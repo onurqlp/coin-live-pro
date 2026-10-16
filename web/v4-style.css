@@ -153,3 +153,16 @@ padding:12px;text-align:left;display:grid;gap:5px;min-height:110px}
 .releaseHistory li span{display:block;margin-top:2px;line-height:1.4}
 .releaseHistory small{color:#90a9c0;line-height:1.4}
 .v4MarketContext a{color:#9cd8f3;text-decoration:underline}
+
+/* Release 4.01: mobile-first watch history & optional news. */
+.v4WatchArchivePanel{margin-bottom:14px}.v4WatchArchivePanel .panelHead{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start}.v4WatchArchivePanel .panelHead button{padding:10px 14px;cursor:pointer}
+.v4ArchiveFilters{display:flex;gap:9px;flex-wrap:wrap;margin:12px 0 14px}.v4ArchiveFilters label{display:flex;flex-direction:column;gap:5px;font-size:11px;color:#a9bfda;flex:1 1 140px}
+.v4ArchiveFilters input,.v4ArchiveFilters select{padding:10px 11px;width:100%;min-width:0;border:1px solid #34506a;border-radius:8px;background:#10253a;color:#eff5ff}
+.v4WatchArchiveRows{display:grid;gap:9px;max-height:700px;overflow:auto}.v4ArchiveItem,.v4NewsItem{border:1px solid #304760;border-radius:10px;padding:12px;background:#122239;min-width:0;overflow-wrap:anywhere}
+.v4ArchiveItemHead{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:12px}.v4ArchiveItemHead>span{color:#a3bfd1;font-size:11px}
+.v4ArchiveResult{color:#b7e6da;font-size:11px;margin:8px 0}.v4ArchiveItem button,#watchArchiveMore{border:1px solid #507591;background:#173852;color:#e5f3ff;border-radius:8px;padding:8px 12px;cursor:pointer}
+#watchArchiveMore{margin-top:12px;width:100%}.v4ContextDisclosure{margin:10px 0 16px;border:1px solid #334a5e;border-radius:10px;background:#0c1927}
+.v4ContextDisclosure summary{cursor:pointer;padding:12px 14px;font-size:12px;color:#bdd6e6;font-weight:650}.v4ContextContent{padding:0 14px 14px}
+.v4ContextContent>p,.v4ContextContent>small{color:#a2bdd3;font-size:11px;line-height:1.5}.v4NewsItems{display:grid;gap:8px}.v4NewsItem{display:grid;gap:4px}
+.v4NewsItem a{color:#9ccff2;font-size:12px;text-decoration:underline}.v4NewsItem small{color:#a1b4ca;font-size:10px}
+@media(max-width:540px){.v4ArchiveFilters label{flex:1 1 100%}.v4WatchArchivePanel .panelHead button{width:100%}.v4WatchArchiveRows{max-height:600px}}
