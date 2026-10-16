@@ -96,6 +96,9 @@
    banner('paperStatus',stale?'redtag':'oktag',stale?'PORTFÖY VERİSİ ESKİ':'PİLOT AKTİF · GERÇEK EMİR YOK');
    $('paperKpis').innerHTML=[
        ['Pilot başlangıcı',since],
+       ['4H/1D swing geçişi',d.swing_cutover_at?trTime(d.swing_cutover_at):'Ölçülüyor'],
+       ['Yeni sanal giriş şartı','1D + 4H uyumlu · anormal risk filtresi'],
+       ['Eski 15m modelinden korunan',String(d.legacy_micro_positions_preserved??0)+' kayıt'],
        ['Sanal başlangıç','100 USDT'],
        ['Tahmini bakiye',fmt(d.estimated_equity_usdt)+' USDT'],
        ['Açık sanal işlem',String(d.open_paper_positions??0)+'/2'],
@@ -110,7 +113,7 @@
      const pnl=o.pnl_usdt==null?'—':(o.pnl_usdt>=0?'+':'')+fmt(o.pnl_usdt)+' USDT*';
      return '<tr><td>'+esc(trTime(o.signal_at))+'</td><td><b>'+esc(o.symbol)+'</b></td>'+
        '<td><span class="chip '+(o.side==='LONG'?'long':'short')+'">'+esc(o.side)+'</span></td>'+
-       '<td>'+esc(o.status)+'</td><td>'+fmt(o.fill_price??o.signal_price)+' / '+fmt(o.stop)+' / '+fmt(o.tp1)+'</td>'+
+       '<td>'+esc(o.status)+'<small class="strategyTag">'+(o.source==='CENTRAL_FORWARD_4H_1D_SWING'?'4H+1D SWING':'ESKİ 15M PİLOT')+'</small></td><td>'+fmt(o.fill_price??o.signal_price)+' / '+fmt(o.stop)+' / '+fmt(o.tp1)+'</td>'+
        '<td>'+details+'</td><td class="'+(o.pnl_usdt>=0?'positive':'negative')+'">'+pnl+'</td></tr>';
    }).join(''):'<tr><td colspan="7">Pilot '+esc(since)+' tarihinde başladı. Eski kıvılcımlar sanal işlem olarak GERİYE DÖNÜK eklenmez. İlk yeni teyit bekleniyor.</td></tr>';
  }
