@@ -136,6 +136,13 @@ def spark_from_mtf(x,market,one_minute=None):
                and 0<=spread<=12 and instrument_live and listed is not None
                and listed>=30)
     technical_ok,technical_gates,technicals=quant_check(day,h4,h1,m15,side)
+    technicals.update({
+        'funding_rate':x.get('funding_rate'),
+        'open_interest_usd':x.get('open_interest_usd'),
+        'open_interest_change_pct':x.get('open_interest_change_pct'),
+        'open_interest_delta_minutes':x.get('open_interest_delta_minutes'),
+        'book_bid_ask_top5_ratio':x.get('book_bid_ask_top5_ratio')
+    })
     confirmed=(weekly and h1ok and m15ok and m5ok and technical_ok and
                market_ok and risk<=24 and score>=76)
     price=mtf.swing.num(market.get('price'))
