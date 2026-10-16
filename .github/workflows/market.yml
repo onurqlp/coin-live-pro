@@ -12,7 +12,7 @@ permissions:
   pages: write
   id-token: write
 concurrency:
-  group: coin-live-pro-market
+  group: coin-live-pro-pages
   cancel-in-progress: false
 jobs:
   collect:
