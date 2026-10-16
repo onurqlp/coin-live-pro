@@ -12,7 +12,7 @@ class TestMacroSwingSparks(unittest.TestCase):
         last=((spark.MS//length)-1)*length
         return {'quality':'CLOSED_CONFIRMED','trend':trend,
                 'last_candle_utc':dt.datetime.fromtimestamp(last/1000,dt.timezone.utc).isoformat(),
-                'atr_pct':1.4,'breakout_high_prev8':99.5,
+                'close':100.,'atr_pct':1.4,'breakout_high_prev8':99.5,
                 'breakout_low_prev8':100.5,
                 'rsi_14':64 if trend=='UP' else 37,
                 'macd_12_26_9':{'hist_pct':.2 if trend=='UP' else -.2},
@@ -116,6 +116,15 @@ class TestMacroSwingSparks(unittest.TestCase):
         y=spark.spark_from_mtf(x,self.market())
         self.assertEqual(y['stage'],'WATCH')
         self.assertEqual(y['entry_timing'],'EXTENDED_WAIT')
+    def test_live_only_breakout_cannot_confirm_before_4h_close(self):
+        x=self.record();x['frames']['1H']['trend']='UP'
+        x['frames']['4H']['close']=99.3
+        y=spark.spark_from_mtf(x,self.market())
+        self.assertEqual(y['stage'],'WATCH')
+        self.assertFalse(y['closed_4h_breakout'])
+        self.assertIn('4H_CLOSED_BREAKOUT_MISSING',y['strict_gate_reasons'])
+        self.assertEqual(y['entry_timing'],'WAIT_4H_CLOSE')
+
     def test_missing_closed_technical_never_confirms(self):
         x=self.record();x['frames']['1H']['trend']='UP'
         for bad in (
