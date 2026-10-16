@@ -201,3 +201,11 @@ body[data-route="radar"] .hero{margin-top:18px}
  .radarColumns #candleChart{height:280px}
  .radarLine .rval{min-width:76px}
 }
+
+/* 2.4 native setup and confirmation chart controls */
+.quickTf{display:flex;gap:6px;flex-wrap:wrap;padding:5px 12px 11px;align-items:center}
+.quickTf button{border:1px solid #36526e;border-radius:7px;background:#10273d;color:#b6d5ed;font:600 11px system-ui;padding:7px 10px;cursor:pointer;min-height:34px}
+.quickTf button:hover,.quickTf button.active{background:#27506a;border-color:#6dc9f3;color:#f2fbff}
+.quickTf button:focus-visible{outline:2px solid #8edfff;outline-offset:2px}
+.timing.unknown{color:#b3b4c8;border-color:#525165;background:#29293b}
+@media(max-width:560px){.quickTf{padding:4px 9px 10px;gap:5px}.quickTf button{font-size:10px;padding:7px 8px}}

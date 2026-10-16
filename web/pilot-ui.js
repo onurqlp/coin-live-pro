@@ -82,10 +82,10 @@
        '<div class="tfGrid">'+summary+'</div>'+
        '<div class="v2why">'+esc(typeNames[x.setup_type]||x.setup_type)+' · Spread '+
        esc(x.spread_bps==null?'bilinmiyor':Number(x.spread_bps).toFixed(2)+' bps')+
-       ' · '+esc((x.reason_codes||[]).filter(x=>!['CLOSED_UTC_CANDLES','1D_4H_PRIMARY_74PCT'].includes(x)).slice(0,7).join(' / '))+'</div>'+
+       ' · '+esc((x.reason_codes||[]).filter(x=>!['CLOSED_UTC_CANDLES','1D_4H_PRIMARY_73PCT'].includes(x)).slice(0,7).join(' / '))+'</div>'+
        '<div class="v2disclaimer">'+(stale?'VERİ ESKİ — yeni işlem senaryosu kurulmaz. ':
          'İZLE/BEKLE araştırma statüsüdür, al/sat emri değildir. ')+
-       '1D/4H toplam ağırlık %74; 15m yalnız tetik · OKX kapanmış UTC mumları · '+
+       '1D+4H yaklaşık %73; 1W yaklaşık %16; 15m yalnız teyit · OKX kapanmış UTC mumları · '+
        esc(trTime(x.observed_at_utc))+'</div></article>';
    }).join(''):'<div class="empty">1D ve 4H uyumlu doğrulanmış swing adayı henüz yok.</div>';
  }

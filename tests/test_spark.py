@@ -16,6 +16,7 @@ class TestMacroSwingSparks(unittest.TestCase):
         frames['1W']['trend']=weekly
         frames['1D']['trend']=daily
         frames['4H']['trend']=h4
+        frames['1H']['trend']='SIDEWAYS' # observed, awaiting hourly timing
         return {'symbol':'BTCUSDT','side':side,'swing_status':status,
                 'quality':'COMPLETE','score':82,'structure_risk_score':risk,
                 'structure_risk_label':'DÜŞÜK','setup_type':'TREND_CONTINUATION',
@@ -53,6 +54,16 @@ class TestMacroSwingSparks(unittest.TestCase):
         self.assertIsNone(spark.spark_from_mtf(bad,self.market(),self.micro()))
         bad=self.record(status='SWING_WATCH',risk=57)
         self.assertIsNone(spark.spark_from_mtf(bad,self.market(),self.micro()))
+    def test_hour_and_15m_confirm_without_1m(self):
+        x=self.record();x['frames']['1H']['trend']='UP'
+        y=spark.spark_from_mtf(x,self.market())
+        self.assertEqual(y['stage'],'CONFIRMED')
+        self.assertEqual(y['confirmation_state']['1m'],'NO_HISTORY')
+        self.assertEqual(spark.spark_from_mtf(x,self.market(),self.micro('DOWN'))['stage'],'CONFIRMED')
+    def test_weekly_opposed_not_mislabeled_missing(self):
+        y=spark.spark_from_mtf(self.record(weekly='DOWN'),self.market())
+        self.assertEqual(y['confirmation_state']['1W'],'NOT_ALIGNED')
+        self.assertEqual(y['primary_tf'],'4H')
     def test_one_minute_alone_does_not_confirm(self):
         x=self.record()
         x['frames']['1H']['trend']='DOWN'

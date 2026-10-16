@@ -59,7 +59,8 @@ jobs:
           assert files['market'].get('analysis_ok',0)>=20,'insufficient successful 15m/1H/4H OHLC coverage'
           assert files['market'].get('analysis_attempted',0)>=30,'scan queue underfilled'
           assert files['mtf']['analyzed']>=3,'macro context insufficient'
-          assert files['swing-radar']['model_version']=='2.3.0-htf-sparks','wrong high-TF radar model'
+          assert files['swing-radar']['model_version']=='2.4.0-htf-sparks','wrong high-TF radar model'
+          assert files['mtf']['model_version']=='2.4.0-mtf-swing','outdated HTF score'
           assert files['swing-radar']['timeframes_primary']==['1D','4H'],'15m must not become primary'
           assert files['swing-radar']['source_mtf_at']==files['mtf']['fetched_at'],'wrong MTF snapshot source'
           assert len({e['event_id'] for e in files['swing-history']['events']})==len(files['swing-history']['events']),'duplicate forward sparks'
@@ -68,7 +69,7 @@ jobs:
           assert all(x['confirmation']['1D'] and x['confirmation']['4H']
                      for x in files['swing-radar']['items']),'higher TF alignment missing'
           assert all(x['stage']!='CONFIRMED' or
-                     all(x['confirmation'][frame] for frame in ('1H','15m','5m','1m'))
+                     all(x['confirmation'][frame] for frame in ('1H','15m'))
                      for x in files['swing-radar']['items']),'invalid micro confirmation'
           assert all(not e['is_executed_trade'] and e['realized_R'] is None
                      for e in files['swing-history']['events']),'research observations pretended to be fills'

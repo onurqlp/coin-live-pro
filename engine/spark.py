@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""COIN.LIVE PRO 2.3: forward-only, higher-timeframe swing sparks.
+"""COIN.LIVE PRO 2.4: forward-only, higher-timeframe swing sparks.
 
 Source: OKX fully closed 1W/1D/4H/1H/15m/5m candle states produced by mtf.py.
 A spark can only START from 1D+4H direction agreement and a safe structure
-gate. 1H/15m and optional CLOSED 1m only upgrade WATCH to CONFIRMED.
+gate. 1H/15m closed candles corroborate; 5m/1m offer optional micro timing.
 It is research, not a trade, manipulation diagnosis, probability or fill.
 """
 import datetime as dt
@@ -17,7 +17,7 @@ import mtf
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 DATA=ROOT/'web'/'data'
 ARCH=ROOT/'archive'/'swing-sparks-ledger.json'
-MODEL='2.3.0-htf-sparks'
+MODEL='2.4.0-htf-sparks'
 UTC=dt.datetime.now(dt.timezone.utc)
 MS=int(UTC.timestamp()*1000)
 DIRECTIONS={'LONG':'UP','SHORT':'DOWN'}
@@ -38,6 +38,10 @@ def fresh(ts,limit_seconds=540):
         difference=(UTC-t).total_seconds()
         return -120<=difference<=limit_seconds
     except (TypeError,ValueError,AttributeError):return False
+
+def confirmation_state(frame,wanted):
+    if frame.get('quality')!='CLOSED_CONFIRMED':return 'NO_HISTORY'
+    return 'ALIGNED' if frame.get('trend')==wanted else 'NOT_ALIGNED'
 
 def spark_from_mtf(x,market,one_minute=None):
     """Pure deterministic high-timeframe primary gate; no single 1m/15m spark."""
@@ -67,7 +71,7 @@ def spark_from_mtf(x,market,one_minute=None):
     one_ok=micro.get('quality')=='CLOSED_CONFIRMED' and micro.get('trend')==aligned
     # Micro candles have zero authority to create a swing candidate. They
     # only raise its timing stage when all macro gates already passed.
-    confirmed=h1ok and m15ok and one_ok and m5ok and risk<35 and score>=67
+    confirmed=h1ok and m15ok and risk<35 and score>=67
     stage='CONFIRMED' if confirmed else 'WATCH'
     price=mtf.swing.num(market.get('price'))
     if price is None or price<=0:return None
@@ -99,7 +103,9 @@ def spark_from_mtf(x,market,one_minute=None):
         'confirmation':{'1W':bool(weekly),'1D':True,'4H':True,
                         '1H':h1ok,'15m':m15ok,'5m':m5ok,'1m':one_ok,
                         '1m_available':micro.get('quality')=='CLOSED_CONFIRMED'},
-        'confirmation_note':'1D+4H core; 1W background; 1H/15m/5m/closed-1m timing only',
+        'confirmation_state':{tf:confirmation_state(st,aligned) for tf,st in
+            (('1W',week),('1D',day),('4H',h4),('1H',h1),('15m',m15),('5m',m5),('1m',micro))},
+        'confirmation_note':'1D+4H setup; 1W context; 1H+15m corroboration; 1m/5m optional micro timing',
         'levels_note':'Estimated from current quote and 4H ATR; not an actual fill or stop guarantee.'
     }
 
@@ -140,7 +146,7 @@ def accumulate(old,items):
 def main():
     macro=load(DATA/'mtf.json',{})
     market=load(DATA/'market.json',{})
-    if macro.get('model_version')!='2.2.0-mtf-swing':
+    if macro.get('model_version')!='2.4.0-mtf-swing':
         raise RuntimeError('Expected verified 4H+daily model, no fallback to old 15m alerts')
     if not fresh(macro.get('fetched_at')) or not fresh(market.get('fetched_at')):
         raise RuntimeError('Stale higher-timeframe assessment; no fresh swing sparks')
@@ -177,7 +183,7 @@ def main():
           'short':sum(s['side']=='SHORT' for s in sparks),
           'confirmed':sum(s['stage']=='CONFIRMED' for s in sparks),
           'attempted':macro.get('attempted'),'analyzed':macro.get('analyzed'),
-          'note':'Only central closed 1D+4H swing observations; low TF never generates a spark.',
+          'note':'Only central closed 1D+4H swing observations; 1H+15m corroborate; 5m/1m are optional, not setup generators.',
           'no_live_orders':True}
     write(ARCH,ledger)
     write(DATA/'swing-history.json',public)

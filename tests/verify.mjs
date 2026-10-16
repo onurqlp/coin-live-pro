@@ -41,9 +41,10 @@ const firstView=html.indexOf('data-view="radar"'),secondView=html.indexOf('data-
 assert.ok(firstView<chart&&chart<secondView,'Chart must appear on FIRST Radar screen');
 assert.ok(router.includes('destination.replaceChildren(panel)'),'Same native chart must be shared with Charts screen');
 assert.ok(code.includes("'swing-radar'")&&code.includes("'swing-history'"),'New first-screen sparks and forward history must use 4H/1D server source');
-assert.ok(code.includes("x.model_version==='2.3.0-htf-sparks'"),'Legacy 15m alerts must never be canonical');
+assert.ok(code.includes("'2.4.0-htf-sparks'")&&code.includes("'2.3.0-htf-sparks'"),'HTF models remain sole canonical source through cutover');
 assert.ok(code.includes("data-tf=")&&code.includes("selectSpark(el.dataset.symbol,el.dataset.tf)"),'Spark click must open signal native timeframe');
 assert.ok(code.includes("S.chartTf=S.radar[0].primary_tf"),'First screen should automatically select top spark period');
 assert.ok(code.includes("['1H','15m','5m','1m']"),'1h/15m/5m/1m should be confirmations only');
+assert.ok(html.includes('id="chartQuickFrames"')&&code.includes("$('chartQuickFrames').onclick"),'Quick frame selector belongs on radar chart');
 assert.ok(html.includes('Kıvılcım: günlük + 4 saatlik')&&html.includes('1m sadece TEYİT'), 'User should see high-timeframe spark logic');
 console.log('PASS: daily/4H macro-only Radar with native period one-click chart, 1m/15m/1h confirmation badges, 14-day audit and six screens');

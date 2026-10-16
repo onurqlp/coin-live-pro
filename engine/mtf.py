@@ -18,7 +18,7 @@ import swing
 
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 DATA=ROOT/'web'/'data'
-MODEL='2.2.0-mtf-swing'
+MODEL='2.4.0-mtf-swing'
 PERIOD={'1W':604800000,'1D':86400000,'12H':43200000,'4H':14400000,'1H':3600000,'15m':900000,'5m':300000,'1m':60000}
 OKX={'1W':'1Wutc','1D':'1Dutc','12H':'12Hutc','4H':'4H','1H':'1H','15m':'15m','5m':'5m','1m':'1m'}
 MIN={'1W':14,'1D':25,'12H':34,'4H':40,'1H':40,'15m':50,'5m':40,'1m':20}
@@ -162,12 +162,12 @@ def assess(m,all_frames,prior,derivatives_data=None):
         existing=[(score,w) for score,w in existing if score is not None]
         return round(sum(score*w for score,w in existing)/sum(w for _,w in existing)) if existing else None
 
-    # 1D = 40% and 4H = 34% of the full nominal score.
-    macro_score=weighted([('1D',.80),('12H',.15),('1W',.05)])
+    # Closed UTC trend: daily 36.4%, 4h 36.55%, weekly 15.6%, hourly 6.45%; micro timing 5%.
+    macro_score=weighted([('1D',.70),('1W',.30)])
     mom_score=weighted([('4H',.85),('1H',.15)])
     entry_score=weighted([('15m',.7),('5m',.3)])
     if macro_score is None or mom_score is None:return None
-    weights=[(macro_score,.50),(mom_score,.40),(entry_score,.10)]
+    weights=[(macro_score,.52),(mom_score,.43),(entry_score,.05)]
     valid=[(score,w) for score,w in weights if score is not None]
     total=round(sum(score*w for score,w in valid)/sum(w for _,w in valid))
 
@@ -182,7 +182,7 @@ def assess(m,all_frames,prior,derivatives_data=None):
           else 'REVERSAL_CANDIDATE' if disagreement
           else 'BREAKOUT_EARLY' if risk['swing_status']=='SWING_WATCH'
           else 'INTRADAY')
-    reason=['CLOSED_UTC_CANDLES','1D_4H_PRIMARY_74PCT']
+    reason=['CLOSED_UTC_CANDLES','1D_4H_PRIMARY_73PCT']
     if disagreement:reason.append('TREND_CONFLICT')
     if quality!='COMPLETE':reason.append('NO_HISTORY')
     if tf['15m'].get('atr_pct',0)>4:reason.append('VOLATILITY_SPIKE')
@@ -201,7 +201,7 @@ def assess(m,all_frames,prior,derivatives_data=None):
         'expected_holding':risk['swing_horizon'],'price_reference':last_quote,
         'volume_24h':m['volume'],'spread_bps':spread,'model_version':MODEL,
         'observed_at_utc':STAMP,'source':'OKX read-only',
-        'swing_model':swing.MODEL,'score_weight_note':'1D 40%,4H 34%,12H 7.5%,1W 2.5%,1H 6%,15m 7%,5m 3%',
+        'swing_model':swing.MODEL,'score_weight_note':'1D 36.4%,4H 36.55%,1W 15.6%,1H 6.45%,15m 3.5%,5m 1.5%; 12H context only',
         **risk}
 
 def main():

@@ -28,6 +28,14 @@ class TestMtfResearch(unittest.TestCase):
         self.assertGreater(result['macro_score'],70)
         self.assertEqual(set(result['frames']),{'1W','1D','12H','4H','1H','15m','5m'})
         self.assertEqual(result['model_version'],mtf.MODEL)
+    def test_weekly_weight_reduces_score_not_daily_gate(self):
+        m={'symbol':'BTCUSDT','price':120.,'volume':140000000}
+        f={tf:fixture_bars(70,period=v) for tf,v in mtf.PERIOD.items() if tf!='1m'}
+        a=mtf.assess(m,f,'LONG')
+        f['1W']=fixture_bars(70,up=False,period=mtf.PERIOD['1W'])
+        b=mtf.assess(m,f,'LONG')
+        self.assertEqual(b['swing_status'],'SWING_CANDIDATE')
+        self.assertLess(b['score'],a['score'])
     def test_weekly_conflict_is_penalised(self):
         all_frames={frame:fixture_bars(70,period=period,up=frame in ('4H','1H','15m','5m'))
                     for frame,period in mtf.PERIOD.items() if frame!='1m'}

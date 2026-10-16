@@ -8,7 +8,13 @@
 
 
 
-## 2.3 — Kıvılcımın ana kaynağı yüksek zaman dilimleri (16.10.2026)
+## 2.4 — Ana periyotlar ve tek dokunuş grafik (16.10.2026)
+
+- Kapanmış **1D + 4H** aynı yönde olmadıkça LONG/SHORT kıvılcımı üretilemez. Toplam puan: **1D %36,4; 4H %36,55; 1W %15,6; 1H %6,45; 15m %3,5; 5m %1,5**. Haftalık uyum 3–7 günlük **1D** grafik, aksi 1–3 günlük **4H** grafik doğurur.
+- **TEYİT:** kapanmış 1H+15m uyumlu, risk puanı <35 ve genel puan ≥67. 1m/5m ek kontroldür; yokluğu temel sinyali iptal etmez; eksik veriye ayrı `NO_HISTORY` atanır.
+- Radar ana ekranda seçilen coinin 1W/1D/4H/1H/15m/1m grafikleri tek dokunuşla açılır; 2.3 verileri yeni tarama tamamlanana kadar okunabilir. Başarı olasılığı ya da gerçekleşmiş kazanç iddiası yoktur.
+
+## 2.3 — Önceki HTF sürümü (arşiv)
 
 - **Yeni kanonik kıvılcım verisi:** `web/data/swing-radar.json`. Kapanmış **günlük (1D) + 4 saatlik (4H)** eğilim aynı yöne bakmalı; şüpheli yapı/risk filtresi geçilmeli. 1m/15m hareketleri kendi başına kıvılcım üretmez.
 - **Haftalık (1W) uyumu varsa** 3–7 gün beklentisi ve varsayılan **1D grafik**; haftalık uyum yok ama 1D + 4H uyumluysa 1–3 gün beklentisi ve varsayılan **4H grafik**. Tahminler garanti değildir.
