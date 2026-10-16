@@ -2,11 +2,13 @@ name: COIN.LIVE PRO — Live Site Verification
 on:
   workflow_dispatch:
   push:
+    branches: [main]
     paths:
       - '.github/workflows/live-site-check.yml'
       - 'web/index.html'
       - 'web/app.js'
       - 'web/v4-ui.js'
+      - 'web/watch-archive-ui.js'
       - 'web/release.json'
       - 'web/v4-style.css'
       - 'web/pilot-ui.js'
@@ -54,7 +56,7 @@ jobs:
           python3 - <<'PYRELEASE'
           import json,datetime
           d=json.load(open('/tmp/release.json'))
-          assert d['product_version']=='4.0', 'User-owned version was changed without permission'
+          assert d['product_version']=='4.01', 'User-owned version was changed without permission'
           assert d['version_change_owner']=='USER_APPROVAL_ONLY'
           assert d['timestamp_basis']=='UTC' and d['market_data_timestamp_separate']
           assert datetime.datetime.fromisoformat(d['updated_at_utc']).tzinfo is not None

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Time-forward V4 observational horizons, NEVER paper fills or executed trades.
 
-For each DISCOVERED setup, measure 1h, 4h, 24h, 3d and 7d from the actual
+For each DISCOVERED setup, measure 1m*, 5m, 15m, 1h, 4h, 24h, 3d and 7d from the actual
 event timestamp, using only complete future OHLC bars. A missed candle yields
 DATA_GAP, not a fabricated return. Metrics are directional maximum favorable
 and adverse excursions, never cash PnL, and UNKNOWN remains distinct from 0.
@@ -16,10 +16,14 @@ ROOT=pathlib.Path(__file__).resolve().parents[1]
 DATA=ROOT/'web'/'data'
 ARCH=ROOT/'archive'/'v4-forward-ledger.json'
 VERSION='4.0.0-forward-a1'
-HORIZONS={'1H':(3600000,'5m',300000),
+HORIZONS={'1M':(60000,'1m',60000),
+          '5M':(300000,'1m',60000),
+          '15M':(900000,'1m',60000),
+          '1H':(3600000,'5m',300000),
           '4H':(14400000,'5m',300000),
           '24H':(86400000,'1H',3600000),
           '3D':(3*86400000,'1H',3600000),
+          '1W':(7*86400000,'4H',14400000),
           '7D':(7*86400000,'4H',14400000)}
 MS_DAY=86400000
 
@@ -65,6 +69,29 @@ def horizon_result(e,now_ms,bars,span,step):
             'measurement_start_utc':dt.datetime.fromtimestamp(first/1000,dt.timezone.utc).isoformat(),
             'measurement_end_utc':dt.datetime.fromtimestamp((last+step)/1000,dt.timezone.utc).isoformat()}
 
+def first_post_event_minute(e,now_ms,bars):
+    """First complete 1m candle strictly after observation, NOT exact 60-second PnL."""
+    when=e.get('event_ms');price=e.get('first_seen_price')
+    if not when or not isinstance(price,(int,float)) or price<=0:
+        return {'state':'UNKNOWN','reason':'INVALID_OBSERVATION'}
+    start=((when+59999)//60000)*60000
+    if now_ms<start+61500:
+        return {'state':'TRACKING','reason':'FIRST_FULL_1M_NOT_YET_CLOSED'}
+    candle=next((b for b in bars if isinstance(b,dict) and b.get('t')==start),None)
+    if candle is None:
+        return {'state':'DATA_GAP','reason':'FIRST_FULL_1M_MISSING'}
+    if not all(isinstance(candle.get(k),(int,float)) and math.isfinite(candle[k])
+               for k in ('o','h','l','c')) or candle['l']<=0 or candle['h']<candle['l']:
+        return {'state':'DATA_GAP','reason':'INVALID_1M_CANDLE'}
+    sign=1 if e['side']=='LONG' else -1
+    return {'state':'OBSERVED',
+        'close_direction_pct':round(sign*(candle['c']/price-1)*100,4),
+        'measurement_start_utc':dt.datetime.fromtimestamp(start/1000,dt.timezone.utc).isoformat(),
+        'measurement_end_utc':dt.datetime.fromtimestamp((start+60000)/1000,dt.timezone.utc).isoformat(),
+        'measurement_delay_seconds':round((start+60000-when)/1000,2),
+        'measurement_kind':'FIRST_FULL_POST_EVENT_1M_NOT_EXACT_1M_RETURN',
+        'not_realized_pnl':True}
+
 def rebuild(previous,events,now_ms,bars_by_symbol):
     state={'model_version':VERSION,'started_at':previous.get('started_at') or
            dt.datetime.fromtimestamp(now_ms/1000,dt.timezone.utc).isoformat(),
@@ -86,8 +113,8 @@ def rebuild(previous,events,now_ms,bars_by_symbol):
                  'first_seen_price':float(price),
                  'horizons':{},'not_executed_trade':True}
     for setup,x in list(observations.items()):
-        if x.get('event_ms',0)<cutoff:
-            del observations[setup];continue
+        # Preserve older verified observations forever in the archived ledger.
+        if x.get('event_ms',0)<cutoff:continue
         source=bars_by_symbol.get(x['symbol'])
         for horizon,(duration,tf,step) in HORIZONS.items():
             old=x['horizons'].get(horizon,{})
@@ -101,7 +128,8 @@ def rebuild(previous,events,now_ms,bars_by_symbol):
                 if now_ms>=x['event_ms']+duration:
                     x['horizons'][horizon]={'state':'SOURCE_UNAVAILABLE'}
                 continue
-            result=horizon_result(x,now_ms,bars,duration,step)
+            result=(first_post_event_minute(x,now_ms,bars) if horizon=='1M'
+                    else horizon_result(x,now_ms,bars,duration,step))
             x['horizons'][horizon]=result
     return state
 
@@ -133,7 +161,8 @@ def main():
     # but always rotate across all observed symbols.
     unresolved={}
     for x in existing.values():
-        if any(x.get('horizons',{}).get(k,{}).get('state') not in ('OBSERVED','DATA_GAP')
+        if now_ms-x.get('event_ms',0)<=7*MS_DAY and any(
+               x.get('horizons',{}).get(k,{}).get('state') not in ('OBSERVED','DATA_GAP')
                for k in HORIZONS):
             unresolved[x['symbol']]=min(unresolved.get(x['symbol'],now_ms),
                                         x.get('event_ms',now_ms))
@@ -147,7 +176,7 @@ def main():
     for symbol in selected:
         inst=symbol[:-4]+'-USDT-SWAP'
         candles[symbol]={}
-        for tf in ('5m','1H','4H'):
+        for tf in ('1m','5m','1H','4H'):
             try:candles[symbol][tf]=mtf.request(inst,tf)
             except Exception:pass
     ledger=rebuild(prior,events,now_ms,candles)

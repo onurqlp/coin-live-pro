@@ -1,19 +1,25 @@
 {
-  "product_version": "4.0",
+  "product_version": "4.01",
   "version_change_owner": "USER_APPROVAL_ONLY",
-  "release_id": "UTC-20261016-2250",
-  "updated_at_utc": "2026-10-16T22:50:10.527Z",
+  "release_id": "GO-20261016-23undefined23",
+  "updated_at_utc": "2026-10-16T23:23:31.919Z",
   "timestamp_basis": "UTC",
   "market_data_timestamp_separate": true,
   "change_summary": [
-    "Global UTC for legacy and V4 charts",
-    "OKX confirmed closed candles only",
-    "Dated release history with user-controlled product version",
-    "Weekday regional windows are DST-aware and not manipulation evidence"
+    "V4 kalıcı WATCH arşivi",
+    "1m-1W ileriye dönük gözlem, sonuç uydurmama",
+    "Bağımsız doğrulanabilir haber-sosyal bağlam",
+    "Mobil arşiv arama, filtre, manuel yenileme ve ölü düğme temizliği",
+    "4H/1D ana ağırlığı korundu; 1W yön bağlamı"
   ],
   "no_real_orders": true,
   "not_a_trading_signal": true,
   "change_log": [
+    {
+      "release_id": "GO-20261016-23undefined23",
+      "updated_at_utc": "2026-10-16T23:23:31.919Z",
+      "summary": "GO onaylı sürüm 4.01: tüm İZLE kayıtları, 1m–1W ileri inceleme, haber bağlamı, arşiv yenileme ve mobil sadeleşme."
+    },
     {
       "release_id": "UTC-20261016-2250",
       "updated_at_utc": "2026-10-16T22:50:10.527Z",

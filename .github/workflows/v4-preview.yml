@@ -8,6 +8,7 @@ on:
       - v4-90day-ui-final-20261016
       - v4-radar-inpage-chart-kpis-20261016
       - v4-utc-session-release-anomaly-20261017
+      - v4-go-archive-context-20261017
     paths:
       - '.github/workflows/v4-preview.yml'
       - 'engine/v4_**'
@@ -40,6 +41,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 engine/collector.py
+          python3 engine/v4_context.py
           python3 engine/mtf.py
           python3 engine/spark.py
           python3 engine/v4_oi.py
@@ -47,6 +49,7 @@ jobs:
           python3 engine/v4_paper.py
           python3 engine/v4_shadow.py
           python3 engine/v4_forward.py
+          python3 engine/v4_watch_archive.py
           python3 engine/v4_lab.py
           python3 engine/forward.py
           python3 engine/paper.py
@@ -57,7 +60,7 @@ jobs:
           from pathlib import Path
           p=Path('web/data')
           data={k:json.loads((p/(k+'.json')).read_text()) for k in
-             ('v4-manifest','v4-radar','v4-history-index','v4-paper','v4-shadow','v4-forward','v4-lab')}
+             ('v4-manifest','v4-radar','v4-history-index','v4-paper','v4-shadow','v4-forward','v4-watch-archive','v4-context','v4-lab')}
           sid=data['v4-manifest']['scan_id']
           assert data['v4-manifest']['publication_valid']
           anomaly=data['v4-radar'].get('anomaly_research',{})
@@ -66,8 +69,10 @@ jobs:
           assert anomaly.get('hourly',{}).get('time_basis')=='UTC'
           assert anomaly.get('clock',{}).get('window_is_not_manipulation_evidence') is True
           release=json.loads((p.parent/'release.json').read_text())
-          assert release['product_version']=='4.0' and release['version_change_owner']=='USER_APPROVAL_ONLY'
-          assert all(data[k]['scan_id']==sid for k in ('v4-radar','v4-history-index','v4-paper','v4-shadow','v4-forward','v4-lab'))
+          assert release['product_version']=='4.01' and release['version_change_owner']=='USER_APPROVAL_ONLY'
+          assert all(data[k]['scan_id']==sid for k in ('v4-radar','v4-history-index','v4-paper','v4-shadow','v4-forward','v4-watch-archive','v4-lab'))
+          assert data['v4-watch-archive']['scan_id']==sid
+          assert data['v4-context']['score_not_used_for_paper_or_v4_stage'] is True
           assert data['v4-paper']['starting_balance_usdt']==10000
           assert data['v4-paper']['legacy_v3_balance_included']==False
           assert not data['v4-paper']['open_positions'], 'First-time V4 paper must not fabricate retro fills'
