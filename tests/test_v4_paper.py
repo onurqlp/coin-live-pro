@@ -48,7 +48,7 @@ class TestV4Paper(unittest.TestCase):
                            {'BTCUSDT':[candle(T+paper.BAR)]},{'BTCUSDT':SPEC},POL)
     self.assertEqual(log['orders']['A']['status'],'PENDING')
     self.assertEqual(view['equity_usdt'],10000.)
-    log,view=paper.advance(log,{'events':[]},MARKET,T+600000,
+    log,view=paper.advance(log,{'events':[]},MARKET,T+600000+2000,
                            {'BTCUSDT':[candle(T+paper.BAR)]},{'BTCUSDT':SPEC},POL)
     self.assertEqual(log['orders']['A']['status'],'FILLED')
     self.assertGreater(log['orders']['A']['remaining_qty'],0)
@@ -57,7 +57,7 @@ class TestV4Paper(unittest.TestCase):
 
  def test_unverified_lot_and_missing_candle_are_no_fill(self):
     log=self.initial()
-    after=T+600000
+    after=T+600000+2000
     log,_=paper.advance(log,{'events':[]},MARKET,after,
         {'BTCUSDT':[candle(T+paper.BAR)]},{'BTCUSDT':None},POL)
     self.assertEqual(log['orders']['A']['status'],'NO_FILL')
@@ -70,29 +70,29 @@ class TestV4Paper(unittest.TestCase):
  def test_repeat_does_not_duplicate_fill_or_fee(self):
     log=self.initial()
     future=[candle(T+paper.BAR)]
-    a,_=paper.advance(log,{'events':[intent(T)]},MARKET,T+600000,{'BTCUSDT':future},{'BTCUSDT':SPEC},POL)
+    a,_=paper.advance(log,{'events':[intent(T)]},MARKET,T+600000+2000,{'BTCUSDT':future},{'BTCUSDT':SPEC},POL)
     fee=a['fees_paid_usdt']
-    b,_=paper.advance(a,{'events':[intent(T)]},MARKET,T+600000,{'BTCUSDT':future},{'BTCUSDT':SPEC},POL)
+    b,_=paper.advance(a,{'events':[intent(T)]},MARKET,T+600000+2000,{'BTCUSDT':future},{'BTCUSDT':SPEC},POL)
     self.assertAlmostEqual(b['fees_paid_usdt'],fee)
     self.assertEqual(len([e for e in b['events'] if e['type']=='PAPER_FILLED']),1)
 
  def test_long_short_symmetry_on_stop(self):
     for side,high,low in [('LONG',101,97),('SHORT',103,99)]:
         a=self.initial(side)
-        a,_=paper.advance(a,{'events':[]},MARKET,T+600000,
+        a,_=paper.advance(a,{'events':[]},MARKET,T+600000+2000,
             {'BTCUSDT':[candle(T+paper.BAR)]},{'BTCUSDT':SPEC},POL)
         stop=candle(T+2*paper.BAR,o=100,h=high,l=low,c=100)
-        b,_=paper.advance(a,{'events':[]},MARKET,T+900000,
+        b,_=paper.advance(a,{'events':[]},MARKET,T+900000+2000,
             {'BTCUSDT':[candle(T+paper.BAR),stop]},{'BTCUSDT':SPEC},POL)
         self.assertEqual(b['orders']['A']['status'],'CLOSED')
         self.assertLess(b['cash_balance_usdt'],10000.)
 
  def test_ambiguous_stop_tp_not_counted_as_win(self):
     a=self.initial()
-    a,_=paper.advance(a,{'events':[]},MARKET,T+600000,
+    a,_=paper.advance(a,{'events':[]},MARKET,T+600000+2000,
         {'BTCUSDT':[candle(T+paper.BAR)]},{'BTCUSDT':SPEC},POL)
     collision=candle(T+2*paper.BAR,o=100,h=104,l=97,c=101)
-    b,_=paper.advance(a,{'events':[]},MARKET,T+900000,
+    b,_=paper.advance(a,{'events':[]},MARKET,T+900000+2000,
         {'BTCUSDT':[candle(T+paper.BAR),collision]},{'BTCUSDT':SPEC},POL)
     p=b['orders']['A']
     self.assertEqual(p['status'],'CLOSED')
@@ -101,11 +101,11 @@ class TestV4Paper(unittest.TestCase):
 
  def test_partial_exit_keeps_margin_consistent(self):
     a=self.initial()
-    a,_=paper.advance(a,{'events':[]},MARKET,T+600000,
+    a,_=paper.advance(a,{'events':[]},MARKET,T+600000+2000,
         {'BTCUSDT':[candle(T+paper.BAR)]},{'BTCUSDT':SPEC},POL)
     p=a['orders']['A'];used=paper.margin_used(a)
     target=candle(T+2*paper.BAR,o=100,h=103,l=99,c=102)
-    b,pub=paper.advance(a,{'events':[]},MARKET,T+900000,
+    b,pub=paper.advance(a,{'events':[]},MARKET,T+900000+2000,
         {'BTCUSDT':[candle(T+paper.BAR),target]},{'BTCUSDT':SPEC},POL)
     self.assertEqual(b['orders']['A']['status'],'FILLED')
     self.assertAlmostEqual(b['orders']['A']['remaining_fraction'],.6,places=5)
