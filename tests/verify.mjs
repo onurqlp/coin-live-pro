@@ -12,7 +12,7 @@ const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(x=>x[1]);
 assert.equal(ids.length,new Set(ids).size,'DOM IDs must be unique');
 const bound=[...(code+'\n'+pilot).matchAll(/\$\('([^']+)'\)/g)].map(x=>x[1]);
 assert.deepEqual([...new Set(bound)].filter(x=>!ids.includes(x)),[],'No missing bound UI nodes');
-for(const id of ['radarRows','swingHistoryRows','forwardRows','forwardSummary','forwardMeta','chartPanel',
+for(const id of ['quoteClock','radarRows','swingHistoryRows','forwardRows','forwardSummary','forwardMeta','chartPanel',
   'candleChart','chartTf','chartQuickFrames','mtfPanel','paperPanel','paperKpis','paperRows',
   'systemPanel','systemKpis','healthTitle','scanStatus','serverRestart'])
   assert.ok(ids.includes(id),'Missing v3 page component: '+id);
@@ -36,4 +36,8 @@ const views=[...html.matchAll(/class="workspaceView"[^>]*data-view="([^"]+)"[^>]
 assert.deepEqual(views.map(v=>v[1]),routes,'Six workspace tabs');
 assert.equal(views.filter(v=>!v[0].includes(' hidden')).length,1,'Exactly first page active');
 for(const route of routes)assert.ok(html.includes('href="#'+route+'" data-nav="'+route+'"'),'Missing route '+route);
+assert.ok(code.includes('async function refreshLivePrices()'),'Independent real-time OKX quotes absent');
+assert.ok(code.includes('setInterval(()=>{if(!document.hidden)refreshLivePrices();},20000)'),'20-sec visible price polling must run');
+assert.ok(code.includes('S.quoteRowsCache.get(old.symbol)'),'Server snapshot should not overwrite newer live prices');
+assert.ok(code.includes("S.stamps.radar")&&code.includes('25*60000'),'Independent stale 1D/4H guard retained');
 console.log('PASS: COIN.LIVE PRO 3.0 only, no 15m signals/legacy metrics; six tabs, charts and forward audit intact.');

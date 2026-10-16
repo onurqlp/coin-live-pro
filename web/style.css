@@ -238,3 +238,9 @@ body[data-route="radar"] .hero{margin-top:18px}
 .freshFilters{display:flex;justify-content:flex-start;margin:14px 0;gap:8px}
 #qualityPanel{margin-top:12px}
 @media(max-width:600px){.freshFilters{flex-wrap:wrap}.freshFilters button{min-height:42px}}
+
+/* COIN.LIVE 3.0 market quote telemetry; distinct from 1D/4H engine age. */
+.quoteClock{font-size:11px;white-space:nowrap;color:#adc5d9;padding:5px 9px;border:1px solid #30465d;border-radius:7px;background:#122234}
+.quoteClock.active{border-color:#276a65;color:#92e5c9;background:#0c302c}
+.quoteClock.inactive{border-color:#76505a;color:#ffc4b9;background:#34202b}
+@media(max-width:800px){.quoteClock{width:100%;text-align:center;order:2}}

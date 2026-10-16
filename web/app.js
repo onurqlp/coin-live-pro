@@ -1,7 +1,7 @@
 'use strict';
 (()=>{
 const $=id=>document.getElementById(id);
-const S={market:[],radar:[],swingEvents:[],provider:'',stamps:{},window:7,selected:null,live:false,loading:false,lastRefresh:0,initialized:false,chartCache:new Map(),chartLoading:null,chartTf:'4H',forward:{reports:[],events:[]}};
+const S={market:[],radar:[],swingEvents:[],provider:'',stamps:{},window:7,selected:null,live:false,loading:false,lastRefresh:0,initialized:false,chartCache:new Map(),chartLoading:null,chartTf:'4H',forward:{reports:[],events:[]},quoteLoading:false,quoteRowsCache:new Map(),quoteLastError:'',quoteUpdates:0};
 const safe=x=>String(x??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const number=x=>x===null||x===undefined||x===''?NaN:Number(x);
 const fmt=x=>!Number.isFinite(Number(x))?'—':Number(x)>=1000?Number(x).toLocaleString('en-US',{maximumFractionDigits:2}):Number(x)>=1?Number(x).toFixed(3):Number(x)>=.01?Number(x).toFixed(5):Number(x).toFixed(8);
@@ -30,9 +30,17 @@ function refreshState(){
  $('healthExplain').textContent=trusted?
    'Kıvılcım yalnız günlük + 4H trend uyumuyla oluşur. 1H/15m teyit, 5m/1m ek kontrol; gerçek emir yok.':
    'Sunucu '+(Number.isFinite(radarAge)?radarAge+' dk':'—')+' önce analiz yaptı. Yeni kıvılcım kapalı. Üstteki yenile yalnız veriyi tekrar kontrol eder, yeni sunucu taraması başlatmaz.';
- $('healthTime').textContent='Sunucu '+(Number.isFinite(radarAge)?radarAge+' dk':'—')+' · Fiyat yedeği '+(Number.isFinite(marketAge)?marketAge+' dk':'—');
+ const quoteSeconds=Math.max(0,Math.floor((Date.now()-S.lastRefresh)/1000));
+ $('healthTime').textContent='Analiz '+(Number.isFinite(radarAge)?radarAge+' dk':'—')+
+   (live?' · OKX canlı fiyat '+quoteSeconds+' sn önce':' · Yedek fiyat '+(Number.isFinite(marketAge)?marketAge+' dk':'—')+
+     ' · '+(S.quoteLastError?'OKX erişim sorunu':'Canlı bağlantı bekleniyor'));
+ const clock=$('quoteClock');
+ if(clock){clock.className='quoteClock '+(live?'active':'inactive');
+   clock.textContent=live?'↻ OKX fiyat '+quoteSeconds+' sn önce · otomatik 20 sn':
+     '↻ Canlı fiyat bekleniyor · sunucu yedeği '+(Number.isFinite(marketAge)?marketAge+' dk':'—');
+ }
  const restart=$('serverRestart');if(restart)restart.hidden=trusted;
- $('source').textContent=live?'● OKX CANLI':'● '+(S.provider||'OKX')+' / SUNUCU';
+ $('source').textContent=live?'● OKX CANLI FİYAT':'● '+(S.provider||'OKX')+' / YEDEK FİYAT';
  $('lastScan').textContent=Number.isFinite(S.stamps.radar)?
    new Date(S.stamps.radar).toLocaleTimeString('tr-TR',{timeZone:'Europe/Istanbul',hour:'2-digit',minute:'2-digit'}):'—';
  const state=$('scanStatus');
@@ -45,6 +53,27 @@ function refreshState(){
  }
 }
 
+async function refreshLivePrices(){
+ // Independent, visible-tab-only ticker channel. No 1D/4H signal calculation.
+ if(S.quoteLoading)return;
+ S.quoteLoading=true;
+ try{
+  const rows=await directQuote();
+  if(rows.length<20)throw Error('OKX ticker kapsamı yetersiz');
+  const map=new Map(rows.map(x=>[x.symbol,x]));
+  const updated=S.market.length?S.market.map(x=>map.has(x.symbol)?{...x,...map.get(x.symbol)}:x):rows;
+  S.market=updated;
+  S.quoteRowsCache=map;
+  S.live=true;S.lastRefresh=Date.now();S.quoteLastError='';S.quoteUpdates++;
+  // Update only prices and telemetry; keep selected coin, chart and central
+  // spark snapshot untouched, even when quotes change between 4H candles.
+  renderMarket();refreshState();renderQuality();
+  if(S.quoteUpdates===1&&!S.selected)renderChartSelector();
+ }catch(e){
+  S.live=false;S.quoteLastError=String(e?.message||'OKX unavailable').slice(0,100);
+  refreshState();
+ }finally{S.quoteLoading=false;}
+}
 async function refresh(){
  if(S.loading)return;S.loading=true;
  $('refresh').disabled=true;$('refresh').textContent='↻ Kontrol ediliyor…';
@@ -59,7 +88,13 @@ async function refresh(){
    return;
   }
   const x=r.value;
-  if(i===0){S.market=x.rows||[];S.provider=x.provider||'OKX';S.stamps.market=Date.parse(x.fetched_at);}
+  if(i===0){
+    S.market=x.rows||[];S.provider=x.provider||'OKX';S.stamps.market=Date.parse(x.fetched_at);
+    // A 15-minute JSON snapshot must never overwrite newer direct OKX quotes.
+    if(Date.now()-S.lastRefresh<60000){
+      for(const old of S.market){const updated=S.quoteRowsCache.get(old.symbol);if(updated)Object.assign(old,updated);}
+    }
+   }
   if(i===1){
    const ok=x.model_version==='3.0.0-htf-sparks'&&Array.isArray(x.timeframes_primary)&&x.timeframes_primary.includes('1D')&&x.timeframes_primary.includes('4H');
    S.sparkModel=ok?x.model_version:'INVALID_SOURCE';
@@ -69,15 +104,7 @@ async function refresh(){
   if(i===2)S.swingEvents=x.model_version==='3.0.0-htf-sparks'?(x.events||[]).filter(e=>e.model_version==='3.0.0-htf-sparks'):[];
   if(i===3)S.forward=x.model_version==='3.0.0-forward-observation'?x:{reports:[],events:[]};
  });
- try{
-  const direct=await directQuote();
-  if(direct.length>=20){
-   const mp=new Map(direct.map(x=>[x.symbol,x]));
-   for(const old of S.market)if(mp.has(old.symbol))Object.assign(old,mp.get(old.symbol));
-   if(!S.market.length)S.market=direct;
-   S.live=true;S.lastRefresh=Date.now();
-  }
- }catch(e){S.live=false;errors.push('doğrudan fiyat: '+e.message);}
+ await refreshLivePrices();
  if(!S.initialized&&S.radar.length){S.selected=S.radar[0].symbol;S.chartTf=S.radar[0].primary_tf;$('chartTf').value=S.chartTf;}
  S.initialized=true;render();
  if(errors.length)$('healthExplain').textContent+=' · Kaynak: '+errors.join(' | ');
@@ -223,7 +250,7 @@ function renderForward(){
  '<div class="empty">3.0 sonrası yeni kıvılcım henüz kaydedilmedi. Eski sinyaller bu ölçüme eklenmez.</div>';
  list.querySelectorAll('[data-forward]').forEach(b=>b.onclick=()=>selectSpark(b.dataset.forward,b.dataset.tf,true));
 }
-function renderQuality(){const rows=[['Fiyat kaynağı',S.provider||'Bekleniyor'],['Sunucu fiyat yaşı',S.stamps.market?age(S.stamps.market)+' dk':'—'],['Sunucu radar yaşı',S.stamps.radar?age(S.stamps.radar)+' dk':'—'],['Tarayıcıdan fiyat bağlantısı',S.live?'OKX başarılı':'Ulaşılamadı / denenmedi'],['Sinyal değerlendirmesi','1D + 4H ana yön; 1W bağlam; 1H/15m teyit; 5m/1m ek kontrol'],['İşlem girişleri','WATCH ≠ işlem; CONFIRMED ≠ gerçek emir'],['Sonuç boşlukları','Belirsiz / veri boşluğu ayrı sınıf'],['Risk hesabı','10x varsayım · örnek 1R · maliyet %0,15'],['Yeni analiz','GitHub zamanlayıcısı gecikebilir; yalnız 3.0 merkezi analiz sonuçları kullanılır']];$('quality').innerHTML=rows.map(([k,v])=>`<div class="line"><span>${safe(k)}</span><b>${safe(v)}</b></div>`).join('');}
+function renderQuality(){const rows=[['Fiyat kaynağı',S.provider||'Bekleniyor'],['Sunucu fiyat yaşı',S.stamps.market?age(S.stamps.market)+' dk':'—'],['Sunucu radar yaşı',S.stamps.radar?age(S.stamps.radar)+' dk':'—'],['Canlı fiyat',S.live&&Date.now()-S.lastRefresh<60000?'OKX · '+Math.floor((Date.now()-S.lastRefresh)/1000)+' saniye önce':'OKX canlı bağlantı yok; yedek fiyat'],['Sinyal değerlendirmesi','1D + 4H ana yön; 1W bağlam; 1H/15m teyit; 5m/1m ek kontrol'],['İşlem girişleri','WATCH ≠ işlem; CONFIRMED ≠ gerçek emir'],['Sonuç boşlukları','Belirsiz / veri boşluğu ayrı sınıf'],['Risk hesabı','10x varsayım · örnek 1R · maliyet %0,15'],['Yeni analiz','GitHub zamanlayıcısı gecikebilir; yalnız 3.0 merkezi analiz sonuçları kullanılır']];$('quality').innerHTML=rows.map(([k,v])=>`<div class="line"><span>${safe(k)}</span><b>${safe(v)}</b></div>`).join('');}
 function renderMarket(){$('marketRows').innerHTML=S.market.slice(0,100).map((m,i)=>{const x=currentRadar().items.find(a=>a.symbol===m.symbol);return `<tr class="marketCoinRow" data-symbol="${safe(m.symbol)}" title="Bu coinin grafiğini aç"><td>${i+1}</td><td><b>${safe(m.symbol.replace('USDT',''))}</b> / USDT</td><td>${fmt(m.price)}</td><td class="${m.change>=0?'positive':'negative'}">${pct(number(m.change))}</td><td>${usd(m.volume)}</td><td>${x?`<span class="chip ${x.side==='LONG'?'long':'short'}">${x.side}</span> <span class="chip ${x.stage==='WATCH'?'watch':'confirmed'}">${x.stage==='WATCH'?'İZLE':'TEYİT'}</span>`:'—'}</td></tr>`;}).join('');
  for(const el of document.querySelectorAll('.marketCoinRow'))el.onclick=()=>{
    const spark=currentRadar().items.find(x=>x.symbol===el.dataset.symbol);
@@ -257,6 +284,14 @@ $('alerts').disabled=true;$('alerts').textContent='🔕 Pilot: bildirim kapalı'
 window.CoinLivePro={state:S,render,currentRadar,get,fmt,age,notify,refreshState,selectSpark};
 window.addEventListener('resize',()=>{if(S.selected)drawChart();});
 refresh();
-setInterval(refresh,60000);
-setInterval(refreshState,12000);
+// Price updates do not depend on GitHub Pages deployment or 15m Actions jobs.
+setInterval(()=>{if(!document.hidden)refreshLivePrices();},20000);
+// Central research JSON is independent and must remain fail-closed if stale.
+setInterval(()=>{if(!document.hidden)refresh();},90000);
+setInterval(refreshState,10000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){
+  refreshLivePrices();
+  if(!S.stamps.radar||Date.now()-S.stamps.radar>12*60000)refresh();
+}});
+window.addEventListener('focus',()=>{if(!document.hidden&&Date.now()-S.lastRefresh>20000)refreshLivePrices();});
 })();
