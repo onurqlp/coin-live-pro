@@ -61,6 +61,9 @@ function syncCoinLivePro(){
     });
     rep.getRange(2,1,2,11).setValues(reportRows);
     const daily=ss.getSheetByName(CLPRO.daily);
+    // Force date key to TEXT, not date serial. Apps Script Date at midnight Istanbul
+    // resolves to the PREVIOUS UTC day and historically caused duplicate rows.
+    daily.getRange('A2:A').setNumberFormat('@');
     const day=String(hist.updated_at).slice(0,10);
     const today=events.filter(e=>String(e.time).startsWith(day));
     const spot=(sym)=>((market.rows||[]).find(x=>x.symbol===sym)||{}).price||'';
@@ -76,7 +79,7 @@ function syncCoinLivePro(){
     // Existing Sheets dates can arrive as strings, Date objects or serial day values.
     // Match by UTC day; update the newest matching row, never append duplicate days.
     const normaliseDay=value=>{
-      if(value instanceof Date&&!isNaN(value.getTime()))return Utilities.formatDate(value,'UTC','yyyy-MM-dd');
+      if(value instanceof Date&&!isNaN(value.getTime()))return Utilities.formatDate(value,ss.getSpreadsheetTimeZone(),'yyyy-MM-dd');
       if(typeof value==='number'&&Number.isFinite(value)){
         const date=new Date(Math.round((value-25569)*86400000));
         return Utilities.formatDate(date,'UTC','yyyy-MM-dd');
@@ -119,7 +122,7 @@ function clFetchArchive(file){
   return JSON.parse(r.getContentText());
 }
 function clDay(v){
-  if(v instanceof Date&&!isNaN(v.getTime()))return Utilities.formatDate(v,'UTC','yyyy-MM-dd');
+  if(v instanceof Date&&!isNaN(v.getTime()))return Utilities.formatDate(v,SpreadsheetApp.getActiveSpreadsheet().getSpreadsheetTimeZone(),'yyyy-MM-dd');
   const t=String(v==null?'':v).trim();
   if(/^\d{4}-\d{2}-\d{2}/.test(t))return t.slice(0,10);
   const tr=t.match(/^(\d{2})\.(\d{2})\.(\d{4})/);
@@ -187,6 +190,7 @@ function clSyncPilotV2(ss){
   ]),false,false);
   // Daily report updates the same UTC date; never appends six identical days.
   const day=String(paper.updated_at).slice(0,10);
+  tab('PERFORMANS_GUNLUK').getRange('A2:A').setNumberFormat('@');
   clUpsertRows(tab('PERFORMANS_GUNLUK'),[[day,100,paper.estimated_equity_usdt,
     paper.open_paper_positions,paper.closed_paper_orders,paper.wins,paper.losses,
     paper.ambiguous,paper.no_fill,paper.max_drawdown_pct_est,
@@ -209,4 +213,23 @@ function clSyncPilotV2(ss){
   ]],false,false);
   return 'AKTİF · zincir yeni '+newChains+' · işlem yeni '+newOrders+' · sağlık yeni '+newRuns+
     (health.schedule_proven?' · CRON KANITLANDI':' · CRON HENÜZ KANITLANMADI');
+}
+
+/** Manual, read-only connector health check. No distribution or installation. */
+function checkCoinLivePro(){
+  const ss=SpreadsheetApp.getActiveSpreadsheet();
+  const state=ss.getSheetByName(CLPRO.settings);
+  const rows={};
+  for(const name of [CLPRO.daily,'PERFORMANS_GUNLUK']){
+    const sh=ss.getSheetByName(name);
+    const vals=sh.getLastRow()>1?sh.getRange(2,1,sh.getLastRow()-1,1).getValues().flat().map(clDay):[];
+    const dupe=vals.filter((v,i)=>v&&vals.indexOf(v)!==i);
+    rows[name]={count:vals.length,duplicateDays:[...new Set(dupe)]};
+    if(dupe.length)console.error('TEKRAR: '+name+' '+[...new Set(dupe)].join(', '));
+  }
+  const triggers=ScriptApp.getProjectTriggers().filter(x=>x.getHandlerFunction()==='syncCoinLivePro');
+  const h=clFetch('health.json'),delta=Math.round((Date.now()-Date.parse(h.updated_at))/60000);
+  const info={triggers:triggers.length,sourceAgeMinutes:delta,lastTrigger:h.last_trigger,scheduleProven:h.schedule_proven===true,tables:rows};
+  console.log('COIN.LIVE PRO GOOGLE DENETİM '+JSON.stringify(info));
+  return info;
 }
