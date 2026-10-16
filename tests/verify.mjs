@@ -44,7 +44,7 @@ assert.ok(code.includes("mode:'SERVER'")&&code.includes("mode:'STALE'"),'Central
 assert.ok(router.includes("window.addEventListener('hashchange',renderRoute)"),'Navigation must support history');
 assert.ok(router.includes('destination.replaceChildren(panel)'),'Native chart must be shared');
 assert.ok(router.includes('schedule_proven'),'Cron health must require evidence');
-assert.ok(html.includes('id="alerts" disabled')&&code.includes('Bildirimler kapalı'),'User alerts must remain disabled during 90 days');
+assert.ok(!html.includes('id="alerts"')&&!code.includes('S.notified'),'Unused browser alerts removed');
 assert.ok(html.indexOf('id="chartPanel"')<html.indexOf('data-view="grafikler"'),'Native chart must be on Radar homepage');
 const routes=['radar','grafikler','portfoy','gecmis','rapor','sistem'];
 const views=[...html.matchAll(/class="workspaceView"[^>]*data-view="([^"]+)"[^>]*>/g)];
@@ -71,7 +71,7 @@ assert.ok(v4code.includes("timeZone:'UTC'"),'V4 displayed market timestamps must
 assert.ok(v4code.includes('renderGlobalResearch(r,manifest)'),'UTC market research view unconnected');
 assert.ok(v4code.includes('loadRelease();load()'),'Version release.json not loaded');
 const release=JSON.parse(fs.readFileSync('web/release.json','utf8'));
-assert.equal(release.product_version,'4.0','Only user may approve product version change');
+assert.equal(release.product_version,'4.01','GO-approved 4.01; major number unchanged');
 assert.equal(release.version_change_owner,'USER_APPROVAL_ONLY');
 assert.ok(Number.isFinite(Date.parse(release.updated_at_utc)),'Update stamp missing');
 assert.ok(html.includes('releaseHistoryList')&&v4code.includes('meta.change_log'),'UTC release history missing');
@@ -87,4 +87,9 @@ assert.ok(html.includes('v3LegacyDisclosure'),'Old V3 100-USDT pilot must remain
 assert.ok(code.includes('window.CoinLiveSelectSpark=selectSpark'), 'V4 cards must be able to reach actual chart selector');
 assert.ok(v4code.includes('window.CoinLiveSelectSpark'), 'V4 graph buttons must have functional chart selector');
 assert.ok(!v4code.includes('Notification('),'No V4 user push alerts');
-console.log('PASS: V3 compatibility plus V4 three-stage, isolated paper UI, checksum reader, shared chart.');
+const watchCode=fs.readFileSync('web/watch-archive-ui.js','utf8');new Function(watchCode);
+for(const id of ['watchArchiveRefresh','watchArchiveRows','watchArchivePeriod','watchArchiveMore','watchArchiveSide','watchArchiveSearch','v4NewsStatus','v4NewsItems'])
+ assert.ok(ids.includes(id),'Required UI missing: '+id);
+assert.ok(watchCode.includes("crypto.subtle.digest")&&watchCode.includes("'v4-watch-archive'"),'Archive must verify SHA256');
+assert.ok(html.includes('watch-archive-ui.js'),'Archive JavaScript missing');
+console.log('PASS: V4 4.01 news/history, safe paper and source integrity checks.');
