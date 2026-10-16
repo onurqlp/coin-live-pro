@@ -48,7 +48,12 @@ jobs:
           from pathlib import Path
           data={n:json.loads(Path(f'/tmp/{n}.json').read_text()) for n in ['market','radar','history','reports','mtf','paper','health']}
           assert len(data['market'].get('rows',[]))>=20,'market list incomplete'
-          assert data['market'].get('analyzed',0)>=30,'no 15m rotated OHLC coverage'
+          assert data['market'].get('analysis_attempted',0)>=30,'15m scan queue underfilled'
+          assert data['market'].get('analysis_ok',0)>=20,'insufficient closed 15m/1H/4H validation'
+          attempted=data['market']['analysis_attempted']
+          successful=data['market']['analysis_ok']
+          print('TECHNICAL_COVERAGE',successful,'/',attempted)
+          if successful<attempted:print('CAUTION: partial coverage; missing coins are NOT confirmed')
           assert isinstance(data['history'].get('events'),list),'history not served'
           assert len(data['reports'].get('reports',[]))==2,'7/14 report not served'
           assert data['mtf']['analyzed']>=3,'real seven-timeframe scan not deployed'
