@@ -233,3 +233,8 @@ body[data-route="radar"] .hero{margin-top:18px}
 .fwdMethod{padding:0 15px 12px}
 @media(max-width:800px){.fwdGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:500px){.fwdRow{grid-template-columns:1fr auto}.fwdResult{grid-column:1}.fwdOpen{grid-column:2;grid-row:1 / span 2}.fwdMetric{padding:11px}}
+
+/* 3.0 fresh-only report */
+.freshFilters{display:flex;justify-content:flex-start;margin:14px 0;gap:8px}
+#qualityPanel{margin-top:12px}
+@media(max-width:600px){.freshFilters{flex-wrap:wrap}.freshFilters button{min-height:42px}}
