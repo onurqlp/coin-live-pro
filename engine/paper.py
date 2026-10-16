@@ -5,6 +5,7 @@ Paper fills are estimates at the NEXT fully closed 5-minute candle's opening
 quote, after signal creation. No retroactive fill. Never claim a real trade.
 """
 import datetime as dt
+import hashlib
 import json
 import math
 import pathlib
@@ -181,6 +182,27 @@ def main():
              'starting_balance':100.,'model_version':MODEL,'orders':{},'journal':[]}
     started=log['pilot_started_ms']
     records=history.get('events',[])
+    chains=log.setdefault('chains',{})
+    # Maintain immutable first observations and append-only stage transitions.
+    # Every confirmed record links to a prior WATCH when it is the same
+    # symbol+side within three hours; otherwise it starts a new chain.
+    forward=sorted((e for e in records if int(e.get('at_ms',0))>started),key=lambda e:int(e['at_ms']))
+    for e in forward:
+        id=e.get('id')
+        if not id or id in chains or e.get('stage') not in ('WATCH','CONFIRMED'):continue
+        prior=[v for v in chains.values() if v['symbol']==e['symbol'] and v['side']==e['side'] and
+               v['stage']=='WATCH' and 0<=int(e['at_ms'])-v['at_ms']<=3*3600000]
+        parent=max(prior,key=lambda x:x['at_ms']) if prior and e['stage']=='CONFIRMED' else None
+        chain_id=parent['chain_id'] if parent else id
+        evidence={'id':id,'time':e.get('time'),'price':e.get('price'),'side':e.get('side'),
+                  'stop':e.get('stop'),'targets':e.get('targets'),'stage':e.get('stage')}
+        sha=hashlib.sha256(json.dumps(evidence,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+        chains[id]={'signal_id':id,'chain_id':chain_id,'parent_signal_id':parent['signal_id'] if parent else None,
+                    'symbol':e['symbol'],'side':e['side'],'stage':e['stage'],'at_ms':int(e['at_ms']),
+                    'created_at':e['time'],'model_version':MODEL,'evidence_sha256':sha}
+        append(log,{'id':id},'WATCH_CREATED' if e['stage']=='WATCH' else 'CONFIRMED',
+               {'chain_id':chain_id,'parent_signal_id':parent['signal_id'] if parent else None,
+                'original_time_immutable':e['time'],'evidence_sha256':sha},e['time'])
     # Only NEW primary CONFIRMED records after model cutover.
     for e in records:
         if e.get('stage')!='CONFIRMED' or int(e.get('at_ms',0))<=started or e.get('id') in log['orders']:
@@ -188,13 +210,12 @@ def main():
         price=float(e['price']);stop=float(e['stop'])
         if min(price,stop)<=0 or not e.get('targets'):continue
         id=e['id']
-        o={'id':id,'chain_id':id,'model_version':MODEL,'inst':e['symbol'][:-4]+'-USDT-SWAP',
+        o={'id':id,'chain_id':chains.get(id,{}).get('chain_id',id),'model_version':MODEL,'inst':e['symbol'][:-4]+'-USDT-SWAP',
            'symbol':e['symbol'],'side':e['side'],'source':'CENTRAL_FORWARD_CONFIRMED',
            'signal_at_ms':int(e['at_ms']),'signal_at':e['time'],'signal_price':price,'stop':stop,
            'tp1':float(e['targets'][0]),'tp2':float(e['targets'][1]),'tp3':float(e['targets'][2]),
            'status':'PENDING','last_eval_ms':int(e['at_ms']),'estimated_only':True}
         log['orders'][id]=o
-        append(log,o,'CONFIRMED',{'no_lookahead':True,'source_signal_id':id},e['time'])
     # On each runner invocation only active symbols get 5m candles; critical
     # 1m requests happen exclusively for ambiguous stop/TP ordering.
     groups={}
@@ -218,6 +239,7 @@ def main():
         'losses':sum(x['status']=='STOP' for x in closed),'ambiguous':sum(x['status']=='AMBIGUOUS' for x in orders),
         'no_fill':sum(x['status']=='NO_FILL' for x in orders),'pending':sum(x['status']=='PENDING' for x in orders),
         'open_positions':[x for x in open_], 'recent_orders':sorted(orders,key=lambda x:x['signal_at_ms'],reverse=True)[:30],
+        'chain_count':len(chains),'audit_journal_events':len(log['journal']),
         'leverage_comparison':{'10x':'Margin = position notional / 10; estimated PnL same if position notional same',
             '15x':'Margin = position notional / 15; liquidation proximity higher, not modeled'},
         'fee_slippage_assumption':'ESTIMATED total 0.15% of position notional; funding excluded',
