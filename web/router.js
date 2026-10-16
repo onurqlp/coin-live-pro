@@ -5,12 +5,12 @@
  */
 (()=>{
  const routes={
-   radar:{label:'⚡ Radar',title:'Radar'},
-   grafikler:{label:'📈 Grafikler',title:'Grafikler'},
-   portfoy:{label:'🧪 Sanal Portföy',title:'Sanal Portföy'},
-   gecmis:{label:'🧭 Geçmiş',title:'Kıvılcım Geçmişi'},
-   rapor:{label:'📊 90 Gün',title:'90 Günlük Performans'},
-   sistem:{label:'🩺 Sistem Sağlığı',title:'Sistem Sağlığı'}
+   radar:{label:'⚡ Fırsatlar',title:'Fırsat Radarı'},
+   grafikler:{label:'📈 Grafik',title:'Grafik ve Piyasa'},
+   portfoy:{label:'🧪 Sanal Kasa',title:'Sanal Kasa'},
+   gecmis:{label:'🧭 Arşiv',title:'Fırsat Arşivi'},
+   rapor:{label:'📊 Sonuçlar',title:'Performans Sonuçları'},
+   sistem:{label:'🩺 Sistem',title:'Sistem Sağlığı'}
  };
  let last='';
  function selectRoute(){
@@ -41,7 +41,8 @@
    }
    const current=document.getElementById('routeCurrent');
    if(current)current.textContent=r.label;
-   document.title=r.title+' · COIN.LIVE PRO 4.0';
+   const version=(document.getElementById('releaseVersion')?.textContent||'Sürüm 4.01').replace('Sürüm ','').trim();
+   document.title=r.title+' · COIN.LIVE PRO '+version;
    document.body.dataset.route=key;
    if(changed){
      last=key;

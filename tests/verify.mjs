@@ -92,4 +92,16 @@ for(const id of ['watchArchiveRefresh','watchArchiveRows','watchArchivePeriod','
  assert.ok(ids.includes(id),'Required UI missing: '+id);
 assert.ok(watchCode.includes("crypto.subtle.digest")&&watchCode.includes("'v4-watch-archive'"),'Archive must verify SHA256');
 assert.ok(html.includes('watch-archive-ui.js'),'Archive JavaScript missing');
+const ui=fs.readFileSync('web/ui-refresh.css','utf8');
+assert.ok(html.includes('ui-refresh.css?v=1'),'UI design tokens must be linked');
+for(const id of ['v4RadarSearch','v4RadarSide','v4RadarFilterStatus'])
+  assert.ok(ids.includes(id),'Radar search & side filters must be present: '+id);
+assert.ok(v4code.includes('applyRadarFilter();')&&v4code.includes("mainFrameSummary(x)"),
+  'Filters and primary closed-candle timeframes must render');
+assert.ok(v4code.includes('v4Evidence')&&v4code.includes('factorLamps(x)'),
+  'Collapsible research details must retain real source metrics');
+assert.ok(ui.includes('prefers-reduced-motion')&&ui.includes(':focus-visible'),
+  'Keyboard focus and reduced motion styles must exist');
+assert.equal(JSON.parse(fs.readFileSync('web/release.json')).product_version,'4.01',
+  'Cosmetic updates cannot increment user-controlled product version');
 console.log('PASS: V4 4.01 news/history, safe paper and source integrity checks.');

@@ -9,6 +9,7 @@ on:
       - v4-radar-inpage-chart-kpis-20261016
       - v4-utc-session-release-anomaly-20261017
       - v4-go-archive-context-20261017
+      - ui-readable-20261017
     paths:
       - '.github/workflows/v4-preview.yml'
       - 'engine/v4_**'
@@ -92,6 +93,8 @@ jobs:
           for id in ('v4Spotlight','v4Motion','v4Watch','v4Status'):
               m=re.search(r'id="'+id+r'"[^>]*>(.*?)</',doc,re.S)
               assert m and m.group(1).strip(),id+' failed to render'
+          assert 'id="v4RadarSearch"' in doc and 'id="v4RadarSide"' in doc,'Radar filters missing'
+          assert 'ui-refresh.css?v=1' in doc,'Readable CSS layer not linked'
           assert 'V4 veri kontrolü:' not in doc,'V4 manifest fetch or hash validation failed'
           assert 'id="v4PaperKpis"' in doc
           import re
