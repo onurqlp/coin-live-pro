@@ -65,6 +65,8 @@ for(const id of ['v4Board','v4Spotlight','v4Motion','v4Watch','v4Desk','v4PaperK
  'v4HistoryRows','v4HistoryCount'])
   assert.ok(ids.includes(id),'V4 view missing '+id);
 assert.ok(html.includes('v4-ui.js')&&html.includes('v4-style.css'),'V4 scripts not connected');
+assert.ok(!html.includes('legacy-reset.js'),'Never read/write browser persistent storage');
+assert.ok(v4code.includes('factorLamps(x)')&&v4code.includes('x.metrics||{}'),'Technical lamps must use actual V4 source metrics');
 assert.ok(router.includes("key==='portfoy'?portfolio"),'One chart must move to paper portfolio');
 assert.ok(v4code.includes('v4-history-index')&&v4code.includes('renderHistory()'),'V4 history must validate and display latest audited event index');
 assert.ok(v4code.includes('publication_valid')&&v4code.includes('SHA-256'),

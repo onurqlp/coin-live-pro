@@ -37,7 +37,7 @@
        '<i aria-hidden="true"></i>'+safe(label)+'</span>';
    });
    // Source metrics are genuine closed-candle readings, not invented indicators.
-   const m=x.metrics_used||{};
+   const m=x.metrics||{};
    for(const [key,label,test] of [
      ['4h_rsi','RSI',v=>x.side==='LONG'?v>=48&&v<=70:v>=30&&v<=52],
      ['4h_adx','ADX',v=>v>=20],
@@ -51,7 +51,9 @@
        '<i aria-hidden="true"></i>'+label+'</span>');
    }
    // Manipulation cannot be certified from RSI/price alone.
-   lamps.unshift('<span class="v4FactorLamp unknown" title="Manipülasyon kanıtı için bağımsız order-book / liquidation / spoofing verisi gerekir"><i aria-hidden="true"></i>MANİP ?</span>');
+   const oi=m.oi_change_pct,spread=m.spread_bps;
+   const risky=(typeof oi==='number'&&Math.abs(oi)>=8)||(typeof spread==='number'&&spread>20);
+   lamps.unshift('<span class="v4FactorLamp '+(risky?'neutral':'unknown')+'" title="'+safe(risky?'Aykırı OI/spread riski; manipülasyon kanıtı değildir':'Manipülasyon bilinmiyor: order-book geçmişi ve tasfiye verisi gerekli')+'"><i aria-hidden="true"></i>MANİP '+(risky?'RİSK':'?')+'</span>');
    lamps.push('<span class="v4FactorLamp unknown" title="Doğrulanmış haber/sosyal kaynak henüz bu sinyal kaydına bağlı değil"><i aria-hidden="true"></i>HABER ?</span>');
    return '<div class="v4FactorLamps" aria-label="Gösterge kontrol ışıkları">'+lamps.join('')+'</div>';
  }
