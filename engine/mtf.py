@@ -62,7 +62,7 @@ def request(inst,frame):
 
 def derivatives(inst):
     """Optional public OKX funding/current OI observations, never imply OI change."""
-    out={'funding_rate':None,'open_interest_usd':None}
+    out={'funding_rate':None,'open_interest_usd':None,'book_bid_ask_top5_ratio':None}
     endpoints=[('funding_rate','/api/v5/public/funding-rate',{'instId':inst},'fundingRate'),
                ('open_interest_usd','/api/v5/public/open-interest',{'instType':'SWAP','instId':inst},'oiUsd')]
     for key,path,params,field in endpoints:
@@ -82,6 +82,23 @@ def derivatives(inst):
             out[key]=n
         except (OSError,ValueError,TypeError,KeyError):
             pass
+    # Top-five public book is one snapshot, not a persistent wall/spoofing
+    # detector. Contract units cancel in bid/ask size ratio on same swap.
+    try:
+        url='https://www.okx.com/api/v5/market/books5?'+urllib.parse.urlencode({'instId':inst})
+        req=urllib.request.Request(url,headers={'User-Agent':UA,'Accept':'application/json'})
+        with urllib.request.urlopen(req,timeout=4) as response:
+            b=json.load(response)
+        if b.get('code')=='0' and b.get('data'):
+            book=b['data'][0]
+            ts=int(book.get('ts') or 0)
+            if -180000<=NOWMS-ts<=120000:
+                bid=sum(float(level[1]) for level in book.get('bids',[])[:5])
+                ask=sum(float(level[1]) for level in book.get('asks',[])[:5])
+                if bid>0 and ask>0 and math.isfinite(bid/ask):
+                    out['book_bid_ask_top5_ratio']=round(bid/ask,3)
+    except (OSError,ValueError,TypeError,KeyError,IndexError):
+        pass
     return out
 
 def ema(values,n):
@@ -325,6 +342,10 @@ def main():
     for symbol in ('BTCUSDT','ETHUSDT'):
         if symbol in rows:candidates.setdefault(symbol,'AUTO')
     candidates=dict(list(candidates.items())[:23])
+    # Compare actual fresh OI snapshots only; a missing historical sample
+    # never becomes a fabricated zero or inferred liquidation.
+    previous=read(DATA/'mtf.json',{})
+    prev_by_symbol={x.get('symbol'):x for x in previous.get('candidates',[])}
     errors=[];out=[]
     def work(pair):
         symbol,side=pair;m=rows[symbol]
@@ -334,7 +355,19 @@ def main():
             for tf in PERIOD:
                 if tf=='1m':continue # 1m is reserved for critical paper exit ordering
                 frames[tf]=request(inst,tf)
-            return assess(m,frames,side,derivatives(inst))
+            deriv=derivatives(inst)
+            older=prev_by_symbol.get(symbol) or {}
+            current_oi=deriv.get('open_interest_usd')
+            old_oi=swing.num(older.get('open_interest_usd'))
+            if old_oi and current_oi and old_oi>0:
+                try:
+                    age=(NOW-dt.datetime.fromisoformat(older['observed_at_utc'])).total_seconds()
+                    if 60<=age<=3600:
+                        deriv['oi_change_pct']=round((current_oi/old_oi-1)*100,3)
+                        deriv['oi_change_interval_minutes']=round(age/60,2)
+                except (ValueError,TypeError,KeyError):
+                    pass
+            return assess(m,frames,side,deriv)
         except Exception as exc:
             errors.append(symbol+': '+str(exc)[:110])
             return None
