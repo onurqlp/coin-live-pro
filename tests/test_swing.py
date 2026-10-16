@@ -61,6 +61,25 @@ class TestOneToSevenDaySwing(unittest.TestCase):
         x=swing.swing_context(m,self.frames(),'LONG')
         self.assertEqual(x['swing_status'],'AVOID_RISK')
         self.assertIn('INSTRUMENT_NOT_LIVE',x['structure_flags'])
+    def test_failed_closed_breakout_is_risk_not_manipulation_proof(self):
+        f=self.frames()
+        f['4H']['fakeout_up_on_close']=True
+        x=swing.swing_context(self.market(),f,'LONG')
+        self.assertIn('4H_FAILED_UP_BREAKOUT',x['structure_flags'])
+        self.assertGreaterEqual(x['structure_risk_score'],22)
+        self.assertNotIn('MANIPULATION_PROVEN',x['structure_flags'])
+
+    def test_oi_change_and_orderbook_are_time_scoped_risk_only(self):
+        d={'funding_rate':.0001,'open_interest_usd':50000000,
+           'oi_change_pct':14.0,'oi_change_interval_minutes':5.0,
+           'book_bid_ask_top5_ratio':.12}
+        x=swing.swing_context(self.market(),self.frames(),'LONG',d)
+        self.assertEqual(x['open_interest_change_pct'],14.)
+        self.assertEqual(x['open_interest_delta_minutes'],5.)
+        self.assertIn('OI_RAPID_SNAPSHOT_CHANGE',x['structure_flags'])
+        self.assertIn('TOP5_BOOK_PRESSURE_OPPOSES_TREND',x['structure_flags'])
+        self.assertGreaterEqual(x['structure_risk_score'],32)
+
     def test_missing_funding_and_oi_explicitly_unknown(self):
         x=swing.swing_context(self.market(),self.frames(),'LONG')
         self.assertIsNone(x['funding_rate'])
