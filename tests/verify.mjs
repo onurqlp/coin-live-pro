@@ -6,7 +6,8 @@ const code=fs.readFileSync('web/app.js','utf8');
 const pilot=fs.readFileSync('web/pilot-ui.js','utf8');
 const router=fs.readFileSync('web/router.js','utf8');
 const cleanup=fs.readFileSync('web/legacy-reset.js','utf8');
-for(const body of [code,pilot,router,cleanup])new Function(body);
+const v4code=fs.readFileSync('web/v4-ui.js','utf8');
+for(const body of [code,pilot,router,cleanup,v4code])new Function(body);
 
 const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(x=>x[1]);
 assert.equal(ids.length,new Set(ids).size,'DOM IDs must be unique');
@@ -40,4 +41,16 @@ assert.ok(code.includes('async function refreshLivePrices()'),'Independent real-
 assert.ok(code.includes('setInterval(()=>{if(!document.hidden)refreshLivePrices();},20000)'),'20-sec visible price polling must run');
 assert.ok(code.includes('S.quoteRowsCache.get(old.symbol)'),'Server snapshot should not overwrite newer live prices');
 assert.ok(code.includes("S.stamps.radar")&&code.includes('25*60000'),'Independent stale 1D/4H guard retained');
-console.log('PASS: COIN.LIVE PRO 3.0 only, no 15m signals/legacy metrics; six tabs, charts and forward audit intact.');
+const marketWorkflow=fs.readFileSync('.github/workflows/market.yml','utf8');
+assert.match(marketWorkflow,/  push:\n    branches:\n      - main\n/,
+  'Feature branch code pushes must not run the production market publishing workflow');
+for(const id of ['v4Board','v4Spotlight','v4Motion','v4Watch','v4Desk','v4PaperKpis',
+ 'v4Positions','chartHostPortfolio','v4Orders','v4EquityCanvas','v4Lab','v4LabBody'])
+  assert.ok(ids.includes(id),'V4 view missing '+id);
+assert.ok(html.includes('v4-ui.js')&&html.includes('v4-style.css'),'V4 scripts not connected');
+assert.ok(router.includes("key==='portfoy'?portfolio"),'One chart must move to paper portfolio');
+assert.ok(v4code.includes('publication_valid')&&v4code.includes('SHA-256'),
+  'V4 must independently validate source checksums');
+assert.ok(html.includes('v3LegacyDisclosure'),'Old V3 100-USDT pilot must remain archived');
+assert.ok(!v4code.includes('Notification('),'No V4 user push alerts');
+console.log('PASS: V3 compatibility plus V4 three-stage, isolated paper UI, checksum reader, shared chart.');

@@ -6,6 +6,8 @@ on:
   schedule:
     - cron: '2,7,12,17,22,27,32,37,42,47,52,57 * * * *'
   push:
+    branches:
+      - main
     paths:
       - 'engine/**'
       - '.github/workflows/market.yml'
@@ -39,12 +41,24 @@ jobs:
         run: python3 engine/mtf.py
       - name: Record central DAILY / 4H sparks; 1H/15m confirmation, 1m optional
         run: python3 engine/spark.py
+      - name: Record separately timestamped OI snapshots
+        run: python3 engine/v4_oi.py
+      - name: Evolve V4 discovery / motion / spotlight forward-only states
+        run: python3 engine/v4_lifecycle.py
+      - name: Manage separate V4 10k read-only paper account
+        run: python3 engine/v4_paper.py
+      - name: Independent all-eligible shadow study
+        run: python3 engine/v4_shadow.py
+      - name: Compute V4 7/14/30/90 day research lab
+        run: python3 engine/v4_lab.py
       - name: Evaluate forward-only 3.0 observations on fully closed 4H candles
         run: python3 engine/forward.py
       - name: Track 3.0-only 100 USDT paper pilot
         run: python3 engine/paper.py
       - name: Record actual scan source and missed cron intervals
         run: python3 engine/health.py
+      - name: Stamp unified V4 data manifest with source file hashes
+        run: python3 engine/v4_publication.py
       - name: Verify self-consistency; fail closed
         run: |
           python3 - <<'PY'
@@ -102,7 +116,21 @@ jobs:
           assert files['paper']['legacy_micro_positions_preserved']==0,'old paper orders leaked'
           assert all(e.get('model_version')=='3.0.0-htf-sparks' for e in files['swing-history']['events']),'old history leaked'
           assert files['paper']['starting_usdt']==100,'pilot balance changed'
-          assert files['health']['last_scan_id'],'missing scan provenance' 
+          assert files['health']['last_scan_id'],'missing scan provenance'
+          required=('v4-oi','v4-radar','v4-paper','v4-shadow','v4-lab','v4-manifest')
+          v4={name:json.loads((p/f'{name}.json').read_text()) for name in required}
+          sid=v4['v4-manifest']['scan_id']
+          assert v4['v4-manifest']['publication_valid'] is True
+          assert all(v4[name].get('scan_id')==sid for name in ('v4-radar','v4-paper','v4-shadow','v4-lab'))
+          assert v4['v4-paper']['starting_balance_usdt']==10000
+          assert v4['v4-paper']['legacy_v3_balance_included'] is False
+          assert v4['v4-paper']['no_real_orders'] is True
+          assert v4['v4-shadow']['combined_with_main_cash'] is False
+          assert v4['v4-oi']['source_mtf_at']==files['mtf']['fetched_at']
+          assert set(v4['v4-radar']['counts']) >= {'spotlight','motion','watch','active_total'}
+          assert len(v4['v4-radar']['spotlight']) <= 5
+          assert all(x.get('review_state')=='FRESH' for x in v4['v4-radar']['spotlight'])
+          print('Verified V4 scan',sid,'three stages + isolated 10k ledger, shadow and report') 
           print('Verified: 100-pair public radar, scanned',files['market']['analyzed'],'v3 events',len(files['swing-history']['events']),'and clean forward audit')
           PY
       - name: Publish only validated data
@@ -112,8 +140,12 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add web/data/market.json
           git add web/data/mtf.json web/data/paper.json web/data/health.json
+          git add web/data/v4-oi.json web/data/v4-radar.json web/data/v4-paper.json
+          git add web/data/v4-history-index.json web/data/v4-shadow.json
+          git add web/data/v4-lab.json web/data/v4-manifest.json
           git add web/data/swing-radar.json web/data/swing-history.json web/data/swing-outcomes.json
           git add archive/pilot-ledger.json archive/scan-health.json archive/swing-sparks-ledger.json archive/swing-active-ledger.json archive/swing-outcomes-ledger.json
+          git add archive/v3-paper-legacy-snapshot.json archive/v4-lifecycle-ledger.json archive/v4-paper-ledger.json archive/v4-shadow-ledger.json archive/v4-oi-timeseries.json
           if git diff --cached --quiet; then exit 0; fi
           git commit -m 'data: 7-timeframe radar, paper pilot, 90-day event and cron provenance [skip ci]'
           for try in 1 2 3; do

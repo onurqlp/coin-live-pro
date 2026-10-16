@@ -1,0 +1,40 @@
+/* COIN.LIVE PRO V4 — supplemental panels; V3 layout remains intact. */
+.v4Area{margin:16px 0}.v4Status{font-size:12px;color:#b0cee9;padding:10px 2px}.v4Stale{color:#ffd28b}
+.v4Header{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.v4Header h2{margin:0;font-size:19px}.v4Header p{margin:4px 0;color:#96acc8;font-size:12px}
+.v4Counts{display:flex;flex-wrap:wrap;gap:10px;font-size:11px;color:#9fb9d6}
+.v4Counts strong{color:#ecf6ff}.v4Columns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.v4Column{background:#111d2e;border:1px solid #30445d;border-radius:12px;min-width:0;overflow:hidden}
+.v4Column.spotlight{border-color:#6a88a5;background:#17283d}
+.v4Column h3{font-size:14px;margin:0;padding:13px 14px;border-bottom:1px solid #32465f}
+.v4Cards{display:grid;gap:9px;padding:10px;max-height:560px;overflow:auto}
+.v4Opportunity{border:1px solid #2b425a;border-radius:10px;background:#101b2c;padding:12px;min-width:0}
+.v4CardTop{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.v4Small{font-size:10px;color:#a6bed4}.v4Sub,.v4Meta{font-size:11px;color:#9fb6cc;margin-top:7px;overflow-wrap:anywhere}
+.v4Reason{margin-top:8px;font-size:12px;color:#e4ecf7;overflow-wrap:anywhere}
+.v4GoChart{margin-top:9px;background:#243d55;color:#e1f2ff;border:1px solid #43637c;
+padding:8px 12px;border-radius:9px;cursor:pointer;font-weight:700}
+.v4GoChart:focus-visible,.v4Position:focus-visible{outline:3px solid #97cffa;outline-offset:2px}
+.v4Empty{padding:18px;color:#a2b5ca;font-size:12px}
+.v4Desk{margin-top:14px;border:1px solid #415573;border-radius:14px;background:#101e30;padding:16px}
+.v4Desk h2{margin:0;font-size:20px}.v4Desk .v4Sub{margin:7px 0 16px}
+.v4Kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.v4Kpi{padding:10px;background:#15263b;border:1px solid #33475c;border-radius:8px;min-width:0}
+.v4Kpi small{display:block;font-size:10px;color:#a1b7cc}.v4Kpi strong{font-size:15px;overflow-wrap:anywhere}
+.v4Positions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0}
+.v4Position{cursor:pointer;background:#192a3f;border:1px solid #47627d;color:#eef6ff;border-radius:10px;
+padding:12px;text-align:left;display:grid;gap:5px;min-height:110px}
+.v4Position small{color:#a4bfdc}.v4Desk h3{font-size:15px;margin:14px 0 7px}
+.v4AuditItem{padding:7px 5px;border-bottom:1px solid #2b4056;font-size:12px}
+.v4Timeline{max-height:180px;overflow:auto}.v4Equity{width:100%;height:170px;border:1px solid #30445f;border-radius:8px}
+.v4Lab{border:1px solid #30455b;border-radius:10px;margin:14px 0;background:#101c2c;padding:14px}
+.v4LabRow{display:flex;justify-content:space-between;flex-wrap:wrap;gap:7px;border-bottom:1px solid #2f3b52;padding:9px 0;font-size:12px}
+.v4LabRow span{color:#a7bbd1}.v4Lab select{background:#192e45;color:#ebf4ff;border:1px solid #526b84;border-radius:7px;padding:7px}
+.legacy-fold{border:1px solid #253750;border-radius:10px;padding:10px;margin-top:16px}
+.legacy-fold>summary{cursor:pointer;color:#9eb7cf;font-size:12px;font-weight:700}
+#chartHostPortfolio{width:100%}#chartHostPortfolio #chartPanel{margin-top:10px}
+@media(max-width:1100px){.v4Columns{grid-template-columns:1fr 1fr}.v4Column.spotlight{grid-column:1/-1}}
+@media(max-width:700px){.v4Columns,.v4Kpis{grid-template-columns:1fr 1fr}
+.v4Positions{grid-template-columns:1fr 1fr}.v4Column.spotlight{grid-column:1/-1}}
+@media(max-width:480px){.v4Columns,.v4Positions{grid-template-columns:1fr}.v4Kpis{grid-template-columns:1fr 1fr}
+.v4Desk{padding:12px}.v4Header h2{font-size:17px}.v4Cards{max-height:440px}.v4Opportunity{padding:10px}}
