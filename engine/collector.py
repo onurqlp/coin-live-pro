@@ -2,7 +2,7 @@
 """COIN.LIVE PRO: public read-only forward-only observation engine.
 Emits auditable 14-day alerts and 7/14-day post-event reports. NO trading.
 """
-import datetime as dt, json, math, os, pathlib, statistics, time, urllib.parse, urllib.request
+import datetime as dt, json, math, os, pathlib, statistics, time, urllib.parse, urllib.request, urllib.error, threading, random
 from concurrent.futures import ThreadPoolExecutor
 BASE=pathlib.Path(__file__).resolve().parent.parent
 DATA=BASE/'web'/'data'; DATA.mkdir(parents=True, exist_ok=True)
@@ -13,6 +13,17 @@ API='https://www.okx.com/api/v5'
 HORIZON_DAYS=14
 WATCH_MAX=48
 TIMEOUT=11
+# Shared process-wide limiter: five OHLC workers must NOT burst requests
+# through the same Actions egress IP and hit OKX public API HTTP 429.
+_REQUEST_LOCK=threading.Lock()
+_NEXT_REQUEST_AT=0.0
+def pace():
+    global _NEXT_REQUEST_AT
+    with _REQUEST_LOCK:
+        now=time.monotonic()
+        delay=max(0.0,_NEXT_REQUEST_AT-now)
+        _NEXT_REQUEST_AT=max(_NEXT_REQUEST_AT,now)+0.22  # ~4.5 requests/second
+    if delay:time.sleep(delay)
 # Known stock/ETF/commodity references listed as OKX USDT swaps; these are
 # not cryptocurrency projects. Keep historical records for audit but exclude
 # new non-crypto contracts from forward crypto-only research.
@@ -38,10 +49,25 @@ def save(name,payload):
 def get(endpoint,params=None):
     qs=('?'+urllib.parse.urlencode(params)) if params else ''
     url=API+endpoint+qs
-    req=urllib.request.Request(url,headers={'Accept':'application/json','User-Agent':'CoinLive-Pro/1.0 (read-only research)'})
-    with urllib.request.urlopen(req,timeout=TIMEOUT) as res:response=json.load(res)
-    if response.get('code')!='0':raise ValueError('OKX response code '+str(response.get('code')))
-    return response.get('data',[])
+    req=urllib.request.Request(url,headers={'Accept':'application/json','User-Agent':'CoinLive-Pro/2.2 (read-only research)'})
+    for attempt in range(4):
+        pace()
+        try:
+            with urllib.request.urlopen(req,timeout=TIMEOUT) as res:response=json.load(res)
+            if response.get('code')=='50011':
+                raise urllib.error.HTTPError(url,429,'OKX rate limited',{},None)
+            if response.get('code')!='0':raise ValueError('OKX response code '+str(response.get('code')))
+            return response.get('data',[])
+        except urllib.error.HTTPError as err:
+            if err.code not in (429,500) or attempt==3:raise
+            header=err.headers.get('Retry-After') if err.headers else None
+            try:wait=float(header) if header else 0.0
+            except (TypeError,ValueError):wait=0.0
+            time.sleep(max(wait,(attempt+1)*1.4)+random.uniform(0.05,.55))
+        except (TimeoutError,ConnectionError,OSError):
+            if attempt==3:raise
+            time.sleep((attempt+1)*.8+random.uniform(0.05,.3))
+    raise RuntimeError('OKX provider unavailable after retries')
 
 def price_rows():
     result=[]
