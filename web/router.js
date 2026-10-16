@@ -40,7 +40,7 @@
    }
    const current=document.getElementById('routeCurrent');
    if(current)current.textContent=r.label;
-   document.title=r.title+' · COIN.LIVE PRO 2.3';
+   document.title=r.title+' · COIN.LIVE PRO 3.0';
    document.body.dataset.route=key;
    if(changed){
      last=key;

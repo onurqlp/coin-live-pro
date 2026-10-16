@@ -40,25 +40,26 @@ jobs:
           grep -q 'id="chartHostAdvanced"' /tmp/site.html
           grep -q 'id="chartQuickFrames"' /tmp/site.html
           grep -q 'id="swingHistoryRows"' /tmp/site.html
+          grep -q 'id="forwardRows"' /tmp/site.html
           grep -q 'id="routeStatus"' /tmp/site.html
           grep -q 'id="mtfCandidates"' /tmp/site.html
           grep -q 'id="paperKpis"' /tmp/site.html
           grep -q 'id="systemKpis"' /tmp/site.html
-          for n in market radar history reports mtf paper health swing-radar swing-history; do
+          for n in market radar history reports mtf paper health swing-radar swing-history swing-outcomes; do
             curl -fSL --max-time 15 "$ROOT/data/$n.json?check=$(date +%s)" -o "/tmp/$n.json"
           done
           python3 - <<'PY'
           import json,datetime
           from pathlib import Path
-          data={n:json.loads(Path(f'/tmp/{n}.json').read_text()) for n in ['market','radar','history','reports','mtf','paper','health','swing-radar','swing-history']}
+          data={n:json.loads(Path(f'/tmp/{n}.json').read_text()) for n in ['market','radar','history','reports','mtf','paper','health','swing-radar','swing-history','swing-outcomes']}
           assert len(data['market'].get('rows',[]))>=20,'market list incomplete'
           swing=data['swing-radar']
-          assert swing['model_version'] in ('2.3.0-htf-sparks','2.4.0-htf-sparks'),'Old 15m spark source used instead of 1D/4H'
+          assert swing['model_version'] in ('2.3.0-htf-sparks','2.4.0-htf-sparks','3.0.0-htf-sparks'),'Old 15m spark source used instead of 1D/4H'
           assert swing['timeframes_primary']==['1D','4H'],'Primary timeframe mismatch'
           assert swing['source_mtf_at']==data['mtf']['fetched_at'],'Macro scanner source mismatch'
           assert all(x['primary_tf'] in ('1D','4H') and x['confirmation']['1D'] and x['confirmation']['4H']
                      for x in swing['items']), 'Low-timeframe alert promoted without 1D+4H'
-          assert all(x['stage']!='CONFIRMED' or all(x['confirmation'][tf] for tf in (('1H','15m') if swing['model_version']=='2.4.0-htf-sparks' else ('1H','15m','5m','1m')))
+          assert all(x['stage']!='CONFIRMED' or all(x['confirmation'][tf] for tf in (('1H','15m') if swing['model_version'] in ('2.4.0-htf-sparks','3.0.0-htf-sparks') else ('1H','15m','5m','1m')))
                      for x in swing['items']),'Confirmation missing closed hourly/15m candle'
           assert all(e['is_executed_trade'] is False and e['realized_R'] is None
                      for e in data['swing-history']['events']),'Forward-only spark history falsified'
@@ -75,6 +76,8 @@ jobs:
           assert len(data['reports'].get('reports',[]))==2,'7/14 report not served'
           assert data['mtf']['analyzed']>=3,'real seven-timeframe scan not deployed'
           assert all(set(x['frames'])>=set(['1W','1D','12H','4H','1H','15m','5m']) for x in data['mtf']['candidates']),'incomplete MTF context'
+          assert data['swing-outcomes']['model_version']=='3.0.0-forward-observation','v3 forward audit not published'
+          assert data['swing-outcomes']['no_legacy_backfill'],'legacy observations must not be treated as v3'
           assert data['paper']['starting_usdt']==100 and data['paper']['pilot_started_at'],'forward-only pilot missing'
           assert data['health']['last_scan_id'] and 'schedule_proven' in data['health'],'audit missing'
           now=datetime.datetime.now(datetime.timezone.utc)

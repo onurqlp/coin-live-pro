@@ -215,3 +215,21 @@ body[data-route="radar"] .hero{margin-top:18px}
 .staleAction:hover,.staleAction:focus-visible{background:#30638d;border-color:#a8d8fb}
 .staleAction[hidden]{display:none!important}
 @media(max-width:660px){.banner .staleAction{width:100%;text-align:center}}
+
+/* COIN.LIVE PRO 3.0 — forward-only model audit, compact mobile-first */
+.fwdPanel{margin-top:14px}
+.fwdMeta{font-size:11px;color:#9cbad5;padding:11px 15px 2px}
+.fwdGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;padding:12px 15px}
+.fwdMetric{border:1px solid #2d4b60;background:#0d2334;border-radius:10px;padding:13px;min-width:0;display:flex;flex-direction:column;gap:5px}
+.fwdMetric span{font-size:11px;color:#a3bdd5}
+.fwdMetric b{font-size:clamp(15px,1.5vw,22px);font-variant-numeric:tabular-nums;overflow-wrap:anywhere;color:#e5f5ff}
+.fwdRows{display:grid;gap:5px;padding:4px 15px 15px;max-height:400px;overflow:auto}
+.fwdRow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr) auto;gap:12px;text-align:left;align-items:center;background:#10283a;border:1px solid #2b4b61;border-radius:10px;color:#f2f7ff;padding:10px 12px;cursor:pointer}
+.fwdRow:hover,.fwdRow:focus-visible{border-color:#7db8d9;background:#18344a}
+.fwdRow span{min-width:0;overflow-wrap:anywhere}
+.fwdRow small{display:block;color:#99b8cc;font-weight:500;font-size:10px;margin-top:3px}
+.fwdResult{font-size:12px;font-weight:700}
+.fwdOpen{font-size:11px;color:#a8d5ed;white-space:nowrap}
+.fwdMethod{padding:0 15px 12px}
+@media(max-width:800px){.fwdGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:500px){.fwdRow{grid-template-columns:1fr auto}.fwdResult{grid-column:1}.fwdOpen{grid-column:2;grid-row:1 / span 2}.fwdMetric{padding:11px}}

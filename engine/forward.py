@@ -103,7 +103,7 @@ def evaluate(e,bars,now_ms):
     out['mae_pct']=round(adverse,3)
     if out['status']=='TRACKING' and now_ms>=expiry:
         # Missing trailing candles are unknown outcomes, never clean expiries.
-        out['status']='EXPIRED' if good[-1]['t']>=latest_start else 'DATA_GAP'
+        out['status']='EXPIRED' if int(good[-1]['t'])==(latest_start//BAR4)*BAR4 else 'DATA_GAP'
     return out
 
 def report(events,days,now_ms):
