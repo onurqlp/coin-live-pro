@@ -127,10 +127,20 @@ def assess(m,all_frames,prior):
     if disagreement:reason.append('TREND_CONFLICT')
     if quality!='COMPLETE':reason.append('NO_HISTORY')
     if tf['15m'].get('atr_pct',0)>4:reason.append('VOLATILITY_SPIKE')
+    spread=m.get('spread_bps')
+    if spread is None:
+        reason.append('SPREAD_UNKNOWN')
+        total=min(total,73)
+    elif spread>35:
+        reason.append('SPREAD_TOO_WIDE')
+        total=min(total,45)
+    elif spread>18:
+        reason.append('SPREAD_ELEVATED')
+        total=min(total,66)
     return {'symbol':m['symbol'],'side':prior,'setup_type':mode,'score':max(0,min(100,total)),
         'macro_score':macro_score,'momentum_score':mom_score,'entry_quality_score':entry_score,
         'frames':tf,'quality':quality,'reason_codes':reason,'expected_holding':expected,
-        'price_reference':last_quote,'volume_24h':m['volume'],'model_version':MODEL,
+        'price_reference':last_quote,'volume_24h':m['volume'],'spread_bps':spread,'model_version':MODEL,
         'observed_at_utc':STAMP,'source':'OKX read-only'}
 
 def main():
