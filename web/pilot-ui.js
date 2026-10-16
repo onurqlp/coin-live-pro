@@ -42,7 +42,7 @@
       '<span class="chip '+(x.side==='LONG'?'long':'short')+'">'+esc(x.side)+'</span></strong>'+
       '<span class="v2score">'+esc(x.score)+'/100</span></div>'+
       '<div class="v2why">'+esc(typeNames[x.setup_type]||x.setup_type)+' · '+esc(x.expected_holding)+
-      ' · '+esc(x.quality)+' · '+esc((x.reason_codes||[]).join(' / '))+'</div>'+
+      ' · '+esc(x.quality)+' · spread '+esc(x.spread_bps==null?'bilinmiyor':Number(x.spread_bps).toFixed(2)+' bps')+' · '+esc((x.reason_codes||[]).join(' / '))+'</div>'+
       '<div class="v2weights"><span>MAKRO <b>'+esc(x.macro_score??'—')+'</b></span>'+
       '<span>MOMENTUM <b>'+esc(x.momentum_score??'—')+'</b></span>'+
       '<span>GİRİŞ <b>'+esc(x.entry_quality_score??'—')+'</b></span></div>'+
