@@ -6,6 +6,7 @@ on:
     - cron: '33 1 * * *'
   push:
     branches:
+      - main
       - research-historical-ohlc-baseline-20261017
     paths:
       - '.github/workflows/v4-history.yml'
