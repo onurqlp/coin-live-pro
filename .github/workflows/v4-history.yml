@@ -1,0 +1,92 @@
+name: COIN.LIVE PRO — Daily Historical Research Archive
+on:
+  workflow_dispatch:
+  schedule:
+    # 04:33 Europe/Istanbul (UTC+3), best-effort daily schedule.
+    - cron: '33 1 * * *'
+  push:
+    branches:
+      - main
+      - research-historical-ohlc-baseline-20261017
+    paths:
+      - '.github/workflows/v4-history.yml'
+permissions:
+  contents: write
+concurrency:
+  group: coin-live-v4-historical-archive
+  cancel-in-progress: false
+jobs:
+  historical:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate closed-only research collector and source provenance
+        run: |
+          python3 -m py_compile engine/v4_historical.py
+          python3 -m unittest discover -s tests -p 'test_v4_historical.py' -v
+      - name: Retrieve real OKX historical OHLC (read-only, no exchange account)
+        run: |
+          set -euo pipefail
+          if [ "${GITHUB_REF}" = 'refs/heads/main' ]; then
+            python3 engine/v4_historical.py
+          else
+            python3 engine/v4_historical.py --preview
+          fi
+          python3 - <<'PY'
+          import gzip,json,pathlib,hashlib
+          p=pathlib.Path('research/okx-history')
+          index=json.loads((p/'index.json').read_text())
+          assert index['historical_candle_used_as_forward_event'] is False
+          assert index['historical_signals_fabricated'] is False
+          assert index['no_exchange_orders'] is True
+          passed=0
+          for item in index['series']:
+              if item['status']!='OK':continue
+              raw=(pathlib.Path(item['artifact'])).read_bytes()
+              assert hashlib.sha256(raw).hexdigest()==item['sha256']
+              data=json.loads(gzip.decompress(raw))
+              assert data['training_only'] and not data['is_forward_verified_signal']
+              bars=data['bars']
+              assert bars and all(bars[i][0]<bars[i+1][0] for i in range(len(bars)-1))
+              assert all(b[0]+data['period_ms']<=
+                         int(__import__('datetime').datetime.fromisoformat(index['capture_utc']).timestamp()*1000)
+                         for b in bars)
+              passed+=1
+          assert passed>=2
+          print('OKX HISTORICAL ARCHIVE CHECK',passed,'verified compressed series')
+          PY
+      - name: Preserve audit artifacts from feature preview
+        if: github.ref != 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: v4-historical-preview-source
+          path: research/okx-history/
+          retention-days: 5
+      - name: Append verified historical research files (main only)
+        if: github.ref == 'refs/heads/main'
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/okx-history
+          if git diff --cached --quiet; then
+            echo "Historical capture unchanged"; exit 0
+          fi
+          git commit -m 'research: verified OKX closed-only historical reference [skip ci]'
+          for try in 1 2 3 4 5; do
+            git fetch origin main
+            git rebase origin/main
+            if git push origin HEAD:main; then
+              echo "Historical capture archived without touching live V4 ledgers"
+              exit 0
+            fi
+            sleep "$((try*2))"
+          done
+          echo "Source preserved in action artifact/log; remote update failed"
+          exit 1
