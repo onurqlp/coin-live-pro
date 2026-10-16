@@ -73,12 +73,17 @@ function syncCoinLivePro(){
       'Gün sonunda değişebilir; sadece gözlenen olaylar'];
     // Sheets may deserialize a yyyy-MM-dd cell as a native Date; String(Date)
     // does not equal yyyy-MM-dd. Normalise before matching to avoid duplicates.
+    // Existing Sheets dates can arrive as strings, Date objects or serial day values.
+    // Match by UTC day; update the newest matching row, never append duplicate days.
     const normaliseDay=value=>{
-      if(value instanceof Date && !isNaN(value.getTime()))
-        return Utilities.formatDate(value,'UTC','yyyy-MM-dd');
+      if(value instanceof Date&&!isNaN(value.getTime()))return Utilities.formatDate(value,'UTC','yyyy-MM-dd');
+      if(typeof value==='number'&&Number.isFinite(value)){
+        const date=new Date(Math.round((value-25569)*86400000));
+        return Utilities.formatDate(date,'UTC','yyyy-MM-dd');
+      }
       const str=String(value==null?'':value).trim();
-      if(/^\\d{4}-\\d{2}-\\d{2}/.test(str))return str.slice(0,10);
-      const tr=str.match(/^(\\d{2})\\.(\\d{2})\\.(\\d{4})/);
+      if(/^\d{4}-\d{2}-\d{2}/.test(str))return str.slice(0,10);
+      const tr=str.match(/^(\d{2})\.(\d{2})\.(\d{4})/);
       if(tr)return tr[3]+'-'+tr[2]+'-'+tr[1];
       return str;
     };
