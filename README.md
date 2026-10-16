@@ -1,10 +1,21 @@
-# COIN.LIVE PRO 2.0 — 7 Günlük Merkezi Pilot
+# COIN.LIVE PRO 2.2 — 4H/Günlük Swing ve 7 Günlük Merkezi Pilot
 
 **Web:** https://onurqlp.github.io/coin-live-pro/  
 **Rapor:** https://docs.google.com/spreadsheets/d/17xCk7i_F3XRGzyts1EF89vfrPiAUPbnEqATAM4fj9nA/edit  
-**Model:** `2.0.0-mtf-pilot` + `2.0.0-paper-pilot`
+**Model:** `2.2.0-mtf-swing` + `2.2.0-swing-4h-1d` + `2.2.0-paper-swing`
 
 > Bu bir **ileri dönük, sadece sanal araştırma** pilotudur. Gerçek alım/satım emri, finansal API anahtarı, Telegram/WhatsApp/e-posta veya pilotta bildirim yoktur. Getiri ve başarı garantisi yoktur.
+
+
+## 2.2 son sürüm — 1–7 günlük SWING filtresi ve veri doğruluğu
+
+- **Ana yön:** tamamlanmış UTC **1D %40 + 4H %34** (toplam **%74**); 12H %7,5, 1W %2,5, 1H %6, 15m %7, 5m %3. Kısa mumlar giriş/hacim zamanlaması içindir; tek başına swing kararı vermez.
+- **LONG / SHORT eşit mantık:** 1D ile 4H yönü uyuşmazsa durum `WAIT_4H_1D`; işlem adayı değildir. 1–3 veya 3–7 gün beklenen gözlem süresi **öngörü**, sonuç garantisi değildir.
+- **Yapısal risk:** kapanmış 4H/1D mumlarında tekrar eden aşırı fitil, 20 mum ortalamasına göre hacim sıçraması, ATR, 24s hareket, alış/satış spread, yeni listeleme/durdurulmuş kontrat ve **veri ulaşırsa** açık pozisyon seviyesi ile funding oranı izlenir. Açık pozisyon **değişimi** doğrulanmadıkça verilmez; risk puanı manipülasyonun ispatı veya kazanma olasılığı değildir.
+- **Kripto filtresi:** açıkça hisse/ETF/emtia temalı USDT swapları yeni kripto taramasına alınmaz; eski denetim kayıtları korunur. `/api/v5/public/instruments` konumundan `state=live` ve listeleme tarihi mümkün olduğunda doğrulanır.
+- **Sanal portföy:** 2.2 geçiş anından **sonra** gelen teyitler de sadece 1D+4H hizalı, yapısal risk eşiğini karşılayan `SWING_CANDIDATE` ise yeni sanal işleme dönüşür. Önceki 15m sanal pozisyonları ayrı `legacy` olarak ölçülmeye devam eder. Gerçek emir yok.
+- **Google Sheets:** `GUNLUK_IZLEME` ve `PERFORMANS_GUNLUK` tarih anahtarı **metin** yapıldı; yinelenmiş 16 Ekim kayıtları temizlendi ve sonraki aktif Google senkronunda tek satır kaldığı denetlendi. Sheets arşivi GitHub analizinin yerine geçmez.
+- **Sınır:** merkezi GitHub `schedule` için iki gerçek zamanlanmış koşu gözlenene kadar 24/7 düzenli tarama **kanıtlanmış değildir**. Manuel iş koşusu bu kanıt sayılmaz.
 
 ## Gerçekten çalışan yapı
 
