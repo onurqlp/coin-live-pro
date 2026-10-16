@@ -45,7 +45,7 @@ function refreshState(){
    new Date(S.stamps.radar).toLocaleTimeString('tr-TR',{timeZone:'Europe/Istanbul',hour:'2-digit',minute:'2-digit'}):'—';
  const state=$('scanStatus');
  if(state){
-   const until=S.stamps.radar?Math.max(0,Math.ceil((15*60000-(Date.now()-S.stamps.radar))/60000)):0;
+   const until=S.stamps.radar?Math.max(0,Math.ceil((5*60000-(Date.now()-S.stamps.radar))/60000)):0;
    state.textContent='MERKEZİ 1D / 4H KIVILCIM · '+(trusted?'AKTİF':'GECİKMİŞ')+
      ' · son '+(Number.isFinite(radarAge)?radarAge+' dk önce':'henüz yok')+
      (trusted?' · sıradaki planlanan ~'+until+' dk (GitHub gecikebilir)':' · ZAMANLAYICI GECİKİYOR · Güncelliği Kontrol Et tarama başlatmaz')+
@@ -165,6 +165,15 @@ function renderRadar(){
      ' <span class="chip '+(confirmed?'confirmed':'watch')+'">'+(confirmed?'TEYİT':'İZLE')+'</span></span>'+
      '<span class="reason"><strong>'+tf+'</strong> · '+safe(x.expected_holding)+
      ' · haftalık '+(c['1W']?'uyumlu':states['1W']==='NO_HISTORY'?'veri eksik':'uyum yok')+' · risk '+safe(x.risk_score)+'/100'+
+     (x.stage==='WATCH'&&x.strict_gate_reasons?.length?' · beklenen: '+safe(({
+       WEEKLY_NOT_ALIGNED:'haftalık trend uyumu',
+       BREAKOUT_NOT_CROSSED:'4H kırılımı',
+       BREAKOUT_OVEREXTENDED:'fiyat sakinleşmesi',
+       LIQUIDITY_OR_SPREAD_UNVERIFIED:'likidite / spread teyidi',
+       TIMING_NOT_CONFIRMED:'1H/15m/5m mum teyidi',
+       STRUCTURE_RISK_ELEVATED:'daha düşük risk',
+       SCORE_BELOW_STRICT_GATE:'puan eşiği'
+     })[x.strict_gate_reasons[0]]||'ek koşullar'):'')+
      (flags?' · '+flags+' uyarı':'')+'</span><span class="timingRow">'+timing+'</span></span>'+
      '<span class="rval"><b>'+fmt(x.price)+'</b><small>Puan '+safe(x.score)+'/100</small>'+
      '<small class="viewChart">Grafiğe bak ↗</small></span></button>';
@@ -265,7 +274,7 @@ function renderForward(){
  '<div class="empty">3.0 sonrası yeni kıvılcım henüz kaydedilmedi. Eski sinyaller bu ölçüme eklenmez.</div>';
  list.querySelectorAll('[data-forward]').forEach(b=>b.onclick=()=>selectSpark(b.dataset.forward,b.dataset.tf,true));
 }
-function renderQuality(){const rows=[['Fiyat kaynağı',S.provider||'Bekleniyor'],['Sunucu fiyat yaşı',S.stamps.market?age(S.stamps.market)+' dk':'—'],['Sunucu radar yaşı',S.stamps.radar?age(S.stamps.radar)+' dk':'—'],['Canlı fiyat',S.live&&Date.now()-S.lastRefresh<60000?'OKX · '+Math.floor((Date.now()-S.lastRefresh)/1000)+' saniye önce':'OKX canlı bağlantı yok; yedek fiyat'],['Sinyal değerlendirmesi','1D + 4H ana yön; 1W bağlam; 1H/15m teyit; 5m/1m ek kontrol'],['İşlem girişleri','WATCH ≠ işlem; CONFIRMED ≠ gerçek emir'],['Sonuç boşlukları','Belirsiz / veri boşluğu ayrı sınıf'],['Risk hesabı','10x varsayım · örnek 1R · maliyet %0,15'],['Yeni analiz','GitHub zamanlayıcısı gecikebilir; yalnız 3.0 merkezi analiz sonuçları kullanılır']];$('quality').innerHTML=rows.map(([k,v])=>`<div class="line"><span>${safe(k)}</span><b>${safe(v)}</b></div>`).join('');}
+function renderQuality(){const rows=[['Fiyat kaynağı',S.provider||'Bekleniyor'],['Sunucu fiyat yaşı',S.stamps.market?age(S.stamps.market)+' dk':'—'],['Sunucu radar yaşı',S.stamps.radar?age(S.stamps.radar)+' dk':'—'],['Canlı fiyat',S.live&&Date.now()-S.lastRefresh<60000?'OKX · '+Math.floor((Date.now()-S.lastRefresh)/1000)+' saniye önce':'OKX canlı bağlantı yok; yedek fiyat'],['Sinyal değerlendirmesi','1D + 4H ana yön; 1W bağlam; 1H/15m teyit; 5m/1m ek kontrol'],['İşlem girişleri','WATCH ≠ işlem; CONFIRMED ≠ gerçek emir'],['Sonuç boşlukları','Belirsiz / veri boşluğu ayrı sınıf'],['Risk hesabı','10x varsayım · örnek 1R · maliyet %0,15'],['Yeni analiz','5 dk GitHub hedefi (garantisiz) · 3.0 sıkı teyit · canlı fiyat 20 sn']];$('quality').innerHTML=rows.map(([k,v])=>`<div class="line"><span>${safe(k)}</span><b>${safe(v)}</b></div>`).join('');}
 function renderMarket(){$('marketRows').innerHTML=S.market.slice(0,100).map((m,i)=>{const x=currentRadar().items.find(a=>a.symbol===m.symbol);return `<tr class="marketCoinRow" data-symbol="${safe(m.symbol)}" title="Bu coinin grafiğini aç"><td>${i+1}</td><td><b>${safe(m.symbol.replace('USDT',''))}</b> / USDT</td><td>${fmt(m.price)}</td><td class="${m.change>=0?'positive':'negative'}">${pct(number(m.change))}</td><td>${usd(m.volume)}</td><td>${x?`<span class="chip ${x.side==='LONG'?'long':'short'}">${x.side}</span> <span class="chip ${x.stage==='WATCH'?'watch':'confirmed'}">${x.stage==='WATCH'?'İZLE':'TEYİT'}</span>`:'—'}</td></tr>`;}).join('');
  for(const el of document.querySelectorAll('.marketCoinRow'))el.onclick=()=>{
    const spark=currentRadar().items.find(x=>x.symbol===el.dataset.symbol);
