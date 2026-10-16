@@ -19,7 +19,7 @@ class TestMacroSwingSparks(unittest.TestCase):
                 'adx_14':28,'volume_ratio_20':1.25,
                 'bb_compression_percentile_30':40}
     def record(self,side='LONG',weekly='UP',daily='UP',h4='UP',status='SWING_CANDIDATE',risk=14):
-        frames={tf:self.state(frame=tf) for tf in ['1W','1D','4H','1H','15m','5m']}
+        frames={tf:self.state(trend='DOWN' if side=='SHORT' else 'UP',frame=tf) for tf in ['1W','1D','4H','1H','15m','5m']}
         frames['1W']['trend']=weekly
         frames['1D']['trend']=daily
         frames['4H']['trend']=h4
