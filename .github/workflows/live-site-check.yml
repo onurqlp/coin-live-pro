@@ -7,6 +7,7 @@ on:
       - 'web/index.html'
       - 'web/app.js'
       - 'web/live-radar.js'
+      - 'web/pilot-ui.js'
 permissions:
   contents: read
 jobs:
@@ -28,17 +29,25 @@ jobs:
           grep -q 'id="candleChart"' /tmp/site.html
           grep -q 'id="scanStatus"' /tmp/site.html
           grep -q 'live-radar.js' /tmp/site.html
-          for n in market radar history reports; do
+          grep -q 'pilot-ui.js' /tmp/site.html
+          grep -q 'id="mtfCandidates"' /tmp/site.html
+          grep -q 'id="paperKpis"' /tmp/site.html
+          grep -q 'id="systemKpis"' /tmp/site.html
+          for n in market radar history reports mtf paper health; do
             curl -fSL --max-time 15 "$ROOT/data/$n.json?check=$(date +%s)" -o "/tmp/$n.json"
           done
           python3 - <<'PY'
           import json,datetime
           from pathlib import Path
-          data={n:json.loads(Path(f'/tmp/{n}.json').read_text()) for n in ['market','radar','history','reports']}
+          data={n:json.loads(Path(f'/tmp/{n}.json').read_text()) for n in ['market','radar','history','reports','mtf','paper','health']}
           assert len(data['market'].get('rows',[]))>=20,'market list incomplete'
           assert data['market'].get('analyzed',0)>=30,'no 15m rotated OHLC coverage'
           assert isinstance(data['history'].get('events'),list),'history not served'
           assert len(data['reports'].get('reports',[]))==2,'7/14 report not served'
+          assert data['mtf']['analyzed']>=3,'real seven-timeframe scan not deployed'
+          assert all(set(x['frames'])>=set(['1W','1D','12H','4H','1H','15m','5m']) for x in data['mtf']['candidates']),'incomplete MTF context'
+          assert data['paper']['starting_usdt']==100 and data['paper']['pilot_started_at'],'forward-only pilot missing'
+          assert data['health']['last_scan_id'] and 'schedule_proven' in data['health'],'audit missing'
           now=datetime.datetime.now(datetime.timezone.utc)
           updated=datetime.datetime.fromisoformat(data['history']['updated_at'])
           age=(now-updated).total_seconds()/60
@@ -55,7 +64,7 @@ jobs:
           python3 - <<'PY'
           import re
           doc=open('/tmp/dom.html').read()
-          for key in ('marketCount','healthTitle','radarRows','historyRows','reportStats','chartCoin','scanStatus','browserHistory'):
+          for key in ('marketCount','healthTitle','radarRows','historyRows','reportStats','chartCoin','scanStatus','browserHistory','chartTf','mtfCandidates','mtfStatus','paperKpis','paperStatus','systemKpis','systemStatus'):
             match=re.search(r'id="'+key+r'"[^>]*>(.*?)</',doc,re.S)
             assert match is not None,'missing '+key
             excerpt=re.sub('<[^>]*>',' ',match.group(1)).strip()[:160]
@@ -64,5 +73,8 @@ jobs:
           match=re.search(r'id="scanStatus"[^>]*>(.*?)</',doc,re.S)
           assert match and 'hazırlanıyor' not in match.group(1),'independent live scanner never started'
           print('LIVE_SCANNER_STATUS',re.sub('<[^>]*>',' ',match.group(1)).strip()[:180])
+          for key in ('mtfCandidates','paperKpis','systemKpis'):
+            m=re.search(r'id="'+key+r'"[^>]*>(.*?)</',doc,re.S)
+            assert m and m.group(1).strip(),'V2 widget failed to render: '+key
           print('BROWSER_DOM_PASS')
           PY
