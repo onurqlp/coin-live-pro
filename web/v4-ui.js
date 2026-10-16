@@ -163,7 +163,7 @@
      }
    }catch(e){
      $('releaseUpdated').textContent='Son kod güncelleme kaydı şu anda doğrulanamıyor';
-     $('releaseFooter').textContent='Sürüm 4.0 · Yayın kaydı geçici olarak okunamıyor';
+     $('releaseFooter').textContent=$('releaseVersion').textContent+' · Yayın kaydı geçici olarak okunamıyor';
    }
  }
  function showMarketSummary(r,manifest,stale){
