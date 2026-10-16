@@ -49,10 +49,12 @@ const marketWorkflow=fs.readFileSync('.github/workflows/market.yml','utf8');
 assert.match(marketWorkflow,/  push:\n    branches:\n      - main\n/,
   'Feature branch code pushes must not run the production market publishing workflow');
 for(const id of ['v4Board','v4Spotlight','v4Motion','v4Watch','v4Desk','v4PaperKpis',
- 'v4Positions','chartHostPortfolio','v4Orders','v4EquityCanvas','v4Lab','v4LabBody'])
+ 'v4Positions','chartHostPortfolio','v4Orders','v4EquityCanvas','v4Lab','v4LabBody',
+ 'v4HistoryRows','v4HistoryCount'])
   assert.ok(ids.includes(id),'V4 view missing '+id);
 assert.ok(html.includes('v4-ui.js')&&html.includes('v4-style.css'),'V4 scripts not connected');
 assert.ok(router.includes("key==='portfoy'?portfolio"),'One chart must move to paper portfolio');
+assert.ok(v4code.includes('v4-history-index')&&v4code.includes('renderHistory()'),'V4 history must validate and display latest audited event index');
 assert.ok(v4code.includes('publication_valid')&&v4code.includes('SHA-256'),
   'V4 must independently validate source checksums');
 assert.ok(html.includes('v3LegacyDisclosure'),'Old V3 100-USDT pilot must remain archived');

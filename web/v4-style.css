@@ -55,3 +55,10 @@ padding:12px;text-align:left;display:grid;gap:5px;min-height:110px}
  background:#263b50;overflow:hidden;flex:0 0 auto}
 .v4ObservationBar span{display:block;height:100%;width:0;background:#78b6d9;border-radius:99px}
 @media(max-width:540px){.v4ObservationBar{width:100%}}
+
+/* V4 original forward event history, independent of legacy V3 results. */
+.v4HistoryPanel{margin:12px 0}
+.v4HistoryRows{display:grid;gap:8px;padding:12px 14px;max-height:600px;overflow:auto}
+.v4HistoryItem{border:1px solid #34465e;border-radius:10px;padding:11px 12px;background:#122137}
+.v4HistoryTop{display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;align-items:center;font-size:12px}
+.v4HistoryTop strong{font-size:10px;color:#b0dfeb}
