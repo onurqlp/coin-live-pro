@@ -131,8 +131,7 @@ async function scan(force=false){
  }
  running=false;
 }
+// Diagnostic comparison only. NEVER creates authoritative events or PnL.
 window.CoinLiveProClient={scan};
-setTimeout(()=>{scan().catch(e=>{running=false;S.localScanStatus='Analiz hatası: '+e.message;host.refreshState();});},3000);
-setInterval(()=>{scan().catch(e=>{running=false;S.localScanStatus='Analiz hatası';host.refreshState();});},60000);
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)scan().catch(()=>{});});
+S.localScanStatus='Elle yapılan tarayıcı karşılaştırması; merkezi pilot değil';
 })();
