@@ -29,15 +29,26 @@
      if(active)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');
      link.classList.toggle('active',active);
    }
+   // One canvas, two placements: Radar home on first view, enlarged on charts.
+   // Moving rather than cloning keeps its coin/TF state and annotations intact.
+   const panel=document.getElementById('chartPanel');
+   const home=document.getElementById('chartHostRadar');
+   const advanced=document.getElementById('chartHostAdvanced');
+   const destination=key==='grafikler'?advanced:home;
+   if(panel&&destination&&panel.parentElement!==destination){
+     destination.replaceChildren(panel);
+   }
    const current=document.getElementById('routeCurrent');
    if(current)current.textContent=r.label;
-   document.title=r.title+' · COIN.LIVE PRO 2.1';
+   document.title=r.title+' · COIN.LIVE PRO 2.3';
    document.body.dataset.route=key;
    if(changed){
      last=key;
      window.scrollTo({top:0,behavior:'instant'});
      // Existing canvas chart repaints when it becomes visible.
-     if(key==='grafikler')requestAnimationFrame(()=>window.dispatchEvent(new Event('resize')));
+     if(key==='grafikler'||key==='radar'){
+       requestAnimationFrame(()=>window.dispatchEvent(new Event('resize')));
+     }
    }
  }
  async function sourceStatus(){
