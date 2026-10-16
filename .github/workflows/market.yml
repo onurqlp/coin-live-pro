@@ -68,6 +68,15 @@ jobs:
           assert files['mtf']['model_version']=='3.0.0-mtf-swing','outdated HTF score'
           assert files['swing-radar']['timeframes_primary']==['1D','4H'],'15m must not become primary'
           assert files['swing-radar']['source_mtf_at']==files['mtf']['fetched_at'],'wrong MTF snapshot source'
+          assert files['swing-radar'].get('filter_policy')=='3.1-persistent-quant-20261016','old quant model published'
+          assert all(x.get('review_state') in ('FRESH','RECHECK_PENDING','INVALIDATED')
+                     for x in files['swing-radar']['items']),'spark lifecycle missing'
+          assert all(x.get('review_state')=='FRESH' or x.get('stage')!='CONFIRMED'
+                     for x in files['swing-radar']['items']),'stale carried confirmation'
+          assert all('rsi_14' in x.get('frames',{}).get('4H',{})
+                     for x in files['mtf']['candidates'] if x.get('quality')=='COMPLETE'),'closed RSI absent'
+          assert all('macd_12_26_9' in x.get('frames',{}).get('4H',{})
+                     for x in files['mtf']['candidates'] if x.get('quality')=='COMPLETE'),'closed MACD absent'
           assert len({e['event_id'] for e in files['swing-history']['events']})==len(files['swing-history']['events']),'duplicate forward sparks'
           assert all(x['primary_tf'] in ('1D','4H') and x['quality']=='VERIFIED_CLOSED_1D_4H'
                      for x in files['swing-radar']['items']),'legacy 15m spark entered HTF radar'
@@ -78,7 +87,8 @@ jobs:
                      for x in files['swing-radar']['items']),'invalid micro confirmation'
           assert all(x.get('stage')!='CONFIRMED' or
                      (x.get('entry_timing')=='STRICT_CONFIRMED'
-                      and x.get('filter_policy')=='3.0-strict-5min-20261016'
+                      and x.get('filter_policy')=='3.1-persistent-quant-20261016'
+                      and x.get('review_state')=='FRESH'
                       and x.get('extended_from_4h_breakout_pct',-999)>0
                       and not x.get('strict_gate_reasons'))
                      for x in files['swing-radar']['items']),'unverified strict confirmation'
@@ -103,7 +113,7 @@ jobs:
           git add web/data/market.json
           git add web/data/mtf.json web/data/paper.json web/data/health.json
           git add web/data/swing-radar.json web/data/swing-history.json web/data/swing-outcomes.json
-          git add archive/pilot-ledger.json archive/scan-health.json archive/swing-sparks-ledger.json archive/swing-outcomes-ledger.json
+          git add archive/pilot-ledger.json archive/scan-health.json archive/swing-sparks-ledger.json archive/swing-active-ledger.json archive/swing-outcomes-ledger.json
           if git diff --cached --quiet; then exit 0; fi
           git commit -m 'data: 7-timeframe radar, paper pilot, 90-day event and cron provenance [skip ci]'
           for try in 1 2 3; do
