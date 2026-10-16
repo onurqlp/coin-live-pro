@@ -50,6 +50,17 @@ class TestOneToSevenDaySwing(unittest.TestCase):
         self.assertIn('4H_REPEATED_LONG_WICKS',x['structure_flags'])
         self.assertLessEqual(swing.gate_score(100,x),39)
         self.assertIn('not proof',x['risk_method'].lower())
+    def test_recent_listing_is_not_a_swing_entry(self):
+        m=self.market();m.update({'instrument_state':'LIVE','listing_age_days':2.5})
+        x=swing.swing_context(m,self.frames(),'LONG')
+        self.assertEqual(x['swing_status'],'AVOID_RISK')
+        self.assertIn('NEW_LISTING_LT_7D',x['structure_flags'])
+        self.assertLessEqual(swing.gate_score(96,x),39)
+    def test_suspended_contract_is_always_blocked(self):
+        m=self.market();m.update({'instrument_state':'suspend','listing_age_days':720})
+        x=swing.swing_context(m,self.frames(),'LONG')
+        self.assertEqual(x['swing_status'],'AVOID_RISK')
+        self.assertIn('INSTRUMENT_NOT_LIVE',x['structure_flags'])
     def test_missing_funding_and_oi_explicitly_unknown(self):
         x=swing.swing_context(self.market(),self.frames(),'LONG')
         self.assertIsNone(x['funding_rate'])
