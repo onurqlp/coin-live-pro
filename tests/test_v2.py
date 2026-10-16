@@ -29,7 +29,7 @@ class TestMtfResearch(unittest.TestCase):
         self.assertEqual(set(result['frames']),{'1W','1D','12H','4H','1H','15m','5m'})
         self.assertEqual(result['model_version'],mtf.MODEL)
     def test_weekly_weight_reduces_score_not_daily_gate(self):
-        m={'symbol':'BTCUSDT','price':120.,'volume':140000000}
+        m={'symbol':'BTCUSDT','price':120.,'volume':140000000,'spread_bps':2}
         f={tf:fixture_bars(70,period=v) for tf,v in mtf.PERIOD.items() if tf!='1m'}
         a=mtf.assess(m,f,'LONG')
         f['1W']=fixture_bars(70,up=False,period=mtf.PERIOD['1W'])
