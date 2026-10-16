@@ -1,0 +1,59 @@
+name: COIN.LIVE PRO — Live Site Verification
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/live-site-check.yml'
+permissions:
+  contents: read
+jobs:
+  browser-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - name: Verify deployed root and all four market JSON files
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=https://onurqlp.github.io/coin-live-pro
+          for i in 1 2 3 4 5 6; do
+            if curl -fSL --max-time 12 "$ROOT/?check=$(date +%s)" -o /tmp/site.html; then break; fi
+            sleep 5
+          done
+          grep -q 'id="radarRows"' /tmp/site.html
+          grep -q 'id="historyRows"' /tmp/site.html
+          grep -q 'id="candleChart"' /tmp/site.html
+          for n in market radar history reports; do
+            curl -fSL --max-time 15 "$ROOT/data/$n.json?check=$(date +%s)" -o "/tmp/$n.json"
+          done
+          python3 - <<'PY'
+          import json,datetime
+          from pathlib import Path
+          data={n:json.loads(Path(f'/tmp/{n}.json').read_text()) for n in ['market','radar','history','reports']}
+          assert len(data['market'].get('rows',[]))>=20,'market list incomplete'
+          assert isinstance(data['history'].get('events'),list),'history not served'
+          assert len(data['reports'].get('reports',[]))==2,'7/14 report not served'
+          now=datetime.datetime.now(datetime.timezone.utc)
+          updated=datetime.datetime.fromisoformat(data['history']['updated_at'])
+          age=(now-updated).total_seconds()/60
+          print('LIVE_SITE_OK | provider=',data['market'].get('provider'),'coins=',len(data['market']['rows']),'events=',len(data['history']['events']),'snapshot_age_minutes=',round(age,1))
+          if age>30:print('CAUTION: Published data is stale; scheduled refresh requires attention')
+          PY
+      - name: Verify real DOM rendering in Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME=$(command -v google-chrome || command -v chromium || true)
+          if [ -z "$CHROME" ]; then echo "Chrome unavailable"; exit 1; fi
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --virtual-time-budget=12000 --dump-dom https://onurqlp.github.io/coin-live-pro/ > /tmp/dom.html 2>/tmp/chrome.log
+          python3 - <<'PY'
+          import re
+          doc=open('/tmp/dom.html').read()
+          for key in ('marketCount','healthTitle','radarRows','historyRows','reportStats','chartCoin'):
+            match=re.search(r'id="'+key+r'"[^>]*>(.*?)</',doc,re.S)
+            assert match is not None,'missing '+key
+            excerpt=re.sub('<[^>]*>',' ',match.group(1)).strip()[:160]
+            print(key,'=',excerpt)
+          assert 'Veriler kontrol ediliyor' not in doc.split('id="source"')[1][:120],'render did not start'
+          print('BROWSER_DOM_PASS')
+          PY
