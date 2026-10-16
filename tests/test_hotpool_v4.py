@@ -54,7 +54,12 @@ class TestHotPoolSelection(unittest.TestCase):
     def test_rotating_market_coverage_survives_full_hot_pool(self):
         selected=mtf.select_candidates(self.universe(),self.hot(),cycle=5)
         self.assertEqual(len(selected),23)
-        self.assertGreaterEqual(len([s for s in selected if s.startswith('C0')]),6)
+        pinned={'BTCUSDT','ETHUSDT'} | {x['symbol'] for x in self.hot()}
+        # At least four symbols must come from discovery beyond pinned/hot.
+        self.assertGreaterEqual(len([s for s in selected if s not in pinned]),4)
+        following=mtf.select_candidates(self.universe(),self.hot(),cycle=6)
+        self.assertNotEqual(set(selected),set(following),
+                            'Rotating discovery must change across cycles')
         self.assertTrue(all(s.endswith('USDT') for s in selected))
 
     def test_invalidated_and_foreign_version_not_prioritized_as_hot(self):
