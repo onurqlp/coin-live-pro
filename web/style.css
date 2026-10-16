@@ -145,3 +145,5 @@ body[data-route="radar"] .hero{margin-top:18px}
 .riskDetails small{font-size:10px;display:block;color:#87accb}
 .tfGrid .frameCell.primaryTf{background:#23405c;border:1px solid #4d7090}
 @media(max-width:620px){.swingStatus{align-items:flex-start;flex-direction:column}.riskDetails{padding:9px}}
+
+.strategyTag{display:block;font-size:9px;margin-top:3px;letter-spacing:.18px;color:#8db6d8;font-weight:700}
