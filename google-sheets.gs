@@ -5,7 +5,7 @@
  */
 const CLPRO = {
   root:'https://raw.githubusercontent.com/onurqlp/coin-live-pro/main/web/data/',
-  history:'KIVILCIM_GECMIS', report:'HAFTALIK_RAPOR',daily:'GUNLUK_IZLEME',settings:'AYARLAR',maxAgeMinutes:25
+  history:'KIVILCIM_GECMIS', report:'HAFTALIK_RAPOR',daily:'GUNLUK_IZLEME',settings:'AYARLAR',maxAgeMinutes:35
 };
 function installCoinLivePro(){
   const ss=SpreadsheetApp.getActiveSpreadsheet();
@@ -63,15 +63,27 @@ function syncCoinLivePro(){
     const day=String(hist.updated_at).slice(0,10);
     const today=events.filter(e=>String(e.time).startsWith(day));
     const spot=(sym)=>((market.rows||[]).find(x=>x.symbol===sym)||{}).price||'';
-    const line=[day,spot('BTCUSDT'),spot('ETHUSDT'),market.provider||'OKX',market.analyzed||0,
+    const line=[day,spot('BTCUSDT'),spot('ETHUSDT'),market.provider||'OKX',market.analysis_ok??market.analyzed??0,
       today.filter(e=>e.side==='LONG'&&e.stage==='WATCH').length,
       today.filter(e=>e.side==='SHORT'&&e.stage==='WATCH').length,
       today.filter(e=>e.side==='LONG'&&e.stage==='CONFIRMED').length,
       today.filter(e=>e.side==='SHORT'&&e.stage==='CONFIRMED').length,
       today.filter(e=>['OPEN','WATCHING'].includes(e.state)).length,
       'Gün sonunda değişebilir; sadece gözlenen olaylar'];
-    const days=daily.getLastRow()>1?daily.getRange(2,1,daily.getLastRow()-1,1).getValues().flat().map(String):[];
-    const found=days.indexOf(day);
+    // Sheets may deserialize a yyyy-MM-dd cell as a native Date; String(Date)
+    // does not equal yyyy-MM-dd. Normalise before matching to avoid duplicates.
+    const normaliseDay=value=>{
+      if(value instanceof Date && !isNaN(value.getTime()))
+        return Utilities.formatDate(value,'UTC','yyyy-MM-dd');
+      const str=String(value==null?'':value).trim();
+      if(/^\\d{4}-\\d{2}-\\d{2}/.test(str))return str.slice(0,10);
+      const tr=str.match(/^(\\d{2})\\.(\\d{2})\\.(\\d{4})/);
+      if(tr)return tr[3]+'-'+tr[2]+'-'+tr[1];
+      return str;
+    };
+    const days=daily.getLastRow()>1?
+      daily.getRange(2,1,daily.getLastRow()-1,1).getValues().flat().map(normaliseDay):[];
+    const found=days.lastIndexOf(day);
     daily.getRange(found>=0?found+2:daily.getLastRow()+1,1,1,11).setValues([line]);
     settings.getRange('A2:C5').setValues([
       ['Son başarılı senkronizasyon',new Date(),'Google 10 dakika aralıkla denetler'],
