@@ -201,6 +201,11 @@ def main():
     records=sparks.get('events',[])
     for e in sorted(records,key=lambda x:int(x.get('at_ms',0))):
         if e.get('model_version')!='3.0.0-htf-sparks' or e.get('stage')!='CONFIRMED':continue
+        # Only observations admitted under the CURRENT conservative gate can
+        # start a new paper position. Never count older 3.0 confirmations as
+        # freshly vetted 5-minute signals or retroactively claim an entry.
+        if e.get('filter_policy')!='3.0-strict-5min-20261016':continue
+        if e.get('entry_timing')!='STRICT_CONFIRMED':continue
         if e.get('entry_timing')=='EXTENDED_WAIT' or int(e.get('risk_score',100))>=35:continue
         at=int(e.get('at_ms',0))
         if at<=started or e.get('event_id') in log['orders']:continue
