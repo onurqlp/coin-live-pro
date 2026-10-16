@@ -63,7 +63,7 @@ function render(){refreshState();$('marketCount').textContent=S.market.length||'
 function selectSpark(symbol,tf,openAdvanced=false){
  const accepted=['1m','5m','15m','1H','4H','12H','1D','1W'];
  const spark=currentRadar().items.find(x=>x.symbol===symbol);
- if(!S.market.some(x=>x.symbol===symbol)&&!spark)return;
+ if(!/^[A-Z0-9]{2,32}USDT$/.test(symbol)||(!S.market.some(x=>x.symbol===symbol)&&!spark&&!S.swingEvents.some(x=>x.symbol===symbol)))return;
  const target=accepted.includes(tf)?tf:(spark?.primary_tf||'4H');
  S.selected=symbol;S.chartTf=target;
  $('chartTf').value=target;
@@ -136,7 +136,7 @@ async function ensureChart(force=false){
  }catch(e){console.warn('COIN.LIVE chart source:',symbol,e.message);}
  finally{S.chartLoading=null;if(S.selected===symbol&&S.chartTf===tf)drawChart();}
 }
-function renderChartSelector(){const prior=S.selected;const options=[...new Set([...currentRadar().items.map(x=>x.symbol),...S.events.slice(0,25).map(x=>x.symbol),...S.market.map(x=>x.symbol)])];if(!options.length)options.push('BTCUSDT','ETHUSDT');if(!options.includes(S.selected))S.selected=options[0];const existing=[...$('chartCoin').options].map(x=>x.value).join('|');if(existing!==options.join('|'))$('chartCoin').innerHTML=options.map(x=>`<option value="${safe(x)}">${safe(x.replace('USDT',''))} / USDT</option>`).join('');$('chartCoin').value=S.selected;const link='https://www.tradingview.com/chart/?symbol='+encodeURIComponent('OKX:'+S.selected.replace('USDT','')+'USDT.P');$('tvLink').href=link;drawChart();ensureChart();}
+function renderChartSelector(){const prior=S.selected;const options=[...new Set([...currentRadar().items.map(x=>x.symbol),...S.swingEvents.slice(-80).map(x=>x.symbol),...S.events.slice(0,25).map(x=>x.symbol),...S.market.map(x=>x.symbol)])];if(!options.length)options.push('BTCUSDT','ETHUSDT');if(!options.includes(S.selected))S.selected=options[0];const existing=[...$('chartCoin').options].map(x=>x.value).join('|');if(existing!==options.join('|'))$('chartCoin').innerHTML=options.map(x=>`<option value="${safe(x)}">${safe(x.replace('USDT',''))} / USDT</option>`).join('');$('chartCoin').value=S.selected;const link='https://www.tradingview.com/chart/?symbol='+encodeURIComponent('OKX:'+S.selected.replace('USDT','')+'USDT.P');$('tvLink').href=link;drawChart();ensureChart();}
 function drawChart(){const c=$('candleChart'),ctx=c.getContext('2d'),r=c.getBoundingClientRect();const w=Math.max(300,r.width||500),h=340,ratio=Math.min(2,window.devicePixelRatio||1);c.width=Math.floor(w*ratio);c.height=Math.floor(h*ratio);ctx.setTransform(ratio,0,0,ratio,0,0);ctx.fillStyle='#0b1421';ctx.fillRect(0,0,w,h);const signal=currentRadar().items.find(x=>x.symbol===S.selected)||null;const cache=S.chartCache.get(S.selected+'|'+S.chartTf);const raw=(cache&&Date.now()-cache.at<120000?cache.data:null)||[];const candles=raw.slice(-52).map(x=>({t:x[0],o:x[1],h:x[2],l:x[3],c:x[4]}));if(candles.length<10){ctx.fillStyle='#adc1dc';ctx.font='13px system-ui';ctx.fillText('Bu coin için kapanmış mum grafiği henüz alınmadı.',17,36);$('chartCaption').textContent='OKX '+S.chartTf+' kapanmış mumları bekleniyor. Kaynak erişimi yoksa uydurma seviye çizilmez.';return;}const left=12,right=96,top=16,bottom=29;let lo=Math.min(...candles.map(x=>x.l)),hi=Math.max(...candles.map(x=>x.h));const lineLevels=[];if(signal&&signal.primary_tf===S.chartTf){
  lineLevels.push({label:'4H SEVİYE',v:signal.threshold,color:'#f7cc7d'});
  if(signal.stage==='CONFIRMED'){
