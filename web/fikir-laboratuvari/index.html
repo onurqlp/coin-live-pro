@@ -4,13 +4,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#0d1420">
-  <meta name="description" content="İki ortak için ekran kartsız, matematik ve yazılımla çalışan pasifleşebilir gelir sistemleri: 30 ayrıntılı model, karşılaştırma, sermaye ve kârlılık laboratuvarı.">
+  <meta name="description" content="İki ortak için ekran kartsız, matematik ve yazılımla çalışan pasifleşebilir gelir sistemleri: 57 ayrıntılı model, karşılaştırma, sermaye ve kârlılık laboratuvarı.">
   <meta property="og:title" content="MAKİNE 2.0 — Dijital Gelir Laboratuvarı">
-  <meta property="og:description" content="Mining mantığını ekran kartsız düşünmek: 30 bağımsız model, 150.000 TL pilot, interaktif karar aracı.">
+  <meta property="og:description" content="Mining mantığını ekran kartsız düşünmek: 57 bağımsız model, 150.000 TL pilot, interaktif karar aracı.">
   <title>MAKİNE 2.0 — Ortaklar için Dijital Gelir Laboratuvarı</title>
-  <link rel="stylesheet" href="./style.css?v=1">
+  <link rel="stylesheet" href="./style.css?v=2">
   <script defer src="./models.js?v=1"></script>
-  <script defer src="./app.js?v=1"></script>
+  <script defer src="./arbitraj-models.js?v=2"></script>
+  <script defer src="./app.js?v=2"></script>
 </head>
 <body>
   <div class="grain" aria-hidden="true"></div>
@@ -18,7 +19,7 @@
   <header class="topbar">
     <a class="logo" href="#ust" aria-label="MAKİNE 2.0 giriş"><span class="logo-square">M<span>.</span></span><span>MAKİNE<small>2.0 / DIGITAL ASSETS LAB</small></span></a>
     <nav aria-label="Bölümler" class="nav">
-      <a href="#fikir">Ana fikir</a><a href="#modeller">30 model</a><a href="#favoriler">İlk 6</a><a href="#hesapla">Hesap makinesi</a><a href="#karar">Ortak kararı</a>
+      <a href="#fikir">Ana fikir</a><a href="#arbitraj">Arbitraj masası</a><a href="#modeller">57 model</a><a href="#favoriler">İlk 6</a><a href="#hesapla">Hesap makinesi</a><a href="#karar">Ortak kararı</a>
     </nav>
     <a class="header-cta" href="#karar">Karar masası <span>↗</span></a>
   </header>
@@ -45,7 +46,7 @@
     </section>
 
     <section class="metricstrip" aria-label="Proje kapsamı">
-      <div><strong>30</strong><span>AYRINTILI SİSTEM</span></div><div><strong>6</strong><span>TEKNOLOJİ ALANI</span></div><div><strong>150K <i>₺</i></strong><span>REFERANS PİLOT</span></div><div><strong>0</strong><span>GARANTİ KÂR İDDİASI</span></div>
+      <div><strong>57</strong><span>AYRINTILI SİSTEM</span></div><div><strong>10</strong><span>STRATEJİ / PAZAR ALANI</span></div><div><strong>150K <i>₺</i></strong><span>REFERANS PİLOT</span></div><div><strong>0</strong><span>GARANTİ KÂR İDDİASI</span></div>
     </section>
 
     <section class="section insight" id="mantik">
@@ -71,24 +72,68 @@
       </div>
     </section>
 
+    <section class="section arbitrage-section" id="arbitraj">
+      <div class="section-top"><span class="section-no">03 / ARBİTRAJ MASASI</span><span class="section-mini">27 YENİ STRATEJİ · 5 PİYASA ALANI</span></div>
+      <div class="section-title"><h2>Kripto, borsa, döviz... <em>Fiyat farkının bütün matematiği.</em></h2><p>İki ortak için özel araştırma masası. 27 ek strateji, mevcut 30 sistemi silmeden kataloğa eklendi. Kiminde doğrudan alım-satım teorisi, kiminde ise yalnızca <strong>ücretli analitik yazılımı</strong> daha gerçekçi.</p></div>
+      <div class="arb-motto"><span class="arb-motto-icon">≠</span><div><strong>Görünen fiyat farkı ≠ garantili arbitraj</strong><p>İki piyasadan ekranda aldığın fiyatı karşılaştırmak yetmez. Aynı anda, doğru miktarda, uygun izinlerle iki bacağı doldurup kapatabiliyor musun? Spread, komisyon, kayma, finansman, funding, transfer, vergi, borçlanma ve zaman farkını hesaba kattığında sonuç nedir? Para buradan kazanılır veya kaybedilir.</p></div></div>
+      <div class="arb-principles">
+        <article><span class="arb-number">01</span><strong>Kripto — CEX / DEX</strong><p>Fiyat, fonlama, spot-vadeli, stablecoin, köprü ve zincir üstü likidite farkları. Hız ve karşı taraf riski yüksektir.</p></article>
+        <article><span class="arb-number">02</span><strong>Borsa — Hisse / ETF / VİOP</strong><p>Endeks-vadeli, hisse çiftleri, ETF-NAV, opsiyon ve vadeler arası farklar. Bazı uygulamalar kurumsal erişim gerektirir.</p></article>
+        <article><span class="arb-number">03</span><strong>FX — Döviz / Altın</strong><p>Çapraz kur, forward-faiz paritesi, ons–gram fiyatı. Banka alış-satış makası teorik kârı silebilir.</p></article>
+        <article><span class="arb-number">04</span><strong>İstatistiksel strateji</strong><p>Kointegrasyon, pair-trading ve piyasa rejimi. Ortalama dönüş bir varsayımdır, gerçek arbitraj garantisi değildir.</p></article>
+      </div>
+      <div class="arb-tabs" role="group" aria-label="Arbitraj alanları">
+        <button type="button" class="arb-tab active" data-arb-cat="all">Tümü</button>
+        <button type="button" class="arb-tab" data-arb-cat="Kripto arbitrajı">Kripto</button>
+        <button type="button" class="arb-tab" data-arb-cat="Borsa & türevler">Borsa / ETF</button>
+        <button type="button" class="arb-tab" data-arb-cat="Döviz & emtia">Döviz / Emtia</button>
+        <button type="button" class="arb-tab" data-arb-cat="İstatistiksel strateji">İstatistiksel</button>
+      </div>
+      <div class="arb-research-list" id="arbitrageRows"></div>
+      <div class="arb-guide">
+        <div class="arb-guide-head"><span>ARAŞTIRMA VE SİMÜLASYON</span><b>Bir fiyat farkının gerçekten para bırakıp bırakmadığını dene</b></div>
+        <div class="arb-calculator">
+          <div class="arb-fields">
+            <label>Örnek senaryo<select id="arbPreset"><option value="funding">Funding / iki bacak</option><option value="cex">Borsalar arası spot fiyat farkı</option><option value="dex">CEX–DEX / zincir üstü</option><option value="etf">ETF / endeks göreli fiyat farkı</option></select></label>
+            <label>İşleme ayrılan nominal (TL)<input id="arbCapital" type="number" min="0" max="100000000" step="5000" value="100000"></label>
+            <label>Brüt fırsat farkı (%)<input id="arbGross" type="number" min="-100" max="100" step="0.05" value="0.8"></label>
+            <label>Tüm bacakların işlem ücreti (%)<input id="arbFees" type="number" min="0" max="100" step="0.01" value="0.25"></label>
+            <label>Toplam spread + kayma (%)<input id="arbSlip" type="number" min="0" max="100" step="0.01" value="0.2"></label>
+            <label>Fonlama / taşıma / borç maliyeti (%)<input id="arbCarry" type="number" min="-100" max="100" step="0.05" value="0.2"></label>
+            <label>Ek risk / hata tamponu (%)<input id="arbBuffer" type="number" min="0" max="100" step="0.05" value="0.2"></label>
+            <label>Sabit transfer, ağ ve diğer gider (TL)<input id="arbFixed" type="number" min="0" max="100000000" step="50" value="150"></label>
+          </div>
+          <div class="arb-output">
+            <span class="arb-caption">İŞLEM BAŞI · TAMAMEN VARSAYIMSAL</span>
+            <div class="arb-big" id="arbNet">—</div>
+            <span class="arb-result-status" id="arbStatus">Hesaplama bekleniyor</span>
+            <div class="arb-output-grid"><div><small>Brüt fırsat</small><b id="arbGrossTL">—</b></div><div><small>Toplam maliyet + tampon</small><b id="arbCostTL">—</b></div><div><small>Net nominal oran</small><b id="arbNetPct">—</b></div><div><small>Başabaş brüt fark</small><b id="arbBreakEven">—</b></div></div>
+            <p class="arb-caution">Bu, bir emir simülatörü veya canlı piyasa verisi değil. Ücretleri toplam işlem nominaline göre seçtiğiniz varsayımsal oranlarla çarpar. İki bacaklı ürünlerde gerçek ücret tabanı farklı olabilir. Dolum garantisi, kuyruk sırası, likidasyon, teminat kaybı, temerrüt, vergi ve operasyon kesintileri tam modellenmez. <strong>Sonuç pozitif olsa da strateji risksiz veya uygulanabilir değildir.</strong></p>
+            <button type="button" class="btn btn-outline" id="arbReset">Varsayımları sıfırla ↺</button>
+          </div>
+        </div>
+      </div>
+      <div class="arb-reality"><strong>100–200 bin TL ile ilk strateji ne?</strong><p>Doğrudan profesyonel arbitrajcılarla milisaniyede yarışmak yerine, önce fiyat/funding karşılaştırmasını <b>abonelik/API ürünü</b> haline getirme ihtimalini ve kendi hesabımıza yalnız maliyetli, ileriye dönük sanal senaryoları araştırırız. ETF oluşturma/itfa gibi işlemler çoğu durumda yalnız yetkili katılımcılara açık. Staking/validator, protokol getirisi olabilir ama doğrudan arbitraj değildir.</p></div>
+    </section>
+
     <section class="section catalogue" id="modeller">
-      <div class="section-top"><span class="section-no">03 / MODEL ATLASI</span><span class="section-mini">TAM KATALOĞU AÇ</span></div>
-      <div class="section-title"><h2>30 bağımsız gelir makinesi. <em>Hangisi bizim?</em></h2><p>Her kartın içinde “bu ne?”, “bize kim para verir?”, “nasıl kurulur?”, “neden batabilir?”, “hangi şartta vazgeçilir?” ve örnek matematik var. Ayrı sektöre veya aynı platforma mecbur değiller.</p></div>
+      <div class="section-top"><span class="section-no">04 / MODEL ATLASI</span><span class="section-mini">TAM KATALOĞU AÇ</span></div>
+      <div class="section-title"><h2>57 bağımsız gelir makinesi. <em>Hangisi bizim?</em></h2><p>Kripto ve borsa arbitrajı dahil yeni 27 model de eklendi. Her kartın içinde “bu ne?”, “bize kim para verir?”, “nasıl kurulur?”, “neden batabilir?”, “hangi şartta vazgeçilir?” ve örnek matematik var. Ayrı sektöre veya aynı platforma mecbur değiller.</p></div>
       <div class="filterbar"><label class="searchbox"><span>⌕</span><input id="modelSearch" placeholder="Model, sektör, teknoloji ara..." aria-label="Modeller içinde ara"></label><label class="selectwrap"><span>SEKTÖR</span><select id="categoryFilter"><option value="all">Tüm alanlar</option></select></label><label class="selectwrap"><span>ÖNCELİK</span><select id="tierFilter"><option value="all">Hepsi</option><option value="A">Önce bunu incele</option><option value="B">Araştırılabilir</option><option value="C">Şimdilik ele</option></select></label><label class="selectwrap"><span>SIRALA</span><select id="sortFilter"><option value="priority">Bizim için uygunluk</option><option value="capital">Az sermaye</option><option value="ops">Az operasyon</option><option value="auto">Otomasyon</option><option value="risk">Daha az risk</option></select></label></div>
-      <div class="catalogue-toolbar"><span id="resultCount">30 model</span><span>☆ Listeye kaydet · ⇄ Karşılaştır · ↗ Detay</span></div>
+      <div class="catalogue-toolbar"><span id="resultCount">57 model</span><span>☆ Listeye kaydet · ⇄ Karşılaştır · ↗ Detay</span></div>
       <div id="modelGrid" class="model-grid" aria-live="polite"></div>
       <div class="showmore"><button id="showAll" class="btn btn-outline" type="button">Diğer modelleri de göster ↓</button></div>
     </section>
 
     <section class="section curated" id="favoriler">
-      <div class="section-top"><span class="section-no">04 / EDİTÖRÜN KISA LİSTESİ</span><span class="section-mini">100–200 BİN TL · YAZILIM ODAKLI</span></div>
+      <div class="section-top"><span class="section-no">05 / EDİTÖRÜN KISA LİSTESİ</span><span class="section-mini">100–200 BİN TL · YAZILIM ODAKLI</span></div>
       <div class="section-title"><h2>Ben olsam ilk etapta <em>bu altısını masaya yatırırım.</em></h2><p>Günlük müşteri görüşmesi, stok, paket, kurye veya pahalı donanım gerektirmeyen; teknik avantajla farklılaşabilecek adaylar.</p></div>
       <div class="top-grid" id="featuredGrid"></div>
       <div class="curated-note"><strong>Neden finansal arbitraj ilk 6'da değil?</strong><span>Müşterisiz çalışabilmesi cazip, ancak profesyonel rekabet, küçük sermaye, komisyon ve tasfiye riski nedeniyle önce yalnız matematiksel gözlem laboratuvarı olarak mantıklı.</span></div>
     </section>
 
     <section class="section machine" id="hesapla">
-      <div class="section-top"><span class="section-no">05 / MALİYET LABORATUVARI</span><span class="section-mini">RAKAMLARI OYNATIN</span></div>
+      <div class="section-top"><span class="section-no">06 / MALİYET LABORATUVARI</span><span class="section-mini">RAKAMLARI OYNATIN</span></div>
       <div class="section-title"><h2>Para gerçekten nereden kalır? <em>Hesaplayalım.</em></h2><p>Buradaki her rakam sizin değiştirebildiğiniz varsayımdır. Güncel pazar getirisi, yatırım tavsiyesi veya garanti kazanç değildir. Vergi ve kurucuların emeği dahil değildir.</p></div>
       <div class="calculator">
         <div class="calc-controls">
@@ -110,7 +155,7 @@
     </section>
 
     <section class="section capital" id="butce">
-      <div class="section-top"><span class="section-no">06 / SERMAYE DİSİPLİNİ</span><span class="section-mini">NAKİT TÜKETMEYELİM</span></div>
+      <div class="section-top"><span class="section-no">07 / SERMAYE DİSİPLİNİ</span><span class="section-mini">NAKİT TÜKETMEYELİM</span></div>
       <div class="section-title"><h2>200 binimiz olsa bile <em>200 bini harcamayacağız.</em></h2><p>Önce talebi, sonra teknolojiyi kanıtlamak. Büyük bahis yerine küçük ve geri dönüşü ölçülebilir deneyler.</p></div>
       <div class="budget-switch"><button class="budget-choice" data-budget="100000" type="button">100.000 TL</button><button class="budget-choice active" data-budget="150000" type="button">150.000 TL</button><button class="budget-choice" data-budget="200000" type="button">200.000 TL</button></div>
       <div class="budget-layout"><div class="budget-bar" id="budgetBar" aria-label="Bütçe dağılımı"></div><div class="budget-items" id="budgetItems"></div></div>
@@ -118,14 +163,14 @@
     </section>
 
     <section class="section execution" id="plan">
-      <div class="section-top"><span class="section-no">07 / 60 GÜNDE DOĞRULA</span><span class="section-mini">SÖZ DEĞİL, KANIT</span></div>
+      <div class="section-top"><span class="section-no">08 / 60 GÜNDE DOĞRULA</span><span class="section-mini">SÖZ DEĞİL, KANIT</span></div>
       <div class="section-title"><h2>İlk iki ayın hedefi para yağdırmak değil; <em>çalışan ekonomik makineyi bulmak.</em></h2><p>Önce yalnız 2 modeli aynı anda yürütürüz. Daha fazlası ölçümü bozar.</p></div>
       <div class="timeline"><article><span>GÜN 01–07</span><h3>İki modeli seç</h3><p>Teknoloji uygulanabilirliği, kaynak kullanım hakkı, potansiyel müşteri ve gerçek fiyat kanıtını kontrol et. Her model için net kapatma şartı yaz.</p></article><article><span>GÜN 08–21</span><h3>Minimum ürün ve landing</h3><p>Bir API endpoint'i veya tek iş yapan uygulamayı aç; ödeme için hazır entegrasyon, kullanım kotası ve otomatik teslimatı kur.</p></article><article><span>GÜN 22–40</span><h3>İlk gerçek ödeme deneyi</h3><p>Organik dağıtım, eklenti mağazası veya düşük bütçeli reklam. İlgi beyanını değil ödeme ve kullanım tekrarını ölç.</p></article><article><span>GÜN 41–60</span><h3>Ölçekle / düzelt / kapat</h3><p>Net katkı, destek ihtiyacı, edinme maliyeti ve kullanım sürekliliği pozitifse devam. Değilse otomatik öldürme kararı.</p></article></div>
       <div class="failure-grid"><article><b>YAZILIM KAPATMA KURALI</b><p>Ödemeye istekli en az birkaç gerçek müşteri ve tekrarlı kullanım oluşmuyorsa özellik biriktirmek yerine ürün/niş değiştir.</p></article><article><b>ARBITRAJ KAPATMA KURALI</b><p>Spread maliyetler sonrası tekrarlanmıyorsa, veri gecikmesi veya hedge riski kontrol edilemiyorsa gerçek para kullanma.</p></article><article><b>HESAPLAMA KAPATMA KURALI</b><p>Her iş büyüdükçe maliyet de gelirden hızlı artıyorsa “ölçek” değil daha büyük zarar üretiyoruz demektir.</p></article></div>
     </section>
 
     <section class="section decisions" id="karar">
-      <div class="section-top"><span class="section-no">08 / ORTAK KARARI</span><span class="section-mini">İKİMİZ DE FİKRİMİZİ YAZALIM</span></div>
+      <div class="section-top"><span class="section-no">09 / ORTAK KARARI</span><span class="section-mini">İKİMİZ DE FİKRİMİZİ YAZALIM</span></div>
       <div class="section-title"><h2>Artık fikir tartışmak yerine <em>birlikte eleme yapalım.</em></h2><p>Beğendiğiniz fikirleri katalogdan ☆ ile kaydedin. Birini detaylı okuyun, 2–3 modeli ⇄ karşılaştırın. Burada iki ortağın karar notlarını hazırlayın.</p></div>
       <div class="decision-layout"><div class="decision-box">
         <h3>Benim kısa listem <span id="shortlistCount">0</span></h3><div id="shortlistRows" class="shortlist-rows"><p class="muted">Henüz model seçilmedi.</p></div>
@@ -144,7 +189,7 @@
       <a href="#karar" class="btn btn-primary">İlk iki sistemi seçelim ↗</a>
     </section>
 
-    <section class="section sources" id="kaynaklar"><div class="section-top"><span class="section-no">09 / KAYNAK VE SINIRLAR</span><span class="section-mini">DİKKATLE OKU</span></div><h2>Bu bir iş fikri sunumu, <em>getiri vaadi değil.</em></h2><p>Kaynaklar teknik/hukuki kapsamı anlamak içindir. Sitedeki örnek fiyat, kâr, müşteri ve bütçe sayıları <strong>bilerek oluşturulmuş senaryolardır</strong>; herhangi bir satış, yatırım veya canlı ölçüm sonucu değildir.</p><div class="source-grid"><a href="https://ethereum.org/staking/solo/" target="_blank" rel="noopener"><b>Ethereum / Solo Staking</b><span>Doğrulayıcı koşulları, 32 ETH ve işletim riski ↗</span></a><a href="https://ethereum.org/staking/pools/" target="_blank" rel="noopener"><b>Ethereum / Pooled Staking</b><span>Havuzlar ve aracı sözleşme riskleri ↗</span></a><a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-interruptions.html" target="_blank" rel="noopener"><b>AWS / Spot Interruption</b><span>Ucuz bulut kapasitesinin kesintiye uğrama riski ↗</span></a><a href="https://docs.github.com/en/pages" target="_blank" rel="noopener"><b>GitHub Pages</b><span>Bu statik sunumun yayın altyapısı ↗</span></a><a href="https://www.spk.gov.tr/" target="_blank" rel="noopener"><b>SPK</b><span>Türkiye'de kripto ve sermaye piyasası düzenlemeleri ↗</span></a><a href="https://www.tcmb.gov.tr/" target="_blank" rel="noopener"><b>TCMB</b><span>Ödeme hizmetleri düzenlemelerine ilişkin bilgi ↗</span></a></div><p class="public-note">Bu sayfa normal GitHub Pages ile yayınlandığında bağlantıyı bilenler dışında da internette erişilebilir olabilir. Bu nedenle şifre, müşteri verisi, cüzdan anahtarı veya gizli sözleşme içermiyor.</p></section>
+    <section class="section sources" id="kaynaklar"><div class="section-top"><span class="section-no">10 / KAYNAK VE SINIRLAR</span><span class="section-mini">DİKKATLE OKU</span></div><h2>Bu bir iş fikri sunumu, <em>getiri vaadi değil.</em></h2><p>Kaynaklar teknik/hukuki kapsamı anlamak içindir. Sitedeki örnek fiyat, kâr, müşteri ve bütçe sayıları <strong>bilerek oluşturulmuş senaryolardır</strong>; herhangi bir satış, yatırım veya canlı ölçüm sonucu değildir.</p><div class="source-grid"><a href="https://www.binance.com/en/support/faq/detail/360033525031" target="_blank" rel="noopener"><b>Binance / Funding Rates</b><span>Perpetual fonlamanın yönü, aralıkları ve nominal hesap ↗</span></a><a href="https://www.okx.com/en-us/help/perps-funding-fee-mechanism" target="_blank" rel="noopener"><b>OKX / Funding Mechanism</b><span>Fonlama, pozisyon değeri ve dönem farklılıkları ↗</span></a><a href="https://www.investor.gov/introduction-investing/general-resources/news-alerts/alerts-bulletins-24" target="_blank" rel="noopener"><b>Investor.gov / ETF</b><span>ETF NAV, fiyat primi ve yetkili katılımcı sınırları ↗</span></a><a href="https://ethereum.org/staking/solo/" target="_blank" rel="noopener"><b>Ethereum / Solo Staking</b><span>Doğrulayıcı koşulları, 32 ETH ve işletim riski ↗</span></a><a href="https://ethereum.org/staking/pools/" target="_blank" rel="noopener"><b>Ethereum / Pooled Staking</b><span>Havuzlar ve aracı sözleşme riskleri ↗</span></a><a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-interruptions.html" target="_blank" rel="noopener"><b>AWS / Spot Interruption</b><span>Ucuz bulut kapasitesinin kesintiye uğrama riski ↗</span></a><a href="https://docs.github.com/en/pages" target="_blank" rel="noopener"><b>GitHub Pages</b><span>Bu statik sunumun yayın altyapısı ↗</span></a><a href="https://www.spk.gov.tr/" target="_blank" rel="noopener"><b>SPK</b><span>Türkiye'de kripto ve sermaye piyasası düzenlemeleri ↗</span></a><a href="https://www.tcmb.gov.tr/" target="_blank" rel="noopener"><b>TCMB</b><span>Ödeme hizmetleri düzenlemelerine ilişkin bilgi ↗</span></a></div><p class="public-note">Bu sayfa normal GitHub Pages ile yayınlandığında bağlantıyı bilenler dışında da internette erişilebilir olabilir. Bu nedenle şifre, müşteri verisi, cüzdan anahtarı veya gizli sözleşme içermiyor.</p></section>
   </main>
   <footer><div class="footer-main"><a class="logo" href="#ust"><span class="logo-square">M<span>.</span></span><span>MAKİNE<small>2.0 / DIGITAL ASSETS LAB</small></span></a><p>İki ortak için düşünme, karşılaştırma ve yatırım eleme masası.</p></div><div class="footer-right"><span>© 2026 · ORTAK ÇALIŞMA BELGESİ</span><a href="#ust">YUKARI DÖN ↑</a></div></footer>
 
