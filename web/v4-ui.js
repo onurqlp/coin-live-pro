@@ -252,6 +252,9 @@
    ];
    for(const [id,items,empty] of groups)$(id).innerHTML=items.length?items.map(card).join(''):
      '<div class="v4Empty">'+safe(stale?'Merkezi veri eski; yeni aşama/işlem uygunluğu gösterilmez.':empty)+'</div>';
+   const priorityShown=!stale&&Boolean((r.spotlight||[]).length||(r.motion||[]).length);
+   if($('v4PriorityArea'))$('v4PriorityArea').hidden=!priorityShown;
+   if($('v4PriorityEmpty'))$('v4PriorityEmpty').hidden=priorityShown;
    $('v4WatchCount').textContent=r.counts?.watch??'—';
    $('v4MotionCount').textContent=stale?'—':r.counts?.motion??'—';
    $('v4SpotCount').textContent=stale?'—':r.counts?.spotlight??'—';
