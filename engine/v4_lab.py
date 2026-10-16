@@ -50,6 +50,7 @@ def compile_report(lifecycle,paper,shadow,now_ms):
             'paper':{'created':len(r),'closed':len(resolved),
                      'open':sum(x['status']=='FILLED' for x in r),
                      'no_fill':sum(x['status']=='NO_FILL' for x in r),
+                     'risk_blocked':sum(x['status']=='RISK_BLOCKED' for x in r),
                      'realized_net_usdt_ex_funding':round(sum(x.get('realized_pnl_usdt',0) for x in r),4),
                      'funding_state':'UNKNOWN_NOT_MODELED'},
             'sample_quality':'INSUFFICIENT_SAMPLE' if len(terminal)<30 else 'OBSERVATIONAL_ONLY',

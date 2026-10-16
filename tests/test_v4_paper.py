@@ -151,7 +151,7 @@ class TestV4Paper(unittest.TestCase):
     fill=candle(T+paper.BAR)
     log,_=paper.advance(log,{'events':[]},MARKET,T+600000+2000,
          {'BTCUSDT':[fill]},{'BTCUSDT':SPEC},POL)
-    self.assertEqual(log['orders']['A']['status'],'NO_FILL')
+    self.assertEqual(log['orders']['A']['status'],'RISK_BLOCKED')
     self.assertEqual(log['orders']['A']['no_fill_reason'],'DAILY_NEW_RISK_BUDGET')
 
  def test_no_negative_or_invented_free_margin(self):
