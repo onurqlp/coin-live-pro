@@ -155,12 +155,16 @@ def spark_from_mtf(x,market,one_minute=None):
     if threshold is None or threshold<=0:return None
     beyond_pct=sign*(price/threshold-1)*100
     breakout=beyond_pct>0
+    last_closed_price=mtf.swing.num(h4.get('close'))
+    closed_breakout=(last_closed_price is not None and last_closed_price>0 and
+                     sign*(last_closed_price/threshold-1)*100>0)
     extended=beyond_pct>max(2.0,0.9*(atr or 0))
-    if not breakout or extended:confirmed=False
+    if not breakout or not closed_breakout or extended:confirmed=False
     stage='CONFIRMED' if confirmed else 'WATCH'
     gating=[]
     if not weekly:gating.append('WEEKLY_NOT_ALIGNED')
     if not breakout:gating.append('BREAKOUT_NOT_CROSSED')
+    if not closed_breakout:gating.append('4H_CLOSED_BREAKOUT_MISSING')
     if extended:gating.append('BREAKOUT_OVEREXTENDED')
     if not market_ok:gating.append('LIQUIDITY_OR_SPREAD_UNVERIFIED')
     if not (h1ok and m15ok and m5ok):gating.append('TIMING_NOT_CONFIRMED')
@@ -183,6 +187,8 @@ def spark_from_mtf(x,market,one_minute=None):
         anomaly_flags.append('4H_VOLUME_WICK_SPIKE')
     if (mtf.swing.num(m15.get('volume_ratio_20')) or 0)>=4:
         anomaly_flags.append('15M_EXTREME_CLOSED_VOLUME')
+    if h4.get('fakeout_up_on_close') or h4.get('fakeout_down_on_close'):
+        anomaly_flags.append('4H_FALSE_BREAKOUT_CLOSED_BACK_INSIDE')
     if (h4.get('wick_rejections_8') or 0)>=3:
         anomaly_flags.append('4H_FAKEOUT_WICK_RISK')
     symbol=x['symbol']
@@ -198,12 +204,13 @@ def spark_from_mtf(x,market,one_minute=None):
         'reason_codes':x.get('reason_codes',[])[:12],
         'quality':'VERIFIED_CLOSED_1D_4H','setup_type':x.get('setup_type'),
         'price':price,'threshold':threshold,'stop':stop,'targets':targets,
-        'entry_timing':'EXTENDED_WAIT' if extended else 'PRESSURE_WATCH' if pressure else 'BREAKOUT_WAIT' if not breakout else
+        'entry_timing':'EXTENDED_WAIT' if extended else 'PRESSURE_WATCH' if pressure else 'BREAKOUT_WAIT' if not breakout else 'WAIT_4H_CLOSE' if not closed_breakout else
                        'STRICT_CONFIRMED' if confirmed else 'STANDARD_WATCH',
         'strict_gate_reasons':gating,'filter_policy':POLICY,
         'technicals':technicals,'pressure_watch':bool(pressure),
         'anomaly_flags':list(dict.fromkeys(anomaly_flags))[:14],
         'extended_from_4h_breakout_pct':round(beyond_pct,3),
+        'closed_4h_breakout':bool(closed_breakout),
         'model_version':MODEL,'observed_at_utc':UTC.isoformat(timespec='seconds'),
         'main_candle_at':last4,'market_structure_flags':x.get('structure_flags',[])[:9],
         'confirmation':{'1W':bool(weekly),'1D':True,'4H':True,
