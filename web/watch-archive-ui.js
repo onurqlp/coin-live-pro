@@ -88,7 +88,7 @@ el('watchArchiveRows')?.addEventListener('click',e=>{
  const b=e.target.closest('[data-archive-chart]');if(!b)return;
  const symbol=b.dataset.archiveChart;
  const period=el('watchArchivePeriod')?.value||'1W';
- const tf={1M:'1m',5M:'5m',15M:'15m',1H:'1H',4H:'4H',24H:'1D',3D:'1D',1W:'1W'}[period]||'4H';
+ const tf={'1M':'1m','5M':'5m','15M':'15m','1H':'1H','4H':'4H','24H':'1D','3D':'1D','1W':'1W'}[period]||'4H';
  if(typeof window.CoinLiveSelectSpark==='function'){
    window.location.hash='radar';
    window.CoinLiveSelectSpark(symbol,tf,false);
