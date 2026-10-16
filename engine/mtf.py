@@ -110,6 +110,11 @@ def state(bars,frame):
     sample=c[-20:]
     width=4*statistics.pstdev(sample)/statistics.mean(sample)*100
     earlier=c[max(0,len(c)-8)]
+    # Breakout levels are from bars preceding the most recent CLOSED bar.
+    # Do not use a still-forming or future bar as a resistance/support level.
+    previous_eight=bars[-9:-1]
+    breakout_high=round(max(x['h'] for x in previous_eight),12)
+    breakout_low=round(min(x['l'] for x in previous_eight),12)
     previous=[float(x.get('v',0)) for x in bars[-21:-1]]
     average_volume=statistics.mean(previous) if previous else 0
     relative_volume=round(float(bars[-1].get('v',0))/average_volume,3) if average_volume>0 else None
@@ -125,7 +130,8 @@ def state(bars,frame):
             'close':c[-1],'last_candle_utc':dt.datetime.fromtimestamp(bars[-1]['t']/1000,dt.timezone.utc).isoformat(),
             'ema_delta_pct':round(delta,3),'atr_pct':round(v/c[-1]*100,3),
             'bb_width_pct':round(width,3),'move_7bars_pct':round((c[-1]/earlier-1)*100,3),
-            'volume_ratio_20':relative_volume,'wick_rejections_8':rejection}
+            'volume_ratio_20':relative_volume,'wick_rejections_8':rejection,
+            'breakout_high_prev8':breakout_high,'breakout_low_prev8':breakout_low}
 
 def score_part(st,side):
     if st['quality']!='CLOSED_CONFIRMED':return None
@@ -139,8 +145,13 @@ def assess(m,all_frames,prior,derivatives_data=None):
     last_quote=float(m['price'])
     # A radar's 15m direction is never allowed to override the 4H + 1D trend.
     # AUTO means a coin was found by volume/rotation rather than the micro radar.
-    if prior=='AUTO':
-        d,h=tf['1D'],tf['4H']
+    d,h=tf['1D'],tf['4H']
+    aligned_core=(d.get('quality')=='CLOSED_CONFIRMED' and h.get('quality')=='CLOSED_CONFIRMED'
+                  and d.get('trend')==h.get('trend') and d.get('trend') in ('UP','DOWN'))
+    if aligned_core:
+        # A 15m legacy radar suggestion cannot veto or reverse the DAILY/4H thesis.
+        prior='LONG' if d['trend']=='UP' else 'SHORT'
+    elif prior=='AUTO':
         if d['quality']=='CLOSED_CONFIRMED' and d['trend'] in ('UP','DOWN'):
             prior='LONG' if d['trend']=='UP' else 'SHORT'
         elif h['quality']=='CLOSED_CONFIRMED' and h['trend'] in ('UP','DOWN'):
