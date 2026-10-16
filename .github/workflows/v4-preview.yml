@@ -1,0 +1,95 @@
+name: COIN.LIVE PRO V4 — Isolated Live Read-Only Preview
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - v4-lifecycle-desk-20261016
+    paths:
+      - '.github/workflows/v4-preview.yml'
+permissions:
+  contents: read
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v4-lifecycle-desk-20261016
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Check branch does NOT publish production main
+        run: |
+          python3 - <<'PY'
+          text=open('.github/workflows/market.yml').read()
+          assert '  push:\n    branches:\n      - main\n' in text
+          PY
+      - name: Run real read-only OKX pipeline in throwaway runner only
+        run: |
+          set -euo pipefail
+          python3 engine/collector.py
+          python3 engine/mtf.py
+          python3 engine/spark.py
+          python3 engine/v4_oi.py
+          python3 engine/v4_lifecycle.py
+          python3 engine/v4_paper.py
+          python3 engine/v4_shadow.py
+          python3 engine/v4_lab.py
+          python3 engine/forward.py
+          python3 engine/paper.py
+          python3 engine/health.py
+          python3 engine/v4_publication.py
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('web/data')
+          data={k:json.loads((p/(k+'.json')).read_text()) for k in
+             ('v4-manifest','v4-radar','v4-paper','v4-shadow','v4-lab')}
+          sid=data['v4-manifest']['scan_id']
+          assert data['v4-manifest']['publication_valid']
+          assert all(data[k]['scan_id']==sid for k in ('v4-radar','v4-paper','v4-shadow','v4-lab'))
+          assert data['v4-paper']['starting_balance_usdt']==10000
+          assert data['v4-paper']['legacy_v3_balance_included']==False
+          assert not data['v4-paper']['open_positions'], 'First-time V4 paper must not fabricate retro fills'
+          print('V4_PREVIEW_DATA_PASS',sid,data['v4-radar']['counts'])
+          PY
+      - name: Chromium renders native three-stage and paper workspace
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8765 --directory web >/tmp/preview-server.log 2>&1 &
+          sleep 2
+          CHROME=$(command -v google-chrome || command -v chromium || true)
+          test -n "$CHROME"
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --virtual-time-budget=18000 --dump-dom http://127.0.0.1:8765/ > /tmp/v4-dom.html 2>/tmp/v4-chrome.log
+          python3 - <<'PY'
+          import re
+          doc=open('/tmp/v4-dom.html').read()
+          for id in ('v4Spotlight','v4Motion','v4Watch','v4Status'):
+              m=re.search(r'id="'+id+r'"[^>]*>(.*?)</',doc,re.S)
+              assert m and m.group(1).strip(),id+' failed to render'
+          assert 'V4 veri kontrolü:' not in doc,'V4 manifest fetch or hash validation failed'
+          assert 'id="v4PaperKpis"' in doc
+          print('V4_CHROMIUM_RENDER_OK')
+          PY
+          for pair in '1366,900:desktop' '390,844:mobile' '320,740:smallmobile'; do
+            dimensions=${pair%:*}
+            label=${pair#*:}
+            "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size="$dimensions" --virtual-time-budget=15000 --screenshot="/tmp/v4-$label.png" "http://127.0.0.1:8765/#portfoy" >/dev/null 2>/dev/null
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v4-isolated-read-only-preview
+          path: |
+            /tmp/v4-dom.html
+            /tmp/v4-chrome.log
+            /tmp/v4-desktop.png
+            /tmp/v4-mobile.png
+            /tmp/v4-smallmobile.png
+            web/data/v4-manifest.json
+            web/data/v4-radar.json
+            web/data/v4-paper.json
+            web/data/v4-shadow.json
+            web/data/v4-lab.json
+          retention-days: 7
