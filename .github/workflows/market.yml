@@ -9,6 +9,8 @@ on:
       - '.github/workflows/market.yml'
 permissions:
   contents: write
+  pages: write
+  id-token: write
 concurrency:
   group: coin-live-pro-market
   cancel-in-progress: false
@@ -16,6 +18,9 @@ jobs:
   collect:
     runs-on: ubuntu-latest
     timeout-minutes: 8
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -58,3 +63,14 @@ jobs:
             sleep "$((try*3))"
           done
           exit 1
+      # GITHUB_TOKEN pushes don't trigger downstream push workflows.
+      # Publish the verified data and site directly from this scheduled run.
+      - name: Configure existing Pages site
+        uses: actions/configure-pages@v5
+      - name: Upload fresh web site and market archives
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: web
+      - name: Publish refreshed COIN.LIVE PRO site
+        id: deployment
+        uses: actions/deploy-pages@v4
