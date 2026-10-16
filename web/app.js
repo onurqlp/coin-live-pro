@@ -159,8 +159,9 @@ function renderRadar(){
      confirmed?'TEYİT':x.pressure_watch?'BİRİKİM İZLE':'İZLE';
    const tech=x.technicals||{};
    const quant=[['RSI4H',tech.rsi_4h],['ADX4H',tech.adx_4h],
-                ['MACD',tech.macd_hist_4h_pct],['RVOL4H',tech.volume_ratio_4h]]
-        .filter(([,n])=>Number.isFinite(Number(n)))
+                ['MACD',tech.macd_hist_4h_pct],['RVOL4H',tech.volume_ratio_4h],
+                ['OIΔ%',tech.open_interest_change_pct],['BOOK5',tech.book_bid_ask_top5_ratio]]
+        .filter(([,n])=>n!==null&&n!==undefined&&Number.isFinite(Number(n)))
         .map(([label,n])=>label+' '+Number(n).toFixed(2)).join(' · ');
    const first=Date.parse(x.first_seen_at||x.observed_at_utc);
    const last=Date.parse(x.last_evaluated_at||x.observed_at_utc);
