@@ -1,0 +1,26 @@
+name: COIN.LIVE PRO — Quality
+on:
+  push:
+    paths:
+      - 'engine/**'
+      - 'web/**'
+      - 'tests/**'
+      - '.github/workflows/quality.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: node --check web/app.js
+      - run: node tests/verify.mjs
+      - run: python3 -m unittest discover -s tests -v
+      - run: python3 -m py_compile engine/collector.py

@@ -1,0 +1,13 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const html=fs.readFileSync('web/index.html','utf8');
+const code=fs.readFileSync('web/app.js','utf8');
+new Function(code);
+const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(x=>x[1]);
+assert.equal(ids.length,new Set(ids).size,'DOM IDs must be unique');
+const used=[...code.matchAll(/\$\('([^']+)'\)/g)].map(x=>x[1]);
+assert.deepEqual([...new Set(used)].filter(x=>!ids.includes(x)),[],'All bound UI elements must exist');
+for(const s of ['market','radar','history','reports','LONG','SHORT','CONFIRMED','WATCH','candleChart'])assert.ok((code+html).includes(s),s);
+assert.ok(html.includes('data-window="7"')&&html.includes('data-window="14"'));
+assert.ok(!html.includes('paperTrade'),'No paper trading desk');
+console.log('PASS: responsive dashboard contract, 7/14 history, chart selector, dual-side radar');
