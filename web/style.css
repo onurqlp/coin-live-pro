@@ -127,3 +127,21 @@ body[data-route="radar"] .hero{margin-top:18px}
   .hero{padding:16px}
 }
 @media(prefers-reduced-motion:reduce){.workspaceView{animation:none}.workspaceNav a{transition:none}}
+
+
+/* 4H + 1D primary 1–7-day swing review and structure anomaly risk */
+.swingStatus{border:1px solid #3c5471;background:#152a3e;border-radius:9px;padding:9px 11px;margin:10px 0 8px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.swingStatus strong{font-size:11px;letter-spacing:.18px;color:#c3ddf8}
+.swingStatus span{font-size:10px;color:#b8c9e1}
+.swingStatus.ready{border-color:#347c65;background:#11352d}
+.swingStatus.ready strong{color:#77e5bc}
+.swingStatus.waiting{border-color:#8d7747;background:#372e1b}
+.swingStatus.waiting strong{color:#f4d68f}
+.swingStatus.blocked{border-color:#914a57;background:#3d2029}
+.swingStatus.blocked strong{color:#ff9caa}
+.riskDetails{margin-bottom:10px;border:1px solid #304456;border-radius:9px;padding:9px 11px;background:#0d2031;line-height:1.45}
+.riskDetails strong{display:block;color:#d1e3f4;font-size:11px;margin-bottom:5px}
+.riskDetails div{font-size:11px;color:#b5c8db;margin:3px 0 5px}
+.riskDetails small{font-size:10px;display:block;color:#87accb}
+.tfGrid .frameCell.primaryTf{background:#23405c;border:1px solid #4d7090}
+@media(max-width:620px){.swingStatus{align-items:flex-start;flex-direction:column}.riskDetails{padding:9px}}
