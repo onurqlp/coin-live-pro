@@ -15,6 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 4
     steps:
+      - name: Allow parallel Pages deployment to finish
+        run: sleep 30
       - name: Verify deployed root and all four market JSON files
         shell: bash
         run: |
