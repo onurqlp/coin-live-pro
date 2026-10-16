@@ -49,7 +49,7 @@ class TestOneToSevenDaySwing(unittest.TestCase):
         self.assertIn('EXTREME_FUNDING_RATE',x['structure_flags'])
         self.assertIn('4H_REPEATED_LONG_WICKS',x['structure_flags'])
         self.assertLessEqual(swing.gate_score(100,x),39)
-        self.assertIn('not proof',x['risk_method'])
+        self.assertIn('not proof',x['risk_method'].lower())
     def test_missing_funding_and_oi_explicitly_unknown(self):
         x=swing.swing_context(self.market(),self.frames(),'LONG')
         self.assertIsNone(x['funding_rate'])
