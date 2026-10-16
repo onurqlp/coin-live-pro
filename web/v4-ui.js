@@ -12,7 +12,7 @@
  SHORT_BREAKDOWN:'SHORT / destek kırılımı'};
  const why={HTF_ALIGNED:'1D+4H yön uyumu',LOCAL_CLOSED_LEVEL:'Yerel kapanışla seviye aşıldı',
  LOCAL_LEVEL_WAIT:'Yerel kırılım bekleniyor',WAIT_4H_CLOSE:'Kapanmış 4H kırılımı bekleniyor',
- '4H_CLOSED_BREAKOUT':'4H kırılımı kapandı',4H_VOLUME_EXPANSION:'4H hacmi arttı',
+ '4H_CLOSED_BREAKOUT':'4H kırılımı kapandı','4H_VOLUME_EXPANSION':'4H hacmi arttı',
  CLOSED_LOCAL_BREAK:'Kapanmış yerel kırılım',BREAKOUT_SEEN:'İlk kırılım görüldü',
  RETEST_SEQUENCE_UNVERIFIED:'Retest mum dizisi kanıtlanmadı',
  RSI_EXTREME:'RSI uç bölgede',MACD_HIST_TURN:'MACD histogramı dönüyor',
