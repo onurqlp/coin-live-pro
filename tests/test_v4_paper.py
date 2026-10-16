@@ -146,7 +146,7 @@ class TestV4Paper(unittest.TestCase):
     for i in range(4):
         log['orders']['old'+str(i)]={
             'status':'CLOSED','symbol':'C'+str(i)+'USDT','initial_risk_usdt':50.,
-            'filled_day':filled_day}
+            'filled_day':filled_day,'created_at_ms':T-3600000}
     log['orders']['A']['created_at_ms']=T
     fill=candle(T+paper.BAR)
     log,_=paper.advance(log,{'events':[]},MARKET,T+600000+2000,
