@@ -147,3 +147,57 @@ body[data-route="radar"] .hero{margin-top:18px}
 @media(max-width:620px){.swingStatus{align-items:flex-start;flex-direction:column}.riskDetails{padding:9px}}
 
 .strategyTag{display:block;font-size:9px;margin-top:3px;letter-spacing:.18px;color:#8db6d8;font-weight:700}
+
+
+/* 2.3 — daily/4H-first swing radar with responsive, shared native-TF chart */
+.workspaceView[data-view="radar"] .hero{padding:16px 20px;gap:15px;margin-top:14px}
+.workspaceView[data-view="radar"] .hero h1{font-size:clamp(24px,2.6vw,35px);margin:4px 0 7px}
+.workspaceView[data-view="radar"] .heroStats>div{padding:9px 13px}
+.workspaceView[data-view="radar"] .heroStats strong{font-size:20px}
+.radarColumns{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:13px;align-items:stretch;margin-top:13px}
+.radarColumns>.radarLayout,.radarColumns>.radarChartHost{min-width:0}
+.radarColumns .panel{margin-top:0}
+.radarColumns .radarChartHost{scroll-margin-top:70px}
+.radarColumns #chartPanel{height:100%}
+.radarColumns .radarRows{max-height:460px;overflow:auto}
+.radarColumns .radarLine{
+  display:grid;width:100%;text-align:left;font:inherit;color:inherit;
+  background:transparent;border:0;border-bottom:1px solid #253953;
+  grid-template-columns:31px minmax(0,1fr) auto;gap:10px;
+  padding:12px 13px;cursor:pointer;
+}
+.radarLine:focus-visible{outline:2px solid #8bc4f4;outline-offset:-2px}
+.radarLine.selected,.radarLine[aria-pressed="true"]{background:#1f3b53!important;box-shadow:inset 3px 0 0 #82c6fa}
+.radarLine:hover{background:#1b3247}
+.radarLine .sparkMain{display:flex;flex-direction:column;gap:6px;min-width:0}
+.radarLine .reason{white-space:normal;line-height:1.45}
+.radarLine .reason strong{font-size:11px;color:#bfe5ff}
+.timingRow{display:flex;flex-wrap:wrap;gap:4px}
+.timing{font-size:10px;color:#8ba3bc;border:1px solid #30455b;border-radius:5px;padding:2px 5px;white-space:nowrap}
+.timing.hit{color:#73e1b6;background:#16382f;border-color:#287258}
+.radarLine .viewChart{color:#a6ddff;letter-spacing:.1px;margin-top:6px}
+.radarColumns .chartControls{padding:9px 12px;flex-wrap:wrap;gap:7px}
+.radarColumns .chartControls label{font-size:10px}
+.radarColumns .chartControls select{padding:8px 9px;max-width:42%;min-width:0}
+.radarColumns #candleChart{height:345px}
+.workspaceView[data-view="grafikler"] #chartPanel{margin-top:0}
+.workspaceView[data-view="grafikler"] #candleChart{height:430px}
+#chartHostAdvanced:empty{min-height:1px}
+.swingEvents{display:grid;gap:7px;padding:10px 13px;max-height:400px;overflow:auto}
+.swingEvent{display:grid;grid-template-columns:minmax(90px,1fr) auto;gap:5px 13px;
+ background:#122339;border:1px solid #263c56;border-radius:9px;padding:11px;color:#cadff2}
+.swingEvent b{font-size:12px}
+.swingEvent small{color:#96afca;font-size:10px}
+.swingEvent button{grid-row:span 2;padding:7px 12px;color:#bddfff;background:#21405d;border:1px solid #39678b;border-radius:8px;cursor:pointer}
+@media(max-width:980px){
+ .radarColumns{grid-template-columns:minmax(0,1fr)}
+ .radarColumns .radarRows{max-height:330px}
+ .radarColumns #chartPanel{scroll-margin-top:72px}
+}
+@media(max-width:560px){
+ .radarColumns{gap:10px}
+ .workspaceView[data-view="radar"] .hero{padding:13px}
+ .radarColumns .chartControls select{max-width:100%;flex:1 1 130px}
+ .radarColumns #candleChart{height:280px}
+ .radarLine .rval{min-width:76px}
+}
