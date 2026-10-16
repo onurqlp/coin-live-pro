@@ -8,6 +8,8 @@ on:
       - 'web/app.js'
       - 'web/live-radar.js'
       - 'web/pilot-ui.js'
+      - 'web/router.js'
+      - 'web/style.css'
 permissions:
   contents: read
 jobs:
@@ -32,6 +34,9 @@ jobs:
           grep -q 'id="scanStatus"' /tmp/site.html
           grep -q 'live-radar.js' /tmp/site.html
           grep -q 'pilot-ui.js' /tmp/site.html
+          grep -q 'router.js' /tmp/site.html
+          grep -q 'id="workspaceNav"' /tmp/site.html
+          grep -q 'id="routeStatus"' /tmp/site.html
           grep -q 'id="mtfCandidates"' /tmp/site.html
           grep -q 'id="paperKpis"' /tmp/site.html
           grep -q 'id="systemKpis"' /tmp/site.html
@@ -78,5 +83,36 @@ jobs:
           for key in ('mtfCandidates','paperKpis','systemKpis'):
             m=re.search(r'id="'+key+r'"[^>]*>(.*?)</',doc,re.S)
             assert m and m.group(1).strip(),'V2 widget failed to render: '+key
-          print('BROWSER_DOM_PASS')
+          routes=['radar','grafikler','portfoy','gecmis','rapor','sistem']
+          for route in routes:
+            assert 'href="#'+route+'"' in doc,'Missing route '+route
+            assert 'data-view="'+route+'"' in doc,'Missing view '+route
+          current=re.search(r'<main class="workspaceView" data-view="radar"[^>]*>',doc)
+          assert current and 'aria-hidden="false"' in current.group(0),'Initial Radar route not active'
+          print('BROWSER_DOM_PASS: six-route navbar, shared central data loaded')
           PY
+
+      - name: Open multiple routes and verify active panel changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME=$(command -v google-chrome || command -v chromium)
+          ROOT=https://onurqlp.github.io/coin-live-pro/
+          for route in grafikler portfoy gecmis rapor sistem; do
+            "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --virtual-time-budget=8000 --dump-dom "${ROOT}#${route}" > /tmp/route.html 2>/dev/null
+            ROUTE="$route" python3 - <<'PY'
+          import os,re
+          route=os.environ['ROUTE']
+          doc=open('/tmp/route.html').read()
+          selected=re.search(r'<main class="workspaceView" data-view="'+route+r'"[^>]*>',doc)
+          assert selected,route+' missing panel'
+          assert 'hidden' not in selected.group(0) and 'aria-hidden="false"' in selected.group(0),route+' not visible'
+          for other in ('radar','grafikler','portfoy','gecmis','rapor','sistem'):
+            panel=re.search(r'<main class="workspaceView" data-view="'+other+r'"[^>]*>',doc)
+            assert panel
+            if other!=route:assert 'hidden' in panel.group(0) and 'aria-hidden="true"' in panel.group(0),other+' not hidden'
+          active=re.search(r'<a[^>]+data-nav="'+route+r'"[^>]*>',doc)
+          assert active and 'aria-current="page"' in active.group(0),'navigation highlight absent'
+          print('ROUTE_OK',route)
+          PY
+          done
