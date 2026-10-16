@@ -26,11 +26,15 @@ assert.ok(!code.includes("'history','reports'")&&!code.includes("'2.4.0-htf-spar
 assert.ok(code.includes("'3.0.0-htf-sparks'")&&code.includes("'swing-history'")&&code.includes("'swing-outcomes'"),'V3 canonical data sources required');
 assert.ok(code.includes('selectSpark(el.dataset.symbol,el.dataset.tf)'),'Spark must select its own native chart');
 assert.ok(html.includes('1H/15m TEYİT; 5m/1m ek kontrol.'),'Microframes used only for confirmation');
+assert.ok(html.includes('legacyTechnicalDisclosure')&&html.includes('legacyReportDisclosure'),'Technical/old reports must be collapsed, not deleted');
+assert.ok(html.includes('v4ObservationStatus')&&html.includes('<option value="3" selected>90 gün</option>'),'90-day observation default missing');
+assert.ok(!html.includes('BETA'),'No beta labels in released site');
+assert.ok(v4code.includes("window.CoinLiveSelectSpark(b.dataset.v4Symbol,'4H',true)"),'V4 opportunities must open visible chart tab');
 assert.ok(code.includes("mode:'SERVER'")&&code.includes("mode:'STALE'"),'Central data gate must fail closed');
 assert.ok(router.includes("window.addEventListener('hashchange',renderRoute)"),'Navigation must support history');
 assert.ok(router.includes('destination.replaceChildren(panel)'),'Native chart must be shared');
 assert.ok(router.includes('schedule_proven'),'Cron health must require evidence');
-assert.ok(html.includes('id="alerts" disabled')&&code.includes('Pilot: bildirim kapalı'),'Pilot alerts should remain disabled');
+assert.ok(html.includes('id="alerts" disabled')&&code.includes('Bildirimler kapalı'),'User alerts must remain disabled during 90 days');
 assert.ok(html.indexOf('id="chartPanel"')<html.indexOf('data-view="grafikler"'),'Native chart must be on Radar homepage');
 const routes=['radar','grafikler','portfoy','gecmis','rapor','sistem'];
 const views=[...html.matchAll(/class="workspaceView"[^>]*data-view="([^"]+)"[^>]*>/g)];

@@ -40,9 +40,25 @@
      '<button type="button" class="v4GoChart" data-v4-symbol="'+safe(x.symbol)+
      '" data-v4-side="'+safe(x.side)+'">Grafiği incele ↗</button></article>';
  }
+ function observationProgress(){
+   const started=Date.parse(store.paper?.pilot_started_at||'');
+   const status=$('v4ObservationStatus'), dates=$('v4ObservationDates'),bar=$('v4ObservationFill');
+   if(!status||!dates||!bar)return;
+   if(!Number.isFinite(started)){status.textContent='90 günlük gözlem · başlangıç verisi bekleniyor';return;}
+   const ends=started+90*86400000;
+   const elapsed=Math.max(0,Math.min(90,Math.floor((Date.now()-started)/86400000)));
+   const remaining=Math.max(0,Math.ceil((ends-Date.now())/86400000));
+   const formatDay=ms=>new Date(ms).toLocaleDateString('tr-TR',{
+     timeZone:'Europe/Istanbul',day:'2-digit',month:'long',year:'numeric'});
+   status.textContent=remaining>0?'90 günlük gözlem · '+elapsed+'. gün · '+remaining+' gün kaldı':
+     '90 günlük gözlem süresi tamamlandı · sonuçlar arşivde';
+   dates.textContent=formatDay(started)+' — '+formatDay(ends)+' · piyasa verileri otomatik kaydedilir';
+   bar.style.width=(Math.min(100,Math.max(0,(Date.now()-started)/(90*86400000)*100))).toFixed(1)+'%';
+ }
  function drawBoard(){
    const r=store.radar,manifest=store.manifest;
    if(!r)return;
+   observationProgress();
    const minutes=(Date.now()-Date.parse(manifest.finished_at_utc))/60000;
    const stale=!Number.isFinite(minutes)||minutes>25;
    const status=$('v4Status');status.textContent=stale?'V4 KAYNAK GECİKMİŞ · GÜNCEL TEYİT YOK':
@@ -61,7 +77,7 @@
    $('v4RecheckCount').textContent=r.counts?.recheck_pending??'—';
    $('v4ArchivedCount').textContent=r.counts?.archived_total??'—';
    document.querySelectorAll('[data-v4-symbol]').forEach(b=>b.onclick=()=>{
-     if(typeof window.CoinLiveSelectSpark==='function')window.CoinLiveSelectSpark(b.dataset.v4Symbol,'4H',false);
+     if(typeof window.CoinLiveSelectSpark==='function')window.CoinLiveSelectSpark(b.dataset.v4Symbol,'4H',true);
    });
  }
  function kpi(label,value){return '<div class="v4Kpi"><small>'+safe(label)+'</small><strong>'+safe(value)+'</strong></div>';}

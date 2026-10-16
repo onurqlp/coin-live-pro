@@ -9,7 +9,7 @@
    grafikler:{label:'📈 Grafikler',title:'Grafikler'},
    portfoy:{label:'🧪 Sanal Portföy',title:'Sanal Portföy'},
    gecmis:{label:'🧭 Geçmiş',title:'Kıvılcım Geçmişi'},
-   rapor:{label:'📊 7/14 Gün',title:'7/14 Günlük Rapor'},
+   rapor:{label:'📊 90 Gün',title:'90 Günlük Performans'},
    sistem:{label:'🩺 Sistem Sağlığı',title:'Sistem Sağlığı'}
  };
  let last='';
