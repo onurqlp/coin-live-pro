@@ -166,3 +166,13 @@ padding:12px;text-align:left;display:grid;gap:5px;min-height:110px}
 .v4ContextContent>p,.v4ContextContent>small{color:#a2bdd3;font-size:11px;line-height:1.5}.v4NewsItems{display:grid;gap:8px}.v4NewsItem{display:grid;gap:4px}
 .v4NewsItem a{color:#9ccff2;font-size:12px;text-decoration:underline}.v4NewsItem small{color:#a1b4ca;font-size:10px}
 @media(max-width:540px){.v4ArchiveFilters label{flex:1 1 100%}.v4WatchArchivePanel .panelHead button{width:100%}.v4WatchArchiveRows{max-height:600px}}
+
+/* Global closed-candle context: 4H/1D primary, 1W regime, micro frames timing only. */
+.v4TfWrap{display:flex;gap:4px;flex-wrap:wrap;margin:8px 0 5px}
+.v4Tf{padding:3px 5px;border-radius:5px;border:1px solid #405268;font-size:10px;color:#a9b9cb;background:#111e2c}
+.v4Tf.positive{border-color:#326b5a;color:#a6dfc5;background:#17372d}
+.v4Tf.negative{border-color:#845465;color:#f2aabc;background:#42222e}
+.v4Tf.neutral{border-color:#726048;color:#e6cf99}
+.v4Tf.unknown{border-style:dashed;color:#899bac}
+.v4Tf.primary{font-weight:800;font-size:11px;border-width:2px}
+.v4TfNote{font-size:10px;line-height:1.35;color:#97b0c7}
