@@ -125,7 +125,7 @@
      const r=await fetch('./release.json?check='+Date.now(),{cache:'no-store'});
      if(!r.ok)throw Error('Yayın kaydı okunamadı');
      const meta=await r.json();
-     if(!/^\\d+\\.\\d+(?:\\.\\d+)?$/.test(meta.product_version)||
+     if(!/^[0-9]+[.][0-9]+(?:[.][0-9]+)?$/.test(meta.product_version)||
         !Number.isFinite(Date.parse(meta.updated_at_utc)))throw Error('Yayın kaydı geçersiz');
      const published=new Date(meta.updated_at_utc).toLocaleString('tr-TR',{
        timeZone:'UTC',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
