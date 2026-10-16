@@ -90,6 +90,73 @@ def ema(values,n):
     for x in values[1:]:out+=k*(x-out)
     return out
 
+def ema_path(values,n):
+    """EMA sequence using closed values only (no partial-candle input)."""
+    if not values:return []
+    out=[float(values[0])]
+    alpha=2/(n+1)
+    for value in values[1:]:out.append(out[-1]+alpha*(value-out[-1]))
+    return out
+
+def rsi14(closes):
+    """Wilder RSI(14) on closed bars; neutral 50 for fully flat markets."""
+    if len(closes)<16:return None
+    gains=[max(0,closes[i]-closes[i-1]) for i in range(1,len(closes))]
+    losses=[max(0,closes[i-1]-closes[i]) for i in range(1,len(closes))]
+    up=sum(gains[:14])/14
+    down=sum(losses[:14])/14
+    for g,l in zip(gains[14:],losses[14:]):
+        up=(up*13+g)/14
+        down=(down*13+l)/14
+    if up==down==0:return 50.
+    if down==0:return 100.
+    return 100-100/(1+up/down)
+
+def macd_closed(closes):
+    if len(closes)<35:return None
+    a=ema_path(closes,12);b=ema_path(closes,26)
+    line=[x-y for x,y in zip(a,b)]
+    sig=ema_path(line,9)
+    # Normalize as % of price for cross-coin comparability.
+    return {'line_pct':round(line[-1]/closes[-1]*100,4),
+            'signal_pct':round(sig[-1]/closes[-1]*100,4),
+            'hist_pct':round((line[-1]-sig[-1])/closes[-1]*100,4),
+            'hist_prev_pct':round((line[-2]-sig[-2])/closes[-2]*100,4)}
+
+def adx14(bars):
+    """Wilder ADX(14), reflecting trend strength, not its direction."""
+    if len(bars)<29:return None
+    tr=[];pd=[];md=[]
+    for previous,current in zip(bars[:-1],bars[1:]):
+        up=current['h']-previous['h'];down=previous['l']-current['l']
+        pd.append(up if up>down and up>0 else 0)
+        md.append(down if down>up and down>0 else 0)
+        tr.append(max(current['h']-current['l'],abs(current['h']-previous['c']),
+                      abs(current['l']-previous['c'])))
+    atrv=sum(tr[:14]);p=sum(pd[:14]);m=sum(md[:14]);dx=[]
+    for i in range(13,len(tr)):
+        if i>13:
+            atrv=atrv-atrv/14+tr[i];p=p-p/14+pd[i];m=m-m/14+md[i]
+        if atrv<=0:dx.append(0);continue
+        plus=100*p/atrv;minus=100*m/atrv
+        dx.append(100*abs(plus-minus)/(plus+minus) if plus+minus>0 else 0)
+    if len(dx)<14:return None
+    v=sum(dx[:14])/14
+    for x in dx[14:]:v=(v*13+x)/14
+    return v
+
+def compression_percentile(closes):
+    """BB(20) relative width percentile in latest 30 CLOSED windows."""
+    if len(closes)<50:return None
+    widths=[]
+    for idx in range(len(closes)-30,len(closes)+1):
+        sample=closes[idx-20:idx]
+        if len(sample)<20 or statistics.mean(sample)<=0:continue
+        widths.append(4*statistics.pstdev(sample)/statistics.mean(sample)*100)
+    if len(widths)<20:return None
+    latest=widths[-1]
+    return round(100*sum(w<=latest for w in widths)/len(widths),1)
+
 def atr(bars):
     if len(bars)<15:return None
     recent=bars[-15:]
@@ -126,11 +193,19 @@ def state(bars,frame):
         body=abs(x['c']-x['o'])
         if max(upper,lower)/extent>=.62 and body/extent<=.34:
             rejection+=1
+    macd=macd_closed(c)
+    rsi=rsi14(c)
+    adx=adx14(bars)
+    comp=compression_percentile(c)
     return {'quality':'CLOSED_CONFIRMED','count':len(bars),'trend':bias,'bar':OKX[frame],
             'close':c[-1],'last_candle_utc':dt.datetime.fromtimestamp(bars[-1]['t']/1000,dt.timezone.utc).isoformat(),
             'ema_delta_pct':round(delta,3),'atr_pct':round(v/c[-1]*100,3),
             'bb_width_pct':round(width,3),'move_7bars_pct':round((c[-1]/earlier-1)*100,3),
             'volume_ratio_20':relative_volume,'wick_rejections_8':rejection,
+            'rsi_14':round(rsi,2) if rsi is not None else None,
+            'macd_12_26_9':macd,
+            'adx_14':round(adx,2) if adx is not None else None,
+            'bb_compression_percentile_30':comp,
             'breakout_high_prev8':breakout_high,'breakout_low_prev8':breakout_low}
 
 def score_part(st,side):
