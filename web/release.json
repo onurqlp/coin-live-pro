@@ -1,20 +1,25 @@
 {
   "product_version": "4.01",
   "version_change_owner": "USER_APPROVAL_ONLY",
-  "release_id": "GO-20261016-2323",
-  "updated_at_utc": "2026-10-16T23:23:31.919Z",
+  "release_id": "UI-20261016-23undefined50",
+  "updated_at_utc": "2026-10-16T23:50:05.843Z",
   "timestamp_basis": "UTC",
   "market_data_timestamp_separate": true,
   "change_summary": [
-    "V4 kalıcı WATCH arşivi",
-    "1m-1W ileriye dönük gözlem, sonuç uydurmama",
-    "Bağımsız doğrulanabilir haber-sosyal bağlam",
-    "Mobil arşiv arama, filtre, manuel yenileme ve ölü düğme temizliği",
-    "4H/1D ana ağırlığı korundu; 1W yön bağlamı"
+    "Mobile-first okunaklı koyu tema, güçlü kontrast ve renkli LONG/SHORT ayrımı",
+    "Fırsat panosunda coin arama ve yön filtresi, anlaşılır kılavuz",
+    "4H/1D/1W yön özeti önde; 1m–1W indikatörler isteğe bağlı açılır",
+    "Altı çalışma alanı yalın Türkçe adlarla, klavye odağı ve mobil dokunma hedefleri",
+    "Teknik sinyal, geçmiş, sanal kasa, UTC veri kaynakları değişmedi; ürün sürümü 4.01"
   ],
   "no_real_orders": true,
   "not_a_trading_signal": true,
   "change_log": [
+    {
+      "release_id": "UI-20261016-23undefined50",
+      "updated_at_utc": "2026-10-16T23:50:05.843Z",
+      "summary": "Arayüz iyileştirmesi: kullanıcı dostu mobil tasarım, daha okunaklı yazılar, LONG/SHORT renkleri, aranabilir radar, katlanabilir göstergeler. Ürün sürümü 4.01 kaldı."
+    },
     {
       "release_id": "GO-20261016-2323",
       "updated_at_utc": "2026-10-16T23:23:31.919Z",
