@@ -21,36 +21,73 @@
  }
  function renderMtf(d){
    const minutes=age(d.fetched_at),stale=minutes>25;
-   banner('mtfStatus',stale?'redtag':'oktag',stale?'ANALİZ ESKİ':'DOĞRULANMIŞ · '+minutes+' DK');
+   banner('mtfStatus',stale?'redtag':'oktag',stale?'ANALİZ ESKİ · İŞLEM YOK':'4H + GÜNLÜK SWING · '+minutes+' DK');
    const regimes=['BTCUSDT','ETHUSDT'].map(sym=>{
-     const x=d.regime?.[sym],daily=x?.frames?.['1D'],weekly=x?.frames?.['1W'],h12=x?.frames?.['12H'];
+     const x=d.regime?.[sym],daily=x?.frames?.['1D'],weekly=x?.frames?.['1W'],h4=x?.frames?.['4H'];
      return '<div class="regimeItem"><strong>'+sym.replace('USDT','')+'</strong>'+
        '<span>1W '+esc(weekly?.quality==='CLOSED_CONFIRMED'?labels[weekly.trend]:'NO_HISTORY')+'</span>'+
        '<span>1D '+esc(daily?.quality==='CLOSED_CONFIRMED'?labels[daily.trend]:'NO_HISTORY')+'</span>'+
-       '<span>12H '+esc(h12?.quality==='CLOSED_CONFIRMED'?labels[h12.trend]:'NO_HISTORY')+'</span></div>';
+       '<span>4H '+esc(h4?.quality==='CLOSED_CONFIRMED'?labels[h4.trend]:'NO_HISTORY')+'</span></div>';
    });
    $('macroRegime').innerHTML=regimes.join('');
+   const statuses={SWING_CANDIDATE:'1–7 GÜN ADAYI',SWING_WATCH:'RİSKLİ ADAY · İZLE',
+     WAIT_4H_1D:'4H/GÜNLÜK UYUMSUZ · BEKLE',AVOID_RISK:'SIRADIŞI RİSK · KAÇIN',
+     NO_HISTORY:'YETERSİZ KAPANMIŞ MUM'};
+   const critical=code=>({
+     '4H_REPEATED_LONG_WICKS':'4H uzun fitil tekrarı',
+     '1D_REPEATED_LONG_WICKS':'Günlük uzun fitil tekrarı',
+     '4H_UNUSUAL_CLOSED_BAR_VOLUME':'4H hacim sıçraması',
+     '1D_UNUSUAL_CLOSED_BAR_VOLUME':'Günlük hacim sıçraması',
+     '4H_HIGH_TRUE_RANGE':'4H yüksek oynaklık',
+     '1D_HIGH_TRUE_RANGE':'Günlük yüksek oynaklık',
+     'EXTREME_24H_PRICE_MOVE':'24s olağandışı fiyat hareketi',
+     'EXTREME_FUNDING_RATE':'Aşırı fonlama oranı',
+     'ELEVATED_FUNDING_RATE':'Yüksek fonlama oranı',
+     'LOW_QUOTE_TURNOVER':'Düşük likidite',
+     'WIDE_SPREAD_35BPS':'Çok geniş alış/satış farkı',
+     'OI_CHANGE_NOT_VERIFIED':'OI değişimi doğrulanmadı',
+     'OI_SNAPSHOT_ONLY_NO_DELTA':'Yalnız anlık OI var; değişim yok',
+     'FUNDING_NOT_VERIFIED':'Fonlama verisi yok'
+   }[code]||code);
    const list=d.candidates||[];
    $('mtfCandidates').innerHTML=list.length?list.map(x=>{
-     const side=x.side==='LONG'?'positive':'negative';
      const summary=frames.map(tf=>{
-        const v=x.frames?.[tf]||{};
-        const value=v.quality==='CLOSED_CONFIRMED'?labels[v.trend]:'NO_HISTORY';
-        return '<div class="frameCell"><small>'+tf+'</small><b class="'+(v.trend==='UP'?'positive':v.trend==='DOWN'?'negative':'')+'">'+esc(value)+'</b></div>';
+       const v=x.frames?.[tf]||{};
+       const value=v.quality==='CLOSED_CONFIRMED'?labels[v.trend]:'NO_HISTORY';
+       return '<div class="frameCell '+(tf==='1D'||tf==='4H'?'primaryTf':'')+'"><small>'+tf+(tf==='1D'||tf==='4H'?' ★':'')+'</small><b class="'+(v.trend==='UP'?'positive':v.trend==='DOWN'?'negative':'')+'">'+esc(value)+'</b></div>';
      }).join('');
+     const status=x.swing_status||'HENÜZ YENİ MODEL YOK';
+     const accepted=status==='SWING_CANDIDATE'&&!stale;
+     const risk=Number(x.structure_risk_score);
+     const funding=Number(x.funding_rate);
+     const oi=Number(x.open_interest_usd);
+     const details=(x.structure_flags||[]).filter(code=>!['OI_CHANGE_NOT_VERIFIED','OI_SNAPSHOT_ONLY_NO_DELTA','FUNDING_NOT_VERIFIED'].includes(code)).slice(0,5);
+     const fundingText=x.funding_rate==null?'Fonlama: doğrulanmadı':'Fonlama: '+(funding*100).toFixed(3)+'% / OKX bildirdiği periyot';
+     const oiText=x.open_interest_usd==null?'Açık pozisyon: doğrulanmadı':'Açık pozisyon: $'+Number(oi).toLocaleString('tr-TR',{maximumFractionDigits:0})+' (yalnız anlık)';
+     const stage='<div class="swingStatus '+(accepted?'ready':status==='AVOID_RISK'?'blocked':'waiting')+'">'+
+       '<strong>'+esc(statuses[status]||status)+'</strong><span>'+esc(x.expected_holding||'Belirsiz')+
+       ' · 1D + 4H '+(x.direction_aligned_4h_1d?'uyumlu':'uyumsuz / doğrulanmadı')+'</span></div>';
+     const flags='<div class="riskDetails"><strong>Yapısal risk: '+esc(x.structure_risk_label||'—')+
+       ' · '+(Number.isFinite(risk)?risk:'—')+'/100</strong><div>'+esc(details.length?details.map(critical).join(' · '):
+       'Belirgin anormal yapı işareti bulunmadı; bu güvenlik garantisi değildir.')+'</div>'+
+       '<small>'+esc(fundingText)+' · '+esc(oiText)+
+       ' · Açık pozisyon DEĞİŞİMİ bilinmiyorsa tahmin edilmez.</small></div>';
      return '<article class="v2card"><div class="v2row"><strong>'+esc(x.symbol.replace('USDT',''))+
-      '<span class="chip '+(x.side==='LONG'?'long':'short')+'">'+esc(x.side)+'</span></strong>'+
-      '<span class="v2score">'+esc(x.score)+'/100</span></div>'+
-      '<div class="v2why">'+esc(typeNames[x.setup_type]||x.setup_type)+' · '+esc(x.expected_holding)+
-      ' · '+esc(x.quality)+' · spread '+esc(x.spread_bps==null?'bilinmiyor':Number(x.spread_bps).toFixed(2)+' bps')+' · '+esc((x.reason_codes||[]).join(' / '))+'</div>'+
-      '<div class="v2weights"><span>MAKRO <b>'+esc(x.macro_score??'—')+'</b></span>'+
-      '<span>MOMENTUM <b>'+esc(x.momentum_score??'—')+'</b></span>'+
-      '<span>GİRİŞ <b>'+esc(x.entry_quality_score??'—')+'</b></span></div>'+
-      '<div class="tfGrid">'+summary+'</div>'+
-      '<div class="v2disclaimer">'+(stale?'ESKİ — yeni işlem senaryosu kurulmaz. ':
-      'Araştırma adayı; otomatik işlem sinyali değildir. ')+
-      'Kaynak OKX kapanmış UTC mumları · '+esc(trTime(x.observed_at_utc))+'</div></article>';
-   }).join(''):'<div class="empty">7 zaman dilimli doğrulanmış aday henüz yok.</div>';
+       '<span class="chip '+(x.side==='LONG'?'long':'short')+'">'+esc(x.side)+'</span></strong>'+
+       '<span class="v2score">'+esc(x.score)+'/100</span></div>'+
+       stage+flags+
+       '<div class="v2weights"><span>GÜNLÜK / HAFTALIK <b>'+esc(x.macro_score??'—')+'</b></span>'+
+       '<span>4H + 1H <b>'+esc(x.momentum_score??'—')+'</b></span>'+
+       '<span>GİRİŞ 15M / 5M <b>'+esc(x.entry_quality_score??'—')+'</b></span></div>'+
+       '<div class="tfGrid">'+summary+'</div>'+
+       '<div class="v2why">'+esc(typeNames[x.setup_type]||x.setup_type)+' · Spread '+
+       esc(x.spread_bps==null?'bilinmiyor':Number(x.spread_bps).toFixed(2)+' bps')+
+       ' · '+esc((x.reason_codes||[]).filter(x=>!['CLOSED_UTC_CANDLES','1D_4H_PRIMARY_74PCT'].includes(x)).slice(0,7).join(' / '))+'</div>'+
+       '<div class="v2disclaimer">'+(stale?'VERİ ESKİ — yeni işlem senaryosu kurulmaz. ':
+         'İZLE/BEKLE araştırma statüsüdür, al/sat emri değildir. ')+
+       '1D/4H toplam ağırlık %74; 15m yalnız tetik · OKX kapanmış UTC mumları · '+
+       esc(trTime(x.observed_at_utc))+'</div></article>';
+   }).join(''):'<div class="empty">1D ve 4H uyumlu doğrulanmış swing adayı henüz yok.</div>';
  }
  function renderPaper(d){
    const mins=age(d.updated_at),stale=mins>25;
