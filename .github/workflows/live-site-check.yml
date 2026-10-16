@@ -4,6 +4,9 @@ on:
   push:
     paths:
       - '.github/workflows/live-site-check.yml'
+      - 'web/index.html'
+      - 'web/app.js'
+      - 'web/live-radar.js'
 permissions:
   contents: read
 jobs:
@@ -23,6 +26,8 @@ jobs:
           grep -q 'id="radarRows"' /tmp/site.html
           grep -q 'id="historyRows"' /tmp/site.html
           grep -q 'id="candleChart"' /tmp/site.html
+          grep -q 'id="scanStatus"' /tmp/site.html
+          grep -q 'live-radar.js' /tmp/site.html
           for n in market radar history reports; do
             curl -fSL --max-time 15 "$ROOT/data/$n.json?check=$(date +%s)" -o "/tmp/$n.json"
           done
@@ -31,6 +36,7 @@ jobs:
           from pathlib import Path
           data={n:json.loads(Path(f'/tmp/{n}.json').read_text()) for n in ['market','radar','history','reports']}
           assert len(data['market'].get('rows',[]))>=20,'market list incomplete'
+          assert data['market'].get('analyzed',0)>=30,'no 15m rotated OHLC coverage'
           assert isinstance(data['history'].get('events'),list),'history not served'
           assert len(data['reports'].get('reports',[]))==2,'7/14 report not served'
           now=datetime.datetime.now(datetime.timezone.utc)
@@ -45,15 +51,18 @@ jobs:
           set -euo pipefail
           CHROME=$(command -v google-chrome || command -v chromium || true)
           if [ -z "$CHROME" ]; then echo "Chrome unavailable"; exit 1; fi
-          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --virtual-time-budget=12000 --dump-dom https://onurqlp.github.io/coin-live-pro/ > /tmp/dom.html 2>/tmp/chrome.log
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --virtual-time-budget=26000 --dump-dom https://onurqlp.github.io/coin-live-pro/ > /tmp/dom.html 2>/tmp/chrome.log
           python3 - <<'PY'
           import re
           doc=open('/tmp/dom.html').read()
-          for key in ('marketCount','healthTitle','radarRows','historyRows','reportStats','chartCoin'):
+          for key in ('marketCount','healthTitle','radarRows','historyRows','reportStats','chartCoin','scanStatus','browserHistory'):
             match=re.search(r'id="'+key+r'"[^>]*>(.*?)</',doc,re.S)
             assert match is not None,'missing '+key
             excerpt=re.sub('<[^>]*>',' ',match.group(1)).strip()[:160]
             print(key,'=',excerpt)
           assert 'Veriler kontrol ediliyor' not in doc.split('id="source"')[1][:120],'render did not start'
+          match=re.search(r'id="scanStatus"[^>]*>(.*?)</',doc,re.S)
+          assert match and 'hazırlanıyor' not in match.group(1),'independent live scanner never started'
+          print('LIVE_SCANNER_STATUS',re.sub('<[^>]*>',' ',match.group(1)).strip()[:180])
           print('BROWSER_DOM_PASS')
           PY
