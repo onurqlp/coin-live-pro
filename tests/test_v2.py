@@ -35,6 +35,21 @@ class TestMtfResearch(unittest.TestCase):
         self.assertLessEqual(x['score'],64)
         self.assertIn('TREND_CONFLICT',x['reason_codes'])
 
+class TestSwingPaperCutover(unittest.TestCase):
+    def test_15m_confirm_without_4h_daily_gate_never_opens(self):
+        signal={'symbol':'BTCUSDT','side':'LONG','stage':'CONFIRMED','at_ms':5000}
+        self.assertFalse(paper.swing_eligible(signal,{},4000))
+        self.assertFalse(paper.swing_eligible(signal,{'BTCUSDT':{'side':'LONG','swing_status':'WAIT_4H_1D'}},4000))
+    def test_only_forward_new_verified_swing_passes(self):
+        signal={'symbol':'BTCUSDT','side':'SHORT','stage':'CONFIRMED','at_ms':5000}
+        thesis={'side':'SHORT','swing_status':'SWING_CANDIDATE','direction_aligned_4h_1d':True,
+                 'quality':'COMPLETE','structure_risk_score':10}
+        self.assertTrue(paper.swing_eligible(signal,{'BTCUSDT':thesis},4999))
+        self.assertFalse(paper.swing_eligible(signal,{'BTCUSDT':thesis},5000))
+        self.assertFalse(paper.swing_eligible({**signal,'stage':'WATCH'},{'BTCUSDT':thesis},4999))
+        self.assertFalse(paper.swing_eligible(signal,{'BTCUSDT':{**thesis,'structure_risk_score':55}},4999))
+        self.assertFalse(paper.swing_eligible(signal,{'BTCUSDT':{**thesis,'side':'LONG'}},4999))
+
 class TestAuditedPaper(unittest.TestCase):
     def make(self,signal_at):
         o={'id':'NEW|BTC|LONG','inst':'BTC-USDT-SWAP','symbol':'BTCUSDT',
