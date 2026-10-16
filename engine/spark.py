@@ -21,6 +21,20 @@ MODEL='3.0.0-htf-sparks'
 UTC=dt.datetime.now(dt.timezone.utc)
 MS=int(UTC.timestamp()*1000)
 DIRECTIONS={'LONG':'UP','SHORT':'DOWN'}
+POLICY='3.0-strict-5min-20261016'
+# Last fully closed candle cannot be arbitrarily old when a research
+# candidate is labelled "CONFIRMED". 1m is never an entry gate.
+CANDLE_LAG={'1W':2*3600,'1D':1800,'4H':1200,'1H':600,'15m':180,'5m':120}
+
+def fresh_closed(st,frame):
+    if st.get('quality')!='CLOSED_CONFIRMED':return False
+    try:
+        t=dt.datetime.fromisoformat(st['last_candle_utc'].replace('Z','+00:00'))
+        close=t+dt.timedelta(milliseconds=mtf.PERIOD[frame])
+        lag=(UTC-close).total_seconds()
+        return -120<=lag<=mtf.PERIOD[frame]/1000+CANDLE_LAG[frame]
+    except (TypeError,ValueError,KeyError,AttributeError):return False
+
 
 def load(path,fallback):
     try:return json.loads(path.read_text(encoding='utf8'))
@@ -52,25 +66,34 @@ def spark_from_mtf(x,market,one_minute=None):
     frame=x.get('frames') or {}
     day,h4,week,h1,m15,m5=[frame.get(k) or {} for k in ('1D','4H','1W','1H','15m','5m')]
     aligned=DIRECTIONS[side]
-    if any(s.get('quality')!='CLOSED_CONFIRMED' for s in (day,h4)):return None
+    if not fresh_closed(day,'1D') or not fresh_closed(h4,'4H'):return None
     if day.get('trend')!=aligned or h4.get('trend')!=aligned:return None
     risk=int(x.get('structure_risk_score') or 0)
     if risk>=45:return None
     score=int(x.get('score') or 0)
     if score<58:return None
 
-    weekly=week.get('quality')=='CLOSED_CONFIRMED' and week.get('trend')==aligned
+    weekly=fresh_closed(week,'1W') and week.get('trend')==aligned
     # Weekly candle establishes the 3–7 day background; the daily chart is
     # the actionable chart for a 3–7 day thesis, not 1-minute candles.
     primary='1D' if weekly else '4H'
     horizon='3–7 gün' if weekly else '1–3 gün'
-    h1ok=h1.get('quality')=='CLOSED_CONFIRMED' and h1.get('trend')==aligned
-    m15ok=m15.get('quality')=='CLOSED_CONFIRMED' and m15.get('trend')==aligned
-    m5ok=m5.get('quality')=='CLOSED_CONFIRMED' and m5.get('trend')==aligned
+    h1ok=fresh_closed(h1,'1H') and h1.get('trend')==aligned
+    m15ok=fresh_closed(m15,'15m') and m15.get('trend')==aligned
+    m5ok=fresh_closed(m5,'5m') and m5.get('trend')==aligned
     micro=one_minute or {}
     one_ok=micro.get('quality')=='CLOSED_CONFIRMED' and micro.get('trend')==aligned
-    # Micro candles cannot create 1D/4H signals. 1H+15m verify direction.
-    confirmed=h1ok and m15ok and risk<35 and score>=67
+    # Strict confirmation requires weekly trend, ALL closed timing candles,
+    # verified liquidity, spread and contract state. 1m remains optional.
+    spread=mtf.swing.num(market.get('spread_bps'))
+    volume=mtf.swing.num(market.get('volume'))
+    listed=mtf.swing.num(market.get('listing_age_days'))
+    instrument_live=str(market.get('instrument_state') or '').lower()=='live'
+    market_ok=(volume is not None and volume>=40_000_000 and spread is not None
+               and 0<=spread<=12 and instrument_live and listed is not None
+               and listed>=30)
+    confirmed=(weekly and h1ok and m15ok and m5ok and
+               market_ok and risk<=24 and score>=76)
     price=mtf.swing.num(market.get('price'))
     if price is None or price<=0:return None
     atr=mtf.swing.num(h4.get('atr_pct'))
@@ -82,13 +105,23 @@ def spark_from_mtf(x,market,one_minute=None):
     stop=round(price-sign*distance,12)
     targets=[round(price+sign*distance*mult,12) for mult in (1,2,3)]
     threshold=mtf.swing.num(h4.get('breakout_high_prev8' if side=='LONG' else 'breakout_low_prev8'))
-    if threshold is None:threshold=price
-    # Prevent chasing an already extended directional breakout without
-    # changing the macro observation. A late setup remains WATCH, not entry-ready.
-    beyond_pct=sign*(price/threshold-1)*100 if threshold>0 else 0
-    extended=beyond_pct>max(3.5,1.5*(atr or 0))
-    if extended:confirmed=False
+    # Absent resistance/support is an unknown setup, never "confirmed".
+    # A trend is NOT a breakout until the current quote crosses the 4H
+    # pre-existing 8-bar threshold in its OWN directional sense.
+    if threshold is None or threshold<=0:return None
+    beyond_pct=sign*(price/threshold-1)*100
+    breakout=beyond_pct>0
+    extended=beyond_pct>max(2.0,0.9*(atr or 0))
+    if not breakout or extended:confirmed=False
     stage='CONFIRMED' if confirmed else 'WATCH'
+    gating=[]
+    if not weekly:gating.append('WEEKLY_NOT_ALIGNED')
+    if not breakout:gating.append('BREAKOUT_NOT_CROSSED')
+    if extended:gating.append('BREAKOUT_OVEREXTENDED')
+    if not market_ok:gating.append('LIQUIDITY_OR_SPREAD_UNVERIFIED')
+    if not (h1ok and m15ok and m5ok):gating.append('TIMING_NOT_CONFIRMED')
+    if risk>24:gating.append('STRUCTURE_RISK_ELEVATED')
+    if score<76:gating.append('SCORE_BELOW_STRICT_GATE')
     symbol=x['symbol']
     last4=h4.get('last_candle_utc')
     # last 4H candle time, NOT the fetch timestamp, is setup identity.
@@ -102,7 +135,9 @@ def spark_from_mtf(x,market,one_minute=None):
         'reason_codes':x.get('reason_codes',[])[:12],
         'quality':'VERIFIED_CLOSED_1D_4H','setup_type':x.get('setup_type'),
         'price':price,'threshold':threshold,'stop':stop,'targets':targets,
-        'entry_timing':'EXTENDED_WAIT' if extended else 'STANDARD_WATCH',
+        'entry_timing':'EXTENDED_WAIT' if extended else 'BREAKOUT_WAIT' if not breakout else
+                       'STRICT_CONFIRMED' if confirmed else 'STANDARD_WATCH',
+        'strict_gate_reasons':gating,'filter_policy':POLICY,
         'extended_from_4h_breakout_pct':round(beyond_pct,3),
         'model_version':MODEL,'observed_at_utc':UTC.isoformat(timespec='seconds'),
         'main_candle_at':last4,'market_structure_flags':x.get('structure_flags',[])[:9],
@@ -111,7 +146,7 @@ def spark_from_mtf(x,market,one_minute=None):
                         '1m_available':micro.get('quality')=='CLOSED_CONFIRMED'},
         'confirmation_state':{tf:confirmation_state(st,aligned) for tf,st in
             (('1W',week),('1D',day),('4H',h4),('1H',h1),('15m',m15),('5m',m5),('1m',micro))},
-        'confirmation_note':'1D+4H setup; 1W context; 1H+15m corroboration; 1m/5m optional micro timing',
+        'confirmation_note':'1D+4H setup; strict TEYIT requires weekly agreement, closed 1H/15m/5m, real 4H breakout, verified liquidity/spread; 1m optional',
         'levels_note':'Estimated from current quote and 4H ATR; not an actual fill or stop guarantee.'
     }
 
@@ -144,7 +179,7 @@ def accumulate(old,items):
             'stage':spark['stage'],'primary_tf':spark['primary_tf'],
             'expected_holding':spark['expected_holding'],'price':spark['price'],
             'stop':spark['stop'],'target_1r':spark['targets'][0],
-            'entry_timing':spark['entry_timing'],
+            'entry_timing':spark['entry_timing'],'filter_policy':spark.get('filter_policy',POLICY),
             'score':spark['score'],'risk_score':spark['risk_score'],
             'confirmation':spark['confirmation'],
             'main_candle_at':spark['main_candle_at'],'model_version':MODEL,
@@ -196,7 +231,8 @@ def main():
           'short':sum(s['side']=='SHORT' for s in sparks),
           'confirmed':sum(s['stage']=='CONFIRMED' for s in sparks),
           'attempted':macro.get('attempted'),'analyzed':macro.get('analyzed'),
-          'note':'Only central closed 1D+4H swing observations; 1H+15m corroborate; 5m/1m are optional, not setup generators.',
+          'filter_policy':POLICY,
+          'note':'Closed 1D/4H setup, strict closed 1W/1H/15m/5m confirmation, breakout crossed and not extended, verified liquid OKX swap; 1m optional.',
           'no_live_orders':True}
     write(ARCH,ledger)
     write(DATA/'swing-history.json',public)

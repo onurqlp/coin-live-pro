@@ -1,4 +1,5 @@
 import copy
+import datetime as dt
 import pathlib
 import sys
 import unittest
@@ -6,13 +7,15 @@ sys.path.insert(0,str(pathlib.Path(__file__).resolve().parents[1]/'engine'))
 import spark
 
 class TestMacroSwingSparks(unittest.TestCase):
-    def state(self,trend='UP'):
+    def state(self,trend='UP',frame='4H'):
+        length=spark.mtf.PERIOD[frame]
+        last=((spark.MS//length)-1)*length
         return {'quality':'CLOSED_CONFIRMED','trend':trend,
-                'last_candle_utc':'2026-10-16T08:00:00+00:00',
-                'atr_pct':1.4,'breakout_high_prev8':105.2,
-                'breakout_low_prev8':94.4}
+                'last_candle_utc':dt.datetime.fromtimestamp(last/1000,dt.timezone.utc).isoformat(),
+                'atr_pct':1.4,'breakout_high_prev8':99.5,
+                'breakout_low_prev8':100.5}
     def record(self,side='LONG',weekly='UP',daily='UP',h4='UP',status='SWING_CANDIDATE',risk=14):
-        frames={tf:self.state() for tf in ['1W','1D','4H','1H','15m','5m']}
+        frames={tf:self.state(frame=tf) for tf in ['1W','1D','4H','1H','15m','5m']}
         frames['1W']['trend']=weekly
         frames['1D']['trend']=daily
         frames['4H']['trend']=h4
@@ -22,9 +25,9 @@ class TestMacroSwingSparks(unittest.TestCase):
                 'structure_risk_label':'DÜŞÜK','setup_type':'TREND_CONTINUATION',
                 'frames':frames,'reason_codes':[],'structure_flags':[]}
     def market(self):
-        return {'symbol':'BTCUSDT','price':100.,'volume':200_000_000}
+        return {'symbol':'BTCUSDT','price':100.,'volume':200_000_000,'spread_bps':2,'instrument_state':'live','listing_age_days':250}
     def micro(self,trend='UP'):
-        return self.state(trend)
+        return self.state(trend,'1m')
 
     def test_weekly_daily_4h_candidate_shows_daily_3_to_7_day_chart(self):
         x=spark.spark_from_mtf(self.record(),self.market())
@@ -64,6 +67,33 @@ class TestMacroSwingSparks(unittest.TestCase):
         y=spark.spark_from_mtf(self.record(weekly='DOWN'),self.market())
         self.assertEqual(y['confirmation_state']['1W'],'NOT_ALIGNED')
         self.assertEqual(y['primary_tf'],'4H')
+    def test_unbroken_levels_cannot_be_confirmed(self):
+        x=self.record();x['frames']['1H']['trend']='UP'
+        x['frames']['4H']['breakout_high_prev8']=105
+        y=spark.spark_from_mtf(x,self.market())
+        self.assertEqual(y['stage'],'WATCH')
+        self.assertEqual(y['entry_timing'],'BREAKOUT_WAIT')
+        self.assertIn('BREAKOUT_NOT_CROSSED',y['strict_gate_reasons'])
+    def test_weekly_disagreement_never_strict_confirmed(self):
+        x=self.record(weekly='DOWN');x['frames']['1H']['trend']='UP'
+        y=spark.spark_from_mtf(x,self.market())
+        self.assertEqual(y['stage'],'WATCH')
+    def test_spread_and_liquidity_must_be_verified_for_confirmed(self):
+        x=self.record();x['frames']['1H']['trend']='UP'
+        for bad in ({'spread_bps':None},{'volume':10000000},{'listing_age_days':None},
+                    {'instrument_state':'suspend'},{'spread_bps':25}):
+            self.assertEqual(spark.spark_from_mtf(x,{**self.market(),**bad})['stage'],'WATCH')
+    def test_5m_confirmation_must_be_fresh_and_aligned(self):
+        x=self.record();x['frames']['1H']['trend']='UP'
+        x['frames']['5m']['trend']='DOWN'
+        self.assertEqual(spark.spark_from_mtf(x,self.market())['stage'],'WATCH')
+        x['frames']['5m']['trend']='UP'
+        x['frames']['15m']['last_candle_utc']='2020-01-01T00:00:00+00:00'
+        self.assertEqual(spark.spark_from_mtf(x,self.market())['stage'],'WATCH')
+    def test_stale_macro_candle_blocks_candidate(self):
+        x=self.record()
+        x['frames']['4H']['last_candle_utc']='2020-01-01T00:00:00+00:00'
+        self.assertIsNone(spark.spark_from_mtf(x,self.market()))
     def test_one_minute_alone_does_not_confirm(self):
         x=self.record()
         x['frames']['1H']['trend']='DOWN'
