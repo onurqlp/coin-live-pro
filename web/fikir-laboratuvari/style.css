@@ -17,3 +17,58 @@ dialog{color:var(--text);border:1px solid #425467;border-radius:15px;padding:0;m
 @media(max-width:540px){html{scroll-padding-top:120px}.site-banner{font-size:7px;gap:6px;padding:0 6px;letter-spacing:.06em}.hero{padding:44px 17px 60px}.hero h1{font-size:clamp(2.4rem,11vw,3.6rem)}.hero-sub{margin-top:25px}.hero-right{padding:16px}.terminal-graph{height:300px}.orbit-c{width:90%}.orb-badge{font-size:8px;padding:5px 7px}.metricstrip strong{font-size:27px}.metricstrip span{font-size:8px}.section{padding:65px 16px 28px}.section-top{margin-bottom:25px}.section-mini{font-size:8px}.section-title{margin-bottom:25px}.section-title h2{font-size:clamp(2rem,9vw,3rem)}.four-logic{grid-template-columns:1fr}.four-logic article{min-height:170px}.flowchart{grid-template-columns:1fr}.flowblock{min-height:115px}.three-examples article{padding:20px}.filterbar{grid-template-columns:1fr;padding:9px}.searchbox{grid-column:auto}.filterbar .selectwrap:last-child,.filterbar .selectwrap:nth-child(3){grid-column:auto}.model-grid{grid-template-columns:1fr}.model-card h3{min-height:0}.model-sub{min-height:0;margin-bottom:25px}.catalogue-toolbar{flex-wrap:wrap;gap:6px}.top-card{padding:19px;grid-template-columns:42px 1fr;gap:12px}.top-card-number{width:42px;height:42px;font-size:25px}.top-card h3{font-size:20px}.curated-note{flex-direction:column}.curated-note strong{min-width:0}.calc-controls,.calc-results{padding:21px}.budget-layout{padding:18px}.budget-items{grid-template-columns:1fr}.budget-bar{height:54px}.budget-part b{font-size:11px}.budget-part small{display:none}.timeline,.failure-grid,.source-grid{grid-template-columns:1fr}.timeline article{padding-bottom:12px}.closing{margin:60px 12px 0!important}.closing h2{font-size:36px}footer{flex-direction:column;align-items:start}.footer-right{text-align:left}.compare-tray{bottom:8px;padding:11px;flex-direction:column;align-items:stretch}.tray-actions{justify-content:space-between}.dialog-shell{padding:22px}.note-actions .btn{width:100%}.result-main strong{font-size:2.6rem}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important;animation:none!important}}
 @media print{.topbar,.site-banner,.hero-actions,.filterbar,.catalogue-toolbar,.model-grid,.showmore,.compare-tray,dialog,.grain,.note-actions{display:none!important}body{background:white;color:#111}section.section{padding:30px 0;break-inside:avoid}.section-title p,section p{color:#444!important}.panel,.top-card,.three-examples article{border-color:#ccc!important}h1,h2,h3{color:#111}}
+
+
+/* Arbitraj araştırma masası: yatırım tavsiyesi veya canlı işlem aracı değildir. */
+.arbitrage-section{padding-top:105px}
+.arb-motto{display:flex;align-items:flex-start;gap:21px;border:1px solid rgba(238,188,124,.34);background:linear-gradient(120deg,rgba(238,188,124,.13),rgba(238,188,124,.025));padding:26px;border-radius:12px;margin-bottom:20px}
+.arb-motto-icon{font-family:Georgia,serif;font-size:43px;line-height:1;color:var(--warm)}
+.arb-motto strong{display:block;font-size:19px;letter-spacing:-.025em}
+.arb-motto p{font-size:12px;color:var(--muted);line-height:1.85;margin-top:10px;max-width:950px}
+.arb-principles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;margin-bottom:22px}
+.arb-principles article{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:22px;min-width:0}
+.arb-number{font-size:10px;font-weight:850;color:var(--warm);letter-spacing:.12em}
+.arb-principles strong{display:block;font-size:15px;margin:12px 0 10px;line-height:1.3}
+.arb-principles p{color:var(--muted);font-size:11.5px;line-height:1.75}
+.arb-tabs{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:26px 0 15px}
+.arb-tab{border:1px solid #435060;background:#182638;color:var(--muted);padding:10px 13px;border-radius:7px;font-size:12px;font-weight:750}
+.arb-tab.active,.arb-tab:hover{background:var(--warm);border-color:var(--warm);color:#182432}
+.arb-research-list{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:22px}
+.arb-row{padding:15px 18px;display:flex;justify-content:space-between;align-items:center;gap:16px;border-bottom:1px solid var(--line)}
+.arb-row:last-child{border-bottom:0}
+.arb-row-main{display:flex;gap:14px;align-items:flex-start;min-width:0;flex:1}
+.arb-row-no{color:var(--warm);font-family:Georgia,serif;font-size:20px;min-width:31px}
+.arb-row-main strong{font-size:13px;display:block;line-height:1.45;letter-spacing:-.01em}
+.arb-row-main p{font-size:11px;color:var(--muted);margin-top:3px}
+.arb-row-main small{font-size:10px;color:var(--dim);display:block;margin-top:6px}
+.arb-row-action{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.arb-details-btn{font-size:11px;font-weight:800;color:var(--warm);border:0;background:transparent;padding:8px}
+.arb-guide{background:linear-gradient(135deg,#202f3d,#142230);border:1px solid rgba(238,188,124,.25);border-radius:13px;overflow:hidden}
+.arb-guide-head{padding:22px 28px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:15px;align-items:center}
+.arb-guide-head span{font-size:10px;color:var(--warm);font-weight:900;letter-spacing:.1em}
+.arb-guide-head b{font-size:13px}
+.arb-calculator{display:grid;grid-template-columns:1.05fr .95fr;gap:0}
+.arb-fields{padding:26px;display:grid;grid-template-columns:1fr 1fr;gap:14px;border-right:1px solid var(--line)}
+.arb-fields label{font-size:11px;color:var(--muted);display:flex;flex-direction:column;gap:7px;min-width:0}
+.arb-fields input,.arb-fields select{background:#0d1926;color:var(--text);border:1px solid #3b4a5a;border-radius:7px;width:100%;padding:11px 12px;outline:0;font-variant-numeric:tabular-nums;font-size:13px}
+.arb-fields label:first-child{grid-column:1/-1}
+.arb-fields input:focus,.arb-fields select:focus{border-color:var(--warm)}
+.arb-output{padding:26px;display:flex;flex-direction:column;align-items:flex-start}
+.arb-caption{font-size:10px;color:var(--warm);letter-spacing:.14em;font-weight:850}
+.arb-big{font-size:clamp(32px,4.5vw,56px);letter-spacing:-.055em;line-height:1.35;font-weight:750;margin-top:15px;font-variant-numeric:tabular-nums}
+.arb-big.negative,.arb-result-status.negative{color:var(--red)}
+.arb-big.positive,.arb-result-status.positive{color:var(--green)}
+.arb-result-status{font-size:12px;margin-top:3px}
+.arb-output-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin:25px 0}
+.arb-output-grid>div{padding:13px;background:rgba(4,11,20,.34);border-radius:6px;border:1px solid var(--line)}
+.arb-output-grid small{display:block;font-size:10px;color:var(--dim)}
+.arb-output-grid b{display:block;font-size:18px;font-weight:700;margin-top:6px;font-variant-numeric:tabular-nums}
+.arb-caution{font-size:11px;color:var(--muted);line-height:1.8;border-left:2px solid var(--warm);padding-left:14px;margin-bottom:15px}
+.arb-caution strong{color:var(--warm2)}
+.arb-reality{padding:24px 26px;background:var(--panel);border:1px solid var(--line);border-radius:12px;margin-top:18px}
+.arb-reality strong{font-size:16px}
+.arb-reality p{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.8}
+.arb-reality b{color:var(--text)}
+@media(max-width:1080px){.arb-principles{grid-template-columns:repeat(2,minmax(0,1fr))}.arb-row-action .tier{display:none}}
+@media(max-width:800px){.arb-calculator{grid-template-columns:1fr}.arb-fields{border-right:0;border-bottom:1px solid var(--line)}.arb-guide-head{align-items:flex-start;flex-direction:column}.arb-row{align-items:flex-start;flex-direction:column;gap:10px}.arb-row-action{padding-left:44px}.arb-fields{grid-template-columns:1fr 1fr}}
+@media(max-width:540px){.arb-principles{grid-template-columns:1fr}.arb-principles article{padding:18px}.arb-motto{padding:18px;gap:12px}.arb-motto-icon{font-size:30px}.arb-motto strong{font-size:16px}.arb-fields{padding:18px;gap:12px}.arb-fields label{font-size:10px}.arb-fields input,.arb-fields select{padding:10px 8px}.arb-output{padding:21px}.arb-output-grid b{font-size:16px}.arb-row-action{padding-left:0;flex-wrap:wrap}.arb-row-main p{font-size:11px}.arb-details-btn{padding-left:0}.arb-guide-head{padding:20px}.arb-tabs{gap:6px}.arb-tab{font-size:11px;padding:9px}}
