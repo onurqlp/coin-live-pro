@@ -38,3 +38,27 @@ padding:12px;text-align:left;display:grid;gap:5px;min-height:110px}
 .v4Positions{grid-template-columns:1fr 1fr}.v4Column.spotlight{grid-column:1/-1}}
 @media(max-width:480px){.v4Columns,.v4Positions{grid-template-columns:1fr}.v4Kpis{grid-template-columns:1fr 1fr}
 .v4Desk{padding:12px}.v4Header h2{font-size:17px}.v4Cards{max-height:440px}.v4Opportunity{padding:10px}}
+
+/* Finished V4 workspace: quiet opt-in advanced technical section, not duplicate dashboard. */
+.v4TechDisclosure{margin:18px 0;padding:13px 15px}
+.v4TechDisclosure>summary{font-size:13px;line-height:1.5;color:#b7d3e9}
+.v4TechDisclosure[open]>summary{margin-bottom:12px}
+.v4TechNote{font-size:12px;color:#9db5d0;margin:0 4px 16px}
+.v4TechDisclosure .hero{margin-top:12px}
+.v4Observation{display:flex;align-items:center;justify-content:space-between;gap:15px;
+ margin:4px 0 15px;padding:11px 14px;border:1px solid #344860;border-radius:11px;
+ background:#0c1929;flex-wrap:wrap}
+.v4Observation>div:first-child{display:grid;gap:3px;min-width:0}
+.v4Observation strong{font-size:13px;color:#e5f4ff}
+.v4Observation small{font-size:11px;color:#9fb8d2}
+.v4ObservationBar{width:clamp(105px,26%,280px);height:7px;border-radius:99px;
+ background:#263b50;overflow:hidden;flex:0 0 auto}
+.v4ObservationBar span{display:block;height:100%;width:0;background:#78b6d9;border-radius:99px}
+@media(max-width:540px){.v4ObservationBar{width:100%}}
+
+/* V4 original forward event history, independent of legacy V3 results. */
+.v4HistoryPanel{margin:12px 0}
+.v4HistoryRows{display:grid;gap:8px;padding:12px 14px;max-height:600px;overflow:auto}
+.v4HistoryItem{border:1px solid #34465e;border-radius:10px;padding:11px 12px;background:#122137}
+.v4HistoryTop{display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;align-items:center;font-size:12px}
+.v4HistoryTop strong{font-size:10px;color:#b0dfeb}

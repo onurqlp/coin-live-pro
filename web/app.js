@@ -338,7 +338,7 @@ $('calculator').onclick=()=>{$('calcModal').classList.add('open');calculator();}
 $('calcClose').onclick=()=>{$('calcModal').classList.remove('open');};
 $('calcModal').onclick=e=>{if(e.target===$('calcModal'))$('calcModal').classList.remove('open');};
 $('balanceInput').oninput=calculator;
-$('alerts').disabled=true;$('alerts').textContent='🔕 Pilot: bildirim kapalı';
+$('alerts').disabled=true;$('alerts').textContent='🔕 Bildirimler kapalı';
 window.CoinLivePro={state:S,render,currentRadar,get,fmt,age,notify,refreshState,selectSpark};
 window.addEventListener('resize',()=>{if(S.selected)drawChart();});
 refresh();

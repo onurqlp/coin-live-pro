@@ -49,8 +49,12 @@ class TestV4OfflineIntegrated(unittest.TestCase):
             forward_public=v4_forward.view(forward,board['scan_id'],now)
             lab=v4_lab.compile_report(life,wallet,shadow,now,forward)
             lab['scan_id']=board['scan_id']
+            history={'model_version':'4.0.0','scan_id':board['scan_id'],
+                'updated_at':board['updated_at'],'archive_days':90,
+                'archived_total':life['archived_count'],'events':life['events'][-140:]}
             for key,obj in [('market',market),('mtf',m),('swing-radar',radar),
                             ('health',health),('v4-oi',oi_pub),('v4-radar',board),
+                            ('v4-history-index',history),
                             ('v4-paper',account),('v4-shadow',shadow_public),
                             ('v4-forward',forward_public),('v4-lab',lab)]:
                 (path/(key+'.json')).write_text(json.dumps(obj))
@@ -64,7 +68,7 @@ class TestV4OfflineIntegrated(unittest.TestCase):
                 self.assertFalse(account['legacy_v3_balance_included'])
                 self.assertTrue(account['no_real_orders'])
                 self.assertTrue(all(x['lifecycle_stage']=='WATCH' for x in life['items']))
-                self.assertEqual(len(manifest['sources']),10)
+                self.assertEqual(len(manifest['sources']),11)
                 shadow_public['scan_id']='incorrect-mixed-round'
                 (path/'v4-shadow.json').write_text(json.dumps(shadow_public))
                 with self.assertRaisesRegex(RuntimeError,'scan ids'):

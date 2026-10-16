@@ -22,7 +22,7 @@
  FUNDING_CROWDING:'Fonlama kalabalıklaşması',NOT_LIQUIDATION_PROOF:'Tasfiye kanıtı değil',
  BEARISH_DAILY_4H:'1D ve 4H aşağı yön',SUPPORT_CLOSED_BREAK:'Destek kapanışta kırıldı',
  SUPPORT_WATCH:'Destek kırılımı bekleniyor'};
- const store={radar:null,paper:null,shadow:null,lab:null,manifest:null,position:null,lastFetch:0,loading:false};
+ const store={radar:null,paper:null,shadow:null,lab:null,history:null,manifest:null,position:null,lastFetch:0,loading:false};
  window.CoinV4=store;
  function explanation(v){return (v?.reasons||[]).slice(0,3).map(s=>why[s]||s).join(' · ')||'Yeni kapanmış mum kanıtı bekleniyor';}
  function card(x){
@@ -40,9 +40,25 @@
      '<button type="button" class="v4GoChart" data-v4-symbol="'+safe(x.symbol)+
      '" data-v4-side="'+safe(x.side)+'">Grafiği incele ↗</button></article>';
  }
+ function observationProgress(){
+   const started=Date.parse(store.paper?.pilot_started_at||'');
+   const status=$('v4ObservationStatus'), dates=$('v4ObservationDates'),bar=$('v4ObservationFill');
+   if(!status||!dates||!bar)return;
+   if(!Number.isFinite(started)){status.textContent='90 günlük gözlem · başlangıç verisi bekleniyor';return;}
+   const ends=started+90*86400000;
+   const elapsed=Math.max(0,Math.min(90,Math.floor((Date.now()-started)/86400000)));
+   const remaining=Math.max(0,Math.ceil((ends-Date.now())/86400000));
+   const formatDay=ms=>new Date(ms).toLocaleDateString('tr-TR',{
+     timeZone:'Europe/Istanbul',day:'2-digit',month:'long',year:'numeric'});
+   status.textContent=remaining>0?'90 günlük gözlem · '+elapsed+'. gün · '+remaining+' gün kaldı':
+     '90 günlük gözlem süresi tamamlandı · sonuçlar arşivde';
+   dates.textContent=formatDay(started)+' — '+formatDay(ends)+' · piyasa verileri otomatik kaydedilir';
+   bar.style.width=(Math.min(100,Math.max(0,(Date.now()-started)/(90*86400000)*100))).toFixed(1)+'%';
+ }
  function drawBoard(){
    const r=store.radar,manifest=store.manifest;
    if(!r)return;
+   observationProgress();
    const minutes=(Date.now()-Date.parse(manifest.finished_at_utc))/60000;
    const stale=!Number.isFinite(minutes)||minutes>25;
    const status=$('v4Status');status.textContent=stale?'V4 KAYNAK GECİKMİŞ · GÜNCEL TEYİT YOK':
@@ -61,7 +77,7 @@
    $('v4RecheckCount').textContent=r.counts?.recheck_pending??'—';
    $('v4ArchivedCount').textContent=r.counts?.archived_total??'—';
    document.querySelectorAll('[data-v4-symbol]').forEach(b=>b.onclick=()=>{
-     if(typeof window.CoinLiveSelectSpark==='function')window.CoinLiveSelectSpark(b.dataset.v4Symbol,'4H',false);
+     if(typeof window.CoinLiveSelectSpark==='function')window.CoinLiveSelectSpark(b.dataset.v4Symbol,'4H',true);
    });
  }
  function kpi(label,value){return '<div class="v4Kpi"><small>'+safe(label)+'</small><strong>'+safe(value)+'</strong></div>';}
@@ -127,6 +143,33 @@
      if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);});ctx.stroke();
    ctx.fillText(fmt(values[values.length-1])+' USDT (sanal)',12,16);
  }
+ function renderHistory(){
+    if(!store.history)return;
+    const data=store.history;
+    // WATCH_STARTED duplicates the associated DISCOVERED event.
+    const events=(data.events||[]).filter(x=>x.type!=='WATCH_STARTED')
+      .slice().sort((a,b)=>Date.parse(b.event_time_utc)-Date.parse(a.event_time_utc))
+      .slice(0,90);
+    const statusNames={
+      DISCOVERED:'YENİ KIVILCIM',MOTION_STARTED:'HAREKET BAŞLADI',
+      SPOTLIGHT_PROMOTED:'GÖZ ÖNÜNDE',DOWNGRADED:'TEYİT ZAYIFLADI',
+      INVALIDATED:'GEÇERSİZ',ARCHIVED:'ARŞİVE ALINDI',
+      ENTRY_ELIGIBLE:'SANAL GİRİŞ ŞARTLARI OLUŞTU'};
+    const count=$('v4HistoryCount');
+    if(count)count.textContent=events.length+' son olay · arşiv '+(data.archived_total||0);
+    const list=$('v4HistoryRows');
+    if(!list)return;
+    list.innerHTML=events.length?events.map(x=>{
+      const label=statusNames[x.type]||x.type;
+      const code=x.reason_codes?.[0]||'—';
+      return '<article class="v4HistoryItem"><div class="v4HistoryTop"><b>'+safe(x.symbol)+
+        ' · '+safe(x.side)+'</b><strong>'+safe(label)+'</strong></div>'+
+        '<div class="v4Sub">'+safe(date(x.event_time_utc))+' · '+
+        safe(names[x.strategy_id]||x.strategy_id)+' · '+safe(code)+'</div>'+
+        '<div class="v4Meta">Gözlenen seviye: '+safe(fmt(x.price_at_transition))+
+        ' USDT · Canlı emir değildir.</div></article>';
+    }).join(''):'<div class="v4Empty">V4 gözleminde henüz yeni kayıt yok. Başka sürümden geçmiş aktarılmadı.</div>';
+ }
  function renderLab(){
    if(!store.lab)return;
    const p=store.lab.periods?.[Number($('v4LabWindow').value)||0];
@@ -160,10 +203,12 @@
      if(!response.ok)throw Error('V4 henüz sunucuya yayınlanmadı');
      const m=await response.json();
      if(!m.publication_valid||m.model_version!=='4.0.0-manifest-a1')throw Error('V4 manifest geçersiz');
-     const [r,p,sh,lab]=await Promise.all(['v4-radar','v4-paper','v4-shadow','v4-lab'].map(k=>readJson(k,m)));
-     if([r,p,sh,lab].some(x=>x.scan_id!==m.scan_id))throw Error('V4 farklı tarama verileri karışmış');
-     store.manifest=m;store.radar=r;store.paper=p;store.shadow=sh;store.lab=lab;
-     store.lastFetch=Date.now();drawBoard();renderDesk();renderLab();
+     const [r,p,sh,lab,history]=await Promise.all(
+       ['v4-radar','v4-paper','v4-shadow','v4-lab','v4-history-index'].map(k=>readJson(k,m)));
+     if([r,p,sh,lab,history].some(x=>x.scan_id!==m.scan_id))
+       throw Error('V4 farklı tarama verileri karışmış');
+     store.manifest=m;store.radar=r;store.paper=p;store.shadow=sh;store.lab=lab;store.history=history;
+     store.lastFetch=Date.now();drawBoard();renderDesk();renderLab();renderHistory();
    }catch(error){
      $('v4Status').textContent='V4 veri kontrolü: '+error.message;
      $('v4PaperStatus').textContent='V4 sunucu verisi doğrulanamadı; yeni sanal sonuç yok';
