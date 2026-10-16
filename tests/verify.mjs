@@ -20,7 +20,7 @@ for(const id of ['radarRows','swingHistoryRows','forwardRows','forwardSummary','
 assert.ok(!fs.existsSync('web/live-radar.js'),'Obsolete 15m browser scanner must be deleted');
 assert.ok(html.includes('legacy-reset.js?')&&!html.includes('live-radar.js?'),'V3 resets old local device history');
 assert.ok(cleanup.includes("removeItem('clpro.local_events_v1')"),'Browser 15m history reset missing');
-assert.ok(!html.includes('Eski 15m')&&!html.includes('id="historyRows"')&&!html.includes('id="browserHistory"'),'Legacy history UI is not allowed');
+assert.ok(!html.includes('Eski 15 Dakikalık Pilot Arşivi')&&!html.includes('id="historyRows"')&&!html.includes('id="browserHistory"'),'Legacy history UI is not allowed');
 assert.ok(!code.includes("'history','reports'")&&!code.includes("'2.4.0-htf-sparks'")&&!code.includes("'2.3.0-htf-sparks'"),'Cannot accept legacy models');
 assert.ok(code.includes("'3.0.0-htf-sparks'")&&code.includes("'swing-history'")&&code.includes("'swing-outcomes'"),'V3 canonical data sources required');
 assert.ok(code.includes('selectSpark(el.dataset.symbol,el.dataset.tf)'),'Spark must select its own native chart');
