@@ -333,6 +333,11 @@ def main():
     if life.get('policy_version')!=policy.get('policy_version'):
         raise RuntimeError('V4 paper/lifecycle policy mismatch')
     previous=read(ARCH,{})
+    # Immutable one-time V3 legacy snapshot: V4 never recalculates or merges it.
+    legacy=ROOT/'archive'/'v3-paper-legacy-snapshot.json'
+    if not previous and not legacy.exists():
+        original=ROOT/'archive'/'pilot-ledger.json'
+        if original.exists():save(legacy,read(original,{}))
     started=previous.get('pilot_started_ms',now_ms)
     if abs(now_ms-int(started))>365*DAY:raise RuntimeError('Invalid V4 pilot timestamp')
     # Read-only source, don't backfill any V3 signal into this brand-new desk.
@@ -349,6 +354,10 @@ def main():
         except Exception:bars[symbol]=[]
         specs[symbol]=fetch_instrument(symbol)
     ledger,doc=advance(previous,life,market,now_ms,bars,specs,policy)
+    radar=read(DATA/'v4-radar.json',{})
+    if radar.get('policy_version')!=policy.get('policy_version'):
+        raise RuntimeError('V4 lifecycle to paper scan mismatch')
+    doc['scan_id']=radar.get('scan_id')
     save(ARCH,ledger);save(DATA/'v4-paper.json',doc)
     print('V4 PAPER equity',doc['equity_usdt'],'filled',len(doc['open_positions']),
           'orders',len(ledger['orders']),flush=True)
