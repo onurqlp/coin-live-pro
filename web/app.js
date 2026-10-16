@@ -11,8 +11,7 @@ const clock=ms=>Number.isFinite(ms)?new Date(ms).toLocaleString('tr-TR',{timeZon
 const usd=x=>x>=1e9?'$'+(x/1e9).toFixed(2)+'B':x>=1e6?'$'+(x/1e6).toFixed(1)+'M':x>=1000?'$'+(x/1000).toFixed(1)+'K':'$'+Number(x||0).toFixed(2);
 async function get(path){const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),8500);try{const r=await fetch(path+(path.includes('?')?'&':'?')+'_='+Date.now(),{cache:'no-store',signal:ctl.signal});if(!r.ok)throw Error('HTTP '+r.status);return r.json();}finally{clearTimeout(timer);}}
 async function directQuote(){const data=await get('https://www.okx.com/api/v5/market/tickers?instType=SWAP');if(data.code!=='0'||!Array.isArray(data.data))throw Error('OKX feed');const rows=[];for(const x of data.data){if(!x.instId?.endsWith('-USDT-SWAP'))continue;const p=+x.last,o=+x.open24h,q=+x.volCcyQuote24h||(+x.volCcy24h*p);if(p>0&&q>0)rows.push({symbol:x.instId.slice(0,-10)+'USDT',price:p,change:o>0?(p/o-1)*100:null,volume:q});}return rows.sort((a,b)=>b.volume-a.volume).slice(0,100);}
-function notify(item){return; /* 7-day pilot intentionally disables external/browser alerts */
- if(!('Notification' in window)||Notification.permission!=='granted'||S.notified.has(item.id))return;S.notified.add(item.id);try{new Notification('COIN.LIVE PRO · '+item.side+' '+item.stage,{body:item.symbol+' · '+fmt(item.price)+' · radar '+item.score+'/100 · gözlem, garanti değil'});}catch(e){}}
+function notify(){return; /* No browser alerts or automatic orders. */}
 function currentRadar(){
  // Official cross-device radar is ONLY the central server snapshot.
  // Independent browser comparison never affects shared history or paper PnL.
@@ -341,7 +340,7 @@ $('calculator').onclick=()=>{$('calcModal').classList.add('open');calculator();}
 $('calcClose').onclick=()=>{$('calcModal').classList.remove('open');};
 $('calcModal').onclick=e=>{if(e.target===$('calcModal'))$('calcModal').classList.remove('open');};
 $('balanceInput').oninput=calculator;
-$('alerts').disabled=true;$('alerts').textContent='🔕 Bildirimler kapalı';
+
 window.CoinLivePro={state:S,render,currentRadar,get,fmt,age,notify,refreshState,selectSpark};
 window.addEventListener('resize',()=>{if(S.selected)drawChart();});
 refresh();
