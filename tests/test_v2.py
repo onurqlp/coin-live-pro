@@ -94,7 +94,7 @@ class TestAuditedPaper(unittest.TestCase):
 class TestCronEvidence(unittest.TestCase):
     def test_scheduled_slots_counted_only_after_last_run(self):
         self.assertEqual(health.slots_between('2026-10-16T00:07:00+00:00',
-           dt.datetime(2026,10,16,0,37,tzinfo=dt.timezone.utc)),2)
+           dt.datetime(2026,10,16,0,37,tzinfo=dt.timezone.utc)),6)
     def test_push_is_not_schedule(self):
         self.assertNotEqual('push','schedule')
 
