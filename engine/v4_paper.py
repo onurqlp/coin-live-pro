@@ -126,11 +126,19 @@ def queue_intents(log,lifecycle,now_ms):
         log['orders'][intent]=order
         event(log,'PAPER_ORDER_CREATED',intent,when,{'paper_market_only':True})
 
+RISK_BLOCK_REASONS={
+    'MAX_CONCURRENT_POSITIONS','SAME_SYMBOL_CONCENTRATION',
+    'TOTAL_RISK_BUDGET','DAILY_NEW_RISK_BUDGET',
+    'DAILY_REALIZED_LOSS_LIMIT','INSUFFICIENT_MARGIN',
+    'LOT_ROUNDING_RISK_EXCEEDED','MIN_LOT_OR_MARGIN_BLOCKED'
+}
 def reject(log,o,why,ms):
-    o['status']='NO_FILL'
+    blocked=why in RISK_BLOCK_REASONS
+    o['status']='RISK_BLOCKED' if blocked else 'NO_FILL'
     o['no_fill_reason']=why
     o['finished_at_ms']=ms
-    event(log,'PAPER_NO_FILL',o['paper_order_id'],ms,{'reason':why})
+    event(log,'PAPER_RISK_BLOCKED' if blocked else 'PAPER_NO_FILL',
+          o['paper_order_id'],ms,{'reason':why})
 
 def maybe_fill(log,o,bars,spec,policy,now_ms,volume):
     if o['status']!='PENDING':return
