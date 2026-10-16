@@ -131,11 +131,16 @@
    if(!store.lab)return;
    const p=store.lab.periods?.[Number($('v4LabWindow').value)||0];
    if(!p)return;
-   $('v4LabBody').innerHTML=Object.entries(p.strategies||{}).map(([id,r])=>
-     '<div class="v4LabRow"><b>'+safe(names[id]||id)+'</b><span>İZLE '+r.discovered+
-     ' · HAREKET '+r.motion+' · GÖZ ÖNÜNDE '+r.spotlight+
-     ' · ELENDİ '+(r.invalidated+r.expired_or_stale)+
-     ' · başarı: örneklem yetersiz</span></div>').join('');
+   $('v4LabBody').innerHTML=Object.entries(p.strategies||{}).map(([id,r])=>{
+     const h=r.forward_horizons?.['24H'];
+     const forward=h?.observed ? ' · 24s örnek '+h.observed+
+       ' · medyan MFE '+fmt(h.median_mfe_pct)+'% · MAE '+fmt(h.median_mae_pct)+'%' :
+       ' · 24s gözlem henüz yok';
+     return '<div class="v4LabRow"><b>'+safe(names[id]||id)+'</b><span>İZLE '+r.discovered+
+       ' · HAREKET '+r.motion+' · GÖZ ÖNÜNDE '+r.spotlight+
+       ' · ELENDİ '+(r.invalidated+r.expired_or_stale)+
+       safe(forward)+' · başarı: örneklem yetersiz</span></div>';
+   }).join('');
    $('v4LabFooter').textContent='Shadow: '+p.shadow.attempts+' deneme, '+p.shadow.resolved+
      ' sonuç · belirsiz '+p.shadow.ambiguous+' · boşluk '+p.shadow.data_gap+
      ' · kasa emri '+p.paper.created+' · fonlama bilinmiyor. Kazanma ihtimali değildir.';
