@@ -1,33 +1,36 @@
-<!doctype html><html lang="tr"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta name="theme-color" content="#08101c"/><title>COIN.LIVE PRO 4.01 | 90 Günlük Canlı Gözlem</title><meta name="description" content="LONG/SHORT kanıta dayalı İZLE HAREKET GÖZ ÖNÜNDE radarı, 10.000 USDT sanal Futures Desk, 1H–7D ileri takip ve 7/14/30/90 günlük rapor. Gerçek emir yok."/><link rel="stylesheet" href="./style.css?v=14"/><link rel="stylesheet" href="./v4-style.css?v=8"/></head>
-<body><div class="shell"><header class="header"><div><div class="brand">COIN<span>.LIVE</span><small> PRO 4.01 / 90 GÜN GÖZLEM</small></div><div class="sub">LONG + SHORT · İZLE → HAREKET → GÖZ ÖNÜNDE · 10.000 USDT SANAL KASA</div>
-<div class="releaseMeta" aria-label="Sürüm ve son kod güncellemesi"><strong id="releaseVersion">Sürüm 4.01</strong><small id="releaseUpdated">Son kod güncellemesi kontrol ediliyor · UTC</small></div><details class="releaseHistory" id="releaseHistory"><summary>Güncelleme geçmişi (UTC)</summary><ol id="releaseHistoryList"><li>Yayın kayıtları yükleniyor…</li></ol><small>Sürümü yalnız siz değiştirirsiniz. Kod tarihi, son analiz zamanı ve mum kapanışı ayrı kayıtlardır.</small></details></div><div class="buttons"><span class="source" id="source">Veriler kontrol ediliyor</span><span class="quoteClock" id="quoteClock">Fiyat bağlantısı bekleniyor</span><button id="refresh" class="primary">↻ Güncelliği Kontrol Et</button><button id="calculator">▦ Mini Hesap Makinesi</button></div></header>
+<!doctype html><html lang="tr"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta name="theme-color" content="#08101c"/><title>COIN.LIVE PRO 4.01 | 90 Günlük Canlı Gözlem</title><meta name="description" content="LONG/SHORT kanıta dayalı İZLE HAREKET GÖZ ÖNÜNDE radarı, 10.000 USDT sanal Futures Desk, 1H–7D ileri takip ve 7/14/30/90 günlük rapor. Gerçek emir yok."/><link rel="stylesheet" href="./style.css?v=14"/><link rel="stylesheet" href="./v4-style.css?v=8"/><link rel="stylesheet" href="./ui-refresh.css?v=1"/></head>
+<body><div class="shell"><header class="header"><div><div class="brand">COIN<span>.LIVE</span><small> PRO 4.01 / 90 GÜN GÖZLEM</small></div><div class="sub">LONG ve SHORT fırsat takibi · 4H + günlük ana yön · 10.000 USDT sanal kasa</div>
+<div class="releaseMeta" aria-label="Sürüm ve son kod güncellemesi"><strong id="releaseVersion">Sürüm 4.01</strong><small id="releaseUpdated">Son kod güncellemesi kontrol ediliyor · UTC</small></div><details class="releaseHistory" id="releaseHistory"><summary>Güncelleme geçmişi (UTC)</summary><ol id="releaseHistoryList"><li>Yayın kayıtları yükleniyor…</li></ol><small>Sürümü yalnız siz değiştirirsiniz. Kod tarihi, son analiz zamanı ve mum kapanışı ayrı kayıtlardır.</small></details></div><div class="buttons"><span class="source" id="source">Veriler kontrol ediliyor</span><span class="quoteClock" id="quoteClock">Fiyat bağlantısı bekleniyor</span><button id="refresh" class="primary">↻ Güncelliği Kontrol Et</button><button id="calculator" title="Eski V3 100 USDT hesabı için örnek matematik">▦ Risk Hesabı (Eski Pilot)</button></div></header>
 <nav class="workspaceNav" aria-label="COIN.LIVE PRO çalışma alanları" id="workspaceNav">
-  <a href="#radar" data-nav="radar" aria-current="page"><span>⚡</span> Radar</a>
-  <a href="#grafikler" data-nav="grafikler"><span>📈</span> Grafikler / Piyasa</a>
-  <a href="#portfoy" data-nav="portfoy"><span>🧪</span> Sanal Portföy</a>
-  <a href="#gecmis" data-nav="gecmis"><span>🧭</span> Geçmiş</a>
-  <a href="#rapor" data-nav="rapor"><span>📊</span> 90 Günlük Rapor</a>
-  <a href="#sistem" data-nav="sistem"><span>🩺</span> Sistem Sağlığı</a>
+  <a href="#radar" data-nav="radar" aria-current="page"><span>⚡</span> Fırsatlar</a>
+  <a href="#grafikler" data-nav="grafikler"><span>📈</span> Grafik</a>
+  <a href="#portfoy" data-nav="portfoy"><span>🧪</span> Sanal Kasa</a>
+  <a href="#gecmis" data-nav="gecmis"><span>🧭</span> Arşiv</a>
+  <a href="#rapor" data-nav="rapor"><span>📊</span> Sonuçlar</a>
+  <a href="#sistem" data-nav="sistem"><span>🩺</span> Sistem</a>
 </nav>
 <div class="routeStatus" id="routeStatus" role="status" aria-live="polite">
-  <span id="routeCurrent">⚡ Radar</span>
-  <small>Merkezi OKX araştırması · PC kapalıyken GitHub zamanlayıcısına bağlı · Gerçek emir yok</small>
+  <span id="routeCurrent">⚡ Fırsatlar</span>
+  <small>OKX kapanmış mum taraması · sanal araştırma · gerçek emir yok</small>
   <a href="#sistem" id="cronIndicator">Zamanlayıcı doğrulanıyor ↗</a>
 </div>
 <div class="banner loading" id="health"><strong id="healthTitle">Kaynak bekleniyor</strong><span id="healthExplain">Veri gelmeden işlem senaryosu gösterilmez</span><small id="healthTime">—</small><a id="serverRestart" class="staleAction" hidden href="https://github.com/onurqlp/coin-live-pro/actions/workflows/market.yml" target="_blank" rel="noopener noreferrer" title="GitHub Actions içinde Run workflow düğmesine basarak yeni merkezi taramayı başlat">⚙ GitHub’da taramayı başlat ↗</a></div>
 <main class="workspaceView" data-view="radar" id="view-radar" >
 <section class="v4Area" id="v4Board" aria-labelledby="v4Title">
- <div class="v4Header"><div><h2 id="v4Title">Canlı Fırsat Panosu</h2>
- <p>Önce kaliteli fırsatları karşılaştır, alt sıradan izlediklerini seç ve grafiği aynı sayfada incele. Puan, kazanma olasılığı değildir.</p></div>
+ <div class="v4Header"><div><h2 id="v4Title">Fırsat Radarı</h2>
+ <p>Adayları karşılaştır, coini seç ve grafiği kontrol et. <strong>Puan başarı yüzdesi değildir.</strong></p></div>
  <div class="v4Counts"><span>İZLE <strong id="v4WatchCount">—</strong></span><span>HAREKET <strong id="v4MotionCount">—</strong></span>
  <span>GÖZ ÖNÜNDE <strong id="v4SpotCount">—</strong></span>
  <span>Yeniden kontrol <strong id="v4RecheckCount">—</strong></span>
  <span>Arşiv <strong id="v4ArchivedCount">—</strong></span></div></div>
  <div class="v4Status" id="v4Status" role="status">Merkezi piyasa taraması doğrulanıyor…</div>
 <div class="v4UtcBar" aria-label="Global UTC piyasa döngüsü">
- <span id="v4GlobalUtcClock">🌍 UTC piyasa saati yükleniyor…</span>
+ <span id="v4GlobalUtcClock">🌍 UTC saati yükleniyor…</span>
+ <details class="v4UtcMore"><summary>Seans ve anomali ayrıntıları</summary>
  <span id="v4GlobalSession">24/7 kripto · Tokyo / Londra / New York gözlem pencereleri</span>
- <small id="v4AnomalyHourly">Anomali saatleri için ileriye dönük örneklem birikiyor</small><small class="v4MarketContext">Tarihsel araştırmalarda Avrupa–ABD örtüşmesinde (yaklaşık 13:00–17:00 UTC) hacim ve oynaklık sıklıkla artar. Bu manipülasyon kanıtı değildir. <a href="https://doi.org/10.1007/s11156-024-01304-1" target="_blank" rel="noopener noreferrer">Araştırma ↗</a></small>
+ <small id="v4AnomalyHourly">Anomali saatleri için ileriye dönük örneklem birikiyor</small>
+ <small class="v4MarketContext">Avrupa–ABD örtüşmesi (yaklaşık 13:00–17:00 UTC) kimi dönemlerde daha hareketlidir. Bu manipülasyon kanıtı değildir. <a href="https://doi.org/10.1007/s11156-024-01304-1" target="_blank" rel="noopener noreferrer">Kaynağı incele ↗</a></small>
+ </details>
 </div>
  <div class="v4Observation" aria-label="90 günlük gözlem dönemi">
    <div><strong id="v4ObservationStatus">90 günlük izleme dönemi hazırlanıyor</strong>
@@ -40,13 +43,26 @@
   <div class="v4SummaryMetric short"><small>SHORT ADAYI</small><strong id="v4ShortTotal">—</strong><span>Tekil parite · izleme dahil</span></div>
   <div class="v4SummaryMetric"><small>SON MERKEZİ ANALİZ</small><strong id="v4LastAnalysis">—</strong><span id="v4LastAnalysisAge">Gerçek tarama kontrol ediliyor</span></div>
  </div>
- <div class="v4TopRow" aria-label="Öncelikli fırsatlar">
-   <section class="v4Column spotlight" aria-label="Göz önünde olan fırsatlar"><h3><span>◎ GÖZ ÖNÜNDE</span><small>En sıkı teyit</small></h3><div id="v4Spotlight" class="v4Cards"><div class="v4Empty">Kaynak bekleniyor</div></div></section>
-   <section class="v4Column motion" aria-label="Hareketi başlayan fırsatlar"><h3><span>↗ HAREKET</span><small>İlerleyen adaylar</small></h3><div id="v4Motion" class="v4Cards"><div class="v4Empty">Kaynak bekleniyor</div></div></section>
+ <div class="v4Guide" aria-label="Üç adımda nasıl kullanılır">
+ <span><b>01</b> Fırsat seç</span><span><b>02</b> 4H ve 1D yönünü incele</span><span><b>03</b> Arşivden sonraki sonucu karşılaştır</span>
+</div>
+<div class="v4RadarTools" role="search" aria-label="Radar fırsat filtresi">
+ <label for="v4RadarSearch">Coin veya strateji ara
+   <input id="v4RadarSearch" type="search" placeholder="Örn. BTC, SOL, Yanardağ" autocomplete="off" />
+ </label>
+ <label for="v4RadarSide" class="v4DirectionField">Yön seç
+   <select id="v4RadarSide"><option value="ALL">Tüm yönler</option><option value="LONG">↑ Yalnız LONG</option><option value="SHORT">↓ Yalnız SHORT</option></select>
+ </label>
+ <span id="v4RadarFilterStatus" role="status" aria-live="polite">Radar yükleniyor…</span>
+</div>
+<div class="v4Legend" aria-label="Renklerin anlamları"><span class="long"><i></i> LONG · yükseliş yönlü</span><span class="short"><i></i> SHORT · düşüş yönlü</span><span class="wait"><i></i> İZLE · teyit bekliyor</span></div>
+<div class="v4TopRow" aria-label="Öncelikli fırsatlar">
+   <section class="v4Column spotlight" aria-label="Göz önünde olan fırsatlar"><h3><span>◎ GÖZ ÖNÜNDE</span><small>Güçlü gözlem · işlem garantisi değil</small></h3><div id="v4Spotlight" class="v4Cards"><div class="v4Empty">Kaynak bekleniyor</div></div></section>
+   <section class="v4Column motion" aria-label="Hareketi başlayan fırsatlar"><h3><span>↗ HAREKET</span><small>Hareket gözleniyor</small></h3><div id="v4Motion" class="v4Cards"><div class="v4Empty">Kaynak bekleniyor</div></div></section>
  </div>
  <div class="v4LowerRow" aria-label="İzlenen fırsatlar ve aynı sayfada grafik">
-   <section class="v4Column watch" aria-label="Erken izlemeye alınan fırsatlar"><h3><span>◌ İZLE</span><small>Grafik için adaya dokun</small></h3><div id="v4Watch" class="v4Cards"><div class="v4Empty">Kaynak bekleniyor</div></div></section>
-   <div id="chartHostRadar" class="radarChartHost v4ChartHost"><section class="panel" id="chartPanel"><div class="panelHead"><div><h2>📈 Seçili Coin Grafiği</h2><p>Yandaki veya yukarıdaki bir fırsata dokun: grafik burada o coine döner. Mumlar kapanmış veri, turkuaz çizgi yalnız açık sayfadaki güncel fiyat göstergesidir.</p></div></div><div class="chartControls"><label for="chartCoin">COIN</label><select id="chartCoin"></select><label for="chartTf">PERİYOT</label><select id="chartTf" aria-label="Mum grafiği zaman dilimi"><option value="1m">1 dk</option><option value="5m">5 dk</option><option value="15m">15 dk</option><option value="1H">1 saat</option><option value="4H" selected>4 saat</option><option value="12H">12 saat</option><option value="1D">Günlük UTC</option><option value="1W">Haftalık UTC</option></select><a id="tvLink" href="https://www.tradingview.com/" target="_blank" rel="noopener">TradingView'da aç ↗</a></div><div id="chartQuickFrames" class="quickTf" role="group" aria-label="Hızlı grafik periyotları"><button type="button" data-quick-tf="AUTO" aria-pressed="false">🎯 Ana (4H)</button><button type="button" data-quick-tf="1W" aria-pressed="false">1 Hafta</button><button type="button" data-quick-tf="1D" aria-pressed="false">1 Gün</button><button type="button" data-quick-tf="4H" aria-pressed="false">4 Saat</button><button type="button" data-quick-tf="1H" aria-pressed="false">1 Saat</button><button type="button" data-quick-tf="15m" aria-pressed="false">15 dk</button><button type="button" data-quick-tf="1m" aria-pressed="false">1 dk</button></div><canvas id="candleChart" height="340" aria-label="Seçilen coinin seçili zaman dilimindeki kapanmış mum grafiği"></canvas><div id="chartCaption" class="chartFoot">Kapanmış mumlar yükleniyor.</div></section></div>
+   <section class="v4Column watch" aria-label="Erken izlemeye alınan fırsatlar"><h3><span>◌ İZLE</span><small>Erken adaylar · ayrıntı için dokun</small></h3><div id="v4Watch" class="v4Cards"><div class="v4Empty">Kaynak bekleniyor</div></div></section>
+   <div id="chartHostRadar" class="radarChartHost v4ChartHost"><section class="panel" id="chartPanel"><div class="panelHead"><div><h2>📈 Seçili Coin Grafiği</h2><p>Fırsattaki <b>Grafiği aç</b> düğmesine dokun. 4H ve günlük ana yönü, 1H zamanlamayı gösterir. Canlı fiyat çizgisi kapanmış mum değildir.</p></div></div><div class="chartControls"><label for="chartCoin">COIN</label><select id="chartCoin"></select><label for="chartTf">PERİYOT</label><select id="chartTf" aria-label="Mum grafiği zaman dilimi"><option value="1m">1 dk</option><option value="5m">5 dk</option><option value="15m">15 dk</option><option value="1H">1 saat</option><option value="4H" selected>4 saat</option><option value="12H">12 saat</option><option value="1D">Günlük UTC</option><option value="1W">Haftalık UTC</option></select><a id="tvLink" href="https://www.tradingview.com/" target="_blank" rel="noopener">TradingView'da aç ↗</a></div><div id="chartQuickFrames" class="quickTf" role="group" aria-label="Hızlı grafik periyotları"><button type="button" data-quick-tf="AUTO" aria-pressed="false">🎯 Ana (4H)</button><button type="button" data-quick-tf="1W" aria-pressed="false">1 Hafta</button><button type="button" data-quick-tf="1D" aria-pressed="false">1 Gün</button><button type="button" data-quick-tf="4H" aria-pressed="false">4 Saat</button><button type="button" data-quick-tf="1H" aria-pressed="false">1 Saat</button><button type="button" data-quick-tf="15m" aria-pressed="false">15 dk</button><button type="button" data-quick-tf="1m" aria-pressed="false">1 dk</button></div><canvas id="candleChart" height="340" aria-label="Seçilen coinin seçili zaman dilimindeki kapanmış mum grafiği"></canvas><div id="chartCaption" class="chartFoot">Kapanmış mumlar yükleniyor.</div></section></div>
  </div>
 </section>
 <details class="v4ContextDisclosure" id="v4ContextDisclosure"><summary>🌍 Haber ve sosyal gündem · Araştırma</summary><div class="v4ContextContent"><p id="v4NewsStatus" role="status">Haber kaynakları kontrol ediliyor…</p><div id="v4NewsItems" class="v4NewsItems"></div><small>Başlıklar ve sosyal söylentiler teknik teyit ya da manipülasyon kanıtı değildir.</small></div></details>
@@ -113,5 +129,5 @@
 <main class="workspaceView" data-view="sistem" id="view-sistem" hidden>
 <header class="pageIntro"><div class="kicker">DATA & OTOMASYON</div><h1>Sistem sağlığı</h1><p>Son gerçek analiz, atlanan döngüler, tarama kapsamı ve otomatik zamanlama kanıtı. GitHub push başarısı 24/7 schedule garantisi değildir.</p></header><section class="panel" id="systemPanel"><div class="panelHead"><div><h2>🩺 Sistem Sağlığı · Gerçek Cron Kanıtı</h2><p>Push ile çalışan işler otomatik zamanlama başarısı kabul edilmez. Veri yaşlanırsa yeni işlem açılmaz.</p></div><span class="tag" id="systemStatus">ÖLÇÜLÜYOR</span></div><div class="v2kpis" id="systemKpis"></div><div id="systemDetail" class="quality"></div></section>
 
-</main><div id="calcModal" class="modal" aria-modal="true" role="dialog" aria-label="Risk hesaplama"><div class="modalCard"><div class="modalHead"><h3>Teminat ve Risk Hesabı</h3><button id="calcClose">✕</button></div><p>Yalnızca <b>TEYİT</b> için koşullu matematiksel örnek. WATCH ile işlem açılmaz. Kaldıraç 10x, izole; hesap riski hedefi en fazla %1, kesin maksimum kayıp değil.</p><label>Bakiye (USDT)<input id="balanceInput" type="number" min="10" max="1000000" value="100" step="10"/></label><div id="calcResult" class="quality"></div></div></div>
+</main><div id="calcModal" class="modal" aria-modal="true" role="dialog" aria-label="Risk hesaplama"><div class="modalCard"><div class="modalHead"><h3>Eski V3 Risk Hesabı · Örnek</h3><button id="calcClose">✕</button></div><p>Eski <b>100 USDT sanal pilotu</b> için matematiksel örnek. Yeni 10.000 USDT V4 kasasının işlem ayarı değildir. İZLE ile işlem açılmaz. Stop kayması nedeniyle hedeflenen risk aşılabilir.</p><label>Bakiye (USDT)<input id="balanceInput" type="number" min="10" max="1000000" value="100" step="10"/></label><div id="calcResult" class="quality"></div></div></div>
 <footer><span id="releaseFooter">Sürüm 4.01 · UTC yayın kaydı kontrol ediliyor</span> · COIN.LIVE 90 günlük ileriye dönük LONG/SHORT araştırması · 10.000 USDT yalnız sanal kasa · gerçek emir ve bildirim yok. Mumlar UTC kapanışıyla değerlendirilir; zamanlayıcı gecikebilir.</footer></div><script defer src="./app.js?v=22"></script><script defer src="./pilot-ui.js?v=9"></script><script defer src="./router.js?v=4"></script><script defer src="./v4-ui.js?v=9"></script><script defer src="./watch-archive-ui.js?v=1"></script></body></html>
