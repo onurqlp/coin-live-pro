@@ -150,7 +150,23 @@ function renderRadar(){
  const active=currentRadar(),fresh=active.mode==='SERVER';
  const available=active.items.slice(0,16);
  $('radarRows').innerHTML=available.length?available.map((x,i)=>{
-   const confirmed=x.stage==='CONFIRMED',tf=x.primary_tf==='1D'?'GÜNLÜK':'4 SAAT';
+   const review=x.review_state||'FRESH';
+   const confirmed=x.stage==='CONFIRMED'&&review==='FRESH';
+   const tf=x.primary_tf==='1D'?'GÜNLÜK':'4 SAAT';
+   const lifecycle=review==='INVALIDATED'?'GEÇERSİZ':
+     review==='RECHECK_PENDING'?'YENİDEN KONTROL':
+     x.confirmation_lost?'TEYİT GERİ ÇEKİLDİ':
+     confirmed?'TEYİT':x.pressure_watch?'BİRİKİM İZLE':'İZLE';
+   const tech=x.technicals||{};
+   const quant=[['RSI4H',tech.rsi_4h],['ADX4H',tech.adx_4h],
+                ['MACD',tech.macd_hist_4h_pct],['RVOL4H',tech.volume_ratio_4h]]
+        .filter(([,n])=>Number.isFinite(Number(n)))
+        .map(([label,n])=>label+' '+Number(n).toFixed(2)).join(' · ');
+   const first=Date.parse(x.first_seen_at||x.observed_at_utc);
+   const last=Date.parse(x.last_evaluated_at||x.observed_at_utc);
+   const reviewText=review==='INVALIDATED'?'Eski sinyal geçersiz kılındı; yeni giriş değil':
+     review==='RECHECK_PENDING'?'Önceki sinyal saklı; bu tur yeniden ölçülmedi; yeni giriş değil':
+     x.confirmation_lost?'Önceki teyit artık geçerli değil':'En son merkezi taramada doğrulandı';
    const c=x.confirmation||{},states=x.confirmation_state||{};
    const timing=['1H','15m','1m','5m'].map(frame=>{
      const st=states[frame]||(frame==='1m'&&!c['1m_available']?'NO_HISTORY':c[frame]?'ALIGNED':'NOT_ALIGNED');
@@ -162,7 +178,7 @@ function renderRadar(){
      safe(x.symbol)+' '+safe(x.side)+' · '+tf+' mum grafiğini aç"><span class="rank">'+(i+1)+
      '</span><span class="sparkMain"><span class="coin">'+safe(x.symbol.replace('USDT',''))+
      ' <span class="chip '+(x.side==='LONG'?'long':'short')+'">'+safe(x.side)+'</span>'+
-     ' <span class="chip '+(confirmed?'confirmed':'watch')+'">'+(confirmed?'TEYİT':'İZLE')+'</span></span>'+
+     ' <span class="chip '+(confirmed?'confirmed':'watch')+'">'+safe(lifecycle)+'</span></span>'+
      '<span class="reason"><strong>'+tf+'</strong> · '+safe(x.expected_holding)+
      ' · haftalık '+(c['1W']?'uyumlu':states['1W']==='NO_HISTORY'?'veri eksik':'uyum yok')+' · risk '+safe(x.risk_score)+'/100'+
      (x.stage==='WATCH'&&x.strict_gate_reasons?.length?' · beklenen: '+safe(({
@@ -174,7 +190,13 @@ function renderRadar(){
        STRUCTURE_RISK_ELEVATED:'daha düşük risk',
        SCORE_BELOW_STRICT_GATE:'puan eşiği'
      })[x.strict_gate_reasons[0]]||'ek koşullar'):'')+
-     (flags?' · '+flags+' uyarı':'')+'</span><span class="timingRow">'+timing+'</span></span>'+
+     (flags?' · '+flags+' yapı uyarısı':'')+
+     (x.anomaly_flags?.length?' · şüpheli hareket göstergesi '+safe(x.anomaly_flags.length):'')+
+     '</span><span class="timingRow">'+timing+'</span>'+
+     '<small class="reason">🔬 '+safe(quant||'RSI/MACD/ADX ölçümleri bekleniyor')+
+     (x.pressure_watch?' · sıkışma/hacim: erken izleme, kırılım değil':'')+
+     '</small><small class="reason">'+safe(reviewText)+' · İlk: '+safe(clock(first))+
+     ' · Son kontrol: '+safe(clock(last))+'</small></span>'+
      '<span class="rval"><b>'+fmt(x.price)+'</b><small>Puan '+safe(x.score)+'/100</small>'+
      '<small class="viewChart">Grafiğe bak ↗</small></span></button>';
  }).join(''):'<div class="empty">'+(fresh?
@@ -216,7 +238,7 @@ function drawChart(){const c=$('candleChart'),ctx=c.getContext('2d'),r=c.getBoun
 const spot=S.live&&Date.now()-S.lastRefresh<60000&&Number.isFinite(tickQuote?.price)&&tickQuote.price>0?tickQuote.price:null;
 if(signal&&signal.primary_tf===S.chartTf){
  lineLevels.push({label:'4H EŞİK',v:signal.threshold,color:'#f7cc7d'});
- if(signal.stage==='CONFIRMED'){
+ if(signal.stage==='CONFIRMED'&&signal.review_state==='FRESH'){
   lineLevels.push({label:'RİSK',v:signal.stop,color:'#ff8296'});
   (signal.targets||[]).forEach((t,i)=>lineLevels.push({label:(i+1)+'R',v:t,color:'#4ce2b4'}));
  }
@@ -226,7 +248,7 @@ if(spot!==null){const spotY=yy(spot);ctx.save();ctx.setLineDash([2,3]);ctx.strok
 ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(left,spotY);ctx.lineTo(w-right,spotY);ctx.stroke();
 ctx.setLineDash([]);ctx.fillStyle='#8ddcff';ctx.font='bold 10px system-ui';
 ctx.fillText('CANLI '+fmt(spot),w-right+5,Math.max(11,spotY-6));ctx.restore();}
-for(let i=0;i<4;i++){const idx=Math.round(i*(candles.length-1)/3);ctx.fillStyle='#8aa6c0';ctx.font='10px system-ui';ctx.fillText(new Date(candles[idx].t).toLocaleString('tr-TR',S.chartTf==='1D'||S.chartTf==='1W'?{day:'2-digit',month:'2-digit'}:{day:'2-digit',hour:'2-digit',minute:'2-digit'}),xx(idx)-15,h-8);}$('chartCaption').textContent=S.selected+' · OKX kapanmış '+S.chartTf+' mumları · '+(signal?signal.side+' '+(signal.stage==='CONFIRMED'?'TEYİT':'İZLE')+' · ana periyot '+signal.primary_tf+' · '+signal.expected_holding:'Serbest fiyat incelemesi')+' · '+(cache?'doğrudan OKX mumları':'kaynak bekleniyor')+(spot!==null?' · CANLI '+fmt(spot)+' (yalnız gösterim)':'')+' · referans seviyeler emir değildir.';}
+for(let i=0;i<4;i++){const idx=Math.round(i*(candles.length-1)/3);ctx.fillStyle='#8aa6c0';ctx.font='10px system-ui';ctx.fillText(new Date(candles[idx].t).toLocaleString('tr-TR',S.chartTf==='1D'||S.chartTf==='1W'?{day:'2-digit',month:'2-digit'}:{day:'2-digit',hour:'2-digit',minute:'2-digit'}),xx(idx)-15,h-8);}$('chartCaption').textContent=S.selected+' · OKX kapanmış '+S.chartTf+' mumları · '+(signal?signal.side+' '+(signal.stage==='CONFIRMED'&&signal.review_state==='FRESH'?'TEYİT':signal.review_state==='INVALIDATED'?'GEÇERSİZ':signal.review_state==='RECHECK_PENDING'?'TEKRAR KONTROL':'İZLE')+' · ana periyot '+signal.primary_tf+' · '+signal.expected_holding:'Serbest fiyat incelemesi')+' · '+(cache?'doğrudan OKX mumları':'kaynak bekleniyor')+(spot!==null?' · CANLI '+fmt(spot)+' (yalnız gösterim)':'')+' · referans seviyeler emir değildir.';}
 function renderSwingHistory(){
  const target=$('swingHistoryRows');if(!target)return;
  const list=S.swingEvents.filter(x=>x.model_version==='3.0.0-htf-sparks'&&Date.now()-Number(x.at_ms)<=14*86400000)
@@ -274,8 +296,8 @@ function renderForward(){
  '<div class="empty">3.0 sonrası yeni kıvılcım henüz kaydedilmedi. Eski sinyaller bu ölçüme eklenmez.</div>';
  list.querySelectorAll('[data-forward]').forEach(b=>b.onclick=()=>selectSpark(b.dataset.forward,b.dataset.tf,true));
 }
-function renderQuality(){const rows=[['Fiyat kaynağı',S.provider||'Bekleniyor'],['Sunucu fiyat yaşı',S.stamps.market?age(S.stamps.market)+' dk':'—'],['Sunucu radar yaşı',S.stamps.radar?age(S.stamps.radar)+' dk':'—'],['Canlı fiyat',S.live&&Date.now()-S.lastRefresh<60000?'OKX · '+Math.floor((Date.now()-S.lastRefresh)/1000)+' saniye önce':'OKX canlı bağlantı yok; yedek fiyat'],['Sinyal değerlendirmesi','1D + 4H ana yön; 1W bağlam; 1H/15m teyit; 5m/1m ek kontrol'],['İşlem girişleri','WATCH ≠ işlem; CONFIRMED ≠ gerçek emir'],['Sonuç boşlukları','Belirsiz / veri boşluğu ayrı sınıf'],['Risk hesabı','10x varsayım · örnek 1R · maliyet %0,15'],['Yeni analiz','5 dk GitHub hedefi (garantisiz) · 3.0 sıkı teyit · canlı fiyat 20 sn']];$('quality').innerHTML=rows.map(([k,v])=>`<div class="line"><span>${safe(k)}</span><b>${safe(v)}</b></div>`).join('');}
-function renderMarket(){$('marketRows').innerHTML=S.market.slice(0,100).map((m,i)=>{const x=currentRadar().items.find(a=>a.symbol===m.symbol);return `<tr class="marketCoinRow" data-symbol="${safe(m.symbol)}" title="Bu coinin grafiğini aç"><td>${i+1}</td><td><b>${safe(m.symbol.replace('USDT',''))}</b> / USDT</td><td>${fmt(m.price)}</td><td class="${m.change>=0?'positive':'negative'}">${pct(number(m.change))}</td><td>${usd(m.volume)}</td><td>${x?`<span class="chip ${x.side==='LONG'?'long':'short'}">${x.side}</span> <span class="chip ${x.stage==='WATCH'?'watch':'confirmed'}">${x.stage==='WATCH'?'İZLE':'TEYİT'}</span>`:'—'}</td></tr>`;}).join('');
+function renderQuality(){const rows=[['Fiyat kaynağı',S.provider||'Bekleniyor'],['Sunucu fiyat yaşı',S.stamps.market?age(S.stamps.market)+' dk':'—'],['Sunucu radar yaşı',S.stamps.radar?age(S.stamps.radar)+' dk':'—'],['Canlı fiyat',S.live&&Date.now()-S.lastRefresh<60000?'OKX · '+Math.floor((Date.now()-S.lastRefresh)/1000)+' saniye önce':'OKX canlı bağlantı yok; yedek fiyat'],['Sinyal değerlendirmesi','1D + 4H ana yön; 1W teyit; RSI14 / MACD / ADX / hacim / fitil / spread / funding / OI risk; 5m kapanış'],['İşlem girişleri','WATCH ≠ işlem; CONFIRMED ≠ gerçek emir'],['Sonuç boşlukları','Belirsiz / veri boşluğu ayrı sınıf'],['Risk hesabı','10x varsayım · örnek 1R · maliyet %0,15'],['Yeni analiz','5 dk GitHub hedefi (garantisiz) · 3.0 sıkı teyit · canlı fiyat 20 sn']];$('quality').innerHTML=rows.map(([k,v])=>`<div class="line"><span>${safe(k)}</span><b>${safe(v)}</b></div>`).join('');}
+function renderMarket(){$('marketRows').innerHTML=S.market.slice(0,100).map((m,i)=>{const x=currentRadar().items.find(a=>a.symbol===m.symbol);return `<tr class="marketCoinRow" data-symbol="${safe(m.symbol)}" title="Bu coinin grafiğini aç"><td>${i+1}</td><td><b>${safe(m.symbol.replace('USDT',''))}</b> / USDT</td><td>${fmt(m.price)}</td><td class="${m.change>=0?'positive':'negative'}">${pct(number(m.change))}</td><td>${usd(m.volume)}</td><td>${x?`<span class="chip ${x.side==='LONG'?'long':'short'}">${x.side}</span> <span class="chip ${x.stage==='CONFIRMED'&&x.review_state==='FRESH'?'confirmed':'watch'}">${x.review_state==='INVALIDATED'?'GEÇERSİZ':x.review_state==='RECHECK_PENDING'?'TEKRAR KONTROL':x.stage==='CONFIRMED'?'TEYİT':'İZLE'}</span>`:'—'}</td></tr>`;}).join('');
  for(const el of document.querySelectorAll('.marketCoinRow'))el.onclick=()=>{
    const spark=currentRadar().items.find(x=>x.symbol===el.dataset.symbol);
    selectSpark(el.dataset.symbol,spark?.primary_tf||'4H',true);
@@ -285,7 +307,7 @@ $('chartCoin').onchange=e=>{S.selected=e.target.value;const spark=currentRadar()
 $('chartTf').onchange=e=>{S.chartTf=e.target.value;renderQuickTf();drawChart();ensureChart(true);};
 $('chartQuickFrames').onclick=e=>{const b=e.target.closest('[data-quick-tf]');if(!b||!S.selected)return;const spark=currentRadar().items.find(x=>x.symbol===S.selected);selectSpark(S.selected,b.dataset.quickTf==='AUTO'?(spark?.primary_tf||'4H'):b.dataset.quickTf);};document.querySelectorAll('[data-window]').forEach(b=>b.onclick=()=>{S.window=+b.dataset.window;document.querySelectorAll('[data-window]').forEach(x=>x.classList.toggle('active',x===b));renderForward();});$('refresh').onclick=async()=>{await refresh();await ensureChart(true);};
 function calculator(){
- const b=Number($('balanceInput').value),x=currentRadar().items.find(z=>z.symbol===S.selected&&z.stage==='CONFIRMED');
+ const b=Number($('balanceInput').value),x=currentRadar().items.find(z=>z.symbol===S.selected&&z.stage==='CONFIRMED'&&z.review_state==='FRESH');
  if(!Number.isFinite(b)||b<10||b>1000000){$('calcResult').innerHTML='<div class="line">Bakiye 10–1.000.000 USDT olmalı</div>';return;}
  if(!x){$('calcResult').innerHTML='<div class="line"><span>Seçilen coin</span><b>TEYİT yok · pozisyon önerilmiyor</b></div>';return;}
  if(currentRadar().mode==='STALE'||!S.live||Date.now()-S.lastRefresh>60000){
