@@ -44,7 +44,7 @@ assert.ok(code.includes("'swing-radar'")&&code.includes("'swing-history'"),'New 
 assert.ok(code.includes("'2.4.0-htf-sparks'")&&code.includes("'2.3.0-htf-sparks'"),'HTF models remain sole canonical source through cutover');
 assert.ok(code.includes("data-tf=")&&code.includes("selectSpark(el.dataset.symbol,el.dataset.tf)"),'Spark click must open signal native timeframe');
 assert.ok(code.includes("S.chartTf=S.radar[0].primary_tf"),'First screen should automatically select top spark period');
-assert.ok(code.includes("['1H','15m','5m','1m']"),'1h/15m/5m/1m should be confirmations only');
+assert.ok(code.includes("['1H','15m','1m','5m']"),'1h/15m/5m/1m should be confirmations only');
 assert.ok(html.includes('id="chartQuickFrames"')&&code.includes("$('chartQuickFrames').onclick"),'Quick frame selector belongs on radar chart');
-assert.ok(html.includes('Kıvılcım: günlük + 4 saatlik')&&html.includes('1m sadece TEYİT'), 'User should see high-timeframe spark logic');
+assert.ok(html.includes('Kıvılcım: günlük + 4 saatlik')&&html.includes('1H/15m TEYİT; 5m/1m ek kontrol.'), 'User should see high-timeframe spark logic');
 console.log('PASS: daily/4H macro-only Radar with native period one-click chart, 1m/15m/1h confirmation badges, 14-day audit and six screens');
