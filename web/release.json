@@ -1,15 +1,28 @@
 {
   "product_version": "4.0",
   "version_change_owner": "USER_APPROVAL_ONLY",
-  "release_id": "UTC-20261017-A",
-  "updated_at_utc": "2026-10-16T22:36:05.003Z",
+  "release_id": "UTC-20261016-22undefined50",
+  "updated_at_utc": "2026-10-16T22:50:10.527Z",
   "timestamp_basis": "UTC",
   "market_data_timestamp_separate": true,
   "change_summary": [
-    "Version/date on site without auto-increasing product version",
-    "UTC global market session indicators and 5m/15m/1H/4H closed-candle anomaly study",
-    "Preserves existing V4 entry thresholds, history and 10000 USDT virtual account"
+    "Global UTC for legacy and V4 charts",
+    "OKX confirmed closed candles only",
+    "Dated release history with user-controlled product version",
+    "Weekday regional windows are DST-aware and not manipulation evidence"
   ],
   "no_real_orders": true,
-  "not_a_trading_signal": true
+  "not_a_trading_signal": true,
+  "change_log": [
+    {
+      "release_id": "UTC-20261016-22undefined50",
+      "updated_at_utc": "2026-10-16T22:50:10.527Z",
+      "summary": "UTC saat birliği, OKX teyitli mumlar, görünür yayın geçmişi ve hafta sonu seans düzeltmesi. Ürün sürümü aynı."
+    },
+    {
+      "release_id": "UTC-20261017-A",
+      "updated_at_utc": "2026-10-16T22:36:05.003Z",
+      "summary": "İlk global UTC/anomali araştırması ve son kod güncelleme etiketi."
+    }
+  ]
 }

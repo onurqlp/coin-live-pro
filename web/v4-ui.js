@@ -132,6 +132,19 @@
      $('releaseVersion').textContent='Sürüm '+meta.product_version;
      $('releaseUpdated').textContent='Kod güncellemesi '+published+' UTC · Kayıt '+meta.release_id;
      $('releaseFooter').textContent='Sürüm '+meta.product_version+' · Son kod güncellemesi '+published+' UTC · Kayıt '+meta.release_id;
+     const history=$('releaseHistoryList');
+     if(history){
+       history.replaceChildren();
+       const entries=Array.isArray(meta.change_log)?meta.change_log:[];
+       for(const entry of entries.slice(0,8)){
+         if(!entry||typeof entry.summary!=='string'||!Number.isFinite(Date.parse(entry.updated_at_utc||'')))continue;
+         const li=document.createElement('li'),stamp=document.createElement('strong'),summary=document.createElement('span');
+         stamp.textContent=new Date(entry.updated_at_utc).toLocaleString('tr-TR',{
+           timeZone:'UTC',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})+' UTC · '+(entry.release_id||'Kayıt');
+         summary.textContent=entry.summary;li.append(stamp,summary);history.append(li);
+       }
+       if(!history.childElementCount)history.textContent='Doğrulanmış yayın kaydı bulunamadı.';
+     }
    }catch(e){
      $('releaseUpdated').textContent='Son kod güncelleme kaydı şu anda doğrulanamıyor';
      $('releaseFooter').textContent='Sürüm 4.0 · Yayın kaydı geçici olarak okunamıyor';

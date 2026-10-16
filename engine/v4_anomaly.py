@@ -29,11 +29,12 @@ def clock(now):
     regions=(('Tokyo','Asia/Tokyo',9,17),('London','Europe/London',8,17),
              ('New York','America/New_York',8,17))
     windows=[name for name,zone,open_,close in regions
-             if open_<=d.astimezone(ZoneInfo(zone)).hour<close]
+             if d.weekday()<5 and open_<=d.astimezone(ZoneInfo(zone)).hour<close]
     return {'utc_at':iso(now),'utc_hour':d.hour,'utc_4h_block':d.hour//4*4,
             'regional_activity_windows':windows,
             'market':'24/7 UTC: regional windows approximate and DST-aware',
-            'window_is_not_manipulation_evidence':True}
+            'window_is_not_manipulation_evidence':True,
+             'weekend_equity_windows_closed':d.weekday()>=5}
 def frame(c,tf,now):
     f=(c.get('frames') or {}).get(tf) or {}
     start=ms(f.get('last_candle_utc'))

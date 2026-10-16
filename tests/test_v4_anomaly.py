@@ -27,6 +27,10 @@ class TestUtcAnomaly(unittest.TestCase):
         self.assertIn('New York',summer['regional_activity_windows'])
         self.assertNotIn('New York',winter['regional_activity_windows'])
         self.assertTrue(summer['window_is_not_manipulation_evidence'])
+    def test_weekend_does_not_invent_equity_market_overlap(self):
+        saturday=a.clock(int(dt.datetime(2026,10,17,14,tzinfo=dt.timezone.utc).timestamp()*1000))
+        self.assertEqual(saturday['regional_activity_windows'],[])
+        self.assertTrue(saturday['weekend_equity_windows_closed'])
     def test_confirmed_only_and_stale_candles_fail_closed(self):
         c,m,o=fixture()
         f=c['frames']['5m'];f['quality']='OPEN'

@@ -7,7 +7,7 @@ const number=x=>x===null||x===undefined||x===''?NaN:Number(x);
 const fmt=x=>!Number.isFinite(Number(x))?'—':Number(x)>=1000?Number(x).toLocaleString('en-US',{maximumFractionDigits:2}):Number(x)>=1?Number(x).toFixed(3):Number(x)>=.01?Number(x).toFixed(5):Number(x).toFixed(8);
 const pct=x=>Number.isFinite(x)?(x>=0?'+':'')+x.toFixed(2)+'%':'—';
 const age=ms=>Math.max(0,Math.floor((Date.now()-ms)/60000));
-const clock=ms=>Number.isFinite(ms)?new Date(ms).toLocaleString('tr-TR',{timeZone:'Europe/Istanbul',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'—';
+const clock=ms=>Number.isFinite(ms)?new Date(ms).toLocaleString('tr-TR',{timeZone:'UTC',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+' UTC':'—';
 const usd=x=>x>=1e9?'$'+(x/1e9).toFixed(2)+'B':x>=1e6?'$'+(x/1e6).toFixed(1)+'M':x>=1000?'$'+(x/1000).toFixed(1)+'K':'$'+Number(x||0).toFixed(2);
 async function get(path){const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),8500);try{const r=await fetch(path+(path.includes('?')?'&':'?')+'_='+Date.now(),{cache:'no-store',signal:ctl.signal});if(!r.ok)throw Error('HTTP '+r.status);return r.json();}finally{clearTimeout(timer);}}
 async function directQuote(){const data=await get('https://www.okx.com/api/v5/market/tickers?instType=SWAP');if(data.code!=='0'||!Array.isArray(data.data))throw Error('OKX feed');const rows=[];for(const x of data.data){if(!x.instId?.endsWith('-USDT-SWAP'))continue;const p=+x.last,o=+x.open24h,q=+x.volCcyQuote24h||(+x.volCcy24h*p);if(p>0&&q>0)rows.push({symbol:x.instId.slice(0,-10)+'USDT',price:p,change:o>0?(p/o-1)*100:null,volume:q});}return rows.sort((a,b)=>b.volume-a.volume).slice(0,100);}
@@ -42,7 +42,7 @@ function refreshState(){
  const restart=$('serverRestart');if(restart)restart.hidden=trusted;
  $('source').textContent=live?'● OKX CANLI FİYAT':'● '+(S.provider||'OKX')+' / YEDEK FİYAT';
  $('lastScan').textContent=Number.isFinite(S.stamps.radar)?
-   new Date(S.stamps.radar).toLocaleTimeString('tr-TR',{timeZone:'Europe/Istanbul',hour:'2-digit',minute:'2-digit'}):'—';
+   new Date(S.stamps.radar).toLocaleTimeString('tr-TR',{timeZone:'UTC',hour:'2-digit',minute:'2-digit'})+' UTC':'—';
  const state=$('scanStatus');
  if(state){
    const until=S.stamps.radar?Math.max(0,Math.ceil((5*60000-(Date.now()-S.stamps.radar))/60000)):0;
@@ -230,7 +230,7 @@ async function ensureChart(force=false){
   const json=await get('https://www.okx.com/api/v5/market/candles?instId='+encodeURIComponent(inst)+'&bar='+bars[tf]+'&limit=90');
   if(json.code!=='0'||!Array.isArray(json.data))throw Error('OKX mum yanıtı yok');
   const now=Date.now();
-  const lines=json.data.map(x=>[+x[0],+x[1],+x[2],+x[3],+x[4],+x[5]])
+  const lines=json.data.filter(x=>Array.isArray(x)&&x.length>=9&&String(x[8])==='1').map(x=>[+x[0],+x[1],+x[2],+x[3],+x[4],+x[5]])
     .filter(x=>x.every(Number.isFinite)&&x[0]+duration[tf]<now-1000)
     .sort((a,b)=>a[0]-b[0]);
   if(lines.length<Math.min(14,90))throw Error('Bu zaman diliminde yeterince geçmiş mum yok');
@@ -263,7 +263,7 @@ if(spot!==null){const spotY=yy(spot);ctx.save();ctx.setLineDash([2,3]);ctx.strok
 ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(left,spotY);ctx.lineTo(w-right,spotY);ctx.stroke();
 ctx.setLineDash([]);ctx.fillStyle='#8ddcff';ctx.font='bold 10px system-ui';
 ctx.fillText('CANLI '+fmt(spot),w-right+5,Math.max(11,spotY-6));ctx.restore();}
-for(let i=0;i<4;i++){const idx=Math.round(i*(candles.length-1)/3);ctx.fillStyle='#8aa6c0';ctx.font='10px system-ui';ctx.fillText(new Date(candles[idx].t).toLocaleString('tr-TR',S.chartTf==='1D'||S.chartTf==='1W'?{day:'2-digit',month:'2-digit'}:{day:'2-digit',hour:'2-digit',minute:'2-digit'}),xx(idx)-15,h-8);}$('chartCaption').textContent=S.selected+' · OKX kapanmış '+S.chartTf+' mumları · '+(signal?signal.side+' '+(signal.stage==='CONFIRMED'&&signal.review_state==='FRESH'?'TEYİT':signal.review_state==='INVALIDATED'?'GEÇERSİZ':signal.review_state==='RECHECK_PENDING'?'TEKRAR KONTROL':'İZLE')+' · ana periyot '+signal.primary_tf+' · '+signal.expected_holding:'Serbest fiyat incelemesi')+' · '+(cache?'doğrudan OKX mumları':'kaynak bekleniyor')+(spot!==null?' · CANLI '+fmt(spot)+' (yalnız gösterim)':'')+(paperPos&&document.body.dataset.route==='portfoy'?' · PAPER giriş/stop/hedef: tahmini, gerçek emir yok':'')+' · referans seviyeler emir değildir.';}
+for(let i=0;i<4;i++){const idx=Math.round(i*(candles.length-1)/3);ctx.fillStyle='#8aa6c0';ctx.font='10px system-ui';ctx.fillText(new Date(candles[idx].t).toLocaleString('tr-TR',S.chartTf==='1D'||S.chartTf==='1W'?{timeZone:'UTC',day:'2-digit',month:'2-digit'}:{timeZone:'UTC',day:'2-digit',hour:'2-digit',minute:'2-digit'}),xx(idx)-15,h-8);}$('chartCaption').textContent=S.selected+' · OKX kapanmış '+S.chartTf+' mumları (UTC) · '+(signal?signal.side+' '+(signal.stage==='CONFIRMED'&&signal.review_state==='FRESH'?'TEYİT':signal.review_state==='INVALIDATED'?'GEÇERSİZ':signal.review_state==='RECHECK_PENDING'?'TEKRAR KONTROL':'İZLE')+' · ana periyot '+signal.primary_tf+' · '+signal.expected_holding:'Serbest fiyat incelemesi')+' · '+(cache?'doğrudan OKX mumları':'kaynak bekleniyor')+(spot!==null?' · CANLI '+fmt(spot)+' (yalnız gösterim)':'')+(paperPos&&document.body.dataset.route==='portfoy'?' · PAPER giriş/stop/hedef: tahmini, gerçek emir yok':'')+' · referans seviyeler emir değildir.';}
 function renderSwingHistory(){
  const target=$('swingHistoryRows');if(!target)return;
  const list=S.swingEvents.filter(x=>x.model_version==='3.0.0-htf-sparks'&&Date.now()-Number(x.at_ms)<=14*86400000)
