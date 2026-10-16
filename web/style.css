@@ -209,3 +209,9 @@ body[data-route="radar"] .hero{margin-top:18px}
 .quickTf button:focus-visible{outline:2px solid #8edfff;outline-offset:2px}
 .timing.unknown{color:#b3b4c8;border-color:#525165;background:#29293b}
 @media(max-width:560px){.quickTf{padding:4px 9px 10px;gap:5px}.quickTf button{font-size:10px;padding:7px 8px}}
+
+/* Data freshness recovery: link never presents a refresh as a new server scan. */
+.staleAction{background:#23456a;border:1px solid #6c94bb;border-radius:8px;padding:7px 11px;color:#e0f2ff;text-decoration:none;font-weight:800;font-size:11px;white-space:nowrap}
+.staleAction:hover,.staleAction:focus-visible{background:#30638d;border-color:#a8d8fb}
+.staleAction[hidden]{display:none!important}
+@media(max-width:660px){.banner .staleAction{width:100%;text-align:center}}

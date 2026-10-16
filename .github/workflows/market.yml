@@ -1,6 +1,8 @@
 name: COIN.LIVE PRO — 4H/Daily Swing & Forward Archive
 on:
   workflow_dispatch:
+  # GitHub scheduler is best-effort. An event=schedule run must be observed;
+  # code pushes and workflow_dispatch alone DO NOT prove unattended refresh.
   schedule:
     - cron: '7,22,37,52 * * * *'
   push:
@@ -35,7 +37,7 @@ jobs:
         run: python3 engine/collector.py
       - name: Build verified UTC-aligned seven-timeframe research
         run: python3 engine/mtf.py
-      - name: Record central DAILY / 4H swing sparks with 1H, 15m and 1m confirmation
+      - name: Record central DAILY / 4H sparks; 1H/15m confirmation, 1m optional
         run: python3 engine/spark.py
       - name: Track forward-only 100 USDT paper pilot
         run: python3 engine/paper.py

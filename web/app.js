@@ -28,9 +28,10 @@ function refreshState(){
  $('healthTitle').textContent=trusted&&live?'CANLI FİYAT + MERKEZİ RADAR':trusted?
    'MERKEZİ ANALİZ GÜNCEL • FİYAT BAĞLANTISI YOK':'ANALİZ ESKİ • YENİ GİRİŞ YOK';
  $('healthExplain').textContent=trusted?
-   'Kıvılcım yalnız günlük + 4H trend uyumuyla oluşur. 1H/15m/5m/1m sadece teyit; gerçek emir yok.':
-   'Sunucu '+(Number.isFinite(radarAge)?radarAge+' dk':'—')+' önce analiz yaptı. Eski kıvılcımlar yalnız geçmişte tutulur; yeni sanal giriş bekler.';
+   'Kıvılcım yalnız günlük + 4H trend uyumuyla oluşur. 1H/15m teyit, 5m/1m ek kontrol; gerçek emir yok.':
+   'Sunucu '+(Number.isFinite(radarAge)?radarAge+' dk':'—')+' önce analiz yaptı. Yeni kıvılcım kapalı. Üstteki yenile yalnız veriyi tekrar kontrol eder, yeni sunucu taraması başlatmaz.';
  $('healthTime').textContent='Sunucu '+(Number.isFinite(radarAge)?radarAge+' dk':'—')+' · Fiyat yedeği '+(Number.isFinite(marketAge)?marketAge+' dk':'—');
+ const restart=$('serverRestart');if(restart)restart.hidden=trusted;
  $('source').textContent=live?'● OKX CANLI':'● '+(S.provider||'OKX')+' / SUNUCU';
  $('lastScan').textContent=Number.isFinite(S.stamps.radar)?
    new Date(S.stamps.radar).toLocaleTimeString('tr-TR',{timeZone:'Europe/Istanbul',hour:'2-digit',minute:'2-digit'}):'—';
@@ -39,7 +40,8 @@ function refreshState(){
    const until=S.stamps.radar?Math.max(0,Math.ceil((15*60000-(Date.now()-S.stamps.radar))/60000)):0;
    state.textContent='MERKEZİ 1D / 4H KIVILCIM · '+(trusted?'AKTİF':'GECİKMİŞ')+
      ' · son '+(Number.isFinite(radarAge)?radarAge+' dk önce':'henüz yok')+
-     ' · sonraki tahmini ~'+until+' dk (GitHub gecikebilir) · tarayıcı kaydı yalnız karşılaştırmadır';
+     (trusted?' · sıradaki planlanan ~'+until+' dk (GitHub gecikebilir)':' · ZAMANLAYICI GECİKİYOR · Güncelliği Kontrol Et tarama başlatmaz')+
+     ' · cihazdaki karşılaştırma resmi analiz değildir';
  }
 }
 
