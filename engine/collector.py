@@ -51,9 +51,11 @@ def klines(inst,tf,limit=100):
     for c in raw:
         try:
             t=int(c[0]);bar={'t':t,'o':float(c[1]),'h':float(c[2]),'l':float(c[3]),'c':float(c[4]),'v':float(c[5])}
+            # OKX completion flag is authoritative; opening 15m bar must not be used.
+            if len(c)>=9 and str(c[8])!='1':continue
             if t+period<=NOW_MS-1500:out.append(bar)
         except (IndexError,ValueError,TypeError):continue
-    return sorted(out,key=lambda x:x['t'])
+    return [bar for _,bar in sorted({x['t']:x for x in out}.items())]
 
 def ema(a,n):
     e=a[0];k=2/(n+1)
@@ -67,6 +69,7 @@ def atr(a):
 def analyze(m):
     a=klines(m['instrument'],'15m',90);b=klines(m['instrument'],'1H',90);c=klines(m['instrument'],'4H',90)
     if min(map(len,(a,b,c)))<55:return None
+    m['_ohlc_ok']=True  # A valid analysis even if no candidate passed the signal gates
     p=m['price'];close1=[x['c'] for x in b];close4=[x['c'] for x in c]
     ema20=ema(close1[-60:],20);ema50=ema(close1[-60:],50);ema4=ema(close4[-60:],20)
     alignment='LONG' if ema20>ema50 and c[-1]['c']>ema4 else 'SHORT' if ema20<ema50 and c[-1]['c']<ema4 else None
@@ -189,6 +192,7 @@ def main():
     with ThreadPoolExecutor(max_workers=5) as executor:
         for found in executor.map(work,target):
             if found is not None:analyzed.append(found)
+    successful=sum(1 for m in target if m.get('_ohlc_ok'))
     if len(target)>=16 and len(errors)>len(target)*.75:
         raise RuntimeError(f'OHLC provider degradation: {len(errors)} of {len(target)} failed; withholding degraded archive')
     # Tracking for open event symbols (may be outside today's current top-volume list).
@@ -211,11 +215,11 @@ def main():
     events.sort(key=lambda x:x['at_ms'],reverse=True)
     # Prevent a listing churn from losing old tracked events: bounded storage only after retention filtering.
     reports=[summary(events,7),summary(events,14)]
-    if len(rows)>=30 and len(target)>=16:
-        save('market.json',{'provider':'OKX','fetched_at':UTC,'rows':rows,'analyzed':len(target),'scan_cycle':cycle,'scan_rotation':step,'errors':errors[:10]})
+    if len(rows)>=30 and successful>=16:
+        save('market.json',{'provider':'OKX','fetched_at':UTC,'rows':rows,'analyzed':successful,'analysis_attempted':len(target),'analysis_ok':successful,'model_version':'v1.1-mtf-pilot','scan_cycle':cycle,'scan_rotation':step,'errors':errors[:10]})
         save('radar.json',{'provider':'OKX','fetched_at':UTC,'items':sorted(analyzed,key=lambda x:x['score'],reverse=True),
                            'long':sum(x['side']=='LONG' for x in analyzed),'short':sum(x['side']=='SHORT' for x in analyzed)})
         save('history.json',{'provider':'OKX','updated_at':UTC,'retention_days':HORIZON_DAYS,'events':events})
         save('reports.json',{'provider':'OKX','updated_at':UTC,'reports':reports,'method':'Forward observation only; 15m OHLC outcomes. Intrabar ordering ambiguity excluded.'})
-    print(f'OK {UTC} OKX {len(rows)} markets; cycle {cycle}; {len(target)} scanned; {len(analyzed)} early alerts; {len(events)} historic; {len(errors)} failed')
+    print(f'OK {UTC} OKX {len(rows)} markets; cycle {cycle}; attempted={len(target)} analyzed_ok={successful}; {len(analyzed)} early alerts; {len(events)} historic; {len(errors)} failed')
 if __name__=='__main__':main()
