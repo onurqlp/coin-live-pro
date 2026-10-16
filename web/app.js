@@ -139,6 +139,7 @@ function selectSpark(symbol,tf,openAdvanced=false){
  }
  ensureChart(true);
 }
+window.CoinLiveSelectSpark=selectSpark;
 function highlightSpark(){
  document.querySelectorAll('.radarLine').forEach(el=>{
    const selected=el.dataset.symbol===S.selected;

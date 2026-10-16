@@ -12,7 +12,7 @@ import v4_paper
 
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 DATA=ROOT/'web'/'data'
-SOURCES=['market','mtf','swing-radar','v4-oi','v4-radar','v4-paper','v4-shadow','v4-lab','health']
+SOURCES=['market','mtf','swing-radar','v4-oi','v4-radar','v4-paper','v4-shadow','v4-forward','v4-lab','health']
 VERSION='4.0.0-manifest-a1'
 
 def produce(now_ms=None):
@@ -29,11 +29,11 @@ def produce(now_ms=None):
     m=data['mtf'];s=data['swing-radar'];v=data['v4-radar']
     if m.get('fetched_at')!=s.get('source_mtf_at') or v.get('source_mtf_at')!=m.get('fetched_at'):
         raise RuntimeError('Mixed market round. Refuse V4 publication.')
-    if any(data[key].get('scan_id')!=v.get('scan_id') for key in ('v4-paper','v4-shadow','v4-lab')):
+    if any(data[key].get('scan_id')!=v.get('scan_id') for key in ('v4-paper','v4-shadow','v4-forward','v4-lab')):
         raise RuntimeError('V4 producer scan ids differ: NO PUBLISH')
     if data['v4-oi'].get('source_mtf_at')!=m.get('fetched_at'):
         raise RuntimeError('OI timestamp is from another scan')
-    for k in ('market','mtf','swing-radar','v4-oi','v4-radar','v4-paper','v4-shadow','v4-lab','health'):
+    for k in ('market','mtf','swing-radar','v4-oi','v4-radar','v4-paper','v4-shadow','v4-forward','v4-lab','health'):
         obj=data[k]
         field='fetched_at' if k in ('market','mtf','swing-radar') else 'updated_at'
         try:ms=int(dt.datetime.fromisoformat(obj[field]).timestamp()*1000)

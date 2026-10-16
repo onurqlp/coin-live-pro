@@ -61,7 +61,7 @@
    $('v4RecheckCount').textContent=r.counts?.recheck_pending??'—';
    $('v4ArchivedCount').textContent=r.counts?.archived_total??'—';
    document.querySelectorAll('[data-v4-symbol]').forEach(b=>b.onclick=()=>{
-     if(typeof selectSpark==='function')selectSpark(b.dataset.v4Symbol,'4H',false);
+     if(typeof window.CoinLiveSelectSpark==='function')window.CoinLiveSelectSpark(b.dataset.v4Symbol,'4H',false);
    });
  }
  function kpi(label,value){return '<div class="v4Kpi"><small>'+safe(label)+'</small><strong>'+safe(value)+'</strong></div>';}
@@ -94,7 +94,7 @@
    document.querySelectorAll('[data-v4-position]').forEach(b=>b.onclick=()=>{
      const x=positions.find(z=>z.paper_order_id===b.dataset.v4Position);
      if(!x)return;store.position=x;
-     if(typeof selectSpark==='function')selectSpark(x.symbol,'4H',false);
+     if(typeof window.CoinLiveSelectSpark==='function')window.CoinLiveSelectSpark(x.symbol,'4H',false);
      requestAnimationFrame(()=>window.dispatchEvent(new Event('resize')));
      $('chartHostPortfolio')?.scrollIntoView({behavior:'smooth',block:'nearest'});
    });
@@ -131,11 +131,16 @@
    if(!store.lab)return;
    const p=store.lab.periods?.[Number($('v4LabWindow').value)||0];
    if(!p)return;
-   $('v4LabBody').innerHTML=Object.entries(p.strategies||{}).map(([id,r])=>
-     '<div class="v4LabRow"><b>'+safe(names[id]||id)+'</b><span>İZLE '+r.discovered+
-     ' · HAREKET '+r.motion+' · GÖZ ÖNÜNDE '+r.spotlight+
-     ' · ELENDİ '+(r.invalidated+r.expired_or_stale)+
-     ' · başarı: örneklem yetersiz</span></div>').join('');
+   $('v4LabBody').innerHTML=Object.entries(p.strategies||{}).map(([id,r])=>{
+     const h=r.forward_horizons?.['24H'];
+     const forward=h?.observed ? ' · 24s örnek '+h.observed+
+       ' · medyan MFE '+fmt(h.median_mfe_pct)+'% · MAE '+fmt(h.median_mae_pct)+'%' :
+       ' · 24s gözlem henüz yok';
+     return '<div class="v4LabRow"><b>'+safe(names[id]||id)+'</b><span>İZLE '+r.discovered+
+       ' · HAREKET '+r.motion+' · GÖZ ÖNÜNDE '+r.spotlight+
+       ' · ELENDİ '+(r.invalidated+r.expired_or_stale)+
+       safe(forward)+' · başarı: örneklem yetersiz</span></div>';
+   }).join('');
    $('v4LabFooter').textContent='Shadow: '+p.shadow.attempts+' deneme, '+p.shadow.resolved+
      ' sonuç · belirsiz '+p.shadow.ambiguous+' · boşluk '+p.shadow.data_gap+
      ' · kasa emri '+p.paper.created+' · fonlama bilinmiyor. Kazanma ihtimali değildir.';

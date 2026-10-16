@@ -36,3 +36,9 @@ Legacy 100 USDT paper ledger remains independent; 10,000 USDT starts fresh.
 
 ## Rollback
 The feature branch never force-pushes main. Before production merge, record the then-current main commit (rolling data commits make the baseline above stale). Revert the code merge commit to disable V4 additions while keeping the current data archives. Never revert/force-push entire main to an earlier historical data commit, which would erase forward observations.
+
+## Hardening update (2026-10-16)
+
+- Newly discovered critical fixes: V4 stage→chart link exported from existing chart engine; initial post-entry 5m range now evaluated for stops/TP; all daily risk consumption counts closed orders; paper cash vs realized PnL allocates entry fees without double-debit; RISK_BLOCKED is distinguished from NO_FILL.
+- Added forward-only MFE/MAE for 1H/4H/24H/3D/7D with fully closed contiguous candles; missing historic future candles labelled DATA_GAP, no backfill. Results are *observational price excursions*, never cash profit or win probability.
+- Canary Chrome preview expanded to 320/360/390/430/768/1024/1366/1920. CI screenshot checks are visual presence, not proof of all accessible UX acceptance. Real 7-90d samples must accumulate prospectively.

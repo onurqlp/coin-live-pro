@@ -112,6 +112,48 @@ class TestV4Paper(unittest.TestCase):
     self.assertAlmostEqual(paper.margin_used(b),used*.6,delta=.1)
     self.assertGreater(pub['fees_paid_usdt'],0)
 
+ def test_entry_bar_stop_is_not_ignored(self):
+    log=self.initial()
+    # If a stop is touched *after* the hypothetical opening fill in the
+    # first fully observed future candle, the account must reflect it.
+    b=candle(T+paper.BAR,o=100,h=101,l=97,c=99)
+    log,pub=paper.advance(log,{'events':[]},MARKET,T+600000+2000,
+        {'BTCUSDT':[b]},{'BTCUSDT':SPEC},POL)
+    self.assertEqual(log['orders']['A']['status'],'CLOSED')
+    self.assertLess(pub['equity_usdt'],10000.)
+    self.assertEqual(pub['open_positions'],[])
+
+ def test_entry_fee_is_allocated_to_realized_net_not_deducted_twice(self):
+    log=self.initial()
+    fill=candle(T+paper.BAR)
+    log,_=paper.advance(log,{'events':[]},MARKET,T+600000+2000,
+        {'BTCUSDT':[fill]},{'BTCUSDT':SPEC},POL)
+    x=log['orders']['A'];entry_fee=x['entry_fee_paid_usdt']
+    target=candle(T+2*paper.BAR,o=100,h=103,l=99,c=102)
+    log,pub=paper.advance(log,{'events':[]},MARKET,T+900000+2000,
+        {'BTCUSDT':[fill,target]},{'BTCUSDT':SPEC},POL)
+    x=log['orders']['A'];y=x['partial_exits'][0]
+    self.assertAlmostEqual(x['entry_fee_allocated_usdt'],entry_fee*.4,places=5)
+    self.assertAlmostEqual(x['realized_pnl_usdt'],y['net_including_entry_fee_share_usdt'],places=5)
+    self.assertAlmostEqual(pub['cash_balance_usdt'],
+         10000-entry_fee+y['qty']*(y['price']-x['fill_price'])-y['qty']*y['price']*.0005,
+         places=4)
+
+ def test_daily_risk_budget_counts_closed_orders(self):
+    log=self.initial()
+    filled_day=dt.datetime.fromtimestamp(T/1000,dt.timezone.utc).date().isoformat()
+    # 4 already-CLOSED trades spent 2% daily new risk budget.
+    for i in range(4):
+        log['orders']['old'+str(i)]={
+            'status':'CLOSED','symbol':'C'+str(i)+'USDT','initial_risk_usdt':50.,
+            'filled_day':filled_day,'created_at_ms':T-3600000}
+    log['orders']['A']['created_at_ms']=T
+    fill=candle(T+paper.BAR)
+    log,_=paper.advance(log,{'events':[]},MARKET,T+600000+2000,
+         {'BTCUSDT':[fill]},{'BTCUSDT':SPEC},POL)
+    self.assertEqual(log['orders']['A']['status'],'RISK_BLOCKED')
+    self.assertEqual(log['orders']['A']['no_fill_reason'],'DAILY_NEW_RISK_BUDGET')
+
  def test_no_negative_or_invented_free_margin(self):
     self.assertIsNone(paper.quantity_for(1000,100,None,'BTCUSDT'))
     self.assertIsNone(paper.quantity_for(1000,100,{'ctType':'inverse'},'BTCUSDT'))

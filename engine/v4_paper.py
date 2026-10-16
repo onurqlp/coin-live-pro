@@ -126,11 +126,19 @@ def queue_intents(log,lifecycle,now_ms):
         log['orders'][intent]=order
         event(log,'PAPER_ORDER_CREATED',intent,when,{'paper_market_only':True})
 
+RISK_BLOCK_REASONS={
+    'MAX_CONCURRENT_POSITIONS','SAME_SYMBOL_CONCENTRATION',
+    'TOTAL_RISK_BUDGET','DAILY_NEW_RISK_BUDGET',
+    'DAILY_REALIZED_LOSS_LIMIT','INSUFFICIENT_MARGIN',
+    'LOT_ROUNDING_RISK_EXCEEDED','MIN_LOT_OR_MARGIN_BLOCKED'
+}
 def reject(log,o,why,ms):
-    o['status']='NO_FILL'
+    blocked=why in RISK_BLOCK_REASONS
+    o['status']='RISK_BLOCKED' if blocked else 'NO_FILL'
     o['no_fill_reason']=why
     o['finished_at_ms']=ms
-    event(log,'PAPER_NO_FILL',o['paper_order_id'],ms,{'reason':why})
+    event(log,'PAPER_RISK_BLOCKED' if blocked else 'PAPER_NO_FILL',
+          o['paper_order_id'],ms,{'reason':why})
 
 def maybe_fill(log,o,bars,spec,policy,now_ms,volume):
     if o['status']!='PENDING':return
@@ -157,8 +165,15 @@ def maybe_fill(log,o,bars,spec,policy,now_ms,volume):
     budget=eq*policy['risk_per_trade_pct']/100
     if risk_open(log)+budget>eq*policy['max_open_risk_pct']/100:
         reject(log,o,'TOTAL_RISK_BUDGET',now_ms);return
-    daily=sum(x.get('initial_risk_usdt',0) for x in active
-              if x.get('filled_day')==dt.datetime.fromtimestamp(now_ms/1000,dt.timezone.utc).date().isoformat())
+    # Count all orders filled TODAY, including closed orders. Otherwise
+    # an intraday close would silently restore an already spent risk budget.
+    today=dt.datetime.fromtimestamp(now_ms/1000,dt.timezone.utc).date().isoformat()
+    daily=sum(x.get('initial_risk_usdt',0) for x in log['orders'].values()
+              if x.get('filled_day')==today)
+    closed_today=sum(x.get('realized_pnl_usdt',0) for x in log['orders'].values()
+                     if x.get('filled_day')==today and x.get('status')=='CLOSED')
+    if closed_today<=-eq*policy['max_daily_new_risk_pct']/100:
+        reject(log,o,'DAILY_REALIZED_LOSS_LIMIT',now_ms);return
     if daily+budget>eq*policy['max_daily_new_risk_pct']/100:
         reject(log,o,'DAILY_NEW_RISK_BUDGET',now_ms);return
     leverage=policy['leverage']
@@ -199,8 +214,11 @@ def maybe_fill(log,o,bars,spec,policy,now_ms,volume):
              notional_usdt=notional,initial_margin_usdt=notional/leverage,
              initial_risk_usdt=risk,filled_day=dt.datetime.fromtimestamp(b['t']/1000,dt.timezone.utc).date().isoformat(),
              stop_initial=o['stop'],initial_R_price=abs(fill-o['stop']),
-             last_processed_bar_ms=b['t'],mark_price=fill,
+             # Entry occurs at hypothetical bar OPEN; the bar's later CLOSED
+             # range must still be evaluated for an immediate stop or TP.
+             last_processed_bar_ms=b['t']-BAR,mark_price=fill,
              partial_exits=[],unrealized_pnl_usdt=0.,fees_paid_usdt=paid,
+             entry_fee_paid_usdt=paid,entry_fee_allocated_usdt=0.,
              funding_state='UNKNOWN_NOT_MODELED')
     log['cash_balance_usdt']-=paid
     log['fees_paid_usdt']+=paid
@@ -218,17 +236,22 @@ def exit_part(log,o,raw,share,kind,ms,policy):
     if qty<=1e-12:return
     gross=sign*(price-o['fill_price'])*qty
     paid=qty*price*fee
-    net=gross-paid
+    # Entry fee was deducted from cash when filled. Allocate its fair share
+    # into realized NET PnL, but never debit cash a second time.
+    fee_share=float(o.get('entry_fee_paid_usdt') or 0)*qty/o['original_qty']
+    net=gross-paid-fee_share
+    o['entry_fee_allocated_usdt']=float(o.get('entry_fee_allocated_usdt') or 0)+fee_share
     o['remaining_qty']=max(0,o['remaining_qty']-qty)
     o['remaining_fraction']=o['remaining_qty']/o['original_qty']
     o['realized_pnl_usdt']+=net
     o['fees_paid_usdt']+=paid
-    log['cash_balance_usdt']+=net
+    log['cash_balance_usdt']+=gross-paid
     log['realized_pnl_usdt']+=net
     log['fees_paid_usdt']+=paid
     o['partial_exits'].append({'kind':kind,'at_ms':ms,'price':price,'qty':qty,
-                                'net_ex_entry_fee_usdt':net})
-    event(log,kind,o['paper_order_id'],ms,{'exit_price':price,'qty':qty,'gross_pnl':gross,'fee':paid})
+                                'net_including_entry_fee_share_usdt':net})
+    event(log,kind,o['paper_order_id'],ms,{'exit_price':price,'qty':qty,'gross_pnl':gross,
+              'exit_fee':paid,'entry_fee_allocated':fee_share,'net_pnl':net})
     if o['remaining_qty']<o['original_qty']*1e-7:
         o['remaining_qty']=0.;o['remaining_fraction']=0.
         o['status']='CLOSED';o['closed_at_ms']=ms

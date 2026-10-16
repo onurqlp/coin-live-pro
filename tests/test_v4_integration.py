@@ -15,6 +15,7 @@ import v4_oi
 import v4_paper
 import v4_shadow
 import v4_lab
+import v4_forward
 import v4_publication
 
 ROOT=pathlib.Path(__file__).resolve().parents[1]
@@ -44,11 +45,14 @@ class TestV4OfflineIntegrated(unittest.TestCase):
             shadow=v4_shadow.build({},life['events'],now,{}, {},policy)
             shadow_public={'scan_id':board['scan_id'],'updated_at':v4_lifecycle.iso(now),
                            'model_version':v4_shadow.VERSION,'combined_with_main_cash':False}
-            lab=v4_lab.compile_report(life,wallet,shadow,now)
+            forward=v4_forward.rebuild({},life['events'],now,{})
+            forward_public=v4_forward.view(forward,board['scan_id'],now)
+            lab=v4_lab.compile_report(life,wallet,shadow,now,forward)
             lab['scan_id']=board['scan_id']
             for key,obj in [('market',market),('mtf',m),('swing-radar',radar),
                             ('health',health),('v4-oi',oi_pub),('v4-radar',board),
-                            ('v4-paper',account),('v4-shadow',shadow_public),('v4-lab',lab)]:
+                            ('v4-paper',account),('v4-shadow',shadow_public),
+                            ('v4-forward',forward_public),('v4-lab',lab)]:
                 (path/(key+'.json')).write_text(json.dumps(obj))
             old=v4_publication.DATA
             v4_publication.DATA=path
@@ -60,7 +64,7 @@ class TestV4OfflineIntegrated(unittest.TestCase):
                 self.assertFalse(account['legacy_v3_balance_included'])
                 self.assertTrue(account['no_real_orders'])
                 self.assertTrue(all(x['lifecycle_stage']=='WATCH' for x in life['items']))
-                self.assertEqual(len(manifest['sources']),9)
+                self.assertEqual(len(manifest['sources']),10)
                 shadow_public['scan_id']='incorrect-mixed-round'
                 (path/'v4-shadow.json').write_text(json.dumps(shadow_public))
                 with self.assertRaisesRegex(RuntimeError,'scan ids'):
