@@ -8,10 +8,12 @@
  * 3. Token is a fine-grained GitHub PAT restricted to onurqlp/coin-live-pro
  *    with Actions: Read and write; do not put token in this source or chats.
  * 4. Run installCoinLiveHeartbeat() once, approve Google's permission request.
+ * 5. GitHub commits DO NOT update installed Apps Script: copy code into Apps
+ *    Script and re-run install to change an existing 15m trigger.
  */
 const CLPRO3 = Object.freeze({
   api: 'https://api.github.com/repos/onurqlp/coin-live-pro/actions/workflows/market.yml',
-  minGapMs: 12 * 60 * 1000,
+  minGapMs: 4 * 60 * 1000,
   fn: 'coinLiveHeartbeat'
 });
 
@@ -74,9 +76,9 @@ function installCoinLiveHeartbeat() {
   ScriptApp.getProjectTriggers()
     .filter(trigger => trigger.getHandlerFunction() === CLPRO3.fn)
     .forEach(trigger => ScriptApp.deleteTrigger(trigger));
-  ScriptApp.newTrigger(CLPRO3.fn).timeBased().everyMinutes(15).create();
+  ScriptApp.newTrigger(CLPRO3.fn).timeBased().everyMinutes(5).create();
   const first = coinLiveHeartbeat();
-  Logger.log('Kuruldu: her 15 dakika kontrol. İlk durum: ' + first);
+  Logger.log('Kuruldu: her 5 dakika kontrol. İlk durum: ' + first);
   return first;
 }
 

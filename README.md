@@ -4,6 +4,14 @@ Canlı site: https://onurqlp.github.io/coin-live-pro/
 
 **Tek aktif model:** `3.0.0-market-quotes` → `3.0.0-mtf-swing` → `3.0.0-htf-sparks` → `3.0.0-forward-observation` ve ayrı `3.0.0-paper-swing`.
 
+## Sıkı 5 dakikalık sistem (16 Ekim 2026)
+
+- GitHub Actions **5 dakikada bir tarama hedefler**; GitHub iş kuyruğu veya OKX gecikmelerinde garanti edilmez. 100 coinin fiyatı site açıkken 20 sn'de bir güncellenir, derin çoklu zaman dilimi taraması her çalışmada seçilmiş likit ve dönüşümlü coinlerde yapılır.
+- TEYİT için kapanmış 1D+4H yönü, kapanmış haftalık 1W aynı yön, kapanmış ve güncel 1H/15m/5m teyitleri, **gerçekten aşılmış** 4H kırılım seviyesi, uzamamış fiyat, ≥76 puan, ≤24 yapı riski, günlük ≥40 milyon USDT hacim, bilinen ≤12 baz puan spread, aktif ve ≥30 gündür listeli kontrat gerekir. 1 dakikalık mum tek başına giriş yaratmaz.
+- Koşulu karşılamayan ama makro yönü uygun aday İZLE kalır; otomatik kazanç veya işlem olasılığı iddia edilmez. Yeni filtre versiyonu: `3.0-strict-5min-20261016`, geçmiş gözlemler korunur.
+- Google Apps Script'in **depo içindeki örnek kodu** 5 dakikaya ayarlandı. Kullanıcının Google hesabında kurulu 15 dakikalık tetikleyici kendiliğinden değişmez; şimdilik bağımsız yedek olarak çalışır. GitHub tarafındaki 5m hedef aktifleşir.
+- 5 dakikada bir kontrol, her 5 dakikada mutlaka yeni kıvılcım oluşacağı anlamına gelmez. Veriler eskiyse eski kıvılcımlar yeni gibi gösterilmez.
+
 ## 3.0 veri ilkeleri
 
 - Merkezi radarın kıvılcım üretmesi için **kapanmış 1D ve 4H** mumların yönü aynı olmalı. Haftalık (1W) trend bağlam ve hedef süre içindir. 1H/15m yalnız onay; 5m/1m yalnız ek giriş ve sıralama teyididir.

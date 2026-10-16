@@ -4,7 +4,7 @@ on:
   # GitHub scheduler is best-effort. An event=schedule run must be observed;
   # code pushes and workflow_dispatch alone DO NOT prove unattended refresh.
   schedule:
-    - cron: '7,22,37,52 * * * *'
+    - cron: '2,7,12,17,22,27,32,37,42,47,52,57 * * * *'
   push:
     paths:
       - 'engine/**'
@@ -31,7 +31,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Timestamp 15-minute automated scan
+      - name: Timestamp 5-minute best-effort scan
         run: echo "TRIGGER=${{ github.event_name }} UTC=$(date -u +%FT%TZ)"
       - name: Read-only OKX crypto market quote universe (legacy 15m signals OFF)
         run: python3 engine/collector.py
@@ -74,8 +74,14 @@ jobs:
           assert all(x['confirmation']['1D'] and x['confirmation']['4H']
                      for x in files['swing-radar']['items']),'higher TF alignment missing'
           assert all(x['stage']!='CONFIRMED' or
-                     all(x['confirmation'][frame] for frame in ('1H','15m'))
+                     all(x['confirmation'][frame] for frame in ('1W','1H','15m','5m'))
                      for x in files['swing-radar']['items']),'invalid micro confirmation'
+          assert all(x.get('stage')!='CONFIRMED' or
+                     (x.get('entry_timing')=='STRICT_CONFIRMED'
+                      and x.get('filter_policy')=='3.0-strict-5min-20261016'
+                      and x.get('extended_from_4h_breakout_pct',-999)>0
+                      and not x.get('strict_gate_reasons'))
+                     for x in files['swing-radar']['items']),'unverified strict confirmation'
           assert all(not e['is_executed_trade'] and e['realized_R'] is None
                      for e in files['swing-history']['events']),'research observations pretended to be fills'
           assert files['swing-outcomes']['model_version']=='3.0.0-forward-observation','forward audit model missing'

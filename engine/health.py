@@ -25,7 +25,7 @@ def slots_between(start,stop):
     t=a.replace(minute=0,second=0,microsecond=0)
     count=0
     while t<stop:
-        for minute in (7,22,37,52):
+        for minute in (2,7,12,17,22,27,32,37,42,47,52,57):
             when=t+dt.timedelta(minutes=minute)
             if a<when<=stop:count+=1
         t+=dt.timedelta(hours=1)
@@ -67,8 +67,8 @@ def main():
        'schedule_proven':schedules>=2,
        'attempted':record['attempted'],'successful_3tf':record['successful_3tf'],
        'mtf_attempted':record['mtf_attempted'],'mtf_verified':record['mtf_verified'],
-       'missed_slots_latest':missed,'cron_utc_minutes':[7,22,37,52],
-       'note':'GitHub schedule is best effort: no guaranteed 24/7 exact-time execution. Browser reading never starts server scans.',
+       'missed_slots_latest':missed,'cron_utc_minutes':[2,7,12,17,22,27,32,37,42,47,52,57],
+       'note':'GitHub 5-minute target is best effort; external Google Apps Script remains independent. Run trigger identifies source.',
        'pilot_started_at':paper.get('pilot_started_at'),'models':{'macro':mtf.get('model_version'),'paper':paper.get('model_version')},
        'recent_runs':h['records'][-24:]}
     dump(ARCH,h);dump(DATA/'health.json',report)
