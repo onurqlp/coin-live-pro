@@ -17,6 +17,7 @@ import v4_shadow
 import v4_lab
 import v4_forward
 import v4_publication
+import v4_watch_archive
 
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 DATA=ROOT/'web'/'data'
@@ -52,7 +53,12 @@ class TestV4OfflineIntegrated(unittest.TestCase):
             history={'model_version':'4.0.0','scan_id':board['scan_id'],
                 'updated_at':board['updated_at'],'archive_days':90,
                 'archived_total':life['archived_count'],'events':life['events'][-140:]}
-            for key,obj in [('market',market),('mtf',m),('swing-radar',radar),
+            watch_ledger,watch_public=v4_watch_archive.merge({},life,forward,now,board['scan_id'])
+            context_public={'model_version':'4.0.0-context-research-a1','updated_at':v4_lifecycle.iso(now),
+                'source_status':{'all':'UNAVAILABLE'},'latest_items':[],
+                'score_not_used_for_paper_or_v4_stage':True}
+            for key,obj in [('v4-watch-archive',watch_public),('v4-context',context_public),
+                            ('market',market),('mtf',m),('swing-radar',radar),
                             ('health',health),('v4-oi',oi_pub),('v4-radar',board),
                             ('v4-history-index',history),
                             ('v4-paper',account),('v4-shadow',shadow_public),
@@ -68,7 +74,8 @@ class TestV4OfflineIntegrated(unittest.TestCase):
                 self.assertFalse(account['legacy_v3_balance_included'])
                 self.assertTrue(account['no_real_orders'])
                 self.assertTrue(all(x['lifecycle_stage']=='WATCH' for x in life['items']))
-                self.assertEqual(len(manifest['sources']),11)
+                self.assertEqual(len(manifest['sources']),13)
+                self.assertEqual(watch_public['total'],len(watch_public['records']))
                 shadow_public['scan_id']='incorrect-mixed-round'
                 (path/'v4-shadow.json').write_text(json.dumps(shadow_public))
                 with self.assertRaisesRegex(RuntimeError,'scan ids'):
