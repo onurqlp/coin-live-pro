@@ -2,7 +2,7 @@
 /* COIN.LIVE PRO V4 — read-only view, never authors trade or lifecycle events. */
 (()=>{
  const $=id=>document.getElementById(id);
- const safe=x=>String(x??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;':'&quot;',"'":'&#39;'}[ch]));
+ const safe=x=>String(x??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
  const date=x=>{const t=Date.parse(x||'');return Number.isFinite(t)?new Date(t).toLocaleString('tr-TR',{timeZone:'Europe/Istanbul',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'—'};
  const fmt=x=>typeof x==='number'&&Number.isFinite(x)?x.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}):'—';
  const ago=x=>{const m=(Date.now()-Date.parse(x||''))/60000;return Number.isFinite(m)&&m>=0?Math.floor(m)+' dk':'—'};
@@ -12,7 +12,7 @@
  SHORT_BREAKDOWN:'SHORT / destek kırılımı'};
  const why={HTF_ALIGNED:'1D+4H yön uyumu',LOCAL_CLOSED_LEVEL:'Yerel kapanışla seviye aşıldı',
  LOCAL_LEVEL_WAIT:'Yerel kırılım bekleniyor',WAIT_4H_CLOSE:'Kapanmış 4H kırılımı bekleniyor',
- 4H_CLOSED_BREAKOUT:'4H kırılımı kapandı',4H_VOLUME_EXPANSION:'4H hacmi arttı',
+ '4H_CLOSED_BREAKOUT':'4H kırılımı kapandı',4H_VOLUME_EXPANSION:'4H hacmi arttı',
  CLOSED_LOCAL_BREAK:'Kapanmış yerel kırılım',BREAKOUT_SEEN:'İlk kırılım görüldü',
  RETEST_SEQUENCE_UNVERIFIED:'Retest mum dizisi kanıtlanmadı',
  RSI_EXTREME:'RSI uç bölgede',MACD_HIST_TURN:'MACD histogramı dönüyor',
