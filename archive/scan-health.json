@@ -1,0 +1,1 @@
+{"schema_version":2,"records":[{"completed_at":"2026-10-16T12:06:02+00:00","trigger":"push","run_id":"38898149138","scan_id":"3283777d29cde3b8559e","model_version":"2.0.0-mtf-pilot","attempted":48,"successful_3tf":30,"mtf_attempted":10,"mtf_verified":10,"missed_cron_slots_since_previous_success":null,"quality":"OK"}]}
