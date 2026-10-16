@@ -19,7 +19,7 @@ ARCH=BASE/'archive'/'pilot-ledger.json'
 NOW=dt.datetime.now(dt.timezone.utc)
 NOWMS=int(NOW.timestamp()*1000)
 UTC=NOW.isoformat(timespec='seconds')
-MODEL='2.0.0-paper-pilot'
+MODEL='2.2.0-paper-swing'
 BAR5=300000;BAR1=60000
 FEE_AND_SLIP=.0015   # Illustrative two-sided round-trip; funding not modeled.
 RISK=.01
@@ -170,17 +170,44 @@ def update_order(log,o,raw):
             settle(log,o,'TIME_EXIT',b['c'],at,'7D_TIME_EXIT')
             break
 
+def swing_eligible(event,assessed,cutover_ms):
+    """Virtual entries require a NEW verified 4H + daily swing thesis."""
+    if int(event.get('at_ms',0))<=cutover_ms:return False
+    if event.get('stage')!='CONFIRMED':return False
+    thesis=assessed.get(event.get('symbol'))
+    return bool(thesis and thesis.get('side')==event.get('side')
+        and thesis.get('swing_status')=='SWING_CANDIDATE'
+        and thesis.get('direction_aligned_4h_1d') is True
+        and thesis.get('quality')=='COMPLETE'
+        and (thesis.get('structure_risk_score') or 0)<45)
+
 def main():
     history=read(DATA/'history.json',{})
     market=read(DATA/'market.json',{})
+    mtf=read(DATA/'mtf.json',{})
     if not history.get('updated_at') or len(market.get('rows',[]))<20:raise RuntimeError('Cannot run paper simulation without healthy authoritative scanner')
     hstamp=dt.datetime.fromisoformat(history['updated_at'])
-    if (NOW-hstamp).total_seconds()>360:raise RuntimeError('Stale server scan; refusing new virtual entries')
+    mtf_stamp=dt.datetime.fromisoformat(mtf['fetched_at']) if mtf.get('fetched_at') else None
+    if (NOW-hstamp).total_seconds()>360 or not mtf_stamp or (NOW-mtf_stamp).total_seconds()>360:
+        raise RuntimeError('Stale central 4H/1D confirmation; refusing new virtual entries')
+    if mtf.get('model_version')!='2.2.0-mtf-swing':
+        raise RuntimeError('4H/1D swing model not ready; legacy 15m-only paper trades disabled')
     log=read(ARCH,None)
     if log is None:
         log={'schema_version':2,'pilot_started_at':UTC,'pilot_started_ms':NOWMS,
              'starting_balance':100.,'model_version':MODEL,'orders':{},'journal':[]}
     started=log['pilot_started_ms']
+    # First deployment after this change is the honest forward-only strategy
+    # cutover. Continue to evaluate legacy positions, never reclassify them.
+    if 'swing_cutover_ms' not in log:
+        log['swing_cutover_ms']=NOWMS
+        log['swing_cutover_at']=UTC
+        append(log,{'id':'SWING_V2_CUTOVER'},'STRATEGY_CUTOVER',
+               {'strategy':'4H+1D_GATE','legacy_orders_preserved':len(log.get('orders',{})),
+                'new_entries_only_after':UTC})
+    cutover_ms=log['swing_cutover_ms']
+    swing_pool={x['symbol']:x for x in mtf.get('candidates',[])}
+
     latest={m['symbol']:m for m in market.get('rows',[])}
     records=history.get('events',[])
     chains=log.setdefault('chains',{})
@@ -206,18 +233,20 @@ def main():
                 'original_time_immutable':e['time'],'evidence_sha256':sha},e['time'])
     # Only NEW primary CONFIRMED records after model cutover.
     for e in records:
-        if e.get('stage')!='CONFIRMED' or int(e.get('at_ms',0))<=started or e.get('id') in log['orders']:
+        if not swing_eligible(e,swing_pool,max(started,cutover_ms)) or e.get('id') in log['orders']:
             continue
         price=float(e['price']);stop=float(e['stop'])
         if min(price,stop)<=0 or not e.get('targets'):continue
         id=e['id']
         quoted_spread=latest.get(e['symbol'],{}).get('spread_bps')
         o={'id':id,'chain_id':chains.get(id,{}).get('chain_id',id),'model_version':MODEL,'inst':e['symbol'][:-4]+'-USDT-SWAP',
-           'symbol':e['symbol'],'side':e['side'],'source':'CENTRAL_FORWARD_CONFIRMED',
+           'symbol':e['symbol'],'side':e['side'],'source':'CENTRAL_FORWARD_4H_1D_SWING',
            'signal_at_ms':int(e['at_ms']),'signal_at':e['time'],'signal_price':price,'stop':stop,
            'tp1':float(e['targets'][0]),'tp2':float(e['targets'][1]),'tp3':float(e['targets'][2]),
            'status':'PENDING','last_eval_ms':int(e['at_ms']),'estimated_only':True,
-           'spread_bps_initial':quoted_spread}
+           'spread_bps_initial':quoted_spread,
+           'swing_model':'2.2.0-swing-4h-1d','swing_horizon':swing_pool[e['symbol']].get('expected_holding','1-7 gün'),
+           'structure_risk_score_at_signal':swing_pool[e['symbol']].get('structure_risk_score')}
         log['orders'][id]=o
         if quoted_spread is not None and quoted_spread>35:
             o['status']='NO_FILL'
@@ -239,6 +268,8 @@ def main():
     closed=[x for x in orders if x['status'] in ('TP1','STOP','TIME_EXIT')]
     result={'model_version':MODEL,'updated_at':UTC,'pilot_started_at':log['pilot_started_at'],
         'starting_usdt':100.,'estimated_equity_usdt':equity,'max_drawdown_pct_est':dd,
+        'swing_cutover_at':log.get('swing_cutover_at'),'new_entry_rule':'4H+1D ALIGNED VERIFIED SWING_CANDIDATE ONLY',
+        'legacy_micro_positions_preserved':sum(x.get('source')!='CENTRAL_FORWARD_4H_1D_SWING' for x in orders),
         'open_paper_positions':len(open_),'max_concurrent_positions':MAX_OPEN,
         'risk_per_trade_target_pct':1,'daily_risk_budget_pct':3,
         'closed_paper_orders':len(closed),'wins':sum(x['status']=='TP1' for x in closed),
