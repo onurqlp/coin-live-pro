@@ -6,7 +6,9 @@ on:
       - '.github/workflows/live-site-check.yml'
       - 'web/index.html'
       - 'web/app.js'
-      - 'web/legacy-reset.js'
+      - 'web/v4-ui.js'
+      - 'web/release.json'
+      - 'web/v4-style.css'
       - 'web/pilot-ui.js'
       - 'web/router.js'
       - 'web/style.css'
@@ -32,7 +34,9 @@ jobs:
           ! grep -q 'id="historyRows"' /tmp/site.html
           grep -q 'id="candleChart"' /tmp/site.html
           grep -q 'id="scanStatus"' /tmp/site.html
-          grep -q 'legacy-reset.js' /tmp/site.html
+          ! grep -q 'legacy-reset.js' /tmp/site.html
+          grep -q 'id="releaseVersion"' /tmp/site.html
+          grep -q 'id="v4GlobalUtcClock"' /tmp/site.html
           ! grep -q 'live-radar.js' /tmp/site.html
           grep -q 'pilot-ui.js' /tmp/site.html
           grep -q 'router.js' /tmp/site.html
@@ -46,6 +50,16 @@ jobs:
           grep -q 'id="mtfCandidates"' /tmp/site.html
           grep -q 'id="paperKpis"' /tmp/site.html
           grep -q 'id="systemKpis"' /tmp/site.html
+          curl -fSL --max-time 15 "$ROOT/release.json?check=$(date +%s)" -o /tmp/release.json
+          python3 - <<'PYRELEASE'
+          import json,datetime
+          d=json.load(open('/tmp/release.json'))
+          assert d['product_version']=='4.0', 'User-owned version was changed without permission'
+          assert d['version_change_owner']=='USER_APPROVAL_ONLY'
+          assert d['timestamp_basis']=='UTC' and d['market_data_timestamp_separate']
+          assert datetime.datetime.fromisoformat(d['updated_at_utc']).tzinfo is not None
+          print('RELEASE_STAMP_OK',d['release_id'],d['updated_at_utc'])
+          PYRELEASE
           for n in market mtf paper health swing-radar swing-history swing-outcomes; do
             curl -fSL --max-time 15 "$ROOT/data/$n.json?check=$(date +%s)" -o "/tmp/$n.json"
           done

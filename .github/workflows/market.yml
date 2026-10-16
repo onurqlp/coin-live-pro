@@ -130,6 +130,16 @@ jobs:
           assert v4['v4-shadow']['combined_with_main_cash'] is False
           assert v4['v4-oi']['source_mtf_at']==files['mtf']['fetched_at']
           assert set(v4['v4-radar']['counts']) >= {'spotlight','motion','watch','active_total'}
+          from pathlib import Path
+          release=json.loads(Path('web/release.json').read_text())
+          assert release['product_version']=='4.0' and release['version_change_owner']=='USER_APPROVAL_ONLY'
+          study=v4['v4-radar'].get('anomaly_research',{})
+          assert study.get('not_used_in_v4_score') is True
+          assert study.get('no_real_orders') is True
+          assert study.get('clock',{}).get('window_is_not_manipulation_evidence') is True
+          assert study.get('hourly',{}).get('not_an_empirical_manipulation_probability') is True
+          assert all(x.get('state') in ('OBSERVED_HEURISTIC','UNKNOWN') for x in study.get('pairs',{}).values())
+          assert all(x.get('not_proof') is True for x in study.get('pairs',{}).values())
           assert len(v4['v4-radar']['spotlight']) <= 5
           assert all(x.get('review_state')=='FRESH' for x in v4['v4-radar']['spotlight'])
           print('Verified V4 scan',sid,'three stages + isolated 10k ledger, shadow and report') 
@@ -147,7 +157,7 @@ jobs:
           git add web/data/v4-lab.json web/data/v4-forward.json web/data/v4-manifest.json
           git add web/data/swing-radar.json web/data/swing-history.json web/data/swing-outcomes.json
           git add archive/pilot-ledger.json archive/scan-health.json archive/swing-sparks-ledger.json archive/swing-active-ledger.json archive/swing-outcomes-ledger.json
-          git add archive/v3-paper-legacy-snapshot.json archive/v4-lifecycle-ledger.json archive/v4-paper-ledger.json archive/v4-shadow-ledger.json archive/v4-forward-ledger.json archive/v4-oi-timeseries.json
+          git add archive/v3-paper-legacy-snapshot.json archive/v4-lifecycle-ledger.json archive/v4-paper-ledger.json archive/v4-shadow-ledger.json archive/v4-forward-ledger.json archive/v4-oi-timeseries.json archive/v4-anomaly-study.json
           if git diff --cached --quiet; then exit 0; fi
           git commit -m 'data: 7-timeframe radar, paper pilot, 90-day event and cron provenance [skip ci]'
           for try in 1 2 3; do

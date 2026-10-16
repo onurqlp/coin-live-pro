@@ -64,6 +64,17 @@ for(const id of ['v4Board','v4Spotlight','v4Motion','v4Watch','v4Desk','v4PaperK
   assert.ok(ids.includes(id),'V4 view missing '+id);
 assert.ok(html.includes('v4-ui.js')&&html.includes('v4-style.css'),'V4 scripts not connected');
 assert.ok(!html.includes('legacy-reset.js'),'Never read/write browser persistent storage');
+for(const id of ['releaseVersion','releaseUpdated','releaseFooter','v4GlobalUtcClock',
+                  'v4GlobalSession','v4AnomalyHourly'])
+  assert.ok(ids.includes(id),'Missing release/UTC header: '+id);
+assert.ok(v4code.includes("timeZone:'UTC'"),'V4 displayed market timestamps must use global UTC');
+assert.ok(v4code.includes('renderGlobalResearch(r,manifest)'),'UTC market research view unconnected');
+assert.ok(v4code.includes('loadRelease();load()'),'Version release.json not loaded');
+const release=JSON.parse(fs.readFileSync('web/release.json','utf8'));
+assert.equal(release.product_version,'4.0','Only user may approve product version change');
+assert.equal(release.version_change_owner,'USER_APPROVAL_ONLY');
+assert.ok(Number.isFinite(Date.parse(release.updated_at_utc)),'Update stamp missing');
+assert.ok(!v4code.includes('localStorage.')&&!v4code.includes('sessionStorage.'),'Browser persistence forbidden');
 assert.ok(v4code.includes('factorLamps(x)')&&v4code.includes('x.metrics||{}'),'Technical lamps must use actual V4 source metrics');
 assert.ok(router.includes("key==='portfoy'?portfolio"),'One chart must move to paper portfolio');
 assert.ok(v4code.includes('v4-history-index')&&v4code.includes('renderHistory()'),'V4 history must validate and display latest audited event index');
