@@ -59,6 +59,10 @@ jobs:
             assert 0<=age<=480,(key,age)
           assert files['market']['model_version']=='3.0.0-market-quotes','legacy market collector in use'
           assert files['market']['analysis_attempted']==0,'legacy 15m OHLC scan not retired'
+          for old in ('history','radar','reports'):
+            retired=json.loads((p/f'{old}.json').read_text())
+            assert retired.get('retired') is True,'retired data source active: '+old
+            assert not retired.get('events',[]) and not retired.get('items',[]) and not retired.get('reports',[]),'old 15m signals reappeared: '+old
           assert files['mtf']['analyzed']>=3,'macro context insufficient'
           assert files['swing-radar']['model_version']=='3.0.0-htf-sparks','wrong high-TF radar model'
           assert files['mtf']['model_version']=='3.0.0-mtf-swing','outdated HTF score'
