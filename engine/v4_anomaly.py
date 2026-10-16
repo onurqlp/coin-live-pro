@@ -54,7 +54,7 @@ def assess(c,market,oi,now):
     fake=sum(bool(f.get('fakeout_up_on_close') or f.get('fakeout_down_on_close'))
              for f in (f5,f15,f1))
     wick=max(num(f.get('wick_rejections_8')) or 0 for f in (f5,f15,f1))
-    rejection=22 if fake>=2 else 15 if fake else 8 if wick>=3 else 4 if wick>=2 else 0
+    rejection=30 if fake>=2 else 17 if fake else 10 if wick>=3 else 6 if wick>=2 else 0
     v5=num(f5.get('volume_ratio_20'));v15=num(f15.get('volume_ratio_20'))
     vmax=max([v for v in (v5,v15,0) if v is not None])
     volume=25 if vmax>=4 else 16 if vmax>=2.5 else 8 if vmax>=1.8 else 0

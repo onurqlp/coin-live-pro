@@ -11,11 +11,13 @@ import hashlib
 import json
 import pathlib
 import v4_strategies as strat
+import v4_anomaly as anomaly
 
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 DATA=ROOT/'web'/'data'
 ARCH=ROOT/'archive'/'v4-lifecycle-ledger.json'
 POLICY=ROOT/'config'/'v4-policy.json'
+ANOMALY_ARCH=ROOT/'archive'/'v4-anomaly-study.json'
 VERSION='4.0.0-lifecycle-a1'
 DAY_MS=86400000
 
@@ -263,7 +265,13 @@ def main():
     market=load(DATA/'market.json',{})
     prior=load(ARCH,{})
     ledger,board=build(m,r,market,prior,now_ms,policy)
+    # Passive parallel investigation: NEVER feeds evolve(), stage scoring or
+    # the 10k account. Same closed-source MTF and OI scan, globally UTC.
+    study,observatory=anomaly.collect(m,market,load(DATA/'v4-oi.json',{}),
+                                     load(ANOMALY_ARCH,{}),now_ms)
+    board['anomaly_research']=observatory
     write(ARCH,ledger)
+    write(ANOMALY_ARCH,study)
     write(DATA/'v4-radar.json',board)
     write(DATA/'v4-history-index.json',{
         'model_version':'4.0.0','updated_at':board['updated_at'],
