@@ -47,7 +47,8 @@ def append_event(state,setup,kind,now_ms,scan_id,reason_codes,previous,next_stag
                  source_closed,metrics,price):
     raw='|'.join((setup['setup_id'],kind,previous or '',
                   next_stage or '',str(source_closed),scan_id))
-    event_id=digest(raw)
+    event_id=(digest('ENTRY_ELIGIBLE|'+setup['trade_intent_id'])
+              if kind=='ENTRY_ELIGIBLE' and setup.get('trade_intent_id') else digest(raw))
     if event_id in state['_event_ids']:return False
     event={'event_id':event_id,'setup_id':setup['setup_id'],'type':kind,
            'previous_stage':previous,'next_stage':next_stage,
@@ -57,7 +58,10 @@ def append_event(state,setup,kind,now_ms,scan_id,reason_codes,previous,next_stag
            'policy_version':state['policy_version'],'symbol':setup['symbol'],
            'side':setup['side'],'strategy_id':setup['strategy_id'],
            'reason_codes':list(reason_codes),'metrics_used':metrics,
-           'price_at_transition':price,'data_quality':setup['review_state']}
+           'price_at_transition':price,'data_quality':setup['review_state'],
+           'trade_intent_id':setup.get('trade_intent_id'),
+           'stop':setup.get('stop'),'targets':setup.get('targets'),
+           'risk_score':setup.get('risk_score')}
     state['events'].append(event)
     state['_event_ids'].add(event_id)
     return True
@@ -173,7 +177,7 @@ def evolve(previous,proposals,scan_id,now_ms,policy,source_ok=True):
             obj['retired_at']=iso(now_ms)
             obj['retired_reason']='STALE_UNVERIFIED'
             append_event(state,obj,'ARCHIVED',now_ms,scan_id,['STALE_UNVERIFIED'],
-                         previous_stage if (previous_stage:=prev_stage(obj)) else 'WATCH','ARCHIVED',
+                         prev_stage(obj),'ARCHIVED',
                          obj.get('last_evidence_at'),{},obj.get('price'))
             state['archived_count']+=1
             continue
