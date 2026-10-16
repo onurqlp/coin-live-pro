@@ -247,14 +247,14 @@ def reconcile_active(previous,scanned,assessments,now_ms):
             first_ms=int(dt.datetime.fromisoformat(first).timestamp()*1000)
         except (TypeError,ValueError):
             first_ms=now_ms;first=now
-        ttl=CONFIRMED_MS if spark['stage']=='CONFIRMED' or
-            (prior or {}).get('peak_stage')=='CONFIRMED' else WATCH_MS
+        was_confirmed=(spark['stage']=='CONFIRMED' or
+                       (prior or {}).get('peak_stage')=='CONFIRMED')
+        ttl=CONFIRMED_MS if was_confirmed else WATCH_MS
         if now_ms-first_ms>=ttl:
             if prior:retired.append(dict(prior,retired_at=now,review_state='EXPIRED'))
             first=now
         item=dict(spark,first_seen_at=first,last_evaluated_at=now,review_state='FRESH',
-                  peak_stage='CONFIRMED' if spark['stage']=='CONFIRMED' or
-                       (prior or {}).get('peak_stage')=='CONFIRMED' else 'WATCH',
+                  peak_stage='CONFIRMED' if was_confirmed else 'WATCH',
                   last_confirmed_at=now if spark['stage']=='CONFIRMED'
                      else (prior or {}).get('last_confirmed_at'),
                   first_seen_price=(prior or {}).get('first_seen_price',spark['price']))
