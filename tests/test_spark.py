@@ -76,6 +76,12 @@ class TestMacroSwingSparks(unittest.TestCase):
         low=self.record()
         low['score']=52
         self.assertIsNone(spark.spark_from_mtf(low,self.market(),self.micro()))
+    def test_extended_breakout_is_watch_not_fake_confirmed_entry(self):
+        x=self.record();x['frames']['1H']['trend']='UP'
+        x['frames']['4H']['breakout_high_prev8']=90
+        y=spark.spark_from_mtf(x,self.market())
+        self.assertEqual(y['stage'],'WATCH')
+        self.assertEqual(y['entry_timing'],'EXTENDED_WAIT')
     def test_forward_history_no_lookahead_no_fake_win(self):
         x=spark.spark_from_mtf(self.record(),self.market())
         d,count=spark.accumulate({'events':[]},[x])

@@ -18,7 +18,7 @@ import swing
 
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 DATA=ROOT/'web'/'data'
-MODEL='2.4.0-mtf-swing'
+MODEL='3.0.0-mtf-swing'
 PERIOD={'1W':604800000,'1D':86400000,'12H':43200000,'4H':14400000,'1H':3600000,'15m':900000,'5m':300000,'1m':60000}
 OKX={'1W':'1Wutc','1D':'1Dutc','12H':'12Hutc','4H':'4H','1H':'1H','15m':'15m','5m':'5m','1m':'1m'}
 MIN={'1W':14,'1D':25,'12H':34,'4H':40,'1H':40,'15m':50,'5m':40,'1m':20}

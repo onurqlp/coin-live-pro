@@ -56,7 +56,7 @@ class TestForwardOnly(unittest.TestCase):
         r=forward.evaluate(ev,[bar(start),bar(start+H*2,hi=103)],start+H*3+2000)
         self.assertEqual(r['status'],'DATA_GAP')
     def test_no_wins_from_small_sample(self):
-        now=100*DAY
+        now=100*DAY+2000
         result=forward.build({'events':[]},{'events':[observation(now-H*2)]},
                              lambda inst,tf:[bar(((now-H*2)//H+1)*H,103,99)],now)
         rep=result['reports'][0]

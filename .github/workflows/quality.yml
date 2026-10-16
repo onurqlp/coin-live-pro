@@ -25,5 +25,5 @@ jobs:
       - run: node --check web/pilot-ui.js
       - run: node --check web/router.js
       - run: node tests/verify.mjs
-      - run: python3 -m py_compile engine/collector.py engine/mtf.py engine/swing.py engine/spark.py engine/paper.py engine/health.py
+      - run: python3 -m py_compile engine/collector.py engine/mtf.py engine/swing.py engine/spark.py engine/forward.py engine/paper.py engine/health.py
       - run: python3 -m unittest discover -s tests -v

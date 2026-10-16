@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""COIN.LIVE PRO 2.4: forward-only, higher-timeframe swing sparks.
+"""COIN.LIVE PRO 3.0: forward-only, higher-timeframe swing sparks.
 
 Source: OKX fully closed 1W/1D/4H/1H/15m/5m candle states produced by mtf.py.
 A spark can only START from 1D+4H direction agreement and a safe structure
@@ -17,7 +17,7 @@ import mtf
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 DATA=ROOT/'web'/'data'
 ARCH=ROOT/'archive'/'swing-sparks-ledger.json'
-MODEL='2.4.0-htf-sparks'
+MODEL='3.0.0-htf-sparks'
 UTC=dt.datetime.now(dt.timezone.utc)
 MS=int(UTC.timestamp()*1000)
 DIRECTIONS={'LONG':'UP','SHORT':'DOWN'}
@@ -69,10 +69,8 @@ def spark_from_mtf(x,market,one_minute=None):
     m5ok=m5.get('quality')=='CLOSED_CONFIRMED' and m5.get('trend')==aligned
     micro=one_minute or {}
     one_ok=micro.get('quality')=='CLOSED_CONFIRMED' and micro.get('trend')==aligned
-    # Micro candles have zero authority to create a swing candidate. They
-    # only raise its timing stage when all macro gates already passed.
+    # Micro candles cannot create 1D/4H signals. 1H+15m verify direction.
     confirmed=h1ok and m15ok and risk<35 and score>=67
-    stage='CONFIRMED' if confirmed else 'WATCH'
     price=mtf.swing.num(market.get('price'))
     if price is None or price<=0:return None
     atr=mtf.swing.num(h4.get('atr_pct'))
@@ -85,6 +83,12 @@ def spark_from_mtf(x,market,one_minute=None):
     targets=[round(price+sign*distance*mult,12) for mult in (1,2,3)]
     threshold=mtf.swing.num(h4.get('breakout_high_prev8' if side=='LONG' else 'breakout_low_prev8'))
     if threshold is None:threshold=price
+    # Prevent chasing an already extended directional breakout without
+    # changing the macro observation. A late setup remains WATCH, not entry-ready.
+    beyond_pct=sign*(price/threshold-1)*100 if threshold>0 else 0
+    extended=beyond_pct>max(3.5,1.5*(atr or 0))
+    if extended:confirmed=False
+    stage='CONFIRMED' if confirmed else 'WATCH'
     symbol=x['symbol']
     last4=h4.get('last_candle_utc')
     # last 4H candle time, NOT the fetch timestamp, is setup identity.
@@ -98,6 +102,8 @@ def spark_from_mtf(x,market,one_minute=None):
         'reason_codes':x.get('reason_codes',[])[:12],
         'quality':'VERIFIED_CLOSED_1D_4H','setup_type':x.get('setup_type'),
         'price':price,'threshold':threshold,'stop':stop,'targets':targets,
+        'entry_timing':'EXTENDED_WAIT' if extended else 'STANDARD_WATCH',
+        'extended_from_4h_breakout_pct':round(beyond_pct,3),
         'model_version':MODEL,'observed_at_utc':UTC.isoformat(timespec='seconds'),
         'main_candle_at':last4,'market_structure_flags':x.get('structure_flags',[])[:9],
         'confirmation':{'1W':bool(weekly),'1D':True,'4H':True,
@@ -127,11 +133,18 @@ def accumulate(old,items):
     for spark in items:
         event_id=spark['id']+'|'+spark['stage']
         if event_id in existing:continue
+        # Suppress near-duplicate 4H setup observations within 12 hours.
+        # Stage upgrades remain distinct. Old 2.x history is not rewritten.
+        if any(e.get('model_version')==MODEL and e.get('symbol')==spark['symbol']
+               and e.get('side')==spark['side'] and e.get('stage')==spark['stage']
+               and 0<=MS-int(e.get('at_ms',0))<12*3600000 for e in history):continue
         event={
             'event_id':event_id,'id':spark['id'],'time':spark['observed_at_utc'],
             'at_ms':MS,'symbol':spark['symbol'],'side':spark['side'],
             'stage':spark['stage'],'primary_tf':spark['primary_tf'],
             'expected_holding':spark['expected_holding'],'price':spark['price'],
+            'stop':spark['stop'],'target_1r':spark['targets'][0],
+            'entry_timing':spark['entry_timing'],
             'score':spark['score'],'risk_score':spark['risk_score'],
             'confirmation':spark['confirmation'],
             'main_candle_at':spark['main_candle_at'],'model_version':MODEL,
@@ -146,7 +159,7 @@ def accumulate(old,items):
 def main():
     macro=load(DATA/'mtf.json',{})
     market=load(DATA/'market.json',{})
-    if macro.get('model_version')!='2.4.0-mtf-swing':
+    if macro.get('model_version')!='3.0.0-mtf-swing':
         raise RuntimeError('Expected verified 4H+daily model, no fallback to old 15m alerts')
     if not fresh(macro.get('fetched_at')) or not fresh(market.get('fetched_at')):
         raise RuntimeError('Stale higher-timeframe assessment; no fresh swing sparks')

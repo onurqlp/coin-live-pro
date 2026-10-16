@@ -8,7 +8,6 @@ Intrabar target/stop collisions are AMBIGUOUS; no simulated fills or PnL.
 import datetime as dt
 import json
 import pathlib
-import math
 import concurrent.futures
 import mtf
 
@@ -94,7 +93,6 @@ def evaluate(e,bars,now_ms):
         adverse=min(adverse,sign*(adv/price-1)*100)
         target_hit=high>=e['target_1r'] if sign>0 else low<=e['target_1r']
         adverse_hit=low<=e['stop'] if sign>0 else high>=e['stop']
-        out['checked_bars']+=1 if False else 0
         if target_hit or adverse_hit:
             out['status']='AMBIGUOUS' if target_hit and adverse_hit else ('FAVORABLE_1R' if target_hit else 'ADVERSE_1R')
             out['event_candle_start_ms']=int(b['t'])
@@ -104,7 +102,8 @@ def evaluate(e,bars,now_ms):
     out['mfe_pct']=round(favorable,3)
     out['mae_pct']=round(adverse,3)
     if out['status']=='TRACKING' and now_ms>=expiry:
-        out['status']='EXPIRED'
+        # Missing trailing candles are unknown outcomes, never clean expiries.
+        out['status']='EXPIRED' if good[-1]['t']>=latest_start else 'DATA_GAP'
     return out
 
 def report(events,days,now_ms):

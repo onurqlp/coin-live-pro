@@ -190,7 +190,7 @@ def main():
     mtf_stamp=dt.datetime.fromisoformat(mtf['fetched_at']) if mtf.get('fetched_at') else None
     if (NOW-hstamp).total_seconds()>360 or not mtf_stamp or (NOW-mtf_stamp).total_seconds()>360:
         raise RuntimeError('Stale central 4H/1D confirmation; refusing new virtual entries')
-    if mtf.get('model_version') not in ('2.2.0-mtf-swing','2.4.0-mtf-swing'):
+    if mtf.get('model_version') not in ('2.2.0-mtf-swing','2.4.0-mtf-swing','3.0.0-mtf-swing'):
         raise RuntimeError('4H/1D swing model not ready; legacy 15m-only paper trades disabled')
     log=read(ARCH,None)
     if log is None:

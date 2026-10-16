@@ -1,14 +1,22 @@
-# COIN.LIVE PRO 2.2 — 4H/Günlük Swing ve 7 Günlük Merkezi Pilot
+# COIN.LIVE PRO 3.0 — 4H/Günlük Swing, Giriş Kalitesi ve İleriye Dönük Sonuç Kontrolü
 
 **Web:** https://onurqlp.github.io/coin-live-pro/  
 **Rapor:** https://docs.google.com/spreadsheets/d/17xCk7i_F3XRGzyts1EF89vfrPiAUPbnEqATAM4fj9nA/edit  
-**Model:** `2.2.0-mtf-swing` + `2.2.0-swing-4h-1d` + `2.2.0-paper-swing`
+**Model:** `3.0.0-mtf-swing` + `3.0.0-htf-sparks` + `3.0.0-forward-observation`; eski 2.x sanal pilot ayrı.
 
 > Bu bir **ileri dönük, sadece sanal araştırma** pilotudur. Gerçek alım/satım emri, finansal API anahtarı, Telegram/WhatsApp/e-posta veya pilotta bildirim yoktur. Getiri ve başarı garantisi yoktur.
 
 
 
-## 2.4 — Ana periyotlar ve tek dokunuş grafik (16.10.2026)
+## 3.0 — Kontrollü giriş ve gerçek ileriye dönük gözlem (16.10.2026)
+
+- Kapanmış 1D+4H yön uyumu şartı, 1W/1H bağlamı, 15m teyidi ve 1m ek kontrol korunur. LONG ve SHORT eşit işlenir. Breakout seviyesi 4H barlarından gelir. Fiyat, kırılımın yönünde 4H ATR'ye göre fazla uzaklaşmışsa aday **İZLE** olur; pahalı/geç girişi sırf momentum var diye **TEYİT** saymayız. Bu filtre test edilmiş bir üstünlük iddiası değildir.
+- 12 saatte bir aynı parite/yön/aşamada yeniden üretilen kıvılcımlara ayrı başarı yazılmaz. Model 3.0 yeni olayları sıfırdan izlemeye başlar; 2.4 arşivi aynen saklanır.
+- `engine/forward.py` **yalnız 3.0 sonrası kaydedilen olayları**, olaydan sonra başlayan **kapanmış 4H mumlarıyla** izler. Hedefi önce görmek = `FAVORABLE_1R`, ters hareket = `ADVERSE_1R`, aynı mumda ikisini görmek = `AMBIGUOUS`, eksik mum = `DATA_GAP`, süre dolumu = `EXPIRED`. Bunlar piyasa yönü gözlemleridir; **gerçek emir, gerçekleşmiş kazanç, isabet garantisi veya sanal fill değildir**.
+- 7/14 günlük ileriye dönük raporda bütün durumlar ayrılır. Gözlenen yön oranı ancak en az 30 net yön olayı sonrasında açıklanır; aksi durumda boş bırakılır. Bu oran bile kalibre edilmiş kazanma olasılığı değildir.
+- GitHub cron hâlâ best-effort; bağımsız zamanlayıcı kanıtı oluşmadıkça '24/7 garanti' denmez. `workflow_dispatch` bağlantısı yalnız kullanıcının GitHub'da elle başlatmasına yönlendirir.
+
+## 2.4 — Önceki sürüm
 
 - Kapanmış **1D + 4H** aynı yönde olmadıkça LONG/SHORT kıvılcımı üretilemez. Toplam puan: **1D %36,4; 4H %36,55; 1W %15,6; 1H %6,45; 15m %3,5; 5m %1,5**. Haftalık uyum 3–7 günlük **1D** grafik, aksi 1–3 günlük **4H** grafik doğurur.
 - **TEYİT:** kapanmış 1H+15m uyumlu, risk puanı <35 ve genel puan ≥67. 1m/5m ek kontroldür; yokluğu temel sinyali iptal etmez; eksik veriye ayrı `NO_HISTORY` atanır.

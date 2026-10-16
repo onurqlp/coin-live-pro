@@ -1,0 +1,1 @@
+{"model_version":"3.0.0-forward-observation","updated_at":"2026-10-16T14:23:38+00:00","events":[],"new_observations":0,"reports":[],"source":"OKX 4H closed candles","observation_only":true,"no_legacy_backfill":true,"no_executed_orders":true,"notes":"3.0 forward observation starts only after 3.0 deployment."}
