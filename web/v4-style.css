@@ -62,3 +62,60 @@ padding:12px;text-align:left;display:grid;gap:5px;min-height:110px}
 .v4HistoryItem{border:1px solid #34465e;border-radius:10px;padding:11px 12px;background:#122137}
 .v4HistoryTop{display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;align-items:center;font-size:12px}
 .v4HistoryTop strong{font-size:10px;color:#b0dfeb}
+
+/* COIN.LIVE 4.0: desk-first radar. Actual candle canvas stays in the main
+   page, adjacent to WATCH; the legacy analysis remains a closed details. */
+.v4MarketSummary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;margin:0 0 15px}
+.v4SummaryMetric{display:flex;flex-direction:column;min-width:0;gap:5px;border:1px solid #344a62;
+  border-radius:13px;padding:15px 16px;background:linear-gradient(140deg,#172a40,#0f1c2c);
+  box-shadow:0 7px 24px rgba(0,0,0,.11)}
+.v4SummaryMetric small{font-size:10px;letter-spacing:.06em;color:#a5bdd4;font-weight:750}
+.v4SummaryMetric strong{font-size:clamp(21px,2.3vw,30px);line-height:1.15;font-variant-numeric:tabular-nums;
+  letter-spacing:-.035em;color:#edf7ff}
+.v4SummaryMetric span{color:#9db5cc;font-size:11px;line-height:1.35;overflow-wrap:anywhere}
+.v4SummaryMetric.long strong{color:#6be6c1}
+.v4SummaryMetric.short strong{color:#ff9eae}
+.v4TopRow,.v4LowerRow{display:grid;gap:13px;min-width:0;align-items:start}
+.v4TopRow{grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:13px}
+.v4LowerRow{grid-template-columns:minmax(0,.82fr) minmax(0,1.48fr)}
+.v4TopRow>.v4Column,.v4LowerRow>.v4Column,.v4LowerRow>.v4ChartHost{min-width:0;width:100%}
+.v4TopRow>.v4Column{height:100%;min-height:165px}
+.v4Column h3{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.v4Column h3 small{font-size:10px;font-weight:500;color:#a5b9d0}
+.v4TopRow .v4Cards{max-height:360px}
+.v4LowerRow .v4Cards{max-height:570px}
+.v4LowerRow .v4Column.watch{border-color:#38526a}
+.v4ChartHost{scroll-margin-top:12px}
+.v4ChartHost #chartPanel{margin-top:0;border:1px solid #46657f;min-height:430px;height:auto}
+.v4ChartHost #candleChart{display:block;max-width:100%;width:100%;height:auto;min-height:285px}
+.v4ChartHost .chartControls{flex-wrap:wrap;gap:9px;justify-content:flex-start}
+.v4ChartHost .panelHead{padding:14px 16px}
+.v4ChartHost .panelHead p{line-height:1.5}
+.v4Column .v4Opportunity:has(.v4GoChart:focus-visible){border-color:#9ad5fa}
+.v4GoChart{min-height:40px;min-width:130px}
+.v4GoChart:hover{background:#2d597a;border-color:#83b8d7}
+.v4GoChart.v4Selected{background:#225b67;border-color:#59c5bf;color:#e5ffff}
+.v4TechDisclosure .radarColumns{display:block}
+.v4TechDisclosure .radarLayout>.panel{margin:0}
+@media(max-width:1000px){
+ .v4LowerRow{grid-template-columns:minmax(0,1fr)}
+ .v4LowerRow .v4Cards{max-height:440px}
+ .v4ChartHost #chartPanel{min-height:385px}
+}
+@media(max-width:720px){
+ .v4MarketSummary{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .v4SummaryMetric{padding:12px 13px}
+ .v4TopRow{grid-template-columns:1fr}
+ .v4TopRow>.v4Column{min-height:0}
+ .v4TopRow .v4Cards{max-height:350px}
+ .v4LowerRow .v4Cards{max-height:440px}
+ .v4ChartHost .panelHead{padding:12px}
+ .v4ChartHost .chartControls{gap:7px}
+ .v4ChartHost .chartControls select{min-width:0;max-width:calc(50vw - 40px)}
+}
+@media(max-width:370px){
+ .v4SummaryMetric{padding:11px}
+ .v4SummaryMetric strong{font-size:22px}
+ .v4MarketSummary{gap:8px}
+ .v4ChartHost #candleChart{min-height:245px}
+}

@@ -29,7 +29,19 @@ assert.ok(html.includes('1H/15m TEYİT; 5m/1m ek kontrol.'),'Microframes used on
 assert.ok(html.includes('legacyTechnicalDisclosure')&&html.includes('legacyReportDisclosure'),'Technical/old reports must be collapsed, not deleted');
 assert.ok(html.includes('v4ObservationStatus')&&html.includes('<option value="3" selected>90 gün</option>'),'90-day observation default missing');
 assert.ok(!html.includes('BETA'),'No beta labels in released site');
-assert.ok(v4code.includes("window.CoinLiveSelectSpark(b.dataset.v4Symbol,'4H',true)"),'V4 opportunities must open visible chart tab');
+assert.ok(v4code.includes("select(symbol,'4H',false)"),'V4 opportunities must select SAME PAGE chart');
+assert.ok(v4code.includes('showMarketSummary(r,manifest,stale)'),'V4 KPIs must render verified manifest data');
+assert.ok(v4code.includes("new Set(rows.filter(x=>x.side===side)"),'LONG / SHORT counts must deduplicate multi-strategy symbol');
+assert.ok(v4code.includes('store.initialChartSelected'),'Auto-select initial V4 candidate once');
+assert.ok(code.includes('silent=false'),'Initial V4 chart must not jump on mobile');
+assert.ok(html.indexOf('id="chartHostRadar"')<html.indexOf('id="legacyTechnicalDisclosure"'),
+  'Chart should always be visible on main radar, never in collapsed technical details');
+assert.ok(html.indexOf('id="v4Spotlight"')<html.indexOf('id="v4Motion"')&&
+  html.indexOf('id="v4Motion"')<html.indexOf('id="v4Watch"')&&
+  html.indexOf('id="v4Watch"')<html.indexOf('id="chartHostRadar"'),
+  'Main radar must show spotlight/motion above watch and chart');
+for(const id of ['v4MarketTotal','v4LongTotal','v4ShortTotal','v4LastAnalysis'])
+  assert.ok(ids.includes(id),'Missing summary KPI: '+id);
 assert.ok(code.includes("mode:'SERVER'")&&code.includes("mode:'STALE'"),'Central data gate must fail closed');
 assert.ok(router.includes("window.addEventListener('hashchange',renderRoute)"),'Navigation must support history');
 assert.ok(router.includes('destination.replaceChildren(panel)'),'Native chart must be shared');
