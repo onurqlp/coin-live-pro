@@ -52,5 +52,7 @@ assert.ok(router.includes("key==='portfoy'?portfolio"),'One chart must move to p
 assert.ok(v4code.includes('publication_valid')&&v4code.includes('SHA-256'),
   'V4 must independently validate source checksums');
 assert.ok(html.includes('v3LegacyDisclosure'),'Old V3 100-USDT pilot must remain archived');
+assert.ok(code.includes('window.CoinLiveSelectSpark=selectSpark'), 'V4 cards must be able to reach actual chart selector');
+assert.ok(v4code.includes('window.CoinLiveSelectSpark'), 'V4 graph buttons must have functional chart selector');
 assert.ok(!v4code.includes('Notification('),'No V4 user push alerts');
 console.log('PASS: V3 compatibility plus V4 three-stage, isolated paper UI, checksum reader, shared chart.');
