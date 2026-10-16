@@ -61,7 +61,7 @@
    $('v4RecheckCount').textContent=r.counts?.recheck_pending??'—';
    $('v4ArchivedCount').textContent=r.counts?.archived_total??'—';
    document.querySelectorAll('[data-v4-symbol]').forEach(b=>b.onclick=()=>{
-     if(typeof selectSpark==='function')selectSpark(b.dataset.v4Symbol,'4H',false);
+     if(typeof window.CoinLiveSelectSpark==='function')window.CoinLiveSelectSpark(b.dataset.v4Symbol,'4H',false);
    });
  }
  function kpi(label,value){return '<div class="v4Kpi"><small>'+safe(label)+'</small><strong>'+safe(value)+'</strong></div>';}
@@ -94,7 +94,7 @@
    document.querySelectorAll('[data-v4-position]').forEach(b=>b.onclick=()=>{
      const x=positions.find(z=>z.paper_order_id===b.dataset.v4Position);
      if(!x)return;store.position=x;
-     if(typeof selectSpark==='function')selectSpark(x.symbol,'4H',false);
+     if(typeof window.CoinLiveSelectSpark==='function')window.CoinLiveSelectSpark(x.symbol,'4H',false);
      requestAnimationFrame(()=>window.dispatchEvent(new Event('resize')));
      $('chartHostPortfolio')?.scrollIntoView({behavior:'smooth',block:'nearest'});
    });
