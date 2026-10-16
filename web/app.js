@@ -184,6 +184,7 @@ function renderRadar(){
      (x.stage==='WATCH'&&x.strict_gate_reasons?.length?' · beklenen: '+safe(({
        WEEKLY_NOT_ALIGNED:'haftalık trend uyumu',
        BREAKOUT_NOT_CROSSED:'4H kırılımı',
+       '4H_CLOSED_BREAKOUT_MISSING':'4H mum kapanışı henüz teyit vermedi',
        BREAKOUT_OVEREXTENDED:'fiyat sakinleşmesi',
        LIQUIDITY_OR_SPREAD_UNVERIFIED:'likidite / spread teyidi',
        TIMING_NOT_CONFIRMED:'1H/15m/5m mum teyidi',
