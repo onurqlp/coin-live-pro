@@ -11,7 +11,7 @@ NOW_MS=int(NOW.timestamp()*1000)
 UTC=NOW.isoformat(timespec='seconds')
 API='https://www.okx.com/api/v5'
 HORIZON_DAYS=14
-WATCH_MAX=32
+WATCH_MAX=48
 TIMEOUT=11
 
 def read_json(name, fallback):
@@ -167,9 +167,21 @@ def main():
     latest={x['symbol']:x for x in rows}
     events=read_json('history.json',{'events':[]}).get('events',[])
     events=[e for e in events if NOW_MS-int(e.get('at_ms',0))<=HORIZON_DAYS*86400000]
-    # Rotate analysis target across top-volume and stronger 24h movers; no 100x3 request storm.
-    focus=list(dict.fromkeys([x['symbol'] for x in rows[:24]]+[x['symbol'] for x in sorted(rows[:85],key=lambda y:abs(y.get('change') or 0)*min(5e8,y['volume']),reverse=True)[:14]]))
-    target=[latest[s] for s in focus[:WATCH_MAX]]
+    # 15-minute runs: retain liquid leaders, prioritize large early deviations,
+    # and deliberately rotate through all 100 tradable symbols. This stops a
+    # permanently top-volume-only selection from ignoring the long tail.
+    old_market=read_json('market.json',{})
+    cycle=int(old_market.get('scan_cycle',-1))+1
+    liquid=[x['symbol'] for x in rows[:12]]
+    movers=[x['symbol'] for x in sorted(rows,key=lambda y:abs(y.get('change') or 0)*min(2e8,y['volume']),reverse=True)[:12]]
+    rotating=[x['symbol'] for x in rows if x['symbol'] not in set(liquid+movers)]
+    step=24
+    offset=(cycle*step)%len(rotating) if rotating else 0
+    rotated=(rotating[offset:]+rotating[:offset])[:step]
+    focus=list(dict.fromkeys(liquid+movers+rotated))
+    # Fill remaining slots with as-yet-unscanned markets.
+    focus.extend(x['symbol'] for x in rows if x['symbol'] not in set(focus))
+    target=[latest[symbol] for symbol in focus[:WATCH_MAX]]
     errors=[];analyzed=[]
     def work(x):
         try:return analyze(x)
@@ -200,10 +212,10 @@ def main():
     # Prevent a listing churn from losing old tracked events: bounded storage only after retention filtering.
     reports=[summary(events,7),summary(events,14)]
     if len(rows)>=30 and len(target)>=16:
-        save('market.json',{'provider':'OKX','fetched_at':UTC,'rows':rows,'analyzed':len(target),'errors':errors[:10]})
+        save('market.json',{'provider':'OKX','fetched_at':UTC,'rows':rows,'analyzed':len(target),'scan_cycle':cycle,'scan_rotation':step,'errors':errors[:10]})
         save('radar.json',{'provider':'OKX','fetched_at':UTC,'items':sorted(analyzed,key=lambda x:x['score'],reverse=True),
                            'long':sum(x['side']=='LONG' for x in analyzed),'short':sum(x['side']=='SHORT' for x in analyzed)})
         save('history.json',{'provider':'OKX','updated_at':UTC,'retention_days':HORIZON_DAYS,'events':events})
         save('reports.json',{'provider':'OKX','updated_at':UTC,'reports':reports,'method':'Forward observation only; 15m OHLC outcomes. Intrabar ordering ambiguity excluded.'})
-    print(f'OK {UTC} OKX {len(rows)} markets; {len(target)} scanned; {len(analyzed)} early alerts; {len(events)} historic; {len(errors)} failed')
+    print(f'OK {UTC} OKX {len(rows)} markets; cycle {cycle}; {len(target)} scanned; {len(analyzed)} early alerts; {len(events)} historic; {len(errors)} failed')
 if __name__=='__main__':main()
