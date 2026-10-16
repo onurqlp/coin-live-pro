@@ -59,6 +59,14 @@ def swing_context(market, states, side, derivatives=None):
         if (state.get('wick_rejections_8') or 0) >= 3:
             risk += round(17*weight)
             notes.append(tf+'_REPEATED_LONG_WICKS')
+        # A closed breakout rejection can indicate a liquidity sweep; it does
+        # not prove spoofing/manipulation, and never authorizes a position.
+        if state.get('fakeout_up_on_close') and side=='LONG':
+            risk += round(22*weight)
+            notes.append(tf+'_FAILED_UP_BREAKOUT')
+        if state.get('fakeout_down_on_close') and side=='SHORT':
+            risk += round(22*weight)
+            notes.append(tf+'_FAILED_DOWN_BREAKOUT')
         rel = num(state.get('volume_ratio_20'))
         if rel is not None and rel >= 3.5:
             risk += round(17*weight)
