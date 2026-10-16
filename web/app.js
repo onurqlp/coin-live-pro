@@ -43,7 +43,7 @@ function refreshState(){
  }
 }
 
-async function refresh(){if(S.loading)return;S.loading=true;$('refresh').disabled=true;$('refresh').textContent='↻ Kontrol ediliyor…';let errors=[];const names=['market','swing-radar','history','reports','swing-history'],data=await Promise.allSettled(names.map(k=>get('./data/'+k+'.json')));data.forEach((r,i)=>{if(r.status!=='fulfilled'){errors.push(names[i]+': '+r.reason.message);return;}let x=r.value;if(i===0){S.market=x.rows||[];S.provider=x.provider||'OKX';S.stamps.market=Date.parse(x.fetched_at);}if(i===1){
+async function refresh(){if(S.loading)return;S.loading=true;$('refresh').disabled=true;$('refresh').textContent='↻ Kontrol ediliyor…';let errors=[];const names=['market','swing-radar','history','reports','swing-history'],data=await Promise.allSettled(names.map(k=>get('./data/'+k+'.json')));data.forEach((r,i)=>{if(r.status!=='fulfilled'){errors.push(names[i]+': '+r.reason.message);if(names[i]==='swing-radar'){S.radar=[];S.sparkModel='SOURCE_ERROR';S.stamps.radar=0;}return;}let x=r.value;if(i===0){S.market=x.rows||[];S.provider=x.provider||'OKX';S.stamps.market=Date.parse(x.fetched_at);}if(i===1){
  const ok=x.model_version==='2.3.0-htf-sparks' &&
  Array.isArray(x.timeframes_primary)&&x.timeframes_primary.includes('1D')&&x.timeframes_primary.includes('4H');
  S.sparkModel=ok?x.model_version:'INVALID_SOURCE';
