@@ -64,7 +64,7 @@ function openModel(id){
 function toggleSave(id){
  const n=Number(id),index=shortlist.indexOf(n);
  if(index>=0){shortlist.splice(index,1);toast('Kısa listeden çıkarıldı')}else{shortlist.push(n);toast('Kısa listeye eklendi')};
- persist();renderModels();renderShortlist();
+ persist();renderModels();renderShortlist();renderArbitrage();
  const dialog=$('modelDialog');if(dialog.open&&get(n)&&$('modelDialogBody').querySelector('[data-save="'+n+'"]')){
   const b=$('modelDialogBody').querySelector('[data-save="'+n+'"]');b.textContent=shortlist.includes(n)?'☆ Kısa listeden çıkar':'☆ Kısa listeme ekle';
  }
@@ -74,7 +74,7 @@ function toggleCompare(id){
  if(index>=0)compare.splice(index,1);
  else if(compare.length>=3){toast('Yan yana en fazla 3 model karşılaştırılabilir');return}
  else compare.push(n);
- renderModels();renderTray();
+ renderModels();renderTray();renderArbitrage();
 }
 function renderTray(){
  $('compareTray').hidden=compare.length===0;
@@ -167,6 +167,47 @@ function renderBudget(){
  $('budgetItems').innerHTML=template.map(x=>'<div class="budget-item"><span class="budget-dot" style="background:'+x.color+'"></span><div><b>'+esc(x.key)+' — '+money(budget*x.part)+'</b><span>'+esc(x.note)+'</span></div></div>').join('');
  document.querySelectorAll('.budget-choice').forEach(b=>b.classList.toggle('active',Number(b.dataset.budget)===budget));
 }
+
+const arbitrageCategories=['Kripto arbitrajı','Borsa & türevler','Döviz & emtia','İstatistiksel strateji'];
+let arbitrageCategory='all';
+function renderArbitrage(){
+ const target=$('arbitrageRows');if(!target)return;
+ const rows=models.filter(m=>m.id>=31&&(arbitrageCategory==='all'||m.cat===arbitrageCategory));
+ target.innerHTML=rows.map(m=>'<article class="arb-row"><div class="arb-row-main"><span class="arb-row-no">'+String(m.id).padStart(2,'0')+'</span><div><strong>'+esc(m.name)+'</strong><p>'+esc(m.tag)+'</p><small>'+esc(m.cat)+' · ~'+m.capital+'K TL pilot (varsayım)</small></div></div><div class="arb-row-action"><span class="tier tier-'+m.tier+'">'+esc(tierName[m.tier])+'</span><button type="button" class="arb-details-btn" data-detail="'+m.id+'">Mantiğı ve riskini aç ↗</button><button class="icon-btn '+(shortlist.includes(m.id)?'saved':'')+'" type="button" data-save="'+m.id+'" aria-label="Kısa listeye ekle">☆</button><button class="icon-btn '+(compare.includes(m.id)?'compare-on':'')+'" type="button" data-compare="'+m.id+'" aria-label="Karşılaştır">⇄</button></div></article>').join('');
+ document.querySelectorAll('.arb-tab').forEach(b=>b.classList.toggle('active',b.dataset.arbCat===arbitrageCategory));
+}
+const arbPresets={
+ funding:[100000,.8,.25,.2,.2,.2,150],
+ cex:[100000,.55,.16,.3,.03,.18,100],
+ dex:[100000,1.2,.25,.45,.08,.35,350],
+ etf:[100000,.75,.18,.28,.22,.25,80]
+};
+const arbIds=['arbCapital','arbGross','arbFees','arbSlip','arbCarry','arbBuffer','arbFixed'];
+function setArbitragePreset(name){
+ const v=arbPresets[name]||arbPresets.funding;
+ arbIds.forEach((id,i)=>{$(id).value=v[i]});
+ evaluateArbitrage();
+}
+function evaluateArbitrage(){
+ const v=arbIds.map(id=>Number($(id).value));
+ const [capital,grossPct,fees,slip,carry,buffer,fixed]=v;
+ if(!v.every(Number.isFinite)||capital<0||fixed<0||[fees,slip,buffer].some(n=>n<0)){
+  $('arbNet').textContent='Veri hatası';$('arbStatus').textContent='Pozitif nominal ve geçerli oranlar girin.';return;
+ }
+ const gross=capital*grossPct/100;
+ const cost=capital*(fees+slip+carry+buffer)/100+fixed;
+ const net=gross-cost,netPct=capital?net*100/capital:NaN;
+ const breakeven=capital?fees+slip+carry+buffer+fixed*100/capital:NaN;
+ $('arbNet').textContent=(net>0?'+':'')+money(net);
+ $('arbNet').className='arb-big '+(net>=0?'positive':'negative');
+ $('arbGrossTL').textContent=money(gross);
+ $('arbCostTL').textContent=money(cost);
+ $('arbNetPct').textContent=Number.isFinite(netPct)?netPct.toLocaleString('tr-TR',{maximumFractionDigits:3})+'%':'—';
+ $('arbBreakEven').textContent=Number.isFinite(breakeven)?breakeven.toLocaleString('tr-TR',{maximumFractionDigits:3})+'%':'—';
+ $('arbStatus').textContent=net>=0?'Matematiksel fark pozitif; gerçek işlem/risksiz getiri kanıtı değil.':'Varsayımsal fark maliyetleri karşılamıyor.';
+ $('arbStatus').className='arb-result-status '+(net>=0?'positive':'negative');
+}
+
 function init(){
  if(!models.length){$('modelGrid').textContent='Model kataloğu yüklenemedi. Sayfayı yenileyin.';return}
  const cats=[...new Set(models.map(m=>m.cat))];$('categoryFilter').innerHTML='<option value="all">Tüm alanlar</option>'+cats.map(cat=>'<option value="'+esc(cat)+'">'+esc(cat)+'</option>').join('');
@@ -174,6 +215,11 @@ function init(){
  if(selection&&shortlist.length===0){shortlist=selection.split(',').map(Number).filter(n=>get(n)).slice(0,8);persist()}
  const saved=readStore(noteKey,'');if(typeof saved==='string')$('partnerNotes').value=saved.slice(0,3000);
  renderModels();renderFeatured();renderTray();renderShortlist();renderBudget();setSimKind('saas');
+ renderArbitrage();setArbitragePreset('funding');
+ document.querySelectorAll('.arb-tab').forEach(b=>b.addEventListener('click',()=>{arbitrageCategory=b.dataset.arbCat;renderArbitrage()}));
+ $('arbPreset').addEventListener('change',e=>setArbitragePreset(e.target.value));
+ arbIds.forEach(id=>$(id).addEventListener('input',evaluateArbitrage));
+ $('arbReset').addEventListener('click',()=>setArbitragePreset($('arbPreset').value));
  $('modelSearch').addEventListener('input',e=>{currentSearch=e.target.value.trim().toLocaleLowerCase('tr');full=false;renderModels()});
  $('categoryFilter').addEventListener('change',e=>{currentCategory=e.target.value;full=false;renderModels()});
  $('tierFilter').addEventListener('change',e=>{currentTier=e.target.value;full=false;renderModels()});
@@ -190,7 +236,7 @@ function init(){
  });
  $('simKind').addEventListener('change',e=>setSimKind(e.target.value));
  sliders.forEach(id=>$(id).addEventListener('input',()=>{document.querySelectorAll('.scenario').forEach(b=>b.classList.remove('active'));updateCalc()}));
- $('clearCompare').addEventListener('click',()=>{compare=[];renderModels();renderTray()});
+ $('clearCompare').addEventListener('click',()=>{compare=[];renderModels();renderTray();renderArbitrage()});
  $('openCompare').addEventListener('click',openCompare);
  $('closeModel').addEventListener('click',()=>$('modelDialog').close());
  $('closeCompare').addEventListener('click',()=>$('comparisonDialog').close());
