@@ -36,18 +36,34 @@ jobs:
           grep -q 'pilot-ui.js' /tmp/site.html
           grep -q 'router.js' /tmp/site.html
           grep -q 'id="workspaceNav"' /tmp/site.html
+          grep -q 'id="chartHostRadar"' /tmp/site.html
+          grep -q 'id="chartHostAdvanced"' /tmp/site.html
+          grep -q 'id="swingHistoryRows"' /tmp/site.html
           grep -q 'id="routeStatus"' /tmp/site.html
           grep -q 'id="mtfCandidates"' /tmp/site.html
           grep -q 'id="paperKpis"' /tmp/site.html
           grep -q 'id="systemKpis"' /tmp/site.html
-          for n in market radar history reports mtf paper health; do
+          for n in market radar history reports mtf paper health swing-radar swing-history; do
             curl -fSL --max-time 15 "$ROOT/data/$n.json?check=$(date +%s)" -o "/tmp/$n.json"
           done
           python3 - <<'PY'
           import json,datetime
           from pathlib import Path
-          data={n:json.loads(Path(f'/tmp/{n}.json').read_text()) for n in ['market','radar','history','reports','mtf','paper','health']}
+          data={n:json.loads(Path(f'/tmp/{n}.json').read_text()) for n in ['market','radar','history','reports','mtf','paper','health','swing-radar','swing-history']}
           assert len(data['market'].get('rows',[]))>=20,'market list incomplete'
+          swing=data['swing-radar']
+          assert swing['model_version']=='2.3.0-htf-sparks','Old 15m spark source used instead of 1D/4H'
+          assert swing['timeframes_primary']==['1D','4H'],'Primary timeframe mismatch'
+          assert swing['source_mtf_at']==data['mtf']['fetched_at'],'Macro scanner source mismatch'
+          assert all(x['primary_tf'] in ('1D','4H') and x['confirmation']['1D'] and x['confirmation']['4H']
+                     for x in swing['items']), 'Low-timeframe alert promoted without 1D+4H'
+          assert all(x['stage']!='CONFIRMED' or all(x['confirmation'][tf] for tf in ('1H','15m','5m','1m'))
+                     for x in swing['items']),'Confirmation missing closed micro candle'
+          assert all(e['is_executed_trade'] is False and e['realized_R'] is None
+                     for e in data['swing-history']['events']),'Forward-only spark history falsified'
+          print('HTF_SPARKS_OK',len(swing['items']),'confirmed',swing['confirmed'],
+                'forward_events',len(data['swing-history']['events']))
+
           assert data['market'].get('analysis_attempted',0)>=30,'15m scan queue underfilled'
           assert data['market'].get('analysis_ok',0)>=20,'insufficient closed 15m/1H/4H validation'
           attempted=data['market']['analysis_attempted']
