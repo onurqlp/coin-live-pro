@@ -229,12 +229,25 @@ def build(mtf,radar,market,archive,now_ms,policy):
     active={(x['symbol'],x['side']):x for x in radar.get('items',[])
             if x.get('review_state')=='FRESH'}
     market_by={x['symbol']:x for x in market.get('rows',[])}
+    oi_doc=load(DATA/'v4-oi.json',{})
+    oi_ready=(oi_doc.get('model_version')=='4.0.0-oi-a1' and
+              oi_doc.get('source_mtf_at')==mtf['fetched_at'])
     propositions=[]
     for item in mtf.get('candidates',[]):
         symbol=item.get('symbol')
         if symbol not in market_by:continue
+        # V4 never treats the V3 single previous-scan delta as a 1h or 4h
+        # measurement. Timed OI exists only after actual historical samples.
+        x=dict(item)
+        x['open_interest_change_pct']=None
+        x['open_interest_delta_minutes']=None
+        oi=(oi_doc.get('deltas',{}).get(symbol,{}) if oi_ready else {})
+        delta=(oi.get('delta',{}).get('5m',{}))
+        if delta.get('status')=='VERIFIED_SNAPSHOT_DELTA':
+            x['open_interest_change_pct']=delta['change_pct']
+            x['open_interest_delta_minutes']=delta['observed_minutes']
         spark=active.get((symbol,item.get('side')))
-        propositions.extend(strat.evaluator(item,market_by[symbol],spark,now_ms))
+        propositions.extend(strat.evaluator(x,market_by[symbol],spark,now_ms))
     ledger=evolve(archive,propositions,scan_id,now_ms,policy)
     board=project_view(ledger,scan_id,{'mtf':mtf['fetched_at'],'spark':radar['fetched_at']},policy)
     return ledger,board
