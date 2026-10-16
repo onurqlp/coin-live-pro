@@ -22,6 +22,7 @@ jobs:
           python-version: '3.11'
       - run: node --check web/app.js
       - run: node --check web/v4-ui.js
+      - run: node --check web/watch-archive-ui.js
       - run: node --check web/legacy-reset.js
       - run: node --check web/pilot-ui.js
       - run: node --check web/router.js
