@@ -1,4 +1,4 @@
-name: COIN.LIVE PRO — 15m Radar & Forward Archive
+name: COIN.LIVE PRO — 4H/Daily Swing & Forward Archive
 on:
   workflow_dispatch:
   schedule:
@@ -35,6 +35,8 @@ jobs:
         run: python3 engine/collector.py
       - name: Build verified UTC-aligned seven-timeframe research
         run: python3 engine/mtf.py
+      - name: Record central DAILY / 4H swing sparks with 1H, 15m and 1m confirmation
+        run: python3 engine/spark.py
       - name: Track forward-only 100 USDT paper pilot
         run: python3 engine/paper.py
       - name: Record actual scan source and missed cron intervals
@@ -44,11 +46,11 @@ jobs:
           python3 - <<'PY'
           import json, pathlib, datetime
           p=pathlib.Path('web/data')
-          files={s:json.loads((p/f'{s}.json').read_text()) for s in ['market','radar','history','reports','mtf','paper','health']}
+          files={s:json.loads((p/f'{s}.json').read_text()) for s in ['market','radar','history','reports','mtf','paper','health','swing-radar','swing-history']}
           now=datetime.datetime.now(datetime.timezone.utc)
           assert len(files['market']['rows']) >= 30
           assert all(x['provider']=='OKX' for x in (files['market'],files['radar'],files['history'],files['reports'],files['mtf']))
-          for key,field in [('market','fetched_at'),('radar','fetched_at'),('history','updated_at'),('reports','updated_at'),('mtf','fetched_at'),('paper','updated_at'),('health','updated_at')]:
+          for key,field in [('market','fetched_at'),('radar','fetched_at'),('history','updated_at'),('reports','updated_at'),('mtf','fetched_at'),('paper','updated_at'),('health','updated_at'),('swing-radar','fetched_at'),('swing-history','updated_at')]:
             age=(now-datetime.datetime.fromisoformat(files[key][field])).total_seconds()
             assert 0<=age<=480,(key,age)
           ev=files['history']['events']
@@ -57,6 +59,19 @@ jobs:
           assert files['market'].get('analysis_ok',0)>=20,'insufficient successful 15m/1H/4H OHLC coverage'
           assert files['market'].get('analysis_attempted',0)>=30,'scan queue underfilled'
           assert files['mtf']['analyzed']>=3,'macro context insufficient'
+          assert files['swing-radar']['model_version']=='2.3.0-htf-sparks','wrong high-TF radar model'
+          assert files['swing-radar']['timeframes_primary']==['1D','4H'],'15m must not become primary'
+          assert files['swing-radar']['source_mtf_at']==files['mtf']['fetched_at'],'wrong MTF snapshot source'
+          assert len({e['event_id'] for e in files['swing-history']['events']})==len(files['swing-history']['events']),'duplicate forward sparks'
+          assert all(x['primary_tf'] in ('1D','4H') and x['quality']=='VERIFIED_CLOSED_1D_4H'
+                     for x in files['swing-radar']['items']),'legacy 15m spark entered HTF radar'
+          assert all(x['confirmation']['1D'] and x['confirmation']['4H']
+                     for x in files['swing-radar']['items']),'higher TF alignment missing'
+          assert all(x['stage']!='CONFIRMED' or
+                     all(x['confirmation'][frame] for frame in ('1H','15m','5m','1m'))
+                     for x in files['swing-radar']['items']),'invalid micro confirmation'
+          assert all(not e['is_executed_trade'] and e['realized_R'] is None
+                     for e in files['swing-history']['events']),'research observations pretended to be fills'
           assert files['paper']['starting_usdt']==100,'pilot balance changed'
           assert files['health']['last_scan_id'],'missing scan provenance' 
           print('Verified: 100-pair public radar, scanned',files['market']['analyzed'],'events',len(ev),'and 7/14-day reports')
@@ -68,7 +83,8 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add web/data/market.json web/data/radar.json web/data/history.json web/data/reports.json
           git add web/data/mtf.json web/data/paper.json web/data/health.json
-          git add archive/pilot-ledger.json archive/scan-health.json
+          git add web/data/swing-radar.json web/data/swing-history.json
+          git add archive/pilot-ledger.json archive/scan-health.json archive/swing-sparks-ledger.json
           if git diff --cached --quiet; then exit 0; fi
           git commit -m 'data: 7-timeframe radar, paper pilot, 90-day event and cron provenance [skip ci]'
           for try in 1 2 3; do
