@@ -41,6 +41,6 @@ assert.ok(code.includes('setInterval(()=>{if(!document.hidden)refreshLivePrices(
 assert.ok(code.includes('S.quoteRowsCache.get(old.symbol)'),'Server snapshot should not overwrite newer live prices');
 assert.ok(code.includes("S.stamps.radar")&&code.includes('25*60000'),'Independent stale 1D/4H guard retained');
 const marketWorkflow=fs.readFileSync('.github/workflows/market.yml','utf8');
-assert.match(marketWorkflow,/  push:\\n    branches:\\n      - main\\n/,
+assert.match(marketWorkflow,/  push:\n    branches:\n      - main\n/,
   'Feature branch code pushes must not run the production market publishing workflow');
 console.log('PASS: COIN.LIVE PRO 3.0 only, no 15m signals/legacy metrics; six tabs, charts and forward audit intact.');
