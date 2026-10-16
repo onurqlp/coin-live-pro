@@ -9,6 +9,7 @@ on:
       - v4-radar-inpage-chart-kpis-20261016
       - v4-utc-session-release-anomaly-20261017
       - v4-go-archive-context-20261017
+      - ui-readable-20261017
     paths:
       - '.github/workflows/v4-preview.yml'
       - 'engine/v4_**'
@@ -89,7 +90,7 @@ jobs:
           python3 - <<'PY'
           import re
           doc=open('/tmp/v4-dom.html').read()
-          for id in ('v4Spotlight','v4Motion','v4Watch','v4Status'):
+          for id in ('v4Spotlight','v4Motion','v4Watch','v4Status','v4RadarSearch','v4RadarSide'):
               m=re.search(r'id="'+id+r'"[^>]*>(.*?)</',doc,re.S)
               assert m and m.group(1).strip(),id+' failed to render'
           assert 'V4 veri kontrolü:' not in doc,'V4 manifest fetch or hash validation failed'
