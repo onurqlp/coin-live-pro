@@ -69,7 +69,7 @@ jobs:
           assert anomaly.get('hourly',{}).get('time_basis')=='UTC'
           assert anomaly.get('clock',{}).get('window_is_not_manipulation_evidence') is True
           release=json.loads((p.parent/'release.json').read_text())
-          assert release['product_version']=='4.0' and release['version_change_owner']=='USER_APPROVAL_ONLY'
+          assert release['product_version']=='4.01' and release['version_change_owner']=='USER_APPROVAL_ONLY'
           assert all(data[k]['scan_id']==sid for k in ('v4-radar','v4-history-index','v4-paper','v4-shadow','v4-forward','v4-watch-archive','v4-lab'))
           assert data['v4-watch-archive']['scan_id']==sid
           assert data['v4-context']['score_not_used_for_paper_or_v4_stage'] is True
