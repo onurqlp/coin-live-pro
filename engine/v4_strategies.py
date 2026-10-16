@@ -89,6 +89,13 @@ def evaluator(candidate,market,spark=None,now_ms=None):
             'oi_change_pct':deriv,'oi_window_minutes':oi_duration,
             'funding_rate':funding,'spread_bps':spread,'volume_24h':volume,
             'risk_score':risk,'closed_4h_breakout':bool(macro_break)}
+    # Every period is sourced from real, fully closed exchange OHLC.
+    # Lower frames are timing evidence; 4H/1D are primary, 1W regime context.
+    metric['timeframe_levels']={
+      tf:{'quality':(f.get(tf) or {}).get('quality','UNKNOWN'),
+          'trend':(f.get(tf) or {}).get('trend','UNKNOWN'),
+          'closed_at_utc':(f.get(tf) or {}).get('last_candle_utc')}
+      for tf in ('1m','5m','15m','1H','4H','12H','1D','1W')}
     proposals=[]
     def add(strategy,discovery,motion,spotlight,reasons,gate,quality=None):
         if not discovery:return
