@@ -106,11 +106,11 @@ jobs:
           doc=open('/tmp/route.html').read()
           selected=re.search(r'<main class="workspaceView" data-view="'+route+r'"[^>]*>',doc)
           assert selected,route+' missing panel'
-          assert 'hidden' not in selected.group(0) and 'aria-hidden="false"' in selected.group(0),route+' not visible'
+          assert ' hidden' not in selected.group(0).replace('aria-hidden','aria_hidden') and 'aria-hidden="false"' in selected.group(0),route+' not visible'
           for other in ('radar','grafikler','portfoy','gecmis','rapor','sistem'):
             panel=re.search(r'<main class="workspaceView" data-view="'+other+r'"[^>]*>',doc)
             assert panel
-            if other!=route:assert 'hidden' in panel.group(0) and 'aria-hidden="true"' in panel.group(0),other+' not hidden'
+            if other!=route:assert ' hidden' in panel.group(0).replace('aria-hidden','aria_hidden') and 'aria-hidden="true"' in panel.group(0),other+' not hidden'
           active=re.search(r'<a[^>]+data-nav="'+route+r'"[^>]*>',doc)
           assert active and 'aria-current="page"' in active.group(0),'navigation highlight absent'
           print('ROUTE_OK',route)
