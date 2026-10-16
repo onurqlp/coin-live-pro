@@ -60,7 +60,58 @@ if(!S.initialized&&S.radar.length){
 S.initialized=true;render();if(errors.length&&(!S.market.length||!S.events.length))$('healthExplain').textContent+=' · Kaynak sorunu: '+errors.join(' | ');
 S.loading=false;$('refresh').disabled=false;$('refresh').textContent='↻ Güncelliği Kontrol Et';}
 function render(){refreshState();$('marketCount').textContent=S.market.length||'—';$('longCount').textContent=currentRadar().items.filter(x=>x.side==='LONG').length;$('shortCount').textContent=currentRadar().items.filter(x=>x.side==='SHORT').length;renderRadar();renderChartSelector();renderHistory();renderLocalHistory();renderReports();renderQuality();renderMarket();}
-function renderRadar(){const active=currentRadar(),fresh=active.mode!=='STALE';const available=active.items.slice(0,14);$('radarRows').innerHTML=available.length?available.map((x,i)=>`<div class="radarLine" data-symbol="${safe(x.symbol)}"><span class="rank">${i+1}</span><div><div class="coin">${safe(x.symbol.replace('USDT',''))} <span class="chip ${x.side==='LONG'?'long':'short'}">${x.side}</span> <span class="chip ${x.stage==='CONFIRMED'?'confirmed':'watch'}">${x.stage==='CONFIRMED'?'TEYİT':'İZLE'}</span></div><div class="reason">${active.mode==='BROWSER'?'DOĞRUDAN CANLI':'SUNUCU'} · 15m hacim ${fmt(x.volume_ratio)}x · radar ${x.score}/100 · 15m/1H/4H</div></div><div class="rval"><b>${fmt(x.price)}</b><small>Eşik: ${fmt(x.threshold)}</small></div></div>`).join(''):'<div class="empty">'+(fresh?'Bu taramada doğrulanan yeni LONG/SHORT adayı yok. 15 dakika sonra tekrar kontrol edilecek.':'Analiz 15 dakikadan eski. Eski kıvılcımlar güncel fırsat diye gösterilmez; geçmiş tablosunda saklanır.')+'</div>';document.querySelectorAll('.radarLine').forEach(x=>x.onclick=()=>{S.selected=x.dataset.symbol;$('chartCoin').value=S.selected;location.hash='#grafikler';ensureChart(true);});}
+function selectSpark(symbol,tf,openAdvanced=false){
+ const accepted=['1m','5m','15m','1H','4H','12H','1D','1W'];
+ const spark=currentRadar().items.find(x=>x.symbol===symbol);
+ if(!S.market.some(x=>x.symbol===symbol)&&!spark)return;
+ const target=accepted.includes(tf)?tf:(spark?.primary_tf||'4H');
+ S.selected=symbol;S.chartTf=target;
+ $('chartTf').value=target;
+ renderChartSelector();
+ highlightSpark();
+ if(openAdvanced){
+   location.hash='#grafikler';
+ }else if(document.body.dataset.route==='radar'&&window.matchMedia('(max-width:980px)').matches){
+   $('chartPanel').scrollIntoView({behavior:'smooth',block:'start'});
+ }
+ ensureChart(true);
+}
+function highlightSpark(){
+ document.querySelectorAll('.radarLine').forEach(el=>{
+   const selected=el.dataset.symbol===S.selected;
+   el.classList.toggle('selected',selected);
+   el.setAttribute('aria-pressed',selected?'true':'false');
+ });
+}
+function renderRadar(){
+ const active=currentRadar(),fresh=active.mode==='SERVER';
+ const available=active.items.slice(0,16);
+ $('radarRows').innerHTML=available.length?available.map((x,i)=>{
+   const confirmed=x.stage==='CONFIRMED',tf=x.primary_tf==='1D'?'GÜNLÜK':'4 SAAT';
+   const c=x.confirmation||{};
+   const timing=['1H','15m','5m','1m'].map(frame=>'<span class="timing '+
+     (c[frame]?'hit':'miss')+'">'+frame+(c[frame]?' ✓':' ·')+'</span>').join('');
+   const flags=(x.market_structure_flags||[]).filter(v=>!String(v).endsWith('_NOT_VERIFIED')).length;
+   return '<button type="button" class="radarLine" data-symbol="'+safe(x.symbol)+
+     '" data-tf="'+safe(x.primary_tf)+'" aria-pressed="false" aria-label="'+
+     safe(x.symbol)+' '+safe(x.side)+' · '+tf+' mum grafiğini aç"><span class="rank">'+(i+1)+
+     '</span><span class="sparkMain"><span class="coin">'+safe(x.symbol.replace('USDT',''))+
+     ' <span class="chip '+(x.side==='LONG'?'long':'short')+'">'+safe(x.side)+'</span>'+
+     ' <span class="chip '+(confirmed?'confirmed':'watch')+'">'+(confirmed?'TEYİT':'İZLE')+'</span></span>'+
+     '<span class="reason"><strong>'+tf+'</strong> · '+safe(x.expected_holding)+
+     ' · haftalık '+(c['1W']?'uyumlu':'ayrışıyor')+' · risk '+safe(x.risk_score)+'/100'+
+     (flags?' · '+flags+' uyarı':'')+'</span><span class="timingRow">'+timing+'</span></span>'+
+     '<span class="rval"><b>'+fmt(x.price)+'</b><small>Puan '+safe(x.score)+'/100</small>'+
+     '<small class="viewChart">Grafiğe bak ↗</small></span></button>';
+ }).join(''):'<div class="empty">'+(fresh?
+   'Günlük + 4H trendi aynı yönde olan ve güvenlik filtresini geçen yeni kıvılcım yok. Mikro mumlar kendi başına aday oluşturmaz.':
+   'Merkezi günlük / 4H kıvılcım analizi eski veya okunamıyor. Eski kayıtlar yalnız Geçmiş bölümünde.')+'</div>';
+ document.querySelectorAll('.radarLine').forEach(el=>{
+   el.onclick=()=>selectSpark(el.dataset.symbol,el.dataset.tf);
+ });
+ highlightSpark();
+}
+
 async function ensureChart(force=false){
  if(!S.selected)return;
  const symbol=S.selected,tf=S.chartTf;
