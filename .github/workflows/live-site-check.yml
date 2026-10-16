@@ -6,7 +6,7 @@ on:
       - '.github/workflows/live-site-check.yml'
       - 'web/index.html'
       - 'web/app.js'
-      - 'web/live-radar.js'
+      - 'web/legacy-reset.js'
       - 'web/pilot-ui.js'
       - 'web/router.js'
       - 'web/style.css'
@@ -29,10 +29,11 @@ jobs:
             sleep 5
           done
           grep -q 'id="radarRows"' /tmp/site.html
-          grep -q 'id="historyRows"' /tmp/site.html
+          ! grep -q 'id="historyRows"' /tmp/site.html
           grep -q 'id="candleChart"' /tmp/site.html
           grep -q 'id="scanStatus"' /tmp/site.html
-          grep -q 'live-radar.js' /tmp/site.html
+          grep -q 'legacy-reset.js' /tmp/site.html
+          ! grep -q 'live-radar.js' /tmp/site.html
           grep -q 'pilot-ui.js' /tmp/site.html
           grep -q 'router.js' /tmp/site.html
           grep -q 'id="workspaceNav"' /tmp/site.html
@@ -45,16 +46,16 @@ jobs:
           grep -q 'id="mtfCandidates"' /tmp/site.html
           grep -q 'id="paperKpis"' /tmp/site.html
           grep -q 'id="systemKpis"' /tmp/site.html
-          for n in market radar history reports mtf paper health swing-radar swing-history swing-outcomes; do
+          for n in market mtf paper health swing-radar swing-history swing-outcomes; do
             curl -fSL --max-time 15 "$ROOT/data/$n.json?check=$(date +%s)" -o "/tmp/$n.json"
           done
           python3 - <<'PY'
           import json,datetime
           from pathlib import Path
-          data={n:json.loads(Path(f'/tmp/{n}.json').read_text()) for n in ['market','radar','history','reports','mtf','paper','health','swing-radar','swing-history','swing-outcomes']}
+          data={n:json.loads(Path(f'/tmp/{n}.json').read_text()) for n in ['market','mtf','paper','health','swing-radar','swing-history','swing-outcomes']}
           assert len(data['market'].get('rows',[]))>=20,'market list incomplete'
           swing=data['swing-radar']
-          assert swing['model_version'] in ('2.3.0-htf-sparks','2.4.0-htf-sparks','3.0.0-htf-sparks'),'Old 15m spark source used instead of 1D/4H'
+          assert swing['model_version']=='3.0.0-htf-sparks','Old 15m spark source used instead of 1D/4H'
           assert swing['timeframes_primary']==['1D','4H'],'Primary timeframe mismatch'
           assert swing['source_mtf_at']==data['mtf']['fetched_at'],'Macro scanner source mismatch'
           assert all(x['primary_tf'] in ('1D','4H') and x['confirmation']['1D'] and x['confirmation']['4H']
@@ -66,24 +67,22 @@ jobs:
           print('HTF_SPARKS_OK',len(swing['items']),'confirmed',swing['confirmed'],
                 'forward_events',len(data['swing-history']['events']))
 
-          assert data['market'].get('analysis_attempted',0)>=30,'15m scan queue underfilled'
-          assert data['market'].get('analysis_ok',0)>=20,'insufficient closed 15m/1H/4H validation'
-          attempted=data['market']['analysis_attempted']
-          successful=data['market']['analysis_ok']
-          print('TECHNICAL_COVERAGE',successful,'/',attempted)
-          if successful<attempted:print('CAUTION: partial coverage; missing coins are NOT confirmed')
-          assert isinstance(data['history'].get('events'),list),'history not served'
-          assert len(data['reports'].get('reports',[]))==2,'7/14 report not served'
-          assert data['mtf']['analyzed']>=3,'real seven-timeframe scan not deployed'
+          assert data['market']['model_version']=='3.0.0-market-quotes','legacy collector still active'
+          assert data['market']['analysis_attempted']==0,'legacy scan still active'
+          attempted=data['mtf']['attempted']
+          successful=data['mtf']['analyzed']
+          print('HTF_TECHNICAL_COVERAGE',successful,'/',attempted)
+          assert successful>=3,'real seven-timeframe scan not deployed'
           assert all(set(x['frames'])>=set(['1W','1D','12H','4H','1H','15m','5m']) for x in data['mtf']['candidates']),'incomplete MTF context'
           assert data['swing-outcomes']['model_version']=='3.0.0-forward-observation','v3 forward audit not published'
           assert data['swing-outcomes']['no_legacy_backfill'],'legacy observations must not be treated as v3'
-          assert data['paper']['starting_usdt']==100 and data['paper']['pilot_started_at'],'forward-only pilot missing'
+          assert all(x.get('model_version')=='3.0.0-htf-sparks' for x in data['swing-history']['events']),'old history leaked'
+          assert data['paper']['model_version']=='3.0.0-paper-swing' and data['paper']['starting_usdt']==100 and data['paper']['pilot_started_at'],'forward-only pilot missing'
           assert data['health']['last_scan_id'] and 'schedule_proven' in data['health'],'audit missing'
           now=datetime.datetime.now(datetime.timezone.utc)
-          updated=datetime.datetime.fromisoformat(data['history']['updated_at'])
+          updated=datetime.datetime.fromisoformat(data['swing-radar']['fetched_at'])
           age=(now-updated).total_seconds()/60
-          print('LIVE_SITE_OK | provider=',data['market'].get('provider'),'coins=',len(data['market']['rows']),'events=',len(data['history']['events']),'snapshot_age_minutes=',round(age,1))
+          print('LIVE_SITE_OK | provider=',data['market'].get('provider'),'coins=',len(data['market']['rows']),'events=',len(data['swing-history']['events']),'snapshot_age_minutes=',round(age,1))
           if age>30:print('CAUTION: Published data is stale; scheduled refresh requires attention')
           PY
       - name: Verify real DOM rendering in Chromium
@@ -96,7 +95,7 @@ jobs:
           python3 - <<'PY'
           import re
           doc=open('/tmp/dom.html').read()
-          for key in ('marketCount','healthTitle','radarRows','historyRows','reportStats','chartCoin','scanStatus','browserHistory','chartTf','mtfCandidates','mtfStatus','paperKpis','paperStatus','systemKpis','systemStatus'):
+          for key in ('marketCount','healthTitle','radarRows','swingHistoryRows','forwardSummary','forwardRows','chartCoin','scanStatus','chartTf','mtfCandidates','mtfStatus','paperKpis','paperStatus','systemKpis','systemStatus'):
             match=re.search(r'id="'+key+r'"[^>]*>(.*?)</',doc,re.S)
             assert match is not None,'missing '+key
             excerpt=re.sub('<[^>]*>',' ',match.group(1)).strip()[:160]
