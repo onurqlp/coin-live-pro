@@ -65,6 +65,22 @@
    lamps.push('<span class="v4FactorLamp unknown" title="Doğrulanmış haber/sosyal kaynak henüz bu sinyal kaydına bağlı değil"><i aria-hidden="true"></i>HABER ?</span>');
    return '<div class="v4FactorLamps" aria-label="Gösterge kontrol ışıkları">'+lamps.join('')+'</div>';
  }
+ function timeframeLadder(x){
+   const frames=x.metrics?.timeframe_levels||{};
+   const tfs=['1m','5m','15m','1H','4H','12H','1D','1W'];
+   const result=tfs.map(tf=>{
+     const v=frames[tf]||{},confirmed=v.quality==='CLOSED_CONFIRMED';
+     const trend=confirmed?v.trend:'UNKNOWN';
+     const same=(x.side==='LONG'&&trend==='UP')||(x.side==='SHORT'&&trend==='DOWN');
+     const opposing=(x.side==='LONG'&&trend==='DOWN')||(x.side==='SHORT'&&trend==='UP');
+     const state=!confirmed?'unknown':same?'positive':opposing?'negative':'neutral';
+     const name=trend==='UP'?'↑':trend==='DOWN'?'↓':trend==='SIDEWAYS'?'↔':'?';
+     const title=tf+' kapanmış mum yönü: '+trend+(tf==='4H'||tf==='1D'?' · ana yön':tf==='1W'?' · büyük resim':' · giriş zamanlaması');
+     return '<span class="v4Tf '+state+(tf==='4H'||tf==='1D'?' primary':'')+'" title="'+safe(title)+'">'+tf+' '+name+'</span>';
+   });
+   return '<div class="v4TfWrap" aria-label="Küçükten büyüğe teyit edilen mum yönleri">'+result.join('')+'</div>'+
+     '<div class="v4TfNote">4H + 1D ana karar · 1W büyük yön · 1H/15m zamanlama · 1m erken gözlem. Hepsinin aynı renk olması gerekmez.</div>';
+ }
  function card(x){
    const st=x.lifecycle_stage,stage=st==='SPOTLIGHT'?'GÖZ ÖNÜNDE':st==='MOTION'?'HAREKET':'İZLE';
    const state=x.review_state==='FRESH'?'Yeniden değerlendirildi':'Yeniden kontrol bekliyor';
@@ -74,7 +90,7 @@
      '<span class="v4Small">'+safe(stage)+' · '+safe(state)+'</span></div>'+
      '<div class="v4Sub">'+safe(names[x.strategy_id]||x.strategy_id)+' · puan '+safe(x.score)+
      '/100 · yapı riski '+safe(x.risk_score)+'/100</div>'+
-     '<div class="v4Reason">'+safe(explanation(x))+'</div>'+factorLamps(x)+
+     '<div class="v4Reason">'+safe(explanation(x))+'</div>'+timeframeLadder(x)+factorLamps(x)+
      '<div class="v4Meta">İlk: '+safe(date(x.first_seen_at))+
      ' · Son gerçek kontrol: '+safe(date(x.last_evaluated_at))+safe(motion)+'</div>'+
      '<button type="button" class="v4GoChart" data-v4-symbol="'+safe(x.symbol)+
