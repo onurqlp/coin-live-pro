@@ -21,7 +21,7 @@ jobs:
         with:
           python-version: '3.11'
       - run: node --check web/app.js
-      - run: node --check web/live-radar.js
+      - run: node --check web/legacy-reset.js
       - run: node --check web/pilot-ui.js
       - run: node --check web/router.js
       - run: node tests/verify.mjs

@@ -33,7 +33,7 @@ jobs:
           python-version: '3.11'
       - name: Timestamp 15-minute automated scan
         run: echo "TRIGGER=${{ github.event_name }} UTC=$(date -u +%FT%TZ)"
-      - name: Read-only 15m OKX futures scan, rotation and forward archive
+      - name: Read-only OKX crypto market quote universe (legacy 15m signals OFF)
         run: python3 engine/collector.py
       - name: Build verified UTC-aligned seven-timeframe research
         run: python3 engine/mtf.py
@@ -41,7 +41,7 @@ jobs:
         run: python3 engine/spark.py
       - name: Evaluate forward-only 3.0 observations on fully closed 4H candles
         run: python3 engine/forward.py
-      - name: Track forward-only 100 USDT paper pilot
+      - name: Track 3.0-only 100 USDT paper pilot
         run: python3 engine/paper.py
       - name: Record actual scan source and missed cron intervals
         run: python3 engine/health.py
@@ -50,18 +50,15 @@ jobs:
           python3 - <<'PY'
           import json, pathlib, datetime
           p=pathlib.Path('web/data')
-          files={s:json.loads((p/f'{s}.json').read_text()) for s in ['market','radar','history','reports','mtf','paper','health','swing-radar','swing-history','swing-outcomes']}
+          files={s:json.loads((p/f'{s}.json').read_text()) for s in ['market','mtf','paper','health','swing-radar','swing-history','swing-outcomes']}
           now=datetime.datetime.now(datetime.timezone.utc)
           assert len(files['market']['rows']) >= 30
-          assert all(x['provider']=='OKX' for x in (files['market'],files['radar'],files['history'],files['reports'],files['mtf']))
-          for key,field in [('market','fetched_at'),('radar','fetched_at'),('history','updated_at'),('reports','updated_at'),('mtf','fetched_at'),('paper','updated_at'),('health','updated_at'),('swing-radar','fetched_at'),('swing-history','updated_at'),('swing-outcomes','updated_at')]:
+          assert all(x['provider']=='OKX' for x in (files['market'],files['mtf'],files['swing-radar']))
+          for key,field in [('market','fetched_at'),('mtf','fetched_at'),('paper','updated_at'),('health','updated_at'),('swing-radar','fetched_at'),('swing-history','updated_at'),('swing-outcomes','updated_at')]:
             age=(now-datetime.datetime.fromisoformat(files[key][field])).total_seconds()
             assert 0<=age<=480,(key,age)
-          ev=files['history']['events']
-          assert len({x['id'] for x in ev})==len(ev),'duplicate history ids'
-          assert all(x['side'] in ('LONG','SHORT') for x in ev)
-          assert files['market'].get('analysis_ok',0)>=20,'insufficient successful 15m/1H/4H OHLC coverage'
-          assert files['market'].get('analysis_attempted',0)>=30,'scan queue underfilled'
+          assert files['market']['model_version']=='3.0.0-market-quotes','legacy market collector in use'
+          assert files['market']['analysis_attempted']==0,'legacy 15m OHLC scan not retired'
           assert files['mtf']['analyzed']>=3,'macro context insufficient'
           assert files['swing-radar']['model_version']=='3.0.0-htf-sparks','wrong high-TF radar model'
           assert files['mtf']['model_version']=='3.0.0-mtf-swing','outdated HTF score'
@@ -81,16 +78,19 @@ jobs:
           assert files['swing-outcomes']['no_legacy_backfill'],'old events cannot be backfilled'
           assert all(not x['is_executed_trade'] and x['realized_R'] is None
                      for x in files['swing-outcomes']['events']),'forward tracker claimed real trades'
+          assert files['paper']['model_version']=='3.0.0-paper-swing','old paper engine used'
+          assert files['paper']['legacy_micro_positions_preserved']==0,'old paper orders leaked'
+          assert all(e.get('model_version')=='3.0.0-htf-sparks' for e in files['swing-history']['events']),'old history leaked'
           assert files['paper']['starting_usdt']==100,'pilot balance changed'
           assert files['health']['last_scan_id'],'missing scan provenance' 
-          print('Verified: 100-pair public radar, scanned',files['market']['analyzed'],'events',len(ev),'and 7/14-day reports')
+          print('Verified: 100-pair public radar, scanned',files['market']['analyzed'],'v3 events',len(files['swing-history']['events']),'and clean forward audit')
           PY
       - name: Publish only validated data
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add web/data/market.json web/data/radar.json web/data/history.json web/data/reports.json
+          git add web/data/market.json
           git add web/data/mtf.json web/data/paper.json web/data/health.json
           git add web/data/swing-radar.json web/data/swing-history.json web/data/swing-outcomes.json
           git add archive/pilot-ledger.json archive/scan-health.json archive/swing-sparks-ledger.json archive/swing-outcomes-ledger.json
