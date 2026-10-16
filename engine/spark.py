@@ -17,11 +17,15 @@ import mtf
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 DATA=ROOT/'web'/'data'
 ARCH=ROOT/'archive'/'swing-sparks-ledger.json'
+ACTIVE=ROOT/'archive'/'swing-active-ledger.json'
 MODEL='3.0.0-htf-sparks'
 UTC=dt.datetime.now(dt.timezone.utc)
 MS=int(UTC.timestamp()*1000)
 DIRECTIONS={'LONG':'UP','SHORT':'DOWN'}
-POLICY='3.0-strict-5min-20261016'
+POLICY='3.1-persistent-quant-20261016'
+WATCH_MS=24*3600000
+CONFIRMED_MS=48*3600000
+INVALIDATED_MS=6*3600000
 # Last fully closed candle cannot be arbitrarily old when a research
 # candidate is labelled "CONFIRMED". 1m is never an entry gate.
 CANDLE_LAG={'1W':2*3600,'1D':1800,'4H':1200,'1H':600,'15m':180,'5m':120}
@@ -56,6 +60,45 @@ def fresh(ts,limit_seconds=540):
 def confirmation_state(frame,wanted):
     if frame.get('quality')!='CLOSED_CONFIRMED':return 'NO_HISTORY'
     return 'ALIGNED' if frame.get('trend')==wanted else 'NOT_ALIGNED'
+
+def quant_check(day,h4,h1,m15,side):
+    """Closed-candle momentum and abnormal activity: cautious veto, not success probability."""
+    sign=1 if side=='LONG' else -1
+    d_rsi=mtf.swing.num(day.get('rsi_14'))
+    h4_rsi=mtf.swing.num(h4.get('rsi_14'))
+    h1_rsi=mtf.swing.num(h1.get('rsi_14'))
+    macd4=(h4.get('macd_12_26_9') or {})
+    macd1=(h1.get('macd_12_26_9') or {})
+    h4_hist=mtf.swing.num(macd4.get('hist_pct'))
+    h1_hist=mtf.swing.num(macd1.get('hist_pct'))
+    adx=mtf.swing.num(h4.get('adx_14'))
+    vol4=mtf.swing.num(h4.get('volume_ratio_20'))
+    vol1=mtf.swing.num(h1.get('volume_ratio_20'))
+    vol15=mtf.swing.num(m15.get('volume_ratio_20'))
+    compression=mtf.swing.num(h4.get('bb_compression_percentile_30'))
+    # Extremes reject chase; neutral readings must line up with the side.
+    rsi_ok=all(v is not None for v in (d_rsi,h4_rsi,h1_rsi)) and (
+        (48<=d_rsi<=78 and 47<=h4_rsi<=76 and 46<=h1_rsi<=79) if sign>0
+        else (22<=d_rsi<=52 and 24<=h4_rsi<=53 and 21<=h1_rsi<=54))
+    macd_ok=h4_hist is not None and h1_hist is not None and (
+        h4_hist>0 and h1_hist>0 if sign>0 else h4_hist<0 and h1_hist<0)
+    trend_ok=adx is not None and adx>=18
+    volume_ok=all(v is not None for v in (vol4,vol1,vol15)) and (
+        vol4>=.65 and vol1>=.6 and vol15>=.6)
+    gate=[]
+    if not rsi_ok:gate.append('RSI_DIRECTION_OR_EXTREME')
+    if not macd_ok:gate.append('MACD_MOMENTUM_MISSING')
+    if not trend_ok:gate.append('ADX_TREND_TOO_WEAK')
+    if not volume_ok:gate.append('CLOSED_VOLUME_INSUFFICIENT')
+    return not gate,gate,{
+        'rsi_daily':d_rsi,'rsi_4h':h4_rsi,'rsi_1h':h1_rsi,
+        'macd_hist_4h_pct':h4_hist,'macd_hist_1h_pct':h1_hist,
+        'adx_4h':adx,'volume_ratio_4h':vol4,'volume_ratio_1h':vol1,
+        'volume_ratio_15m':vol15,'bb_compression_percentile_4h':compression,
+        'verified_closed_only':True,
+        'manipulation_proven':False
+    }
+
 
 def spark_from_mtf(x,market,one_minute=None):
     """Pure deterministic high-timeframe primary gate; no single 1m/15m spark."""
@@ -92,7 +135,8 @@ def spark_from_mtf(x,market,one_minute=None):
     market_ok=(volume is not None and volume>=40_000_000 and spread is not None
                and 0<=spread<=12 and instrument_live and listed is not None
                and listed>=30)
-    confirmed=(weekly and h1ok and m15ok and m5ok and
+    technical_ok,technical_gates,technicals=quant_check(day,h4,h1,m15,side)
+    confirmed=(weekly and h1ok and m15ok and m5ok and technical_ok and
                market_ok and risk<=24 and score>=76)
     price=mtf.swing.num(market.get('price'))
     if price is None or price<=0:return None
@@ -122,6 +166,25 @@ def spark_from_mtf(x,market,one_minute=None):
     if not (h1ok and m15ok and m5ok):gating.append('TIMING_NOT_CONFIRMED')
     if risk>24:gating.append('STRUCTURE_RISK_ELEVATED')
     if score<76:gating.append('SCORE_BELOW_STRICT_GATE')
+    gating+=technical_gates
+    # "Volcano" is a volatility-compression/watch heuristic, NEVER a trigger
+    # to bypass closed daily+4H agreement, liquidity or spoof-risk gates.
+    pressure=(technicals['bb_compression_percentile_4h'] is not None
+              and technicals['bb_compression_percentile_4h']<=30
+              and technicals['volume_ratio_15m'] is not None
+              and technicals['volume_ratio_15m']>=1.1
+              and technicals['macd_hist_1h_pct'] is not None
+              and sign*technicals['macd_hist_1h_pct']>0
+              and not breakout and risk<=24
+              and abs(beyond_pct)<=max(1.0,atr or 0))
+    anomaly_flags=list(x.get('structure_flags') or [])
+    # Closed-candle risk evidence: no assertion that manipulation occurred.
+    if (mtf.swing.num(h4.get('volume_ratio_20')) or 0)>=3 and (h4.get('wick_rejections_8') or 0)>=2:
+        anomaly_flags.append('4H_VOLUME_WICK_SPIKE')
+    if (mtf.swing.num(m15.get('volume_ratio_20')) or 0)>=4:
+        anomaly_flags.append('15M_EXTREME_CLOSED_VOLUME')
+    if (h4.get('wick_rejections_8') or 0)>=3:
+        anomaly_flags.append('4H_FAKEOUT_WICK_RISK')
     symbol=x['symbol']
     last4=h4.get('last_candle_utc')
     # last 4H candle time, NOT the fetch timestamp, is setup identity.
@@ -135,9 +198,11 @@ def spark_from_mtf(x,market,one_minute=None):
         'reason_codes':x.get('reason_codes',[])[:12],
         'quality':'VERIFIED_CLOSED_1D_4H','setup_type':x.get('setup_type'),
         'price':price,'threshold':threshold,'stop':stop,'targets':targets,
-        'entry_timing':'EXTENDED_WAIT' if extended else 'BREAKOUT_WAIT' if not breakout else
+        'entry_timing':'EXTENDED_WAIT' if extended else 'PRESSURE_WATCH' if pressure else 'BREAKOUT_WAIT' if not breakout else
                        'STRICT_CONFIRMED' if confirmed else 'STANDARD_WATCH',
         'strict_gate_reasons':gating,'filter_policy':POLICY,
+        'technicals':technicals,'pressure_watch':bool(pressure),
+        'anomaly_flags':list(dict.fromkeys(anomaly_flags))[:14],
         'extended_from_4h_breakout_pct':round(beyond_pct,3),
         'model_version':MODEL,'observed_at_utc':UTC.isoformat(timespec='seconds'),
         'main_candle_at':last4,'market_structure_flags':x.get('structure_flags',[])[:9],
@@ -158,7 +223,92 @@ def build(mtf_doc,market_doc,one_minute_states=None):
         if not m:continue
         spark=spark_from_mtf(x,m,(one_minute_states or {}).get(x['symbol']))
         if spark:result.append(spark)
-    return sorted(result,key=lambda x:(x['stage']!='CONFIRMED',-x['score'],x['risk_score']))[:20]
+    return sorted(result,key=lambda x:(x['stage']!='CONFIRMED',-x['score'],x['risk_score']))[:24]
+
+def reconcile_active(previous,scanned,assessments,now_ms):
+    """Maintain cross-scan visibility, but never freeze an old TEYIT as actionable.
+
+    FRESH: source candle states checked this run.
+    RECHECK_PENDING: carried only as a prior WATCH, NOT a current confirmation.
+    INVALIDATED: retained briefly with an explicit warning, then archived.
+    No old record can make a new forward-only observation/paper order.
+    """
+    now=dt.datetime.fromtimestamp(now_ms/1000,dt.timezone.utc).isoformat()
+    before=[dict(x) for x in previous.get('items',[])]
+    old={(x.get('symbol'),x.get('side')):x for x in before
+         if x.get('symbol') and x.get('side')}
+    latest={(x['symbol'],x['side']):x for x in scanned}
+    by_symbol={x.get('symbol'):x for x in assessments if x.get('symbol')}
+    out=[];retired=list(previous.get('retired',[]))[-80:]
+    for key,spark in latest.items():
+        prior=old.pop(key,None)
+        first=(prior or {}).get('first_seen_at') or spark['observed_at_utc']
+        try:
+            first_ms=int(dt.datetime.fromisoformat(first).timestamp()*1000)
+        except (TypeError,ValueError):
+            first_ms=now_ms;first=now
+        ttl=CONFIRMED_MS if spark['stage']=='CONFIRMED' or
+            (prior or {}).get('peak_stage')=='CONFIRMED' else WATCH_MS
+        if now_ms-first_ms>=ttl:
+            if prior:retired.append(dict(prior,retired_at=now,review_state='EXPIRED'))
+            first=now
+        item=dict(spark,first_seen_at=first,last_evaluated_at=now,review_state='FRESH',
+                  peak_stage='CONFIRMED' if spark['stage']=='CONFIRMED' or
+                       (prior or {}).get('peak_stage')=='CONFIRMED' else 'WATCH',
+                  last_confirmed_at=now if spark['stage']=='CONFIRMED'
+                     else (prior or {}).get('last_confirmed_at'),
+                  first_seen_price=(prior or {}).get('first_seen_price',spark['price']))
+        if prior and prior.get('stage')=='CONFIRMED' and spark['stage']!='CONFIRMED':
+            item['confirmation_lost']=True
+        out.append(item)
+    for prior in old.values():
+        try:
+            age=now_ms-int(dt.datetime.fromisoformat(prior.get('first_seen_at') or prior['observed_at_utc']).timestamp()*1000)
+        except (ValueError,KeyError,TypeError):
+            retired.append(dict(prior,retired_at=now,review_state='BAD_TIMESTAMP'))
+            continue
+        ttl=CONFIRMED_MS if prior.get('peak_stage')=='CONFIRMED' else WATCH_MS
+        if age>=ttl:
+            retired.append(dict(prior,retired_at=now,review_state='EXPIRED'))
+            continue
+        prior=dict(prior)
+        previously_invalid=prior.get('review_state')=='INVALIDATED'
+        assessed=by_symbol.get(prior['symbol'])
+        reason=None
+        if assessed and assessed.get('quality')=='COMPLETE':
+            if assessed.get('side')!=prior['side'] or not assessed.get('direction_aligned_4h_1d'):
+                reason='MACRO_DIRECTION_CHANGED'
+            elif assessed.get('swing_status') in ('AVOID_RISK','WAIT_4H_1D'):
+                reason='STRUCTURE_OR_TREND_INVALID'
+            elif assessed.get('swing_status')=='SWING_CANDIDATE':
+                reason='STRICT_SETUP_NO_LONGER_VALID'
+            else:
+                reason='SETUP_INVALID'
+        if reason and not previously_invalid:
+            prior['invalidated_at']=now
+            prior['invalidated_reason']=reason
+        if reason or previously_invalid:
+            prior['review_state']='INVALIDATED'
+            try:
+                invalid_age=now_ms-int(dt.datetime.fromisoformat(prior['invalidated_at']).timestamp()*1000)
+            except (ValueError,KeyError,TypeError):
+                invalid_age=INVALIDATED_MS
+            if invalid_age>=INVALIDATED_MS:
+                retired.append(dict(prior,retired_at=now))
+                continue
+        else:
+            prior['review_state']='RECHECK_PENDING'
+        # Never carry an old CONFIRMED into the live radar as a current TEYIT.
+        if prior.get('stage')=='CONFIRMED':prior['confirmation_lost']=True
+        prior['stage']='WATCH'
+        out.append(prior)
+    # Stay bounded and deterministic; fresh, then pending, then invalidated.
+    rank={'FRESH':0,'RECHECK_PENDING':1,'INVALIDATED':2}
+    out.sort(key=lambda x:(rank.get(x['review_state'],3),
+        x['stage']!='CONFIRMED',-float(x.get('score') or 0),x.get('first_seen_at','')))
+    return {'items':out[:30],'retired':retired[-120:],
+            'updated_at':now,'policy':POLICY},len([x for x in out if x['review_state']=='FRESH'])
+
 
 def accumulate(old,items):
     """Append only new forward observed 4H setups / stage transitions."""
@@ -220,6 +370,15 @@ def main():
         if len(one)>=9:break
 
     sparks=build(macro,market,one)
+    previous=load(ACTIVE,{})
+    # First migration seeds recent v3 radar only; never fabricate historical
+    # observations from old archive entries with no raw candidate evidence.
+    if not previous.get('items'):
+        snapshot=load(DATA/'swing-radar.json',{})
+        if snapshot.get('model_version')==MODEL and fresh(snapshot.get('fetched_at'),1500):
+            previous={'items':[x for x in snapshot.get('items',[])
+                               if x.get('filter_policy') in (POLICY,'3.0-strict-5min-20261016')]}
+    board,fresh_count=reconcile_active(previous,sparks,macro.get('candidates',[]),MS)
     archive=load(ARCH,{'events':[]})
     ledger,changes=accumulate(archive,sparks)
     now14=MS-14*86400000
@@ -227,16 +386,20 @@ def main():
     live={'provider':'OKX','model_version':MODEL,'fetched_at':UTC.isoformat(timespec='seconds'),
           'source_mtf_at':macro['fetched_at'],'timeframes_primary':['1D','4H'],
           'timeframes_macro':['1W','1D','4H'],'timeframes_confirmation':['1H','15m','5m','1m'],
-          'items':sparks,'long':sum(s['side']=='LONG' for s in sparks),
-          'short':sum(s['side']=='SHORT' for s in sparks),
-          'confirmed':sum(s['stage']=='CONFIRMED' for s in sparks),
+          'items':board['items'],
+          'retired_recent':board['retired'][-12:],
+          'fresh_count':fresh_count,'retained_count':len(board['items'])-fresh_count,
+          'long':sum(s['side']=='LONG' and s['review_state']=='FRESH' for s in board['items']),
+          'short':sum(s['side']=='SHORT' and s['review_state']=='FRESH' for s in board['items']),
+          'confirmed':sum(s['stage']=='CONFIRMED' and s['review_state']=='FRESH' for s in board['items']),
           'attempted':macro.get('attempted'),'analyzed':macro.get('analyzed'),
           'filter_policy':POLICY,
           'note':'Closed 1D/4H setup, strict closed 1W/1H/15m/5m confirmation, breakout crossed and not extended, verified liquid OKX swap; 1m optional.',
           'no_live_orders':True}
     write(ARCH,ledger)
+    write(ACTIVE,board)
     write(DATA/'swing-history.json',public)
     write(DATA/'swing-radar.json',live)
-    print(f'HTF-SPARKS {live["fetched_at"]}={len(sparks)} LONG={live["long"]} SHORT={live["short"]} CONFIRMED={live["confirmed"]} newly_observed={changes}',flush=True)
+    print(f'HTF-SPARKS {live["fetched_at"]} observed={len(sparks)} retained={live["retained_count"]} LONG={live["long"]} SHORT={live["short"]} CONFIRMED={live["confirmed"]} newly_observed={changes}',flush=True)
 
 if __name__=='__main__':main()
