@@ -13,6 +13,17 @@ API='https://www.okx.com/api/v5'
 HORIZON_DAYS=14
 WATCH_MAX=48
 TIMEOUT=11
+# Known stock/ETF/commodity references listed as OKX USDT swaps; these are
+# not cryptocurrency projects. Keep historical records for audit but exclude
+# new non-crypto contracts from forward crypto-only research.
+NONCRYPTO_BASES=frozenset({
+    'AAPL','AMD','AAOI','CHIP','CRCL','CRWV','DRAM','EWY','INTC','MRVL',
+    'MSTR','MU','NBIS','NVDA','QQQ','SAMSUNG','SKHY','SKHYNIX','SNDK',
+    'SOXL','SOXS','SPCX','TSLA','UNITREE','XAG','XAU','ZHIPU'
+})
+def eligible_crypto(inst_id):
+    if not inst_id.endswith('-USDT-SWAP'):return False
+    return inst_id[:-10] not in NONCRYPTO_BASES
 
 def read_json(name, fallback):
     try:return json.loads((DATA/name).read_text(encoding='utf8'))
@@ -36,7 +47,7 @@ def price_rows():
     result=[]
     for x in get('/market/tickers',{'instType':'SWAP'}):
         name=x.get('instId','')
-        if not name.endswith('-USDT-SWAP'):continue
+        if not eligible_crypto(name):continue
         p=float(x.get('last') or 0);op=float(x.get('open24h') or 0)
         q=float(x.get('volCcyQuote24h') or 0)
         if q<=0:q=float(x.get('volCcy24h') or 0)*p
