@@ -112,7 +112,7 @@ async function refresh(){
   if(i===3)S.forward=x.model_version==='3.0.0-forward-observation'?x:{reports:[],events:[]};
  });
  await refreshLivePrices();
- if(!S.initialized&&S.radar.length){S.selected=S.radar[0].symbol;S.chartTf=S.radar[0].primary_tf;$('chartTf').value=S.chartTf;}
+ if(!S.initialized&&!S.selected&&S.radar.length){S.selected=S.radar[0].symbol;S.chartTf=S.radar[0].primary_tf;$('chartTf').value=S.chartTf;}
  S.initialized=true;render();
  if(errors.length)$('healthExplain').textContent+=' · Kaynak: '+errors.join(' | ');
  S.loading=false;$('refresh').disabled=false;$('refresh').textContent='↻ Güncelliği Kontrol Et';

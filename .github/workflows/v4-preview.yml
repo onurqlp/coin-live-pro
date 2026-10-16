@@ -6,11 +6,14 @@ on:
       - v4-lifecycle-desk-20261016
       - v4-production-hardening-20261016
       - v4-90day-ui-final-20261016
+      - v4-radar-inpage-chart-kpis-20261016
     paths:
       - '.github/workflows/v4-preview.yml'
       - 'engine/v4_**'
       - 'tests/test_v4_**'
       - 'web/v4-**'
+      - 'web/index.html'
+      - 'web/app.js'
 permissions:
   contents: read
 jobs:
@@ -76,6 +79,13 @@ jobs:
               assert m and m.group(1).strip(),id+' failed to render'
           assert 'V4 veri kontrolü:' not in doc,'V4 manifest fetch or hash validation failed'
           assert 'id="v4PaperKpis"' in doc
+          import re
+          for target in ('v4MarketTotal','v4LongTotal','v4ShortTotal','v4LastAnalysis'):
+              m=re.search(r'id="'+target+r'"[^>]*>(.*?)</',doc,re.S)
+              assert m and m.group(1).strip() not in ('—',''), 'Summary KPI missing data: '+target
+          assert 'id="v4TopRow"' not in doc  # CSS grid, not duplicated DOM ID
+          assert doc.index('id="v4Spotlight"')<doc.index('id="v4Motion"')<doc.index('id="v4Watch"')<doc.index('id="chartHostRadar"'), 'Stage order incorrect'
+          assert doc.index('id="chartHostRadar"')<doc.index('id="legacyTechnicalDisclosure"'), 'Main chart trapped in closed technical details'
           print('V4_CHROMIUM_RENDER_OK')
           PY
           for pair in '1920,1080:widescreen' '1366,900:desktop' '1024,768:tablet' '768,1024:smalldesktop' '430,932:mobile430' '390,844:mobile' '360,800:mobile360' '320,740:smallmobile'; do
