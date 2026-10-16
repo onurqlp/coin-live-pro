@@ -3,7 +3,7 @@
 (()=>{
  const $=id=>document.getElementById(id);
  const safe=x=>String(x??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
- const date=x=>{const t=Date.parse(x||'');return Number.isFinite(t)?new Date(t).toLocaleString('tr-TR',{timeZone:'Europe/Istanbul',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'—'};
+ const date=x=>{const t=Date.parse(x||'');return Number.isFinite(t)?new Date(t).toLocaleString('tr-TR',{timeZone:'UTC',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+' UTC':'—'};
  const fmt=x=>typeof x==='number'&&Number.isFinite(x)?x.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}):'—';
  const ago=x=>{const m=(Date.now()-Date.parse(x||''))/60000;return Number.isFinite(m)&&m>=0?Math.floor(m)+' dk':'—'};
  const names={TREND_BREAKOUT:'Trend / 4H kırılım',VOLUME_EXPANSION:'Hacim genişlemesi',
@@ -50,10 +50,18 @@
      lamps.push('<span class="v4FactorLamp '+state+'" title="'+safe(label+': '+(known?v.toFixed(2):'veri yok'))+'">'+
        '<i aria-hidden="true"></i>'+label+'</span>');
    }
-   // Manipulation cannot be certified from RSI/price alone.
-   const oi=m.oi_change_pct,spread=m.spread_bps;
-   const risky=(typeof oi==='number'&&Math.abs(oi)>=8)||(typeof spread==='number'&&spread>20);
-   lamps.unshift('<span class="v4FactorLamp '+(risky?'neutral':'unknown')+'" title="'+safe(risky?'Aykırı OI/spread riski; manipülasyon kanıtı değildir':'Manipülasyon bilinmiyor: order-book geçmişi ve tasfiye verisi gerekli')+'"><i aria-hidden="true"></i>MANİP '+(risky?'RİSK':'?')+'</span>');
+   // Side-specific anomaly context from independently closed global market candles.
+   // Do not treat this index as proven manipulation, probability, or V4 score.
+   const source=store.radar?.anomaly_research?.pairs?.[x.symbol+'|'+x.side];
+   const live=Date.now()-Date.parse(store.manifest?.finished_at_utc||'')<=25*60000;
+   const verified=live&&source?.state==='OBSERVED_HEURISTIC'&&typeof source.index==='number';
+   const idx=verified?Math.max(0,Math.min(100,source.index)):null;
+   const caution=verified&&idx>=30;
+   const tip=verified?
+     'UTC kapanmış 5m/15m/1H/4H, fitil, RVOL, ATR, OI ve spread kaynaklı anomali endeksi; manipülasyon kanıtı veya giriş sinyali değildir':
+     'Güncel bağımsız mikro-mum kanıtı yok. Spoofing / tasfiye geçmişi doğrulanmamıştır';
+   lamps.unshift('<span class="v4FactorLamp '+(verified?(caution?'neutral':'unknown'):'unknown')+'" title="'+safe(tip)+'"><i aria-hidden="true"></i>'+
+      (verified?'ANOMALİ '+idx+'/100':'ANOMALİ ?')+'</span>');
    lamps.push('<span class="v4FactorLamp unknown" title="Doğrulanmış haber/sosyal kaynak henüz bu sinyal kaydına bağlı değil"><i aria-hidden="true"></i>HABER ?</span>');
    return '<div class="v4FactorLamps" aria-label="Gösterge kontrol ışıkları">'+lamps.join('')+'</div>';
  }
@@ -81,11 +89,53 @@
    const elapsed=Math.max(0,Math.min(90,Math.floor((Date.now()-started)/86400000)));
    const remaining=Math.max(0,Math.ceil((ends-Date.now())/86400000));
    const formatDay=ms=>new Date(ms).toLocaleDateString('tr-TR',{
-     timeZone:'Europe/Istanbul',day:'2-digit',month:'long',year:'numeric'});
+     timeZone:'UTC',day:'2-digit',month:'long',year:'numeric'});
    status.textContent=remaining>0?'90 günlük gözlem · '+elapsed+'. gün · '+remaining+' gün kaldı':
      '90 günlük gözlem süresi tamamlandı · sonuçlar arşivde';
-   dates.textContent=formatDay(started)+' — '+formatDay(ends)+' · piyasa verileri otomatik kaydedilir';
+   dates.textContent=formatDay(started)+' — '+formatDay(ends)+' (UTC) · piyasa verileri otomatik kaydedilir';
    bar.style.width=(Math.min(100,Math.max(0,(Date.now()-started)/(90*86400000)*100))).toFixed(1)+'%';
+ }
+ function renderGlobalResearch(r,manifest){
+   const area=r?.anomaly_research;
+   const c=area?.clock;
+   const clk=$('v4GlobalUtcClock'),sessions=$('v4GlobalSession'),hours=$('v4AnomalyHourly');
+   if(!clk||!sessions||!hours)return;
+   const age=(Date.now()-Date.parse(manifest?.finished_at_utc||''))/60000;
+   if(!c||!Number.isFinite(age)||age>25){
+     clk.textContent='🌍 UTC döngüsü · kaynak gecikmiş veya bilinmiyor';
+     sessions.textContent='Piyasa 24/7 açık · zaman penceresi kanıtı bekleniyor';
+     hours.textContent='Geçmiş istatistiği ile güncel sinyal farklıdır';return;
+   }
+   const moment=Date.parse(c.utc_at);
+   const formatted=Number.isFinite(moment)?
+      new Date(moment).toLocaleString('tr-TR',{timeZone:'UTC',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+' UTC':'— UTC';
+   clk.textContent='🌍 '+formatted+' · 4H blok '+String(c.utc_4h_block).padStart(2,'0')+':00 UTC';
+   sessions.textContent='Yaklaşık bölgesel saatler: '+
+      ((c.regional_activity_windows||[]).join(' + ')||'Pencereler dışında')+' · kripto 24/7';
+   const stats=area.hourly;
+   const winners=stats?.top_utc_hours||[];
+   hours.textContent=winners.length?'Örneklemde yükselen anomali saatleri: '+
+      winners.map(x=>String(x.utc_hour).padStart(2,'0')+':00 UTC (%'+x.elevated_pct+
+      ', n='+x.sample_n+', '+x.days+' gün)').join(' · ')+
+      ' · kesin manipülasyon göstergesi değil':
+      'UTC saat analizi: en az 3 ayrı gün ve saat başına 40 tekil kapanmış 5m gözlemi bekleniyor';
+ }
+ async function loadRelease(){
+   try{
+     const r=await fetch('./release.json?check='+Date.now(),{cache:'no-store'});
+     if(!r.ok)throw Error('Yayın kaydı okunamadı');
+     const meta=await r.json();
+     if(!/^\\d+\\.\\d+(?:\\.\\d+)?$/.test(meta.product_version)||
+        !Number.isFinite(Date.parse(meta.updated_at_utc)))throw Error('Yayın kaydı geçersiz');
+     const published=new Date(meta.updated_at_utc).toLocaleString('tr-TR',{
+       timeZone:'UTC',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+     $('releaseVersion').textContent='Sürüm '+meta.product_version;
+     $('releaseUpdated').textContent='Kod güncellemesi '+published+' UTC · Kayıt '+meta.release_id;
+     $('releaseFooter').textContent='Sürüm '+meta.product_version+' · Son kod güncellemesi '+published+' UTC · Kayıt '+meta.release_id;
+   }catch(e){
+     $('releaseUpdated').textContent='Son kod güncelleme kaydı şu anda doğrulanamıyor';
+     $('releaseFooter').textContent='Sürüm 4.0 · Yayın kaydı geçici olarak okunamıyor';
+   }
  }
  function showMarketSummary(r,manifest,stale){
    const rows=[...(r.spotlight||[]),...(r.motion||[]),...(r.watch||[])];
@@ -102,7 +152,7 @@
    $('v4ShortTotal').textContent=String(perSide('SHORT'));
    const stamp=Date.parse(manifest.started_at_utc||'');
    $('v4LastAnalysis').textContent=Number.isFinite(stamp)?
-     new Date(stamp).toLocaleTimeString('tr-TR',{timeZone:'Europe/Istanbul',hour:'2-digit',minute:'2-digit'}):'—';
+     new Date(stamp).toLocaleTimeString('tr-TR',{timeZone:'UTC',hour:'2-digit',minute:'2-digit'})+' UTC':'—';
    $('v4LastAnalysisAge').textContent=stale?
        'Veri gecikmiş · yeni teyit gösterilmez':
        'Son kapanmış mum analizi · '+ago(manifest.started_at_utc)+' önce';
@@ -114,6 +164,7 @@
    const minutes=(Date.now()-Date.parse(manifest.finished_at_utc))/60000;
    const stale=!Number.isFinite(minutes)||minutes>25;
    showMarketSummary(r,manifest,stale);
+   renderGlobalResearch(r,manifest);
    const status=$('v4Status');status.textContent=stale?'V4 KAYNAK GECİKMİŞ · GÜNCEL TEYİT YOK':
      'V4 · '+ago(r.updated_at)+' önce merkezi değerlendirme · otomatik emir YOK';
    status.className='v4Status '+(stale?'v4Stale':'');
@@ -290,5 +341,5 @@
  $('refresh')?.addEventListener('click',()=>setTimeout(load,1000));
  window.addEventListener('resize',()=>{if(store.paper)drawEquity(store.paper.equity_curve||[])});
  document.addEventListener('visibilitychange',()=>{if(!document.hidden)load()});
- load();setInterval(()=>{if(!document.hidden)load()},60000);
+ loadRelease();load();setInterval(()=>{if(!document.hidden)load()},60000);
 })();

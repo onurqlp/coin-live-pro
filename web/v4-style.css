@@ -131,3 +131,14 @@ padding:12px;text-align:left;display:grid;gap:5px;min-height:110px}
 .v4FactorLamp.unknown{border-color:#3b4d60;color:#8c9caf}
 .v4FactorLamp.unknown i{background:#758398}
 @media(max-width:420px){.v4FactorLamp{font-size:9px;padding:4px 6px}.v4FactorLamps{gap:4px}}
+
+/* Version is user-approved; build time is explicit UTC and never a market timestamp. */
+.releaseMeta{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:8px;color:#c6dbef;font-size:11px}
+.releaseMeta strong{border:1px solid #4d6d89;background:#18354b;padding:4px 9px;border-radius:7px;white-space:nowrap}
+.releaseMeta small{color:#9db7ce;font-size:10px}
+.v4UtcBar{margin:8px 0 12px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 15px;
+  padding:11px 14px;border:1px solid #3c5570;border-radius:12px;background:#122538;color:#d0e7f8}
+.v4UtcBar>span:first-child{font-weight:750;font-size:12px}
+.v4UtcBar>span:nth-child(2){font-size:11px;color:#acccdf}
+.v4UtcBar>small{flex-basis:100%;font-size:10px;color:#a0bed5;line-height:1.45}
+@media(max-width:700px){.v4UtcBar{padding:10px 12px}.releaseMeta{gap:5px}}
