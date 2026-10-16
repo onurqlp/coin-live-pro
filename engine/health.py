@@ -44,8 +44,10 @@ def main():
     event=os.getenv('GITHUB_EVENT_NAME','UNKNOWN')
     run_id=os.getenv('GITHUB_RUN_ID','LOCAL')
     quality= 'OK'
-    failed=max(0,int(market.get('analysis_attempted',0))-int(market.get('analysis_ok',0)))
-    if failed>int(market.get('analysis_attempted',0))*.40:quality='DEGRADED_COVERAGE'
+    attempted=int(mtf.get('attempted') or 0)
+    successful=int(mtf.get('analyzed') or 0)
+    failed=max(0,attempted-successful)
+    if attempted<5 or successful<5 or failed>attempted*.40:quality='DEGRADED_COVERAGE'
     if missed is not None and missed>=1:quality='DEGRADED_SCHEDULE_GAP'
     schedules_before=sum(r['trigger']=='schedule' for r in h['records'])
     if schedules_before+(1 if event=='schedule' else 0)<2 and quality=='OK':
@@ -53,8 +55,8 @@ def main():
     record={'completed_at':UTC,'trigger':event,'run_id':run_id,
        'scan_id':hashlib.sha256((UTC+'|'+run_id+'|'+market.get('fetched_at','')).encode()).hexdigest()[:20],
        'model_version':mtf.get('model_version'),
-       'attempted':market.get('analysis_attempted',market.get('analyzed')),
-       'successful_3tf':market.get('analysis_ok',market.get('analyzed')),
+       'attempted':attempted,
+       'successful_3tf':successful,
        'mtf_attempted':mtf.get('attempted'),'mtf_verified':mtf.get('analyzed'),
        'missed_cron_slots_since_previous_success':missed,'quality':quality}
     h['records'].append(record)

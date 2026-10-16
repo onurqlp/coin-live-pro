@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""COIN.LIVE PRO 2.0 forward-only paper pilot: auditable observation, no live orders.
+"""COIN.LIVE PRO 3.0 forward-only paper pilot: auditable observation, no live orders.
 
 Paper fills are estimates at the NEXT fully closed 5-minute candle's opening
 quote, after signal creation. No retroactive fill. Never claim a real trade.
@@ -19,7 +19,7 @@ ARCH=BASE/'archive'/'pilot-ledger.json'
 NOW=dt.datetime.now(dt.timezone.utc)
 NOWMS=int(NOW.timestamp()*1000)
 UTC=NOW.isoformat(timespec='seconds')
-MODEL='2.2.0-paper-swing'
+MODEL='3.0.0-paper-swing'
 BAR5=300000;BAR1=60000
 FEE_AND_SLIP=.0015   # Illustrative two-sided round-trip; funding not modeled.
 RISK=.01
@@ -41,7 +41,7 @@ def bars(inst,frame,limit=100):
     # Critical 1m calls are made ONLY for stop/TP conflicts, not for all coins.
     q=urllib.parse.urlencode({'instId':inst,'bar':frame,'limit':str(limit)})
     url='https://www.okx.com/api/v5/market/candles?'+q
-    req=urllib.request.Request(url,headers={'User-Agent':'CoinLive-PaperPilot/2.0','Accept':'application/json'})
+    req=urllib.request.Request(url,headers={'User-Agent':'CoinLive-PaperPilot/3.0','Accept':'application/json'})
     with urllib.request.urlopen(req,timeout=10) as resp:payload=json.load(resp)
     if payload.get('code')!='0':raise RuntimeError('OKX '+str(payload.get('code')))
     period=BAR1 if frame=='1m' else BAR5
@@ -182,108 +182,75 @@ def swing_eligible(event,assessed,cutover_ms):
         and (thesis.get('structure_risk_score') or 0)<45)
 
 def main():
-    history=read(DATA/'history.json',{})
-    market=read(DATA/'market.json',{})
+    """Fresh 3.0 paper-only pilot. NEVER ingest legacy 15m signals/orders."""
+    sparks=read(DATA/'swing-history.json',{})
     mtf=read(DATA/'mtf.json',{})
-    if not history.get('updated_at') or len(market.get('rows',[]))<20:raise RuntimeError('Cannot run paper simulation without healthy authoritative scanner')
-    hstamp=dt.datetime.fromisoformat(history['updated_at'])
-    mtf_stamp=dt.datetime.fromisoformat(mtf['fetched_at']) if mtf.get('fetched_at') else None
-    if (NOW-hstamp).total_seconds()>360 or not mtf_stamp or (NOW-mtf_stamp).total_seconds()>360:
-        raise RuntimeError('Stale central 4H/1D confirmation; refusing new virtual entries')
-    if mtf.get('model_version') not in ('2.2.0-mtf-swing','2.4.0-mtf-swing','3.0.0-mtf-swing'):
-        raise RuntimeError('4H/1D swing model not ready; legacy 15m-only paper trades disabled')
+    market=read(DATA/'market.json',{})
+    if sparks.get('model_version')!='3.0.0-htf-sparks' or mtf.get('model_version')!='3.0.0-mtf-swing':
+        raise RuntimeError('V3 verified source unavailable; no virtual entries')
+    if not sparks.get('updated_at') or not mtf.get('fetched_at') or not market.get('fetched_at'):
+        raise RuntimeError('Missing 3.0 market timestamps')
+    for timestamp in (sparks['updated_at'],mtf['fetched_at'],market['fetched_at']):
+        delta=(NOW-dt.datetime.fromisoformat(timestamp)).total_seconds()
+        if not -120<=delta<=480:raise RuntimeError('Stale V3 data: refuse new paper decisions')
     log=read(ARCH,None)
-    if log is None:
-        log={'schema_version':2,'pilot_started_at':UTC,'pilot_started_ms':NOWMS,
+    if not isinstance(log,dict) or log.get('model_version')!=MODEL:
+        log={'schema_version':3,'pilot_started_at':UTC,'pilot_started_ms':NOWMS,
              'starting_balance':100.,'model_version':MODEL,'orders':{},'journal':[]}
-    started=log['pilot_started_ms']
-    # First deployment after this change is the honest forward-only strategy
-    # cutover. Continue to evaluate legacy positions, never reclassify them.
-    if 'swing_cutover_ms' not in log:
-        log['swing_cutover_ms']=NOWMS
-        log['swing_cutover_at']=UTC
-        append(log,{'id':'SWING_V2_CUTOVER'},'STRATEGY_CUTOVER',
-               {'strategy':'4H+1D_GATE','legacy_orders_preserved':len(log.get('orders',{})),
-                'new_entries_only_after':UTC})
-    cutover_ms=log['swing_cutover_ms']
-    swing_pool={x['symbol']:x for x in mtf.get('candidates',[])}
-
-    latest={m['symbol']:m for m in market.get('rows',[])}
-    records=history.get('events',[])
-    chains=log.setdefault('chains',{})
-    # Maintain immutable first observations and append-only stage transitions.
-    # Every confirmed record links to a prior WATCH when it is the same
-    # symbol+side within three hours; otherwise it starts a new chain.
-    forward=sorted((e for e in records if int(e.get('at_ms',0))>started),key=lambda e:int(e['at_ms']))
-    for e in forward:
-        id=e.get('id')
-        if not id or id in chains or e.get('stage') not in ('WATCH','CONFIRMED'):continue
-        prior=[v for v in chains.values() if v['symbol']==e['symbol'] and v['side']==e['side'] and
-               v['stage']=='WATCH' and 0<=int(e['at_ms'])-v['at_ms']<=3*3600000]
-        parent=max(prior,key=lambda x:x['at_ms']) if prior and e['stage']=='CONFIRMED' else None
-        chain_id=parent['chain_id'] if parent else id
-        evidence={'id':id,'time':e.get('time'),'price':e.get('price'),'side':e.get('side'),
-                  'stop':e.get('stop'),'targets':e.get('targets'),'stage':e.get('stage')}
-        sha=hashlib.sha256(json.dumps(evidence,sort_keys=True,separators=(',',':')).encode()).hexdigest()
-        chains[id]={'signal_id':id,'chain_id':chain_id,'parent_signal_id':parent['signal_id'] if parent else None,
-                    'symbol':e['symbol'],'side':e['side'],'stage':e['stage'],'at_ms':int(e['at_ms']),
-                    'created_at':e['time'],'model_version':MODEL,'evidence_sha256':sha}
-        append(log,{'id':id},'WATCH_CREATED' if e['stage']=='WATCH' else 'CONFIRMED',
-               {'chain_id':chain_id,'parent_signal_id':parent['signal_id'] if parent else None,
-                'original_time_immutable':e['time'],'evidence_sha256':sha},e['time'])
-    # Only NEW primary CONFIRMED records after model cutover.
-    for e in records:
-        if not swing_eligible(e,swing_pool,max(started,cutover_ms)) or e.get('id') in log['orders']:
-            continue
-        price=float(e['price']);stop=float(e['stop'])
-        if min(price,stop)<=0 or not e.get('targets'):continue
-        id=e['id']
-        quoted_spread=latest.get(e['symbol'],{}).get('spread_bps')
-        o={'id':id,'chain_id':chains.get(id,{}).get('chain_id',id),'model_version':MODEL,'inst':e['symbol'][:-4]+'-USDT-SWAP',
-           'symbol':e['symbol'],'side':e['side'],'source':'CENTRAL_FORWARD_4H_1D_SWING',
-           'signal_at_ms':int(e['at_ms']),'signal_at':e['time'],'signal_price':price,'stop':stop,
-           'tp1':float(e['targets'][0]),'tp2':float(e['targets'][1]),'tp3':float(e['targets'][2]),
-           'status':'PENDING','last_eval_ms':int(e['at_ms']),'estimated_only':True,
-           'spread_bps_initial':quoted_spread,
-           'swing_model':'2.2.0-swing-4h-1d','swing_horizon':swing_pool[e['symbol']].get('expected_holding','1-7 gün'),
-           'structure_risk_score_at_signal':swing_pool[e['symbol']].get('structure_risk_score')}
-        log['orders'][id]=o
-        if quoted_spread is not None and quoted_spread>35:
-            o['status']='NO_FILL'
-            append(log,o,'NO_FILL',{'reason':'SPREAD_TOO_WIDE','quoted_spread_bps':quoted_spread},e['time'])
-    # On each runner invocation only active symbols get 5m candles; critical
-    # 1m requests happen exclusively for ambiguous stop/TP ordering.
+    started=int(log['pilot_started_ms'])
+    records=sparks.get('events',[])
+    for e in sorted(records,key=lambda x:int(x.get('at_ms',0))):
+        if e.get('model_version')!='3.0.0-htf-sparks' or e.get('stage')!='CONFIRMED':continue
+        if e.get('entry_timing')=='EXTENDED_WAIT' or int(e.get('risk_score',100))>=35:continue
+        at=int(e.get('at_ms',0))
+        if at<=started or e.get('event_id') in log['orders']:continue
+        side=e.get('side')
+        price=float(e.get('price') or 0);stop=float(e.get('stop') or 0)
+        tp=float(e.get('target_1r') or 0)
+        if side not in ('LONG','SHORT') or min(price,stop,tp)<=0:continue
+        if (side=='LONG' and not(stop<price<tp)) or (side=='SHORT' and not(tp<price<stop)):continue
+        key=e['event_id']
+        log['orders'][key]={
+            'id':key,'model_version':MODEL,'inst':e['symbol'][:-4]+'-USDT-SWAP',
+            'symbol':e['symbol'],'side':side,'source':'V3_CLOSED_1D_4H_CONFIRMED',
+            'signal_at_ms':at,'signal_at':e['time'],'signal_price':price,
+            'stop':stop,'tp1':tp,'tp2':tp,'tp3':tp,'status':'PENDING',
+            'last_eval_ms':at,'estimated_only':True,'risk_score_at_signal':e.get('risk_score')
+        }
+        append(log,log['orders'][key],'V3_CONFIRMED_PAPER_CREATED',{'not_executed':True},e['time'])
     groups={}
     for o in log['orders'].values():
         if o['status'] in ('PENDING','FILLED'):groups.setdefault(o['inst'],[]).append(o)
     for inst,orders in list(groups.items())[:12]:
         try:
             recent=bars(inst,'5m',100)
-            for o in orders:update_order(log,o,recent)
+            for order in orders:update_order(log,order,recent)
         except Exception as exc:
-            log.setdefault('errors',[]).append({'at':UTC,'inst':inst,'error':str(exc)[:80]})
-    equity,dd=record_equity(log)
+            log.setdefault('errors',[]).append({'at':UTC,'inst':inst,'error':str(exc)[:90]})
+    equity,drawdown=record_equity(log)
     orders=list(log['orders'].values())
-    open_=[x for x in orders if x['status']=='FILLED']
-    closed=[x for x in orders if x['status'] in ('TP1','STOP','TIME_EXIT')]
-    result={'model_version':MODEL,'updated_at':UTC,'pilot_started_at':log['pilot_started_at'],
-        'starting_usdt':100.,'estimated_equity_usdt':equity,'max_drawdown_pct_est':dd,
-        'swing_cutover_at':log.get('swing_cutover_at'),'new_entry_rule':'4H+1D ALIGNED VERIFIED SWING_CANDIDATE ONLY',
-        'legacy_micro_positions_preserved':sum(x.get('source')!='CENTRAL_FORWARD_4H_1D_SWING' for x in orders),
-        'open_paper_positions':len(open_),'max_concurrent_positions':MAX_OPEN,
-        'risk_per_trade_target_pct':1,'daily_risk_budget_pct':3,
-        'closed_paper_orders':len(closed),'wins':sum(x['status']=='TP1' for x in closed),
-        'losses':sum(x['status']=='STOP' for x in closed),'ambiguous':sum(x['status']=='AMBIGUOUS' for x in orders),
-        'no_fill':sum(x['status']=='NO_FILL' for x in orders),'pending':sum(x['status']=='PENDING' for x in orders),
-        'open_positions':[x for x in open_], 'recent_orders':sorted(orders,key=lambda x:x['signal_at_ms'],reverse=True)[:30],
-        'chain_count':len(chains),'audit_journal_events':len(log['journal']),
-        'leverage_comparison':{'10x':'Margin = position notional / 10; estimated PnL same if position notional same',
-            '15x':'Margin = position notional / 15; liquidation proximity higher, not modeled'},
-        'fee_slippage_assumption':'ESTIMATED total 0.15% of position notional; funding excluded',
-        'notes':['Only central NEW confirmed events after pilot cutover','Orders inferred from closed 5m OHLC, not live fills',
-                 'Same-bar unresolved stop and TP excluded from win rate','Liquidation, spread and funding are NOT verified']}
-    write(ARCH,log)
-    write(DATA/'paper.json',result)
-    print(f'PAPER PILOT {UTC} pending={result["pending"]} open={len(open_)} closed={len(closed)} journal={len(log["journal"])}',flush=True)
-
+    closed=[o for o in orders if o['status'] in ('TP1','STOP','TIME_EXIT')]
+    result={
+      'model_version':MODEL,'updated_at':UTC,'pilot_started_at':log['pilot_started_at'],
+      'starting_usdt':100.,'estimated_equity_usdt':equity,'max_drawdown_pct_est':drawdown,
+      'swing_cutover_at':log['pilot_started_at'],
+      'new_entry_rule':'ONLY V3 CONFIRMED 1D+4H FROM V3 START; NO 15M SIGNALS',
+      'legacy_micro_positions_preserved':0,
+      'open_paper_positions':sum(o['status']=='FILLED' for o in orders),
+      'max_concurrent_positions':MAX_OPEN,'risk_per_trade_target_pct':1,'daily_risk_budget_pct':3,
+      'closed_paper_orders':len(closed),'wins':sum(o['status']=='TP1' for o in closed),
+      'losses':sum(o['status']=='STOP' for o in closed),
+      'ambiguous':sum(o['status']=='AMBIGUOUS' for o in orders),
+      'no_fill':sum(o['status']=='NO_FILL' for o in orders),
+      'pending':sum(o['status']=='PENDING' for o in orders),
+      'open_positions':[o for o in orders if o['status']=='FILLED'],
+      'recent_orders':sorted(orders,key=lambda o:o['signal_at_ms'],reverse=True)[:30],
+      'chain_count':len(orders),'audit_journal_events':len(log['journal']),
+      'no_real_trades':True,'historical_reset':True,
+      'notes':['V3-only confirmed swing virtual fills after reset',
+               '5m candle-based estimated fills, NEVER exchange executions',
+               'Funding and liquidation unverified; fee/slip 0.15% nominal']
+    }
+    write(ARCH,log);write(DATA/'paper.json',result)
+    print(f'PAPER V3 {UTC} orders={len(orders)} equity_est={equity:.4f}',flush=True)
 if __name__=='__main__':main()

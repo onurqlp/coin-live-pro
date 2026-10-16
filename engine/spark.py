@@ -127,7 +127,7 @@ def build(mtf_doc,market_doc,one_minute_states=None):
 
 def accumulate(old,items):
     """Append only new forward observed 4H setups / stage transitions."""
-    history=list(old.get('events',[]))
+    history=[e for e in old.get('events',[]) if e.get('model_version')==MODEL]
     existing={e['event_id'] for e in history}
     changes=0
     for spark in items:
@@ -188,7 +188,7 @@ def main():
     archive=load(ARCH,{'events':[]})
     ledger,changes=accumulate(archive,sparks)
     now14=MS-14*86400000
-    public={**ledger,'events':[e for e in ledger['events'] if int(e['at_ms'])>=now14]}
+    public={**ledger,'events':[e for e in ledger['events'] if int(e['at_ms'])>=now14 and e.get('model_version')==MODEL]}
     live={'provider':'OKX','model_version':MODEL,'fetched_at':UTC.isoformat(timespec='seconds'),
           'source_mtf_at':macro['fetched_at'],'timeframes_primary':['1D','4H'],
           'timeframes_macro':['1W','1D','4H'],'timeframes_confirmation':['1H','15m','5m','1m'],

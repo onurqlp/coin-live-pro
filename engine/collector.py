@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """COIN.LIVE PRO: public read-only forward-only observation engine.
-Emits auditable 14-day alerts and 7/14-day post-event reports. NO trading.
+Version 3: quote-universe collector ONLY. Older event functions retained as inert test helpers; no 15m signals are produced.
 """
 import datetime as dt, json, math, os, pathlib, statistics, time, urllib.parse, urllib.request, urllib.error, threading, random
 from concurrent.futures import ThreadPoolExecutor
@@ -220,60 +220,16 @@ def summary(events,days):
       'note':'Observed events only; no backfilled trades, no verified predictive edge. Net R illustrative 0.15% notional friction.'}
 
 def main():
-    rows=price_rows();assert len(rows)>=30,'Market source insufficient'
-    latest={x['symbol']:x for x in rows}
-    events=read_json('history.json',{'events':[]}).get('events',[])
-    events=[e for e in events if NOW_MS-int(e.get('at_ms',0))<=HORIZON_DAYS*86400000]
-    # 15-minute runs: retain liquid leaders, prioritize large early deviations,
-    # and deliberately rotate through all 100 tradable symbols. This stops a
-    # permanently top-volume-only selection from ignoring the long tail.
-    old_market=read_json('market.json',{})
-    cycle=int(old_market.get('scan_cycle',-1))+1
-    liquid=[x['symbol'] for x in rows[:12]]
-    movers=[x['symbol'] for x in sorted(rows,key=lambda y:abs(y.get('change') or 0)*min(2e8,y['volume']),reverse=True)[:12]]
-    rotating=[x['symbol'] for x in rows if x['symbol'] not in set(liquid+movers)]
-    step=24
-    offset=(cycle*step)%len(rotating) if rotating else 0
-    rotated=(rotating[offset:]+rotating[:offset])[:step]
-    focus=list(dict.fromkeys(liquid+movers+rotated))
-    # Fill remaining slots with as-yet-unscanned markets.
-    focus.extend(x['symbol'] for x in rows if x['symbol'] not in set(focus))
-    target=[latest[symbol] for symbol in focus[:WATCH_MAX]]
-    errors=[];analyzed=[]
-    def work(x):
-        try:return analyze(x)
-        except Exception as exc:errors.append(x['symbol']+':'+str(exc)[:70]);return None
-    with ThreadPoolExecutor(max_workers=5) as executor:
-        for found in executor.map(work,target):
-            if found is not None:analyzed.append(found)
-    successful=sum(1 for m in target if m.get('_ohlc_ok'))
-    if len(target)>=16 and len(errors)>len(target)*.75:
-        raise RuntimeError(f'OHLC provider degradation: {len(errors)} of {len(target)} failed; withholding degraded archive')
-    # Tracking for open event symbols (may be outside today's current top-volume list).
-    open_symbols={e['symbol'] for e in events if e.get('state') in ('OPEN','WATCHING')}
-    def history_fetch(symbol):
-        inst=symbol[:-4]+'-USDT-SWAP'
-        try:return symbol,klines(inst,'15m',100)
-        except Exception:return symbol,None
-    with ThreadPoolExecutor(max_workers=5) as executor:
-        history_bars=dict(executor.map(history_fetch,open_symbols))
-    update_existing(events,history_bars)
-    for x in analyzed:
-        # Dedup and 3h cooldown per symbol + direction + stage; genuine direction reversals are separate events.
-        recent=[e for e in events if e['symbol']==x['symbol'] and e['side']==x['side'] and e['stage']==x['stage'] and NOW_MS-e['at_ms']<3*3600000]
-        if recent:continue
-        ev={k:v for k,v in x.items() if k not in ('ohlc15',)}
-        ev.update(id=f"{x['symbol']}|{x['side']}|{x['stage']}|{x['at_ms']}",state='OPEN' if x['stage']=='CONFIRMED' else 'WATCHING',
-             last_observed_ms=x['at_ms'],mfe_pct=0,mae_pct=0,quality='OBSERVATION_STARTED')
-        events.append(ev)
-    events.sort(key=lambda x:x['at_ms'],reverse=True)
-    # Prevent a listing churn from losing old tracked events: bounded storage only after retention filtering.
-    reports=[summary(events,7),summary(events,14)]
-    if len(rows)>=30 and successful>=16:
-        save('market.json',{'provider':'OKX','fetched_at':UTC,'rows':rows,'analyzed':successful,'analysis_attempted':len(target),'analysis_ok':successful,'model_version':'v1.1-mtf-pilot','scan_cycle':cycle,'scan_rotation':step,'errors':errors[:10]})
-        save('radar.json',{'provider':'OKX','fetched_at':UTC,'items':sorted(analyzed,key=lambda x:x['score'],reverse=True),
-                           'long':sum(x['side']=='LONG' for x in analyzed),'short':sum(x['side']=='SHORT' for x in analyzed)})
-        save('history.json',{'provider':'OKX','updated_at':UTC,'retention_days':HORIZON_DAYS,'events':events})
-        save('reports.json',{'provider':'OKX','updated_at':UTC,'reports':reports,'method':'Forward observation only; 15m OHLC outcomes. Intrabar ordering ambiguity excluded.'})
-    print(f'OK {UTC} OKX {len(rows)} markets; cycle {cycle}; attempted={len(target)} analyzed_ok={successful}; {len(analyzed)} early alerts; {len(events)} historic; {len(errors)} failed')
+    """3.0 quotes + rotating symbol universe only; NO 15m event generation."""
+    rows=price_rows()
+    if len(rows)<30:raise RuntimeError('Verified market quote coverage too small')
+    old=read_json('market.json',{})
+    cycle=int(old.get('scan_cycle',-1))+1
+    save('market.json',{
+        'provider':'OKX','fetched_at':UTC,'rows':rows,'analyzed':len(rows),
+        'analysis_attempted':0,'analysis_ok':0,'model_version':'3.0.0-market-quotes',
+        'scan_cycle':cycle,'scan_rotation':5,'errors':[],
+        'note':'3.0 quote universe ONLY. Legacy 15m signal source retired; closed 1D+4H analysis is in mtf.json.'
+    })
+    print(f'V3 MARKET {UTC} OKX crypto quotes={len(rows)} scan_cycle={cycle} (legacy 15m signals OFF)',flush=True)
 if __name__=='__main__':main()

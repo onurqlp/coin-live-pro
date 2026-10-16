@@ -206,22 +206,13 @@ def assess(m,all_frames,prior,derivatives_data=None):
 
 def main():
     market=read(DATA/'market.json',{})
-    radar=read(DATA/'radar.json',{})
-    history=read(DATA/'history.json',{})
     if len(market.get('rows',[]))<30:raise RuntimeError('No verified current market universe')
     time_market=dt.datetime.fromisoformat(market['fetched_at'])
     if (NOW-time_market).total_seconds()>360:raise RuntimeError('Stale underlying scanner; MTF will not publish')
     rows={x['symbol']:x for x in market['rows']}
-    # Distinct pool: active 15m early signs PLUS the liquid swing universe,
-    # strong movers, and a rotating tail so 4H/1D candidates aren't invisible.
+    # Canonical 3.0 discovery: liquid symbols, movers and rotating coverage only.
+    # No historical 15m alerts are ever used for candidate selection.
     candidates={}
-    for x in radar.get('items',[])[:9]:
-        if x.get('side') in ('LONG','SHORT') and x.get('symbol') in rows:
-            candidates[x['symbol']]=x['side']
-    for e in reversed(history.get('events',[])):
-        if e.get('state') in ('OPEN','WATCHING') and e.get('stage')=='CONFIRMED' and e.get('symbol') in rows:
-            candidates.setdefault(e['symbol'],e['side'])
-            if len(candidates)>=12:break
     liquid=sorted(rows.values(),key=lambda x:x.get('volume') or 0,reverse=True)
     movers=sorted(rows.values(),key=lambda x:abs(x.get('change') or 0)
                   *math.sqrt(max(0,x.get('volume') or 0)),reverse=True)
@@ -256,7 +247,7 @@ def main():
     output={'model_version':MODEL,'provider':'OKX','fetched_at':STAMP,'attempted':len(candidates),
         'analyzed':len(out),'candidates':sorted(out,key=lambda x:x['score'],reverse=True),
         'regime':{sym:next((x for x in out if x['symbol']==sym),None) for sym in ('BTCUSDT','ETHUSDT')},
-        'warnings':errors[:15], 'paper_trade_status':'SEPARATE_EXPERIMENT',
+        'warnings':errors[:15], 'paper_trade_status':'V3_FORWARD_ONLY',
         'swing_model':swing.MODEL,'swing_primary_timeframes':['4H','1D'],
         'swing_horizon':'1-7 gün','micro_candles_role':'confirmation_and_entry_only',
         'risk_note':'Structure flags are heuristics, not manipulation proof or calibrated win probabilities.'}
