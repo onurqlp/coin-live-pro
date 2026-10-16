@@ -182,6 +182,11 @@ def state(bars,frame):
     previous_eight=bars[-9:-1]
     breakout_high=round(max(x['h'] for x in previous_eight),12)
     breakout_low=round(min(x['l'] for x in previous_eight),12)
+    last=bars[-1]
+    # Potential liquidity grabs: prior 8-bar support/resistance briefly pierced,
+    # then 4H/1H candle closed back inside. Suspicion, not manipulation proof.
+    false_up=last['h']>breakout_high and last['c']<breakout_high
+    false_down=last['l']<breakout_low and last['c']>breakout_low
     previous=[float(x.get('v',0)) for x in bars[-21:-1]]
     average_volume=statistics.mean(previous) if previous else 0
     relative_volume=round(float(bars[-1].get('v',0))/average_volume,3) if average_volume>0 else None
@@ -206,7 +211,9 @@ def state(bars,frame):
             'macd_12_26_9':macd,
             'adx_14':round(adx,2) if adx is not None else None,
             'bb_compression_percentile_30':comp,
-            'breakout_high_prev8':breakout_high,'breakout_low_prev8':breakout_low}
+            'breakout_high_prev8':breakout_high,'breakout_low_prev8':breakout_low,
+            'fakeout_up_on_close':bool(false_up),
+            'fakeout_down_on_close':bool(false_down)}
 
 def score_part(st,side):
     if st['quality']!='CLOSED_CONFIRMED':return None
