@@ -7,6 +7,17 @@
 > Bu bir **ileri dönük, sadece sanal araştırma** pilotudur. Gerçek alım/satım emri, finansal API anahtarı, Telegram/WhatsApp/e-posta veya pilotta bildirim yoktur. Getiri ve başarı garantisi yoktur.
 
 
+
+## 2.3 — Kıvılcımın ana kaynağı yüksek zaman dilimleri (16.10.2026)
+
+- **Yeni kanonik kıvılcım verisi:** `web/data/swing-radar.json`. Kapanmış **günlük (1D) + 4 saatlik (4H)** eğilim aynı yöne bakmalı; şüpheli yapı/risk filtresi geçilmeli. 1m/15m hareketleri kendi başına kıvılcım üretmez.
+- **Haftalık (1W) uyumu varsa** 3–7 gün beklentisi ve varsayılan **1D grafik**; haftalık uyum yok ama 1D + 4H uyumluysa 1–3 gün beklentisi ve varsayılan **4H grafik**. Tahminler garanti değildir.
+- **TEYİT:** Yalnız makro kıvılcım zaten oluşmuşsa 1H + 15m + 5m + isteğe bağlı erişilebilen *kapanmış* 1m yönleri beraber uyuştuğunda `CONFIRMED`; aksi `WATCH`. 1m erişilemiyorsa bilgi `NO_1M_CONFIRMATION` olarak saklanır, olumlu teyit uydurulmaz.
+- **Ana sayfa:** kıvılcım listesi ve **tek paylaşılan, oynanabilir mum grafiği** yan yanadır. Kıvılcıma basınca coin ve doğal analiz periyodu otomatik seçilir. Grafikler sekmesi aynı grafiği genişletir; mobilde alt alta iner.
+- **Geçmiş:** `web/data/swing-history.json` ileriye dönük, 14 gün kamuya açık arşiv; `archive/swing-sparks-ledger.json` 90 günlük merkezi denetim kaydı. Bu olaylar gerçek emir ve gerçekleşen kazanç olarak raporlanmaz; eski 15m V1 arşivi ayrı tutulur.
+- **Kaynak:** `engine/mtf.py` + `engine/spark.py`; 4H/günlük sinyali belirler, mikro periyotlar yalnız durum yükseltir. Veri eski, kaynak bozuk veya model uyuşmuyorsa yeni kıvılcım kapatılır.
+- **Yayın/cron:** GitHub Pages ve market işlerinin dağıtımı bir sıraya alındı. GitHub 15 dakikalık cron gecikmeleri mümkündür; gerçek periyodik `schedule` olayları kanıtlanana dek 24/7 garantisi verilmez.
+
 ## 2.2 son sürüm — 1–7 günlük SWING filtresi ve veri doğruluğu
 
 - **Ana yön:** tamamlanmış UTC **1D %40 + 4H %34** (toplam **%74**); 12H %7,5, 1W %2,5, 1H %6, 15m %7, 5m %3. Kısa mumlar giriş/hacim zamanlaması içindir; tek başına swing kararı vermez.
