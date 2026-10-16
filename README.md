@@ -4,6 +4,16 @@ Canlı site: https://onurqlp.github.io/coin-live-pro/
 
 **Tek aktif model:** `3.0.0-market-quotes` → `3.0.0-mtf-swing` → `3.0.0-htf-sparks` → `3.0.0-forward-observation` ve ayrı `3.0.0-paper-swing`.
 
+## Sürekli radar, daha sıkı quant incelemesi (16 Ekim 2026)
+
+- Kıvılcımlar **bir sonraki taramada listeden kaybolmaz**. `archive/swing-active-ledger.json` sunucular arası kalıcı listeden önceki adayları tekrar taramaya öncelikli dahil eder; WATCH gözlemleri **24 saat**, TEYİT görmüş gözlemler **48 saat** tutulabilir. Bu süreler bir kazanç/işlem garantisi değil, gözlem penceresidir.
+- Her satır ilk görülme, son incelenme ve durumunu gösterir: **FRESH** (bu taramada veriyle kontrol edildi), **RECHECK_PENDING** (bu tur ölçülmedi; yalnız geçmişteki İZLE durumu gösterilir), **INVALIDATED** (makro yön/risk/setup bozuldu; 6 saat uyarı olarak tutulup arşivlenir). Eski TEYİT asla güncel giriş sinyali diye taşınmaz.
+- **TEYİT**, canlı fiyatın 4H eşiğine yaklaşmasına değil, kapanmış **4H mumunda kırılım**, 1D/4H/1W uyumu, güncel kapanmış 1H/15m/5m teyidi, RSI(14), MACD(12/26/9), ADX(14), kapanmış mum göreli hacmi, spread/likidite ve yapı-risk kontrollerine bağlıdır. İZLE daha gevşek ama yine 1D/4H tabanlıdır.
+- **Birikim / yanardağ gözlemi:** Bollinger bant sıkışması, göreli hacim canlanması ve MACD yönü izlenir; bu kesinlikle fiyat patlaması tahmini veya TEYİT değildir. Yukarı/aşağı iki yönde eşdeğer kurallar uygulanır.
+- **Şüpheli hareket riski:** kapanmış mumda fitil + yüksek hacim, geri dönmüş kırılım, fonlama, kaynağı/yaşı belli OI değişimi ve tek karelik ilk 5 seviye emir defteri dengesizliği kontrol edilir. Bu gözlemler **manipülasyonun ispatı değildir**. Yoksa veri uydurulmaz.
+- Sinyal puanı istatistiksel kazanma olasılığı değildir; gerçek alım/satım izni, işlem emri, kullanıcıya bildirim veya otomatik para transferi yoktur. 7/14 gün raporları ileriye dönük kapanmış mumları izler.
+- Yeni filtre etiketi `3.1-persistent-quant-20261016`. Önceki 3.0 olayları/sanal gözlemleri silinmez; önceden TEYİT edilmiş bir olay yeni quant standardına otomatik terfi ettirilmez.
+
 ## Sıkı 5 dakikalık sistem (16 Ekim 2026)
 
 - GitHub Actions **5 dakikada bir tarama hedefler**; GitHub iş kuyruğu veya OKX gecikmelerinde garanti edilmez. 100 coinin fiyatı site açıkken 20 sn'de bir güncellenir, derin çoklu zaman dilimi taraması her çalışmada seçilmiş likit ve dönüşümlü coinlerde yapılır.
