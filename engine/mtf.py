@@ -303,45 +303,69 @@ def assess(m,all_frames,prior,derivatives_data=None):
         'swing_model':swing.MODEL,'score_weight_note':'1D 36.4%,4H 36.55%,1W 15.6%,1H 6.45%,15m 3.5%,5m 1.5%; 12H context only',
         **risk}
 
+def select_candidates(rows,held,cycle,limit=23):
+    """Select hot opportunities fairly while reserving fresh-market coverage.
+
+    Always include available BTC/ETH benchmarks. Eight overdue active
+    opportunities are checked before new discovery; selection order uses the
+    *oldest actual evaluation*, not the most recently evaluated record. Each
+    successful check refreshes its last_evaluated_at in the active ledger, so
+    previously skipped opportunities move to the front next cycle.
+
+    Market movers and rotating symbols retain dedicated slots. This function
+    chooses symbols only; it never changes a signal's review state or claims a
+    scan happened. Actual verified/attempted counters come from mtf.main().
+    """
+    if limit<=0:return {}
+    selected={}
+    def add(symbol):
+        if symbol in rows and symbol not in selected and len(selected)<limit:
+            selected[symbol]='AUTO'
+            return True
+        return False
+
+    for symbol in ('BTCUSDT','ETHUSDT'):add(symbol)
+    eligible=(x for x in held if
+              x.get('symbol') in rows and
+              x.get('review_state') in ('FRESH','RECHECK_PENDING') and
+              x.get('model_version')=='3.0.0-htf-sparks')
+    oldest_first=sorted(eligible,key=lambda x:(
+        x.get('last_evaluated_at') or x.get('first_seen_at') or '',
+        x.get('symbol') or ''))
+    hot_count=0
+    for x in oldest_first:
+        if hot_count>=min(8,max(0,limit-2)):break
+        if add(x['symbol']):hot_count+=1
+
+    liquid=sorted(rows.values(),key=lambda x:x.get('volume') or 0,reverse=True)
+    movers=sorted(rows.values(),key=lambda x:
+                  abs(x.get('change') or 0)*math.sqrt(max(0,x.get('volume') or 0)),
+                  reverse=True)
+    for x in liquid[:4]+movers[:3]:add(x['symbol'])
+    universe=[x['symbol'] for x in liquid if x['symbol'] not in selected]
+    if universe:
+        offset=(int(cycle)*6)%len(universe)
+        for symbol in (universe[offset:]+universe[:offset]):
+            if len(selected)>=limit:break
+            add(symbol)
+    return selected
+
+
 def main():
     market=read(DATA/'market.json',{})
     if len(market.get('rows',[]))<30:raise RuntimeError('No verified current market universe')
     time_market=dt.datetime.fromisoformat(market['fetched_at'])
     if (NOW-time_market).total_seconds()>360:raise RuntimeError('Stale underlying scanner; MTF will not publish')
     rows={x['symbol']:x for x in market['rows']}
-    # Canonical 3.0 discovery: liquid symbols, movers and rotating coverage only.
-    # No historical 15m alerts are ever used for candidate selection.
-    candidates={}
-    # Radar must revisit its own live observations. Earlier code rotated to
-    # new coins and accidentally made still-valid sparks disappear in 5min.
+    # Preserve active opportunities with a fair, oldest-first hot-pool budget.
+    # Benchmarks, liquidity, momentum and rotating coverage remain distinct.
     tracked=read(ROOT/'archive'/'swing-active-ledger.json',{})
     held=tracked.get('items',[])
     if not held:
         older=read(DATA/'swing-radar.json',{})
         held=older.get('items',[]) if older.get('model_version')=='3.0.0-htf-sparks' else []
-    held=[x for x in held if x.get('symbol') in rows and
-          x.get('review_state')!='INVALIDATED' and
-          x.get('model_version')=='3.0.0-htf-sparks']
-    held=sorted(held,key=lambda x:(x.get('review_state')=='FRESH',
-                x.get('last_evaluated_at','')),reverse=True)
     cycle=int(market.get('scan_cycle',0))
-    if held:
-        offset=(cycle*4)%len(held)
-        for x in (held[offset:]+held[:offset])[:8]:
-            candidates.setdefault(x['symbol'],'AUTO')
-    liquid=sorted(rows.values(),key=lambda x:x.get('volume') or 0,reverse=True)
-    movers=sorted(rows.values(),key=lambda x:abs(x.get('change') or 0)
-                  *math.sqrt(max(0,x.get('volume') or 0)),reverse=True)
-    for x in liquid[:5]+movers[:4]:
-        candidates.setdefault(x['symbol'],'AUTO')
-    universe=[x['symbol'] for x in liquid if x['symbol'] not in candidates]
-    if universe:
-        offset=(cycle*5)%len(universe)
-        for symbol in (universe[offset:]+universe[:offset])[:5]:
-            candidates.setdefault(symbol,'AUTO')
-    for symbol in ('BTCUSDT','ETHUSDT'):
-        if symbol in rows:candidates.setdefault(symbol,'AUTO')
-    candidates=dict(list(candidates.items())[:23])
+    candidates=select_candidates(rows,held,cycle)
     # Compare actual fresh OI snapshots only; a missing historical sample
     # never becomes a fabricated zero or inferred liquidation.
     previous=read(DATA/'mtf.json',{})
