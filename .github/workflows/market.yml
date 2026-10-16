@@ -42,6 +42,8 @@ jobs:
           python3 engine/v4_context.py || python3 - <<'PY'
           import datetime,json,pathlib
           p=pathlib.Path('web/data/v4-context.json')
+          q=pathlib.Path('archive/v4-context-ledger.json');q.parent.mkdir(exist_ok=True,parents=True)
+          q.write_text(json.dumps({'model_version':'4.0.0-context-research-a1','events':[], 'sources':{'all':'UNAVAILABLE'}}))
           p.write_text(json.dumps({'model_version':'4.0.0-context-research-a1',
               'updated_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),
               'source_status':{'all':'UNAVAILABLE'},'latest_items':[],'observations':{},
