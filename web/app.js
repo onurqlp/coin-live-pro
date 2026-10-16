@@ -1,7 +1,7 @@
 'use strict';
 (()=>{
 const $=id=>document.getElementById(id);
-const S={market:[],radar:[],events:[],reports:[],provider:'',stamps:{},window:7,selected:null,live:false,loading:false,notified:new Set(),seen:new Set(),lastRefresh:0,initialized:false,chartCache:new Map(),chartLoading:null,chartTf:'4H',localRadar:[],localScanTime:0,localCoverage:0,localScanStatus:'Başlatılıyor',browserEvents:[]};
+const S={market:[],radar:[],events:[],swingEvents:[],reports:[],provider:'',stamps:{},window:7,selected:null,live:false,loading:false,notified:new Set(),seen:new Set(),lastRefresh:0,initialized:false,chartCache:new Map(),chartLoading:null,chartTf:'4H',localRadar:[],localScanTime:0,localCoverage:0,localScanStatus:'Başlatılıyor',browserEvents:[]};
 const safe=x=>String(x??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const number=x=>x===null||x===undefined||x===''?NaN:Number(x);
 const fmt=x=>!Number.isFinite(Number(x))?'—':Number(x)>=1000?Number(x).toLocaleString('en-US',{maximumFractionDigits:2}):Number(x)>=1?Number(x).toFixed(3):Number(x)>=.01?Number(x).toFixed(5):Number(x).toFixed(8);
@@ -16,7 +16,7 @@ function notify(item){return; /* 7-day pilot intentionally disables external/bro
 function currentRadar(){
  // Official cross-device radar is ONLY the central server snapshot.
  // Independent browser comparison never affects shared history or paper PnL.
- const ok=Number.isFinite(S.stamps.radar)&&Date.now()-S.stamps.radar<=25*60000;
+ const ok=S.sparkModel==='2.3.0-htf-sparks'&&Number.isFinite(S.stamps.radar)&&Date.now()-S.stamps.radar<=25*60000;
  return ok?{items:S.radar,mode:'SERVER',stamp:S.stamps.radar}:{items:[],mode:'STALE',stamp:0};
 }
 function refreshState(){
@@ -28,7 +28,7 @@ function refreshState(){
  $('healthTitle').textContent=trusted&&live?'CANLI FİYAT + MERKEZİ RADAR':trusted?
    'MERKEZİ ANALİZ GÜNCEL • FİYAT BAĞLANTISI YOK':'ANALİZ ESKİ • YENİ GİRİŞ YOK';
  $('healthExplain').textContent=trusted?
-   'Sunucu kıvılcımları cihazdan bağımsız kaydedilir. Bu haftaki pilot sanaldır; gerçek işlem veya emir gönderilmez.':
+   'Kıvılcım yalnız günlük + 4H trend uyumuyla oluşur. 1H/15m/5m/1m sadece teyit; gerçek emir yok.':
    'Sunucu '+(Number.isFinite(radarAge)?radarAge+' dk':'—')+' önce analiz yaptı. Eski kıvılcımlar yalnız geçmişte tutulur; yeni sanal giriş bekler.';
  $('healthTime').textContent='Sunucu '+(Number.isFinite(radarAge)?radarAge+' dk':'—')+' · Fiyat yedeği '+(Number.isFinite(marketAge)?marketAge+' dk':'—');
  $('source').textContent=live?'● OKX CANLI':'● '+(S.provider||'OKX')+' / SUNUCU';
@@ -37,15 +37,26 @@ function refreshState(){
  const state=$('scanStatus');
  if(state){
    const until=S.stamps.radar?Math.max(0,Math.ceil((15*60000-(Date.now()-S.stamps.radar))/60000)):0;
-   state.textContent='MERKEZİ 15 DK TARAMA · '+(trusted?'AKTİF':'GECİKMİŞ')+
+   state.textContent='MERKEZİ 1D / 4H KIVILCIM · '+(trusted?'AKTİF':'GECİKMİŞ')+
      ' · son '+(Number.isFinite(radarAge)?radarAge+' dk önce':'henüz yok')+
      ' · sonraki tahmini ~'+until+' dk (GitHub gecikebilir) · tarayıcı kaydı yalnız karşılaştırmadır';
  }
 }
 
-async function refresh(){if(S.loading)return;S.loading=true;$('refresh').disabled=true;$('refresh').textContent='↻ Kontrol ediliyor…';let errors=[];const names=['market','radar','history','reports'],data=await Promise.allSettled(names.map(k=>get('./data/'+k+'.json')));data.forEach((r,i)=>{if(r.status!=='fulfilled'){errors.push(names[i]+': '+r.reason.message);return;}let x=r.value;if(i===0){S.market=x.rows||[];S.provider=x.provider||'OKX';S.stamps.market=Date.parse(x.fetched_at);}if(i===1){S.radar=x.items||[];S.stamps.radar=Date.parse(x.fetched_at);}if(i===2){S.events=x.events||[];S.stamps.history=Date.parse(x.updated_at);}if(i===3){S.reports=x.reports||[];S.stamps.reports=Date.parse(x.updated_at);}});
+async function refresh(){if(S.loading)return;S.loading=true;$('refresh').disabled=true;$('refresh').textContent='↻ Kontrol ediliyor…';let errors=[];const names=['market','swing-radar','history','reports','swing-history'],data=await Promise.allSettled(names.map(k=>get('./data/'+k+'.json')));data.forEach((r,i)=>{if(r.status!=='fulfilled'){errors.push(names[i]+': '+r.reason.message);return;}let x=r.value;if(i===0){S.market=x.rows||[];S.provider=x.provider||'OKX';S.stamps.market=Date.parse(x.fetched_at);}if(i===1){
+ const ok=x.model_version==='2.3.0-htf-sparks' &&
+ Array.isArray(x.timeframes_primary)&&x.timeframes_primary.includes('1D')&&x.timeframes_primary.includes('4H');
+ S.sparkModel=ok?x.model_version:'INVALID_SOURCE';
+ S.radar=ok?(x.items||[]).filter(y=>['1D','4H'].includes(y.primary_tf)&&y.quality==='VERIFIED_CLOSED_1D_4H'):[];
+ S.stamps.radar=ok?Date.parse(x.fetched_at):0;
+}if(i===2){S.events=x.events||[];S.stamps.history=Date.parse(x.updated_at);}if(i===3){S.reports=x.reports||[];S.stamps.reports=Date.parse(x.updated_at);}if(i===4){S.swingEvents=x.model_version==='2.3.0-htf-sparks'?(x.events||[]):[];}});
 try{const direct=await directQuote();if(direct.length>=20){const mp=new Map(direct.map(x=>[x.symbol,x]));for(const old of S.market){if(mp.has(old.symbol))Object.assign(old,mp.get(old.symbol));}if(!S.market.length)S.market=direct;S.live=true;S.lastRefresh=Date.now();}}catch(e){S.live=false;errors.push('doğrudan fiyat: '+e.message);}
 const first=!S.initialized;for(const ev of S.events){if(first)S.seen.add(ev.id);else if(!S.seen.has(ev.id)){S.seen.add(ev.id);if((ev.stage==='CONFIRMED'||ev.stage==='WATCH')&&Number.isFinite(Date.parse(ev.time))&&Date.now()-Date.parse(ev.time)<10*60000)notify(ev);}}
+if(!S.initialized&&S.radar.length){
+ S.selected=S.radar[0].symbol;
+ S.chartTf=S.radar[0].primary_tf;
+ $('chartTf').value=S.chartTf;
+}
 S.initialized=true;render();if(errors.length&&(!S.market.length||!S.events.length))$('healthExplain').textContent+=' · Kaynak sorunu: '+errors.join(' | ');
 S.loading=false;$('refresh').disabled=false;$('refresh').textContent='↻ Güncelliği Kontrol Et';}
 function render(){refreshState();$('marketCount').textContent=S.market.length||'—';$('longCount').textContent=currentRadar().items.filter(x=>x.side==='LONG').length;$('shortCount').textContent=currentRadar().items.filter(x=>x.side==='SHORT').length;renderRadar();renderChartSelector();renderHistory();renderLocalHistory();renderReports();renderQuality();renderMarket();}
@@ -89,7 +100,7 @@ function renderLocalHistory(){
  '<div class="empty">Bu cihazda henüz bağımsız kıvılcım kaydı yok. İlk canlı taramadan sonra burada görünür.</div>';
 }
 function renderReports(){$('weekCards').innerHTML=[7,14].map(days=>{const r=S.reports.find(x=>x.days===days)||{};return `<div class="reportCard"><h3>${days} GÜN</h3>${[['Kıvılcım',r.total??0],['LONG / SHORT',(r.longs??0)+' / '+(r.shorts??0)],['Teyitli',r.confirmed??0],['Sonuçlanan',r.closed??0],['TP1 / STOP',(r.wins??0)+' / '+(r.losses??0)],['Belirsiz / veri boşluğu',r.ambiguous??0],['İzlenen başarı',r.win_rate==null?'Henüz ölçülemedi':r.win_rate+'%'],['Toplam temsili net R',r.sum_net_R==null?'—':r.sum_net_R+'R'],['100 USDT varsayımında ±$',r.illustrative_100_usdt_delta==null?'Örnek yok':(r.illustrative_100_usdt_delta>=0?'+':'')+r.illustrative_100_usdt_delta+' USDT'],['İZLE kıvılcımında +%1 yön hareketi',r.watch_1pct_observed_rate==null?'Henüz ölçülemedi':r.watch_1pct_observed_rate+'%']].map(([k,v])=>`<div class="line"><span>${safe(k)}</span><b>${safe(v)}</b></div>`).join('')}<p class="method">${r.sample_ok?'30+ kapanmış örnek var; gene de kesin öngörü değildir.':'İstatistiksel çıkarım için en az 30 sonuçlanan teyitli olay hedeflenir.'}</p></div>`;}).join('');}
-function renderQuality(){const rows=[['Fiyat kaynağı',S.provider||'Bekleniyor'],['Sunucu fiyat yaşı',S.stamps.market?age(S.stamps.market)+' dk':'—'],['Sunucu radar yaşı',S.stamps.radar?age(S.stamps.radar)+' dk':'—'],['Tarayıcıdan fiyat bağlantısı',S.live?'OKX başarılı':'Ulaşılamadı / denenmedi'],['Sinyal değerlendirmesi','15m OHLC · geriye dönük uydurma yok'],['İşlem girişleri','WATCH ≠ işlem; CONFIRMED ≠ gerçek emir'],['Sonuç boşlukları','Belirsiz / veri boşluğu ayrı sınıf'],['Risk hesabı','10x varsayım · örnek 1R · maliyet %0,15'],['Yeni analiz tetiklemesi','GitHub 15 dk (best effort) + sayfa açıkken doğrudan OKX 15 dk; Google yalnız sunucu arşivini alır']];$('quality').innerHTML=rows.map(([k,v])=>`<div class="line"><span>${safe(k)}</span><b>${safe(v)}</b></div>`).join('');}
+function renderQuality(){const rows=[['Fiyat kaynağı',S.provider||'Bekleniyor'],['Sunucu fiyat yaşı',S.stamps.market?age(S.stamps.market)+' dk':'—'],['Sunucu radar yaşı',S.stamps.radar?age(S.stamps.radar)+' dk':'—'],['Tarayıcıdan fiyat bağlantısı',S.live?'OKX başarılı':'Ulaşılamadı / denenmedi'],['Sinyal değerlendirmesi','15m OHLC · geriye dönük uydurma yok'],['İşlem girişleri','WATCH ≠ işlem; CONFIRMED ≠ gerçek emir'],['Sonuç boşlukları','Belirsiz / veri boşluğu ayrı sınıf'],['Risk hesabı','10x varsayım · örnek 1R · maliyet %0,15'],['Yeni analiz','GitHub yaklaşık 15 dk aralıkla kapanmış 1D/4H kontrol eder; mikro mumlar yalnız teyit']];$('quality').innerHTML=rows.map(([k,v])=>`<div class="line"><span>${safe(k)}</span><b>${safe(v)}</b></div>`).join('');}
 function renderMarket(){$('marketRows').innerHTML=S.market.slice(0,100).map((m,i)=>{const x=currentRadar().items.find(a=>a.symbol===m.symbol);return `<tr class="marketCoinRow" data-symbol="${safe(m.symbol)}" title="Bu coinin grafiğini aç"><td>${i+1}</td><td><b>${safe(m.symbol.replace('USDT',''))}</b> / USDT</td><td>${fmt(m.price)}</td><td class="${m.change>=0?'positive':'negative'}">${pct(number(m.change))}</td><td>${usd(m.volume)}</td><td>${x?`<span class="chip ${x.side==='LONG'?'long':'short'}">${x.side}</span> <span class="chip ${x.stage==='WATCH'?'watch':'confirmed'}">${x.stage==='WATCH'?'İZLE':'TEYİT'}</span>`:'—'}</td></tr>`;}).join('');
  for(const el of document.querySelectorAll('.marketCoinRow'))el.onclick=()=>{
    S.selected=el.dataset.symbol;
