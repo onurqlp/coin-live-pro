@@ -98,7 +98,8 @@ def evolve(previous,proposals,scan_id,now_ms,policy,source_ok=True):
                  'first_seen_at':iso(now_ms),'entered_stage_at':iso(now_ms),
                  'last_evaluated_at':iso(now_ms),'last_evidence_at':p['source_candle_closed_at_utc'],
                  'score':p['score'],'risk_score':p['risk_score'],
-                 'reasons':p['reason_codes'],'metrics':p['metrics_used'],'price':p['price'],
+                 'reasons':p['reason_codes'],'metrics':p['metrics_used'],
+                 'factor_groups':p.get('factor_groups') or {},'price':p['price'],
                  'stop':p.get('stop'),'targets':p.get('targets') or [],
                  'source_snapshot_id':scan_id,'source_price':p['price'],
                  'transition_count':0}
@@ -114,7 +115,8 @@ def evolve(previous,proposals,scan_id,now_ms,policy,source_ok=True):
         has_new=evidence_time>prev_evidence
         obj.update(review_state='FRESH',last_evaluated_at=iso(now_ms),
                    source_snapshot_id=scan_id,score=p['score'],risk_score=p['risk_score'],
-                   reasons=p['reason_codes'],metrics=p['metrics_used'],price=p['price'],
+                   reasons=p['reason_codes'],metrics=p['metrics_used'],
+                   factor_groups=p.get('factor_groups') or {},price=p['price'],
                    strategy_version=p['strategy_version'],
                    stop=p.get('stop'),targets=p.get('targets') or [])
         # Evidence provenance updated only for a newer fully closed candle.

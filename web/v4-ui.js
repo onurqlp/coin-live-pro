@@ -25,6 +25,38 @@
  const store={radar:null,paper:null,shadow:null,lab:null,history:null,manifest:null,position:null,lastFetch:0,loading:false,initialChartSelected:false};
  window.CoinV4=store;
  function explanation(v){return (v?.reasons||[]).slice(0,3).map(s=>why[s]||s).join(' · ')||'Yeni kapanmış mum kanıtı bekleniyor';}
+ const factorLabels={trend:'TREND',structure:'YAPI',volume:'HACİM',momentum:'MACD',liquidity:'LİKİDİTE'};
+ function factorLamps(x){
+   const groups=x.factor_groups||{};
+   const names=Object.keys(factorLabels);
+   const lamps=names.map(k=>{
+     const v=groups[k],known=typeof v==='number'&&Number.isFinite(v);
+     const state=!known?'unknown':v>0?'positive':'neutral';
+     const label=factorLabels[k];
+     return '<span class="v4FactorLamp '+state+'" title="'+safe(label+': '+(!known?'veri yok':v>0?'destekli':'teyit yok'))+'">'+
+       '<i aria-hidden="true"></i>'+safe(label)+'</span>';
+   });
+   // Source metrics are genuine closed-candle readings, not invented indicators.
+   const m=x.metrics||{};
+   for(const [key,label,test] of [
+     ['4h_rsi','RSI',v=>x.side==='LONG'?v>=48&&v<=70:v>=30&&v<=52],
+     ['4h_adx','ADX',v=>v>=20],
+     ['4h_relative_volume','RVOL',v=>v>=1.2],
+     ['4h_macd_signed','MACD',v=>v>0],
+     ['bb_compression_percentile','BB',v=>v<=30]
+   ]){
+     const v=Number(m[key]),known=m[key]!==null&&m[key]!==undefined&&Number.isFinite(v);
+     const state=!known?'unknown':test(v)?'positive':'neutral';
+     lamps.push('<span class="v4FactorLamp '+state+'" title="'+safe(label+': '+(known?v.toFixed(2):'veri yok'))+'">'+
+       '<i aria-hidden="true"></i>'+label+'</span>');
+   }
+   // Manipulation cannot be certified from RSI/price alone.
+   const oi=m.oi_change_pct,spread=m.spread_bps;
+   const risky=(typeof oi==='number'&&Math.abs(oi)>=8)||(typeof spread==='number'&&spread>20);
+   lamps.unshift('<span class="v4FactorLamp '+(risky?'neutral':'unknown')+'" title="'+safe(risky?'Aykırı OI/spread riski; manipülasyon kanıtı değildir':'Manipülasyon bilinmiyor: order-book geçmişi ve tasfiye verisi gerekli')+'"><i aria-hidden="true"></i>MANİP '+(risky?'RİSK':'?')+'</span>');
+   lamps.push('<span class="v4FactorLamp unknown" title="Doğrulanmış haber/sosyal kaynak henüz bu sinyal kaydına bağlı değil"><i aria-hidden="true"></i>HABER ?</span>');
+   return '<div class="v4FactorLamps" aria-label="Gösterge kontrol ışıkları">'+lamps.join('')+'</div>';
+ }
  function card(x){
    const st=x.lifecycle_stage,stage=st==='SPOTLIGHT'?'GÖZ ÖNÜNDE':st==='MOTION'?'HAREKET':'İZLE';
    const state=x.review_state==='FRESH'?'Yeniden değerlendirildi':'Yeniden kontrol bekliyor';
@@ -34,7 +66,7 @@
      '<span class="v4Small">'+safe(stage)+' · '+safe(state)+'</span></div>'+
      '<div class="v4Sub">'+safe(names[x.strategy_id]||x.strategy_id)+' · puan '+safe(x.score)+
      '/100 · yapı riski '+safe(x.risk_score)+'/100</div>'+
-     '<div class="v4Reason">'+safe(explanation(x))+'</div>'+
+     '<div class="v4Reason">'+safe(explanation(x))+'</div>'+factorLamps(x)+
      '<div class="v4Meta">İlk: '+safe(date(x.first_seen_at))+
      ' · Son gerçek kontrol: '+safe(date(x.last_evaluated_at))+safe(motion)+'</div>'+
      '<button type="button" class="v4GoChart" data-v4-symbol="'+safe(x.symbol)+

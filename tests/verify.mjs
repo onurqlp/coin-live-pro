@@ -5,9 +5,8 @@ const html=fs.readFileSync('web/index.html','utf8');
 const code=fs.readFileSync('web/app.js','utf8');
 const pilot=fs.readFileSync('web/pilot-ui.js','utf8');
 const router=fs.readFileSync('web/router.js','utf8');
-const cleanup=fs.readFileSync('web/legacy-reset.js','utf8');
 const v4code=fs.readFileSync('web/v4-ui.js','utf8');
-for(const body of [code,pilot,router,cleanup,v4code])new Function(body);
+for(const body of [code,pilot,router,v4code])new Function(body);
 
 const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(x=>x[1]);
 assert.equal(ids.length,new Set(ids).size,'DOM IDs must be unique');
@@ -19,8 +18,7 @@ for(const id of ['quoteClock','radarRows','swingHistoryRows','forwardRows','forw
   assert.ok(ids.includes(id),'Missing v3 page component: '+id);
 
 assert.ok(!fs.existsSync('web/live-radar.js'),'Obsolete 15m browser scanner must be deleted');
-assert.ok(html.includes('legacy-reset.js?')&&!html.includes('live-radar.js?'),'V3 resets old local device history');
-assert.ok(cleanup.includes("removeItem('clpro.local_events_v1')"),'Browser 15m history reset missing');
+assert.ok(!html.includes('legacy-reset.js?')&&!html.includes('live-radar.js?'),'No browser persistence script in online-only 90-day system');
 assert.ok(!html.includes('Eski 15 Dakikalık Pilot Arşivi')&&!html.includes('id="historyRows"')&&!html.includes('id="browserHistory"'),'Legacy history UI is not allowed');
 assert.ok(!code.includes("'history','reports'")&&!code.includes("'2.4.0-htf-sparks'")&&!code.includes("'2.3.0-htf-sparks'"),'Cannot accept legacy models');
 assert.ok(code.includes("'3.0.0-htf-sparks'")&&code.includes("'swing-history'")&&code.includes("'swing-outcomes'"),'V3 canonical data sources required');
@@ -65,6 +63,8 @@ for(const id of ['v4Board','v4Spotlight','v4Motion','v4Watch','v4Desk','v4PaperK
  'v4HistoryRows','v4HistoryCount'])
   assert.ok(ids.includes(id),'V4 view missing '+id);
 assert.ok(html.includes('v4-ui.js')&&html.includes('v4-style.css'),'V4 scripts not connected');
+assert.ok(!html.includes('legacy-reset.js'),'Never read/write browser persistent storage');
+assert.ok(v4code.includes('factorLamps(x)')&&v4code.includes('x.metrics||{}'),'Technical lamps must use actual V4 source metrics');
 assert.ok(router.includes("key==='portfoy'?portfolio"),'One chart must move to paper portfolio');
 assert.ok(v4code.includes('v4-history-index')&&v4code.includes('renderHistory()'),'V4 history must validate and display latest audited event index');
 assert.ok(v4code.includes('publication_valid')&&v4code.includes('SHA-256'),

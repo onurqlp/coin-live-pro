@@ -119,3 +119,15 @@ padding:12px;text-align:left;display:grid;gap:5px;min-height:110px}
  .v4MarketSummary{gap:8px}
  .v4ChartHost #candleChart{min-height:245px}
 }
+
+/* Research evidence lamps: do not infer positive signal from missing data. */
+.v4FactorLamps{display:flex;flex-wrap:wrap;gap:5px;margin:9px 0 6px}
+.v4FactorLamp{display:inline-flex;align-items:center;gap:5px;border:1px solid #42566b;border-radius:12px;padding:4px 7px;font-size:10px;letter-spacing:.015em;background:#152538;color:#c2d0df;white-space:nowrap}
+.v4FactorLamp i{display:block;flex:0 0 7px;width:7px;height:7px;border-radius:50%;background:#8893a3}
+.v4FactorLamp.positive{border-color:#326a5a;color:#9fe5c9}
+.v4FactorLamp.positive i{background:#4fd39b;box-shadow:0 0 5px #4fd39b66}
+.v4FactorLamp.neutral{border-color:#7c633a;color:#f4cf93}
+.v4FactorLamp.neutral i{background:#e3aa52}
+.v4FactorLamp.unknown{border-color:#3b4d60;color:#8c9caf}
+.v4FactorLamp.unknown i{background:#758398}
+@media(max-width:420px){.v4FactorLamp{font-size:9px;padding:4px 6px}.v4FactorLamps{gap:4px}}
