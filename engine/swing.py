@@ -37,6 +37,18 @@ def swing_context(market, states, side, derivatives=None):
     day_change = num(market.get('change'))
     funding = num(derivatives.get('funding_rate'))
     oi_usd = num(derivatives.get('open_interest_usd'))
+    listing_age_days = num(market.get('listing_age_days'))
+    instrument_state = str(market.get('instrument_state') or '').upper()
+    inactive = instrument_state not in ('','LIVE','UNKNOWN')
+    newly_listed = listing_age_days is not None and listing_age_days < 7
+    if inactive:
+        risk += 80; notes.append('INSTRUMENT_NOT_LIVE')
+    elif instrument_state == 'UNKNOWN':
+        risk += 8; notes.append('INSTRUMENT_STATE_UNVERIFIED')
+    if newly_listed:
+        risk += 38; notes.append('NEW_LISTING_LT_7D')
+    elif listing_age_days is not None and listing_age_days<30:
+        risk += 17; notes.append('NEW_LISTING_LT_30D')
 
     # Volume and wick observations require *completed* bars; these fields are
     # calculated in mtf.state() after the OKX confirm flag was verified.
@@ -96,7 +108,7 @@ def swing_context(market, states, side, derivatives=None):
         status='WAIT_4H_1D'
         horizon='Belirsiz'
         notes.append('4H_1D_DIRECTION_MISMATCH' if mixed else '4H_1D_NOT_ALIGNED_WITH_SIDE')
-    elif risk >=70:
+    elif risk >=70 or inactive or newly_listed:
         status='AVOID_RISK'
         horizon='Belirsiz'
         notes.append('STRUCTURE_RISK_BLOCK')
@@ -107,6 +119,7 @@ def swing_context(market, states, side, derivatives=None):
         'swing_status':status,'swing_horizon':horizon,'swing_direction':side,
         'direction_aligned_4h_1d':bool(aligned),'structure_risk_score':risk,
         'structure_risk_label':risk_label,'structure_flags':list(dict.fromkeys(notes)),
+        'instrument_state':instrument_state or None,'listing_age_days':listing_age_days,
         'funding_rate':funding,'open_interest_usd':oi_usd,
         'open_interest_change_pct':None,
         'risk_method':'Heuristic: closed-candle long wicks, abnormal volume, ATR, spread, 24h move, funding/current OI. Not proof of manipulation.'
