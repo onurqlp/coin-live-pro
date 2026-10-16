@@ -47,6 +47,9 @@ def main():
     failed=max(0,int(market.get('analysis_attempted',0))-int(market.get('analysis_ok',0)))
     if failed>int(market.get('analysis_attempted',0))*.40:quality='DEGRADED_COVERAGE'
     if missed is not None and missed>=1:quality='DEGRADED_SCHEDULE_GAP'
+    schedules_before=sum(r['trigger']=='schedule' for r in h['records'])
+    if schedules_before+(1 if event=='schedule' else 0)<2 and quality=='OK':
+        quality='SCHEDULE_UNVERIFIED'
     record={'completed_at':UTC,'trigger':event,'run_id':run_id,
        'scan_id':hashlib.sha256((UTC+'|'+run_id+'|'+market.get('fetched_at','')).encode()).hexdigest()[:20],
        'model_version':mtf.get('model_version'),
