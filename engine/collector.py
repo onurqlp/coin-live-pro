@@ -41,7 +41,10 @@ def price_rows():
         q=float(x.get('volCcyQuote24h') or 0)
         if q<=0:q=float(x.get('volCcy24h') or 0)*p
         if p<=0 or q<5_000_000:continue
-        result.append({'symbol':name[:-10]+'USDT','instrument':name,'price':p,'change':(p/op-1)*100 if op>0 else None,'volume':q,'quote':'USDT'})
+        bid=float(x.get('bidPx') or 0);ask=float(x.get('askPx') or 0)
+        spread_bps=round((ask-bid)/((ask+bid)/2)*10000,3) if bid>0 and ask>=bid else None
+        result.append({'symbol':name[:-10]+'USDT','instrument':name,'price':p,'change':(p/op-1)*100 if op>0 else None,
+                       'volume':q,'quote':'USDT','bid':bid or None,'ask':ask or None,'spread_bps':spread_bps})
     return sorted(result,key=lambda x:x['volume'],reverse=True)[:100]
 
 def klines(inst,tf,limit=100):
@@ -84,6 +87,7 @@ def analyze(m):
     score=int(min(100,max(0,round(score))))
     # Avoid extreme volatility and thin books even when early movement looks exciting.
     if not (.08<atr_pct<6.5) or m['volume']<15e6 or not alignment:score=0
+    if m.get('spread_bps') is not None and m['spread_bps']>35:score=0  # Too wide for conservative pilot
     # Confirmed breakout must use a completed 15-minute candle, and not be too extended.
     resistance=max(z['h'] for z in a[-10:-2]);support=min(z['l'] for z in a[-10:-2]);last=a[-1]
     breakout=(last['c']>resistance and last['c']>last['o']) if alignment=='LONG' else (last['c']<support and last['c']<last['o'])
