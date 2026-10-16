@@ -45,9 +45,21 @@ def get(endpoint,params=None):
 
 def price_rows():
     result=[]
+    # The instrument directory gives contract lifecycle state/listing timestamps.
+    # Ticker feeds alone may still show contracts at preopen/suspension/delisting.
+    try:
+        metadata={x.get('instId'):x for x in get('/public/instruments',{'instType':'SWAP'})}
+    except (OSError,ValueError,KeyError,TimeoutError) as exc:
+        print('Instrument lifecycle directory unavailable: '+str(exc)[:100],flush=True)
+        metadata={}
     for x in get('/market/tickers',{'instType':'SWAP'}):
         name=x.get('instId','')
         if not eligible_crypto(name):continue
+        detail=metadata.get(name)
+        state=detail.get('state','UNKNOWN') if detail else 'UNKNOWN'
+        if detail and state.lower()!='live':continue
+        listed=int(detail.get('listTime') or 0) if detail else 0
+        list_age_days=round((NOW_MS-listed)/86400000,2) if listed>0 and listed<=NOW_MS else None
         p=float(x.get('last') or 0);op=float(x.get('open24h') or 0)
         q=float(x.get('volCcyQuote24h') or 0)
         if q<=0:q=float(x.get('volCcy24h') or 0)*p
@@ -55,7 +67,8 @@ def price_rows():
         bid=float(x.get('bidPx') or 0);ask=float(x.get('askPx') or 0)
         spread_bps=round((ask-bid)/((ask+bid)/2)*10000,3) if bid>0 and ask>=bid else None
         result.append({'symbol':name[:-10]+'USDT','instrument':name,'price':p,'change':(p/op-1)*100 if op>0 else None,
-                       'volume':q,'quote':'USDT','bid':bid or None,'ask':ask or None,'spread_bps':spread_bps})
+                       'volume':q,'quote':'USDT','bid':bid or None,'ask':ask or None,'spread_bps':spread_bps,
+                       'instrument_state':state,'listing_age_days':list_age_days})
     return sorted(result,key=lambda x:x['volume'],reverse=True)[:100]
 
 def klines(inst,tf,limit=100):
