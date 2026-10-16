@@ -2,11 +2,13 @@ name: COIN.LIVE PRO — Live Site Verification
 on:
   workflow_dispatch:
   push:
+    branches: [main]
     paths:
       - '.github/workflows/live-site-check.yml'
       - 'web/index.html'
       - 'web/app.js'
       - 'web/v4-ui.js'
+      - 'web/watch-archive-ui.js'
       - 'web/release.json'
       - 'web/v4-style.css'
       - 'web/pilot-ui.js'
