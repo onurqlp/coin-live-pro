@@ -5,6 +5,7 @@
  */
 const CLPRO = {
   root:'https://raw.githubusercontent.com/onurqlp/coin-live-pro/main/web/data/',
+  archive:'https://raw.githubusercontent.com/onurqlp/coin-live-pro/main/archive/',
   history:'KIVILCIM_GECMIS', report:'HAFTALIK_RAPOR',daily:'GUNLUK_IZLEME',settings:'AYARLAR',maxAgeMinutes:35
 };
 function installCoinLivePro(){
@@ -90,10 +91,117 @@ function syncCoinLivePro(){
       ['Durum','AKTİF','GitHub verisi '+Math.floor(age)+' dk eski'],
       ['Yeni kıvılcım kaydı',insert.length,'Gerçek zamanlı kayıttan; geriye dönük başarı yok'],
       ['Sonuç güncellemesi',updates,'Stop/TP/Belirsiz/DATA_GAP']]);
-    SpreadsheetApp.flush();console.log('COIN.LIVE PRO OK | yeni '+insert.length+' | sonuç güncellemesi '+updates);
+    const v2Result=clSyncPilotV2(ss);
+    settings.getRange('A6:C7').setValues([
+      ['Pilot V2',v2Result,'Merkezi sinyal zinciri ve sanal portföy yedeklendi'],
+      ['Cron kanıtı',v2Result.includes('CRON KANITLANDI')?'VAR':'HENÜZ YOK','Başarılı push, 24/7 schedule kanıtı değildir']]);
+    SpreadsheetApp.flush();console.log('COIN.LIVE PRO V2 OK | yeni '+insert.length+' | sonuç güncellemesi '+updates+' | '+v2Result);
   }catch(e){
     if(settings)settings.getRange('A2:C4').setValues([
       ['Son kontrol',new Date(),'Bağlantı denendi'],['Durum','HATA',String(e.message).slice(0,160)],['Kaynak','GitHub','Değişiklik yapılmadı']]);
     console.log('COIN.LIVE PRO HATA: '+e.message);
   }finally{lock.releaseLock();}
+}
+
+/**
+ * V2 — additive sync. Keeps every original V1 tab and row.
+ * New data is sourced only from centrally published model/audit JSON.
+ * Apps Script is a read-only mirror, never a trading engine.
+ */
+function clFetchArchive(file){
+  const r=UrlFetchApp.fetch(CLPRO.archive+file+'?t='+Date.now(),{muteHttpExceptions:true});
+  if(r.getResponseCode()!==200)throw Error('Arşiv HTTP '+r.getResponseCode()+': '+file);
+  return JSON.parse(r.getContentText());
+}
+function clDay(v){
+  if(v instanceof Date&&!isNaN(v.getTime()))return Utilities.formatDate(v,'UTC','yyyy-MM-dd');
+  const t=String(v==null?'':v).trim();
+  if(/^\d{4}-\d{2}-\d{2}/.test(t))return t.slice(0,10);
+  const tr=t.match(/^(\d{2})\.(\d{2})\.(\d{4})/);
+  return tr?tr[3]+'-'+tr[2]+'-'+tr[1]:t;
+}
+function clUpsertRows(sheet,rows,mutable,dayMode){
+  if(!rows.length)return 0;
+  const width=rows[0].length,last=sheet.getLastRow();
+  const ids=last>1?sheet.getRange(2,1,last-1,1).getValues().flat():[];
+  const index=new Map(ids.map((v,i)=>[dayMode?clDay(v):String(v),i+2]).filter(x=>x[0]));
+  const newRows=[];
+  rows.forEach(row=>{
+    const id=dayMode?clDay(row[0]):String(row[0]||'');
+    if(!id)return;
+    const existing=index.get(id);
+    if(existing){
+      if(mutable){
+        const old=sheet.getRange(existing,1,1,width).getValues()[0];
+        if(JSON.stringify(old.map(String))!==JSON.stringify(row.map(String))){
+          sheet.getRange(existing,1,1,width).setValues([row]);
+        }
+      }
+    }else{
+      // Prevent duplicates inside a single fetch too.
+      index.set(id,last+newRows.length+1);
+      newRows.push(row);
+    }
+  });
+  if(newRows.length)sheet.getRange(sheet.getLastRow()+1,1,newRows.length,width).setValues(newRows);
+  return newRows.length;
+}
+function clSyncPilotV2(ss){
+  const mtf=clFetch('mtf.json');
+  const paper=clFetch('paper.json');
+  const health=clFetch('health.json');
+  const ledger=clFetchArchive('pilot-ledger.json');
+  const history=clFetchArchive('scan-health.json');
+  const t=Date.now();
+  for(const [name,iso] of [['mtf',mtf.fetched_at],['paper',paper.updated_at],['health',health.updated_at]]){
+    const delta=(t-Date.parse(iso))/60000;
+    if(!Number.isFinite(delta)||delta>40||delta< -3)throw Error('V2 '+name+' bayat veri: '+Math.round(delta)+' dk');
+  }
+  const tab=name=>{
+    const sh=ss.getSheetByName(name);
+    if(!sh)throw Error('Pilot tablosu eksik: '+name);
+    return sh;
+  };
+  const chains=Object.values(ledger.chains||{}).sort((a,b)=>a.at_ms-b.at_ms);
+  const newChains=clUpsertRows(tab('SINYAL_ZINCIRI'),chains.map(x=>[
+    x.signal_id,x.chain_id,x.parent_signal_id||'',x.created_at,x.symbol,x.side,x.stage,
+    x.model_version,x.evidence_sha256,'CENTRAL_FORWARD']
+  ),false,false);
+  const orders=Object.values(ledger.orders||{}).sort((a,b)=>a.signal_at_ms-b.signal_at_ms);
+  const newOrders=clUpsertRows(tab('SANAL_ISLEMLER'),orders.map(x=>[
+    x.id,x.chain_id||x.id,x.symbol,x.side,x.signal_at,x.filled_at||'',
+    x.fill_price??'',x.stop,x.tp1,x.margin_10x??'',x.margin_15x??'',
+    x.risk_budget??'',x.status,x.exit_at||'',x.exit_price??'',x.pnl_usdt??'',
+    x.net_R??'',x.quality||'ESTIMATED_NOT_FILLED']
+  ),true,false);
+  const runs=(history.records||[]);
+  const newRuns=clUpsertRows(tab('SISTEM_SAGLIGI'),runs.map(x=>[
+    x.scan_id,x.completed_at,x.trigger,x.attempted,x.successful_3tf,
+    x.mtf_attempted,x.mtf_verified,x.missed_cron_slots_since_previous_success??'',
+    x.quality,x.model_version
+  ]),false,false);
+  // Daily report updates the same UTC date; never appends six identical days.
+  const day=String(paper.updated_at).slice(0,10);
+  clUpsertRows(tab('PERFORMANS_GUNLUK'),[[day,100,paper.estimated_equity_usdt,
+    paper.open_paper_positions,paper.closed_paper_orders,paper.wins,paper.losses,
+    paper.ambiguous,paper.no_fill,paper.max_drawdown_pct_est,
+    'ESTIMATED 5m OHLC; fee/slip %0,15 nominal; gerçek işlem değil'
+  ]],true,true);
+  const candidates=mtf.candidates||[];
+  const frames=['1W','1D','12H','4H','1H','15m','5m'];
+  tab('ZAMAN_DILIMI_ISTATISTIK').getRange(2,1,frames.length,8).setValues(
+    frames.map(tf=>{
+      const good=candidates.filter(x=>x.frames&&x.frames[tf]&&x.frames[tf].quality==='CLOSED_CONFIRMED');
+      const avg=key=>good.length?Math.round(good.reduce((a,b)=>a+Number(b[key]||0),0)/good.length*10)/10:'';
+      return [tf,good.length?good[0].frames[tf].bar:'OKX '+tf,good.length,
+        avg('macro_score'),avg('momentum_score'),avg('entry_quality_score'),
+        candidates.length-good.length,mtf.model_version];
+    })
+  );
+  clUpsertRows(tab('STRATEJI_SURUMLERI'),[[
+    mtf.model_version,paper.pilot_started_at,'',.35,.50,.15,'1% işlem, 3% gün, 2 eşzamanlı',
+    'Pilot; model değişirse yeni sürüm ayrı takip edilecek'
+  ]],false,false);
+  return 'AKTİF · zincir yeni '+newChains+' · işlem yeni '+newOrders+' · sağlık yeni '+newRuns+
+    (health.schedule_proven?' · CRON KANITLANDI':' · CRON HENÜZ KANITLANMADI');
 }
