@@ -29,7 +29,7 @@ def load(path,fallback):
 def write(path,obj):
     path.parent.mkdir(exist_ok=True,parents=True)
     temp=path.with_suffix(path.suffix+'.tmp')
-    temp.write_text(json.dumps(obj,ensure_ascii=False,allow_nan=False,separators=(',',':'),encoding='utf8')
+    temp.write_text(json.dumps(obj,ensure_ascii=False,allow_nan=False,separators=(',',':')),encoding='utf8')
     temp.replace(path)
 
 def fresh(ts,limit_seconds=540):
