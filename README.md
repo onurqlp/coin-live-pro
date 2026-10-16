@@ -3,7 +3,8 @@
 **Üretim:** [COIN.LIVE PRO 4.0](https://onurqlp.github.io/coin-live-pro/). Canlı V4 araştırma sistemi otomatik veri biriktirir; işlem yapmaz.
 
 - 90 günün başlangıcı V4 sanal kasa kayıt saatidir (16 Ekim 2026); ilerleme sitede gösterilir. 90 gün tamamlandığında geçmiş silinmez; sonuçlar incelenir.
-- Ana radar: yalnız V4 İZLE / HAREKET / GÖZ ÖNÜNDE. V3.1 günlük/4H sinyalleri ve 7-zaman-dilimli teknik raporlar silinmeden kapalı **Teknik analiz ayrıntıları** altında. V4 kartları direkt **Grafikler** sekmesini açar.
+- Ana radar: üstte **GÖZ ÖNÜNDE** ve **HAREKET**; altta **İZLE + aynı sayfada 4H grafik**. Eski 4 kutulu sayaç geri getirildi: toplam OKX USDT paritesi, tekil LONG/SHORT pariteleri ve son merkezi tarama saati. Strateji sayısı coin sayısı gibi gösterilmez. Kıvılcım seçimi aynı sayfada grafiği değiştirir; özel Grafikler sekmesi isteğe bağlı tam ekran/piyasa tablosu olarak korunur.
+- V3.1 günlük/4H sinyalleri ve 7-zaman-dilimli teknik raporlar silinmeden kapalı **Teknik analiz ayrıntıları** altında.
 - 10.000 USDT kasanın tamamı sanaldır, V3 100 USDT verileriyle birleştirilmez. Kullanıcıya bildirim veya gerçek otomatik emir yok.
 - Performans raporu varsayılan **90 gün**; 7/14/30 günlük kısaltmalar seçilebilir. Forward-only ölçümler örneklem/numune yetersizliğini ve veri boşluklarını ayrı işaretler.
 - 5 dk kontrol ve GitHub schedule hedefleri garanti değildir; GitHub + Google Apps Script bağımsız kontrollerini açık tut. 90 gün işletim kararı, bir uptime SLA değildir.

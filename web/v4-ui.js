@@ -22,7 +22,7 @@
  FUNDING_CROWDING:'Fonlama kalabalıklaşması',NOT_LIQUIDATION_PROOF:'Tasfiye kanıtı değil',
  BEARISH_DAILY_4H:'1D ve 4H aşağı yön',SUPPORT_CLOSED_BREAK:'Destek kapanışta kırıldı',
  SUPPORT_WATCH:'Destek kırılımı bekleniyor'};
- const store={radar:null,paper:null,shadow:null,lab:null,history:null,manifest:null,position:null,lastFetch:0,loading:false};
+ const store={radar:null,paper:null,shadow:null,lab:null,history:null,manifest:null,position:null,lastFetch:0,loading:false,initialChartSelected:false};
  window.CoinV4=store;
  function explanation(v){return (v?.reasons||[]).slice(0,3).map(s=>why[s]||s).join(' · ')||'Yeni kapanmış mum kanıtı bekleniyor';}
  function card(x){
@@ -38,7 +38,7 @@
      '<div class="v4Meta">İlk: '+safe(date(x.first_seen_at))+
      ' · Son gerçek kontrol: '+safe(date(x.last_evaluated_at))+safe(motion)+'</div>'+
      '<button type="button" class="v4GoChart" data-v4-symbol="'+safe(x.symbol)+
-     '" data-v4-side="'+safe(x.side)+'">Grafiği incele ↗</button></article>';
+     '" data-v4-side="'+safe(x.side)+'">Grafiği burada aç ↓</button></article>';
  }
  function observationProgress(){
    const started=Date.parse(store.paper?.pilot_started_at||'');
@@ -55,12 +55,33 @@
    dates.textContent=formatDay(started)+' — '+formatDay(ends)+' · piyasa verileri otomatik kaydedilir';
    bar.style.width=(Math.min(100,Math.max(0,(Date.now()-started)/(90*86400000)*100))).toFixed(1)+'%';
  }
+ function showMarketSummary(r,manifest,stale){
+   const rows=[...(r.spotlight||[]),...(r.motion||[]),...(r.watch||[])];
+   // One parite may appear under several independent strategies. Count it
+   // once per direction, not once per hypothesis; also retain WATCH_PENDING.
+   const perSide=side=>new Set(rows.filter(x=>x.side===side).map(x=>x.symbol)).size;
+   const counters=manifest.candidate_counts||{};
+   const pairs=Number(counters.market_pairs);
+   $('v4MarketTotal').textContent=Number.isFinite(pairs)&&pairs>0?String(pairs):'—';
+   const verified=Number(counters.verified),attempted=Number(counters.attempted);
+   $('v4MarketDetail').textContent=Number.isFinite(verified)&&Number.isFinite(attempted)
+      ?'Derin analiz: '+verified+'/'+attempted+' aday':'OKX USDT pariteleri';
+   $('v4LongTotal').textContent=String(perSide('LONG'));
+   $('v4ShortTotal').textContent=String(perSide('SHORT'));
+   const stamp=Date.parse(manifest.started_at_utc||'');
+   $('v4LastAnalysis').textContent=Number.isFinite(stamp)?
+     new Date(stamp).toLocaleTimeString('tr-TR',{timeZone:'Europe/Istanbul',hour:'2-digit',minute:'2-digit'}):'—';
+   $('v4LastAnalysisAge').textContent=stale?
+       'Veri gecikmiş · yeni teyit gösterilmez':
+       'Son kapanmış mum analizi · '+ago(manifest.started_at_utc)+' önce';
+ }
  function drawBoard(){
    const r=store.radar,manifest=store.manifest;
    if(!r)return;
    observationProgress();
    const minutes=(Date.now()-Date.parse(manifest.finished_at_utc))/60000;
    const stale=!Number.isFinite(minutes)||minutes>25;
+   showMarketSummary(r,manifest,stale);
    const status=$('v4Status');status.textContent=stale?'V4 KAYNAK GECİKMİŞ · GÜNCEL TEYİT YOK':
      'V4 · '+ago(r.updated_at)+' önce merkezi değerlendirme · otomatik emir YOK';
    status.className='v4Status '+(stale?'v4Stale':'');
@@ -77,8 +98,27 @@
    $('v4RecheckCount').textContent=r.counts?.recheck_pending??'—';
    $('v4ArchivedCount').textContent=r.counts?.archived_total??'—';
    document.querySelectorAll('[data-v4-symbol]').forEach(b=>b.onclick=()=>{
-     if(typeof window.CoinLiveSelectSpark==='function')window.CoinLiveSelectSpark(b.dataset.v4Symbol,'4H',true);
+     const select=window.CoinLiveSelectSpark;
+     if(typeof select!=='function')return;
+     const symbol=b.dataset.v4Symbol;
+     select(symbol,'4H',false);
+     document.querySelectorAll('[data-v4-symbol]').forEach(item=>
+       item.classList.toggle('v4Selected',item.dataset.v4Symbol===symbol));
+     const pane=$('chartHostRadar');
+     if(!pane)return;
+     const rect=pane.getBoundingClientRect();
+     // Keep the route. Only scroll when the in-page chart is below/above view.
+     if(rect.top>window.innerHeight*.67||rect.bottom<30)
+       pane.scrollIntoView({behavior:'smooth',block:'start'});
    });
+   if(!store.initialChartSelected){
+     const candidate=[...(r.spotlight||[]),...(r.motion||[]),...(r.watch||[])]
+       .find(x=>x.review_state==='FRESH');
+     if(candidate&&typeof window.CoinLiveSelectSpark==='function'){
+       store.initialChartSelected=true;
+       window.CoinLiveSelectSpark(candidate.symbol,'4H',false,true);
+     }
+   }
  }
  function kpi(label,value){return '<div class="v4Kpi"><small>'+safe(label)+'</small><strong>'+safe(value)+'</strong></div>';}
  function renderDesk(){

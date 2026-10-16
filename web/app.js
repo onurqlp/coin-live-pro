@@ -123,10 +123,13 @@ function render(){
  $('shortCount').textContent=currentRadar().items.filter(x=>x.side==='SHORT').length;
  renderRadar();renderChartSelector();renderSwingHistory();renderForward();renderQuality();renderMarket();
 }
-function selectSpark(symbol,tf,openAdvanced=false){
+function selectSpark(symbol,tf,openAdvanced=false,silent=false){
  const accepted=['1m','5m','15m','1H','4H','12H','1D','1W'];
  const spark=currentRadar().items.find(x=>x.symbol===symbol);
- if(!/^[A-Z0-9]{2,32}USDT$/.test(symbol)||(!S.market.some(x=>x.symbol===symbol)&&!spark&&!S.swingEvents.some(x=>x.symbol===symbol)&&!(window.CoinV4?.paper?.open_positions||[]).some(x=>x.symbol===symbol)))return;
+ const v4=window.CoinV4?.radar;
+ const isV4=[...(v4?.watch||[]),...(v4?.motion||[]),...(v4?.spotlight||[])]
+    .some(x=>x.symbol===symbol);
+ if(!/^[A-Z0-9]{2,32}USDT$/.test(symbol)||(!isV4&&!S.market.some(x=>x.symbol===symbol)&&!spark&&!S.swingEvents.some(x=>x.symbol===symbol)&&!(window.CoinV4?.paper?.open_positions||[]).some(x=>x.symbol===symbol)))return;
  const target=accepted.includes(tf)?tf:(spark?.primary_tf||'4H');
  S.selected=symbol;S.chartTf=target;
  $('chartTf').value=target;
@@ -134,7 +137,7 @@ function selectSpark(symbol,tf,openAdvanced=false){
  highlightSpark();
  if(openAdvanced){
    location.hash='#grafikler';
- }else if(document.body.dataset.route==='radar'&&window.matchMedia('(max-width:980px)').matches){
+ }else if(!silent&&document.body.dataset.route==='radar'&&window.matchMedia('(max-width:980px)').matches){
    $('chartPanel').scrollIntoView({behavior:'smooth',block:'start'});
  }
  ensureChart(true);
@@ -236,7 +239,7 @@ async function ensureChart(force=false){
  finally{S.chartLoading=null;if(S.selected===symbol&&S.chartTf===tf)drawChart();}
 }
 function renderQuickTf(){const g=$('chartQuickFrames');if(!g)return;const spark=currentRadar().items.find(x=>x.symbol===S.selected);const primary=spark?.primary_tf||'4H';for(const b of g.querySelectorAll('[data-quick-tf]')){const tf=b.dataset.quickTf,active=tf==='AUTO'?S.chartTf===primary:S.chartTf===tf&&S.chartTf!==primary;b.classList.toggle('active',active);b.setAttribute('aria-pressed',active?'true':'false');if(tf==='AUTO')b.textContent='🎯 Ana ('+primary+')';}}
-function renderChartSelector(){const prior=S.selected;const options=[...new Set([...currentRadar().items.map(x=>x.symbol),...S.swingEvents.slice(-80).map(x=>x.symbol),...S.market.map(x=>x.symbol),...(window.CoinV4?.paper?.open_positions||[]).map(x=>x.symbol)])];if(!options.length)options.push('BTCUSDT','ETHUSDT');if(!options.includes(S.selected))S.selected=options[0];const existing=[...$('chartCoin').options].map(x=>x.value).join('|');if(existing!==options.join('|'))$('chartCoin').innerHTML=options.map(x=>`<option value="${safe(x)}">${safe(x.replace('USDT',''))} / USDT</option>`).join('');$('chartCoin').value=S.selected;const link='https://www.tradingview.com/chart/?symbol='+encodeURIComponent('OKX:'+S.selected.replace('USDT','')+'USDT.P');$('tvLink').href=link;drawChart();renderQuickTf();ensureChart();}
+function renderChartSelector(){const prior=S.selected;const options=[...new Set([...currentRadar().items.map(x=>x.symbol),...S.swingEvents.slice(-80).map(x=>x.symbol),...S.market.map(x=>x.symbol),...(window.CoinV4?.radar?.watch||[]).map(x=>x.symbol),...(window.CoinV4?.radar?.motion||[]).map(x=>x.symbol),...(window.CoinV4?.radar?.spotlight||[]).map(x=>x.symbol),...(window.CoinV4?.paper?.open_positions||[]).map(x=>x.symbol)])];if(!options.length)options.push('BTCUSDT','ETHUSDT');if(!options.includes(S.selected))S.selected=options[0];const existing=[...$('chartCoin').options].map(x=>x.value).join('|');if(existing!==options.join('|'))$('chartCoin').innerHTML=options.map(x=>`<option value="${safe(x)}">${safe(x.replace('USDT',''))} / USDT</option>`).join('');$('chartCoin').value=S.selected;const link='https://www.tradingview.com/chart/?symbol='+encodeURIComponent('OKX:'+S.selected.replace('USDT','')+'USDT.P');$('tvLink').href=link;drawChart();renderQuickTf();ensureChart();}
 function drawChart(){const c=$('candleChart'),ctx=c.getContext('2d'),r=c.getBoundingClientRect();const w=Math.max(300,r.width||500),h=340,ratio=Math.min(2,window.devicePixelRatio||1);c.width=Math.floor(w*ratio);c.height=Math.floor(h*ratio);ctx.setTransform(ratio,0,0,ratio,0,0);ctx.fillStyle='#0b1421';ctx.fillRect(0,0,w,h);const signal=currentRadar().items.find(x=>x.symbol===S.selected)||null;const cache=S.chartCache.get(S.selected+'|'+S.chartTf);const raw=(cache&&Date.now()-cache.at<900000?cache.data:null)||[];const candles=raw.slice(-52).map(x=>({t:x[0],o:x[1],h:x[2],l:x[3],c:x[4]}));if(candles.length<10){ctx.fillStyle='#adc1dc';ctx.font='13px system-ui';ctx.fillText('Bu coin için kapanmış mum grafiği henüz alınmadı.',17,36);$('chartCaption').textContent='OKX '+S.chartTf+' kapanmış mumları bekleniyor. Kaynak erişimi yoksa uydurma seviye çizilmez.';return;}const left=12,right=96,top=16,bottom=29;let lo=Math.min(...candles.map(x=>x.l)),hi=Math.max(...candles.map(x=>x.h));const lineLevels=[];
 const paperPos=window.CoinV4?.position;
 if(document.body.dataset.route==='portfoy'&&paperPos?.status==='FILLED'&&paperPos.symbol===S.selected){

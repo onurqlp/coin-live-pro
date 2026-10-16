@@ -49,7 +49,7 @@ def produce(now_ms=None):
         'started_at_utc':m['fetched_at'],
         'finished_at_utc':dt.datetime.fromtimestamp(now_ms/1000,dt.timezone.utc).isoformat(),
         'trigger':data['health'].get('last_trigger'),'sources':files,
-        'candidate_counts':{'attempted':m.get('attempted'),'verified':m.get('analyzed'),
+        'candidate_counts':{'market_pairs':len(data['market'].get('rows',[])),'attempted':m.get('attempted'),'verified':m.get('analyzed'),
                             'v4':v.get('counts')},
         'provider':'OKX','publication_valid':True,
         'no_real_orders':True,
