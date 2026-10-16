@@ -90,9 +90,11 @@ jobs:
           python3 - <<'PY'
           import re
           doc=open('/tmp/v4-dom.html').read()
-          for id in ('v4Spotlight','v4Motion','v4Watch','v4Status','v4RadarSearch','v4RadarSide'):
+          for id in ('v4Spotlight','v4Motion','v4Watch','v4Status'):
               m=re.search(r'id="'+id+r'"[^>]*>(.*?)</',doc,re.S)
               assert m and m.group(1).strip(),id+' failed to render'
+          assert 'id="v4RadarSearch"' in doc and 'id="v4RadarSide"' in doc,'Radar filters missing'
+          assert 'ui-refresh.css?v=1' in doc,'Readable CSS layer not linked'
           assert 'V4 veri kontrolü:' not in doc,'V4 manifest fetch or hash validation failed'
           assert 'id="v4PaperKpis"' in doc
           import re
