@@ -81,20 +81,68 @@
    return '<div class="v4TfWrap" aria-label="Küçükten büyüğe teyit edilen mum yönleri">'+result.join('')+'</div>'+
      '<div class="v4TfNote">4H + 1D ana karar · 1W büyük yön · 1H/15m zamanlama · 1m erken gözlem. Hepsinin aynı renk olması gerekmez.</div>';
  }
+ function mainFrameSummary(x){
+   const frames=x.metrics?.timeframe_levels||{};
+   return '<div class="v4TrendMini" aria-label="Ana zaman dilimleri">'+
+     ['4H','1D','1W'].map(tf=>{
+       const v=frames[tf]||{},trend=v.quality==='CLOSED_CONFIRMED'?v.trend:'UNKNOWN';
+       const aligned=(x.side==='LONG'&&trend==='UP')||(x.side==='SHORT'&&trend==='DOWN');
+       const opposed=(x.side==='LONG'&&trend==='DOWN')||(x.side==='SHORT'&&trend==='UP');
+       const cls=trend==='UNKNOWN'?'unknown':aligned?'aligned':opposed?'opposed':'neutral';
+       const dir=trend==='UP'?'↑':trend==='DOWN'?'↓':trend==='SIDEWAYS'?'↔':'?';
+       return '<span class="'+cls+'" title="'+safe(tf+' kapanmış yön: '+trend)+'">'+tf+' <strong>'+dir+'</strong></span>';
+     }).join('')+'</div>';
+ }
+ function applyRadarFilter(){
+   const term=($('v4RadarSearch')?.value||'').trim().toLocaleUpperCase('tr-TR');
+   const side=$('v4RadarSide')?.value||'ALL';
+   let total=0,shown=0;
+   for(const id of ['v4Spotlight','v4Motion','v4Watch']){
+     const panel=$(id);if(!panel)continue;
+     const cards=[...panel.querySelectorAll('.v4Opportunity[data-v4-pair]')];
+     let visible=0;
+     for(const card of cards){
+       const match=(side==='ALL'||card.dataset.v4Direction===side) &&
+         (!term||((card.dataset.v4Pair||'')+' '+(card.dataset.v4Strategy||''))
+           .toLocaleUpperCase('tr-TR').includes(term));
+       card.hidden=!match;
+       if(match){visible++;shown++;}
+       total++;
+     }
+     let placeholder=panel.querySelector('.v4FilterEmpty');
+     if(cards.length){
+       if(!placeholder){
+         placeholder=document.createElement('div');
+         placeholder.className='v4FilterEmpty';
+         placeholder.textContent='Bu bölümde filtreyle eşleşen aday yok.';
+         panel.append(placeholder);
+       }
+       placeholder.hidden=visible>0;
+     }else if(placeholder)placeholder.remove();
+   }
+   const status=$('v4RadarFilterStatus');
+   if(status)status.textContent=total?shown+' / '+total+
+     ' aday gösteriliyor · Üstteki sayılar filtresizdir':
+     'Merkezi sinyaller yükleniyor; filtreler sadece ekrandaki adayları etkiler.';
+ }
  function card(x){
    const st=x.lifecycle_stage,stage=st==='SPOTLIGHT'?'GÖZ ÖNÜNDE':st==='MOTION'?'HAREKET':'İZLE';
    const state=x.review_state==='FRESH'?'Yeniden değerlendirildi':'Yeniden kontrol bekliyor';
    const motion=x.confirmation_state==='CONFIRMED'?' · strateji teyidi var':' · giriş teyidi yok';
-   return '<article class="v4Opportunity"><div class="v4CardTop"><b>'+safe(x.symbol)+
+   return '<article class="v4Opportunity" data-v4-pair="'+safe(x.symbol)+
+     '" data-v4-direction="'+safe(x.side)+'" data-v4-strategy="'+safe(names[x.strategy_id]||x.strategy_id)+'"><div class="v4CardTop"><b>'+safe(x.symbol)+
      ' <span class="chip '+(x.side==='LONG'?'long':'short')+'">'+safe(x.side)+'</span></b>'+
      '<span class="v4Small">'+safe(stage)+' · '+safe(state)+'</span></div>'+
-     '<div class="v4Sub">'+safe(names[x.strategy_id]||x.strategy_id)+' · puan '+safe(x.score)+
-     '/100 · yapı riski '+safe(x.risk_score)+'/100</div>'+
-     '<div class="v4Reason">'+safe(explanation(x))+'</div>'+timeframeLadder(x)+factorLamps(x)+
-     '<div class="v4Meta">İlk: '+safe(date(x.first_seen_at))+
-     ' · Son gerçek kontrol: '+safe(date(x.last_evaluated_at))+safe(motion)+'</div>'+
+     '<div class="v4Sub">'+safe(names[x.strategy_id]||x.strategy_id)+'</div>'+
+     '<div class="v4CardScore"><span>Aday puanı <strong>'+safe(x.score)+'/100</strong></span>'+
+     '<span>Yapı riski '+safe(x.risk_score)+'/100</span></div>'+
+     '<div class="v4Reason">'+safe(explanation(x))+'</div>'+mainFrameSummary(x)+
+     '<details class="v4Evidence"><summary>Göstergeler ve 1m–1W yönleri</summary>'+
+     timeframeLadder(x)+factorLamps(x)+'</details>'+
+     '<div class="v4Meta">Son kontrol: '+safe(date(x.last_evaluated_at))+
+     ' · İlk kayıt: '+safe(date(x.first_seen_at))+safe(motion)+'</div>'+
      '<button type="button" class="v4GoChart" data-v4-symbol="'+safe(x.symbol)+
-     '" data-v4-side="'+safe(x.side)+'">Grafiği burada aç ↓</button></article>';
+     '" data-v4-side="'+safe(x.side)+'">Grafiği aç →</button></article>';
  }
  function observationProgress(){
    const started=Date.parse(store.paper?.pilot_started_at||'');
@@ -223,6 +271,7 @@
      if(rect.top>window.innerHeight*.67||rect.bottom<30)
        pane.scrollIntoView({behavior:'smooth',block:'start'});
    });
+   applyRadarFilter();
    if(!store.initialChartSelected){
      const candidate=[...(r.spotlight||[]),...(r.motion||[]),...(r.watch||[])]
        .find(x=>x.review_state==='FRESH');
@@ -367,6 +416,8 @@
    }finally{store.loading=false;}
  }
  $('v4LabWindow')?.addEventListener('change',renderLab);
+ $('v4RadarSearch')?.addEventListener('input',applyRadarFilter);
+ $('v4RadarSide')?.addEventListener('change',applyRadarFilter);
  $('refresh')?.addEventListener('click',()=>setTimeout(load,1000));
  window.addEventListener('resize',()=>{if(store.paper)drawEquity(store.paper.equity_curve||[])});
  document.addEventListener('visibilitychange',()=>{if(!document.hidden)load()});
