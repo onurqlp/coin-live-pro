@@ -1,0 +1,31 @@
+{
+  "policy_version": "4.0.0-research-20261016",
+  "model_version": "4.0.0",
+  "source_model": "3.1-persistent-quant-20261016",
+  "discovery_min_score": 50,
+  "motion_min_score": 65,
+  "spotlight_min_score": 78,
+  "max_spotlight": 5,
+  "max_motion": 12,
+  "max_watch": 28,
+  "watch_hours": 36,
+  "motion_hours": 72,
+  "spotlight_hours": 168,
+  "source_stale_minutes": 25,
+  "paper": {
+    "starting_balance_usdt": 10000,
+    "risk_per_trade_pct": 0.5,
+    "max_open_risk_pct": 2.0,
+    "max_daily_new_risk_pct": 2.0,
+    "max_positions": 3,
+    "leverage": 3,
+    "max_margin_trade_pct": 25,
+    "max_margin_total_pct": 50,
+    "example_fee_side_pct": 0.05,
+    "example_slippage_side_pct": 0.05,
+    "max_entry_delay_minutes": 15,
+    "take_profit_splits": [0.40,0.35,0.25],
+    "take_profit_r": [1,2,3],
+    "real_orders": false
+  }
+}
