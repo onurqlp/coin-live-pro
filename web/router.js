@@ -34,19 +34,20 @@
    const panel=document.getElementById('chartPanel');
    const home=document.getElementById('chartHostRadar');
    const advanced=document.getElementById('chartHostAdvanced');
-   const destination=key==='grafikler'?advanced:home;
+   const portfolio=document.getElementById('chartHostPortfolio');
+   const destination=key==='grafikler'?advanced:key==='portfoy'?portfolio:home;
    if(panel&&destination&&panel.parentElement!==destination){
      destination.replaceChildren(panel);
    }
    const current=document.getElementById('routeCurrent');
    if(current)current.textContent=r.label;
-   document.title=r.title+' · COIN.LIVE PRO 3.0';
+   document.title=r.title+' · COIN.LIVE PRO 4.0';
    document.body.dataset.route=key;
    if(changed){
      last=key;
      window.scrollTo({top:0,behavior:'instant'});
      // Existing canvas chart repaints when it becomes visible.
-     if(key==='grafikler'||key==='radar'){
+     if(key==='grafikler'||key==='radar'||key==='portfoy'){
        requestAnimationFrame(()=>window.dispatchEvent(new Event('resize')));
      }
    }
