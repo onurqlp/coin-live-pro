@@ -181,6 +181,7 @@ def main():
         log={'schema_version':2,'pilot_started_at':UTC,'pilot_started_ms':NOWMS,
              'starting_balance':100.,'model_version':MODEL,'orders':{},'journal':[]}
     started=log['pilot_started_ms']
+    latest={m['symbol']:m for m in market.get('rows',[])}
     records=history.get('events',[])
     chains=log.setdefault('chains',{})
     # Maintain immutable first observations and append-only stage transitions.
@@ -210,12 +211,17 @@ def main():
         price=float(e['price']);stop=float(e['stop'])
         if min(price,stop)<=0 or not e.get('targets'):continue
         id=e['id']
+        quoted_spread=latest.get(e['symbol'],{}).get('spread_bps')
         o={'id':id,'chain_id':chains.get(id,{}).get('chain_id',id),'model_version':MODEL,'inst':e['symbol'][:-4]+'-USDT-SWAP',
            'symbol':e['symbol'],'side':e['side'],'source':'CENTRAL_FORWARD_CONFIRMED',
            'signal_at_ms':int(e['at_ms']),'signal_at':e['time'],'signal_price':price,'stop':stop,
            'tp1':float(e['targets'][0]),'tp2':float(e['targets'][1]),'tp3':float(e['targets'][2]),
-           'status':'PENDING','last_eval_ms':int(e['at_ms']),'estimated_only':True}
+           'status':'PENDING','last_eval_ms':int(e['at_ms']),'estimated_only':True,
+           'spread_bps_initial':quoted_spread}
         log['orders'][id]=o
+        if quoted_spread is not None and quoted_spread>35:
+            o['status']='NO_FILL'
+            append(log,o,'NO_FILL',{'reason':'SPREAD_TOO_WIDE','quoted_spread_bps':quoted_spread},e['time'])
     # On each runner invocation only active symbols get 5m candles; critical
     # 1m requests happen exclusively for ambiguous stop/TP ordering.
     groups={}
