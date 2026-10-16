@@ -210,3 +210,15 @@ footer{color:#aabed2;font-size:12px}
 @media(prefers-reduced-motion:reduce){
  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}
 }
+
+/* Show only decisive 4H / daily / weekly direction before expanding evidence. */
+.v4TrendMini{display:flex;flex-wrap:wrap;gap:6px;margin:9px 0}
+.v4TrendMini span{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:63px;
+ padding:5px 9px;border-radius:7px;border:1px solid #3a526a;background:#101e30;color:#b6cbdb;
+ font-size:12px;font-weight:700;letter-spacing:.02em}
+.v4TrendMini strong{font-size:16px;line-height:1}
+.v4TrendMini .aligned{border-color:#398269;background:#15382d;color:#9ce8cb}
+.v4TrendMini .opposed{border-color:#9b5868;background:#422532;color:#ffd1da}
+.v4TrendMini .neutral{border-color:#816d4c;background:#352a19;color:#f1d39a}
+.v4TrendMini .unknown{border-style:dashed;color:#b4c3d2}
+.v4FilterEmpty[hidden],#watchArchiveMore[hidden]{display:none!important}
