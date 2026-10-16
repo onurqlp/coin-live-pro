@@ -21,6 +21,6 @@ assert.ok(local.includes('clpro.local_events_v1'),'Device-only spark history mus
 assert.ok(code.includes("mode:'SERVER'")&&code.includes("mode:'STALE'")&&!code.includes("mode:'BROWSER'"),'Only central server radar may issue authoritative signals');
 for(const id of ['chartTf','mtfPanel','mtfStatus','mtfCandidates','macroRegime','paperPanel','paperKpis','paperRows','systemPanel','systemKpis','systemDetail'])assert.ok(ids.includes(id),'Missing pilot panel: '+id);
 assert.ok(html.includes('pilot-ui.js?'),'Central pilot report UI must be loaded');
-assert.ok(code.includes('pilot: bildirim kapalı'),'Pilot must not enable browser notifications');
+assert.ok(code.includes('Pilot: bildirim kapalı'),'Pilot must not enable browser notifications');
 assert.ok(!local.includes('setInterval(()=>{scan()'),'Browser standalone scan must not run unattended or become canonical');
 console.log('PASS: responsive dashboard contract, 7/14 history, chart selector, dual-side radar');
