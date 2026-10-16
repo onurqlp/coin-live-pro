@@ -46,3 +46,13 @@
 Modeller `model_version` altında tutulur. Önceki 14 günlük arşiv silinmez. GitHub commits sayesinde dosyalar istenirse belirli bir commit'e geri döndürülür. Yeni pilot `pilot_started_at` tarihinden öncesini sanal alım yapılmış gibi saymaz. Raporlarda `ESTIMATED`, `NO_HISTORY`, `NO_FILL`, `AMBIGUOUS`, `DATA_GAP` durumları ayrı sınıflandırılır.
 
 **Resmî teknik kaynaklar:** [OKX v5](https://tr.okx.com/docs-v5/en/) · [GitHub schedule sınırlamaları](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows).
+
+
+## Durum ve 24/7 çalışma kanıtı (16.10.2026)
+
+- Kaynak kodda 7TF makro/radar + kritik 1m + merkezi anonim sanal portföy mevcut; merkezi veriler GitHub JSON ve `archive/` altında tutulur.
+- GitHub Actions `schedule` **henüz gerçek zamanlanmış çalışma olarak kanıtlanmadı**. `push` / manuel `workflow_dispatch` başarıları 24/7 operasyon kabul edilmez. Canlı kontrol: [health.json](https://onurqlp.github.io/coin-live-pro/data/health.json) -> `schedule_proven`.
+- P0 veri sürekliliği / barındırma kararı: [GitHub issue #1](https://github.com/onurqlp/coin-live-pro/issues/1). Ücretsiz GitHub cron tam dakikasında garanti vermez.
+- 16 Ekim'deki mükerrer Google `GUNLUK_IZLEME` satırları, `GUNLUK_YEDEK_1610` korunarak tek gün satırına indirilmiştir. `google-sheets.gs` normalizasyonu güncellendi, **Google Apps Script Kod.gs kendiliğinden güncellenmez**.
+- Resmî merkezî defter ve 7 günlük pilot, otomatik arka plan taramasının gerçek çalışması ve veri devamlılığı doğrulanmadan 'kesintisiz' diye sunulmaz.
+- Kullanıcı Render bağlantısını etkinleştirirse (ve ücretsiz/ücretli çalıştırma koşullarını onaylarsa) merkezi çalışan bir zamanlayıcıyı GitHub Pages'ten bağımsız barındırma opsiyonu değerlendirilebilir. Servis ücretini onaylamadan otomatik abonelik kurulmaz.
