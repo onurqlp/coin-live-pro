@@ -17,7 +17,7 @@ concurrency:
 jobs:
   collect:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -33,22 +33,32 @@ jobs:
         run: echo "TRIGGER=${{ github.event_name }} UTC=$(date -u +%FT%TZ)"
       - name: Read-only 15m OKX futures scan, rotation and forward archive
         run: python3 engine/collector.py
+      - name: Build verified UTC-aligned seven-timeframe research
+        run: python3 engine/mtf.py
+      - name: Track forward-only 100 USDT paper pilot
+        run: python3 engine/paper.py
+      - name: Record actual scan source and missed cron intervals
+        run: python3 engine/health.py
       - name: Verify self-consistency; fail closed
         run: |
           python3 - <<'PY'
           import json, pathlib, datetime
           p=pathlib.Path('web/data')
-          files={s:json.loads((p/f'{s}.json').read_text()) for s in ['market','radar','history','reports']}
+          files={s:json.loads((p/f'{s}.json').read_text()) for s in ['market','radar','history','reports','mtf','paper','health']}
           now=datetime.datetime.now(datetime.timezone.utc)
           assert len(files['market']['rows']) >= 30
-          assert all(x['provider']=='OKX' for x in files.values())
-          for key,field in [('market','fetched_at'),('radar','fetched_at'),('history','updated_at'),('reports','updated_at')]:
+          assert all(x['provider']=='OKX' for x in (files['market'],files['radar'],files['history'],files['reports'],files['mtf']))
+          for key,field in [('market','fetched_at'),('radar','fetched_at'),('history','updated_at'),('reports','updated_at'),('mtf','fetched_at'),('paper','updated_at'),('health','updated_at')]:
             age=(now-datetime.datetime.fromisoformat(files[key][field])).total_seconds()
             assert 0<=age<=480,(key,age)
           ev=files['history']['events']
           assert len({x['id'] for x in ev})==len(ev),'duplicate history ids'
           assert all(x['side'] in ('LONG','SHORT') for x in ev)
-          assert files['market'].get('analyzed',0)>=30,'insufficient fresh technical coverage' 
+          assert files['market'].get('analysis_ok',0)>=20,'insufficient successful 15m/1H/4H OHLC coverage'
+          assert files['market'].get('analysis_attempted',0)>=30,'scan queue underfilled'
+          assert files['mtf']['analyzed']>=3,'macro context insufficient'
+          assert files['paper']['starting_usdt']==100,'pilot balance changed'
+          assert files['health']['last_scan_id'],'missing scan provenance' 
           print('Verified: 100-pair public radar, scanned',files['market']['analyzed'],'events',len(ev),'and 7/14-day reports')
           PY
       - name: Publish only validated data
@@ -57,8 +67,10 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add web/data/market.json web/data/radar.json web/data/history.json web/data/reports.json
+          git add web/data/mtf.json web/data/paper.json web/data/health.json
+          git add archive/pilot-ledger.json archive/scan-health.json
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'data: forward-only market radar and 7-14 day audit [skip ci]'
+          git commit -m 'data: 7-timeframe radar, paper pilot, 90-day event and cron provenance [skip ci]'
           for try in 1 2 3; do
             git fetch origin main
             git rebase origin/main
