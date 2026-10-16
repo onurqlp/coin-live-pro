@@ -37,6 +37,16 @@ jobs:
         run: echo "TRIGGER=${{ github.event_name }} UTC=$(date -u +%FT%TZ)"
       - name: Read-only OKX crypto market quote universe (legacy 15m signals OFF)
         run: python3 engine/collector.py
+      - name: Read-only RSS/social context (never trading confirmation)
+        run: |
+          python3 engine/v4_context.py || python3 - <<'PY'
+          import datetime,json,pathlib
+          p=pathlib.Path('web/data/v4-context.json')
+          p.write_text(json.dumps({'model_version':'4.0.0-context-research-a1',
+              'updated_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),
+              'source_status':{'all':'UNAVAILABLE'},'latest_items':[],'observations':{},
+              'score_not_used_for_paper_or_v4_stage':True}))
+          PY
       - name: Build verified UTC-aligned seven-timeframe research
         run: python3 engine/mtf.py
       - name: Record central DAILY / 4H sparks; 1H/15m confirmation, 1m optional
@@ -51,6 +61,8 @@ jobs:
         run: python3 engine/v4_shadow.py
       - name: Observe forward V4 1H / 4H / 24H / 3D / 7D horizons
         run: python3 engine/v4_forward.py
+      - name: Persist all WATCH first-sightings and forward checkpoints
+        run: python3 engine/v4_watch_archive.py
       - name: Compute V4 7/14/30/90 day research lab
         run: python3 engine/v4_lab.py
       - name: Evaluate forward-only 3.0 observations on fully closed 4H candles
@@ -119,11 +131,11 @@ jobs:
           assert all(e.get('model_version')=='3.0.0-htf-sparks' for e in files['swing-history']['events']),'old history leaked'
           assert files['paper']['starting_usdt']==100,'pilot balance changed'
           assert files['health']['last_scan_id'],'missing scan provenance'
-          required=('v4-oi','v4-radar','v4-paper','v4-shadow','v4-forward','v4-lab','v4-manifest')
+          required=('v4-oi','v4-radar','v4-paper','v4-shadow','v4-forward','v4-watch-archive','v4-context','v4-lab','v4-manifest')
           v4={name:json.loads((p/f'{name}.json').read_text()) for name in required}
           sid=v4['v4-manifest']['scan_id']
           assert v4['v4-manifest']['publication_valid'] is True
-          assert all(v4[name].get('scan_id')==sid for name in ('v4-radar','v4-paper','v4-shadow','v4-forward','v4-lab'))
+          assert all(v4[name].get('scan_id')==sid for name in ('v4-radar','v4-paper','v4-shadow','v4-forward','v4-watch-archive','v4-lab'))
           assert v4['v4-paper']['starting_balance_usdt']==10000
           assert v4['v4-paper']['legacy_v3_balance_included'] is False
           assert v4['v4-paper']['no_real_orders'] is True
@@ -155,9 +167,10 @@ jobs:
           git add web/data/v4-oi.json web/data/v4-radar.json web/data/v4-paper.json
           git add web/data/v4-history-index.json web/data/v4-shadow.json
           git add web/data/v4-lab.json web/data/v4-forward.json web/data/v4-manifest.json
+          git add web/data/v4-watch-archive.json web/data/v4-context.json
           git add web/data/swing-radar.json web/data/swing-history.json web/data/swing-outcomes.json
           git add archive/pilot-ledger.json archive/scan-health.json archive/swing-sparks-ledger.json archive/swing-active-ledger.json archive/swing-outcomes-ledger.json
-          git add archive/v3-paper-legacy-snapshot.json archive/v4-lifecycle-ledger.json archive/v4-paper-ledger.json archive/v4-shadow-ledger.json archive/v4-forward-ledger.json archive/v4-oi-timeseries.json archive/v4-anomaly-study.json
+          git add archive/v3-paper-legacy-snapshot.json archive/v4-lifecycle-ledger.json archive/v4-paper-ledger.json archive/v4-shadow-ledger.json archive/v4-forward-ledger.json archive/v4-oi-timeseries.json archive/v4-anomaly-study.json archive/v4-watch-ledger.json archive/v4-context-ledger.json
           if git diff --cached --quiet; then exit 0; fi
           git commit -m 'data: 7-timeframe radar, paper pilot, 90-day event and cron provenance [skip ci]'
           for try in 1 2 3; do
