@@ -4,6 +4,12 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'engine'))
 import collector
 
 class TestReporting(unittest.TestCase):
+    def test_only_crypto_underlyings_enter_forward_radar(self):
+        for inst in ('NVDA-USDT-SWAP','SNDK-USDT-SWAP','SOXL-USDT-SWAP','XAU-USDT-SWAP','AAPL-USDT-SWAP'):
+            self.assertFalse(collector.eligible_crypto(inst),inst)
+        for inst in ('BTC-USDT-SWAP','ETH-USDT-SWAP','SOL-USDT-SWAP','DOGE-USDT-SWAP'):
+            self.assertTrue(collector.eligible_crypto(inst),inst)
+        self.assertFalse(collector.eligible_crypto('BTC-USDT-SPOT'))
     def test_empty_7d(self):
         r=collector.summary([],7)
         self.assertEqual(r['total'],0)
