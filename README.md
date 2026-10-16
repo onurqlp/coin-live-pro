@@ -2,6 +2,13 @@
 
 **Üretim:** [COIN.LIVE PRO 4.0](https://onurqlp.github.io/coin-live-pro/). Canlı V4 araştırma sistemi otomatik veri biriktirir; işlem yapmaz.
 
+**Sürüm yetkisi:** Yayınlanan ana sürüm `web/release.json` içindeki `product_version` alanında tutulur ve **yalnızca kullanıcının onayıyla değişir**. Her geliştirici güncellemesinde `updated_at_utc`, `release_id` ve kısa değişiklik notları güncellenir; kullanıcı sürümü otomatik arttırılmaz. Ana sayfa ve alt bilgi bu kaydı gösterir. Piyasa tarama zamanı kod yayın zamanından ayrıdır.
+
+**Global saat ve anomali araştırması:** Hesaplamaların tek otoritesi UTC ve OKX tarafından kapanışı doğrulanmış 5m/15m/1H/4H mumlarıdır. Tokyo/Londra/New York yaklaşık etkinlik pencereleri ayrı olarak DST-aware gösterilir; kripto 24/7 açıktır, sabit bir "manipülasyon saati" varsayılmaz. Yeni `archive/v4-anomaly-study.json` 90 günlük UTC saat histogramını yalnız **tekil 5m kapanışları** üzerinden biriktirir; oranı göstermek için saat başına en az 40 gözlem ve 3 farklı gün gerekir. Dönen aday havuzunun seçim yanlılığı açıkça belirtilir. **Anomali indeksi manipülasyon kanıtı, gerçekleşme olasılığı veya sinyal puanı değildir**; mevcut V4 skoru, sanal emir ve risk eşiği aynen kalır.
+
+**Deep Freeze / tarayıcı:** Veri ve muhasebe sunucu tarafında `archive/` ve `web/data/` altında. Tarayıcıda localStorage/sessionStorage/IndexedDB kalıcı durumu yok; URL/ekran yalnız görüntüleme için.
+
+
 - 90 günün başlangıcı V4 sanal kasa kayıt saatidir (16 Ekim 2026); ilerleme sitede gösterilir. 90 gün tamamlandığında geçmiş silinmez; sonuçlar incelenir.
 - Ana radar: üstte **GÖZ ÖNÜNDE** ve **HAREKET**; altta **İZLE + aynı sayfada 4H grafik**. Eski 4 kutulu sayaç geri getirildi: toplam OKX USDT paritesi, tekil LONG/SHORT pariteleri ve son merkezi tarama saati. Strateji sayısı coin sayısı gibi gösterilmez. Kıvılcım seçimi aynı sayfada grafiği değiştirir; özel Grafikler sekmesi isteğe bağlı tam ekran/piyasa tablosu olarak korunur.
 - V3.1 günlük/4H sinyalleri ve 7-zaman-dilimli teknik raporlar silinmeden kapalı **Teknik analiz ayrıntıları** altında.

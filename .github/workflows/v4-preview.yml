@@ -60,6 +60,13 @@ jobs:
              ('v4-manifest','v4-radar','v4-history-index','v4-paper','v4-shadow','v4-forward','v4-lab')}
           sid=data['v4-manifest']['scan_id']
           assert data['v4-manifest']['publication_valid']
+          anomaly=data['v4-radar'].get('anomaly_research',{})
+          assert anomaly.get('not_used_in_v4_score') is True
+          assert anomaly.get('no_real_orders') is True
+          assert anomaly.get('hourly',{}).get('time_basis','UTC')=='UTC' if 'time_basis' in anomaly.get('hourly',{}) else True
+          assert anomaly.get('clock',{}).get('window_is_not_manipulation_evidence') is True
+          release=json.loads((p.parent/'release.json').read_text())
+          assert release['product_version']=='4.0' and release['version_change_owner']=='USER_APPROVAL_ONLY'
           assert all(data[k]['scan_id']==sid for k in ('v4-radar','v4-history-index','v4-paper','v4-shadow','v4-forward','v4-lab'))
           assert data['v4-paper']['starting_balance_usdt']==10000
           assert data['v4-paper']['legacy_v3_balance_included']==False
