@@ -19,10 +19,28 @@ permissions:
 jobs:
   browser-check:
     runs-on: ubuntu-latest
-    timeout-minutes: 4
+    timeout-minutes: 10
     steps:
-      - name: Allow parallel Pages deployment to finish
-        run: sleep 30
+      - uses: actions/checkout@v4
+      - name: Wait for this exact release on Pages before checking
+        shell: bash
+        run: |
+          set -euo pipefail
+          ready=0
+          for i in $(seq 1 48); do
+            if curl -fsSL --max-time 15 "https://onurqlp.github.io/coin-live-pro/release.json?bust=$(date +%s%N)" -o /tmp/coin-live-release.json; then
+              if python3 - <<'PY'
+          import json,sys
+          expected=json.load(open('web/release.json'))
+          live=json.load(open('/tmp/coin-live-release.json'))
+          sys.exit(0 if expected.get('release_id')==live.get('release_id') and
+                          expected.get('product_version')==live.get('product_version') else 1)
+          PY
+              then ready=1;break;fi
+            fi
+            sleep 8
+          done
+          test "$ready" = 1
       - name: Verify deployed root and all four market JSON files
         shell: bash
         run: |
