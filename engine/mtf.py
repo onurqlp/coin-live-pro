@@ -288,13 +288,29 @@ def main():
     # Canonical 3.0 discovery: liquid symbols, movers and rotating coverage only.
     # No historical 15m alerts are ever used for candidate selection.
     candidates={}
+    # Radar must revisit its own live observations. Earlier code rotated to
+    # new coins and accidentally made still-valid sparks disappear in 5min.
+    tracked=read(ROOT/'archive'/'swing-active-ledger.json',{})
+    held=tracked.get('items',[])
+    if not held:
+        older=read(DATA/'swing-radar.json',{})
+        held=older.get('items',[]) if older.get('model_version')=='3.0.0-htf-sparks' else []
+    held=[x for x in held if x.get('symbol') in rows and
+          x.get('review_state')!='INVALIDATED' and
+          x.get('model_version')=='3.0.0-htf-sparks']
+    held=sorted(held,key=lambda x:(x.get('review_state')=='FRESH',
+                x.get('last_evaluated_at','')),reverse=True)
+    cycle=int(market.get('scan_cycle',0))
+    if held:
+        offset=(cycle*4)%len(held)
+        for x in (held[offset:]+held[:offset])[:8]:
+            candidates.setdefault(x['symbol'],'AUTO')
     liquid=sorted(rows.values(),key=lambda x:x.get('volume') or 0,reverse=True)
     movers=sorted(rows.values(),key=lambda x:abs(x.get('change') or 0)
                   *math.sqrt(max(0,x.get('volume') or 0)),reverse=True)
     for x in liquid[:5]+movers[:4]:
         candidates.setdefault(x['symbol'],'AUTO')
     universe=[x['symbol'] for x in liquid if x['symbol'] not in candidates]
-    cycle=int(market.get('scan_cycle',0))
     if universe:
         offset=(cycle*5)%len(universe)
         for symbol in (universe[offset:]+universe[:offset])[:5]:
