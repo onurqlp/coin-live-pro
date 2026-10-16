@@ -58,6 +58,7 @@ class TestUtcAnomaly(unittest.TestCase):
         new,report2=a.collect(source,market,oi,ledger,NOW+60000)
         self.assertEqual(count(new),1)
         self.assertEqual(report2['hourly']['state'],'INSUFFICIENT_SAMPLE')
+        self.assertEqual(report2['hourly']['time_basis'],'UTC')
     def test_different_source_time_is_rejected(self):
         c,m,o=fixture()
         with self.assertRaises(RuntimeError):

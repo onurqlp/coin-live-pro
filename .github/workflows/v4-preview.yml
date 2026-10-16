@@ -63,7 +63,7 @@ jobs:
           anomaly=data['v4-radar'].get('anomaly_research',{})
           assert anomaly.get('not_used_in_v4_score') is True
           assert anomaly.get('no_real_orders') is True
-          assert anomaly.get('hourly',{}).get('time_basis','UTC')=='UTC' if 'time_basis' in anomaly.get('hourly',{}) else True
+          assert anomaly.get('hourly',{}).get('time_basis')=='UTC'
           assert anomaly.get('clock',{}).get('window_is_not_manipulation_evidence') is True
           release=json.loads((p.parent/'release.json').read_text())
           assert release['product_version']=='4.0' and release['version_change_owner']=='USER_APPROVAL_ONLY'

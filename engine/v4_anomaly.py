@@ -117,6 +117,7 @@ def collect(mtf,market,oi,previous,now):
             'hourly':{'state':'EXPLORATORY' if leader else 'INSUFFICIENT_SAMPLE',
                       'top_utc_hours':leader,'min_n':40,'min_days':3,
                       'denominator':'distinct rotating scanned pair/side/closed 5m; NOT entire OKX market',
+                      'time_basis':'UTC',
                       'selection_bias':True,'not_an_empirical_manipulation_probability':True},
             'not_used_in_v4_score':True,'no_real_orders':True}
     return study,report
