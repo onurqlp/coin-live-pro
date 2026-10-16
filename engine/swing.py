@@ -37,6 +37,9 @@ def swing_context(market, states, side, derivatives=None):
     day_change = num(market.get('change'))
     funding = num(derivatives.get('funding_rate'))
     oi_usd = num(derivatives.get('open_interest_usd'))
+    oi_change=num(derivatives.get('oi_change_pct'))
+    oi_interval=num(derivatives.get('oi_change_interval_minutes'))
+    book_ratio=num(derivatives.get('book_bid_ask_top5_ratio'))
     listing_age_days = num(market.get('listing_age_days'))
     instrument_state = str(market.get('instrument_state') or '').upper()
     inactive = instrument_state not in ('','LIVE','UNKNOWN')
@@ -99,6 +102,15 @@ def swing_context(market, states, side, derivatives=None):
         risk += 23; notes.append('EXTREME_FUNDING_RATE')
     elif abs(funding) >= .00075:
         risk += 11; notes.append('ELEVATED_FUNDING_RATE')
+    if oi_change is not None:
+        if abs(oi_change)>=12:
+            risk+=20;notes.append('OI_RAPID_SNAPSHOT_CHANGE')
+        elif abs(oi_change)>=6:
+            risk+=9;notes.append('OI_ELEVATED_SNAPSHOT_CHANGE')
+    if book_ratio is None:
+        notes.append('ORDERBOOK_DEPTH_UNKNOWN')
+    elif (side=='LONG' and book_ratio<.25) or (side=='SHORT' and book_ratio>4):
+        risk+=12;notes.append('TOP5_BOOK_PRESSURE_OPPOSES_TREND')
     if oi_usd is None:
         notes.append('OI_CHANGE_NOT_VERIFIED')
     elif oi_usd < 2_000_000:
@@ -129,8 +141,10 @@ def swing_context(market, states, side, derivatives=None):
         'structure_risk_label':risk_label,'structure_flags':list(dict.fromkeys(notes)),
         'instrument_state':instrument_state or None,'listing_age_days':listing_age_days,
         'funding_rate':funding,'open_interest_usd':oi_usd,
-        'open_interest_change_pct':None,
-        'risk_method':'Heuristic: closed-candle long wicks, abnormal volume, ATR, spread, 24h move, funding/current OI. Not proof of manipulation.'
+        'open_interest_change_pct':oi_change,
+        'open_interest_delta_minutes':oi_interval,
+        'book_bid_ask_top5_ratio':book_ratio,
+        'risk_method':'Heuristic: closed RSI/MACD/ADX, 4H fakeout wicks, unusual volume/ATR, spread, funding, timestamped OI delta and single top-5 book snapshot. Not proof of manipulation.'
     }
 
 def gate_score(raw, context):
