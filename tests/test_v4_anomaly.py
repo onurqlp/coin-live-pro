@@ -5,7 +5,7 @@ import unittest
 sys.path.insert(0,str(pathlib.Path(__file__).resolve().parents[1]/'engine'))
 import v4_anomaly as a
 
-NOW=int(dt.datetime(2026,10,17,2,5,tzinfo=dt.timezone.utc).timestamp()*1000)
+NOW=int(dt.datetime(2026,10,17,2,6,tzinfo=dt.timezone.utc).timestamp()*1000)
 def when(ms):return a.iso(ms)
 def fixture():
     f={}
