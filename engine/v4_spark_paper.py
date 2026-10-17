@@ -114,6 +114,8 @@ def advance(prior,early,mtf_doc,now_ms,candles):
         ticket={'event_id':k,'symbol':x['symbol'],'side':x['side'],
            'signal_at_utc':x['first_seen_at_utc'],'signal_price':price,
            'stage_at_birth':x['research_tier'],'stage':TIER_STAGE.get(x['research_tier'],1),
+           'stage_transitions':[{'at_utc':stamp(now_ms),'stage':TIER_STAGE.get(x['research_tier'],1),
+                                  'tier':x['research_tier']}],
            'rank_at_birth':x['research_rank'],'source_1h_candle':x.get('source_closed_1h_at_utc'),
            'features_at_birth':feature_snap(src),'reasons_at_birth':x.get('reasons',[]),
            'hourly_threshold':x.get('hourly_level'),
@@ -132,6 +134,19 @@ def advance(prior,early,mtf_doc,now_ms,candles):
            'last_processed_ms':None,'valuation_status':'WAITING',
            'no_backfilled_fill':True}
         index[k]=ticket
+    # Existing same-hour research hypotheses may strengthen/weaken. Keep a
+    # time-stamped stage transition, but preserve immutable birth stage for
+    # fair performance cohorts (no future maturity leakage).
+    if old['last_scan_id']!=early.get('scan_id'):
+        for candidate in early.get('candidates',[]):
+            ticket=index.get(candidate.get('event_id'))
+            if not ticket:continue
+            current=TIER_STAGE.get(candidate.get('research_tier'),1)
+            if ticket.get('stage')!=current:
+                ticket['stage']=current
+                ticket.setdefault('stage_transitions',[]).append({
+                    'at_utc':stamp(now_ms),'stage':current,
+                    'tier':candidate['research_tier']})
     # All orders are independent *tickets* in one cost-accounted virtual study.
     # A hard funding cap prevents silently creating executable-looking exposure.
     for t in sorted(index.values(),key=lambda v:(v['entry_at_ms'],v['event_id'])):
