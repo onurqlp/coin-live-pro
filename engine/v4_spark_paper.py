@@ -113,8 +113,11 @@ def advance(prior,early,mtf_doc,now_ms,candles):
         ok=bool(gap and gap<price)
         ticket={'event_id':k,'symbol':x['symbol'],'side':x['side'],
            'signal_at_utc':x['first_seen_at_utc'],'signal_price':price,
-           'stage_at_birth':x['research_tier'],'stage':TIER_STAGE.get(x['research_tier'],1),
-           'stage_transitions':[{'at_utc':stamp(now_ms),'stage':TIER_STAGE.get(x['research_tier'],1),
+           'stage_at_birth':x['research_tier'],
+           'stage_at_birth_number':x.get('paper_stage_number',TIER_STAGE.get(x['research_tier'],1)),
+           'stage_definition':'CLOSED_1H_BREAKOUT_REQUIRED',
+           'stage':x.get('paper_stage_number',TIER_STAGE.get(x['research_tier'],1)),
+           'stage_transitions':[{'at_utc':stamp(now_ms),'stage':x.get('paper_stage_number',TIER_STAGE.get(x['research_tier'],1)),
                                   'tier':x['research_tier']}],
            'rank_at_birth':x['research_rank'],'source_1h_candle':x.get('source_closed_1h_at_utc'),
            'features_at_birth':feature_snap(src),'reasons_at_birth':x.get('reasons',[]),
@@ -141,7 +144,7 @@ def advance(prior,early,mtf_doc,now_ms,candles):
         for candidate in early.get('candidates',[]):
             ticket=index.get(candidate.get('event_id'))
             if not ticket:continue
-            current=TIER_STAGE.get(candidate.get('research_tier'),1)
+            current=candidate.get('paper_stage_number',TIER_STAGE.get(candidate.get('research_tier'),1))
             if ticket.get('stage')!=current:
                 ticket['stage']=current
                 ticket.setdefault('stage_transitions',[]).append({

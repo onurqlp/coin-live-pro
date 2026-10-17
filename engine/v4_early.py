@@ -180,7 +180,8 @@ def build(mtf,market,radar,prior,watch,now_ms):
                     prior_event.setdefault('stage_history',[]).append({
                        'at_utc':stamp(now_ms),'tier':x['research_tier'],'research_rank':x['research_rank']})
                 prior_event['last_research_tier']=x['research_tier']
-        x['paper_stage_number']={'KIVILCIM':1,'ERKEN_SINYAL':2,'ISIK_GUCLENIYOR':3}[x['research_tier']]
+        x['paper_stage_number']=(3 if x['hourly_level_state']=='CLOSED_1H_LEVEL_BREACHED' else
+                2 if x['research_tier'] in ('ERKEN_SINYAL','ISIK_GUCLENIYOR') else 1)
         x['paper_stage_name']={1:'İZLENEN',2:'GELMEKTE OLAN',3:'GELDİ'}[x['paper_stage_number']]
         x['event_id']=event_id
         x['first_seen_at_utc']=old[event_id]['first_seen_at_utc']
@@ -195,6 +196,8 @@ def build(mtf,market,radar,prior,watch,now_ms):
         'candidates':proposals[:32],'total_fresh_candidates':len(proposals),
         'counts':{k:sum(x['research_tier']==k for x in proposals)
                   for k in ('KIVILCIM','ERKEN_SINYAL','ISIK_GUCLENIYOR')},
+        'stage_counts':{str(n):sum(x['paper_stage_number']==n for x in proposals) for n in (1,2,3)},
+        'stage_3_requires_closed_1h_breakout':True,
         'archive_recent_events':events[:40],
         'archive_total_discoveries':len(events),
         'prior_watch_directional_observations':hist,

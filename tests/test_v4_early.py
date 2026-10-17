@@ -35,6 +35,17 @@ def sources(x):
             {'scan_id':'scan-alpha','source_mtf_at':t},
             {'scan_id':'scan-alpha','records':[]})
 class TestEarlyResearch(unittest.TestCase):
+    def test_stage_three_requires_actual_closed_hour_break(self):
+        x=early.detect(candidate(),quote(),NOW)
+        self.assertEqual(x['hourly_level_state'],'CLOSED_1H_LEVEL_BREACHED')
+        mtf,market,radar,watch=sources(candidate())
+        ledger,pub=early.build(mtf,market,radar,{},watch,NOW)
+        self.assertEqual(pub['candidates'][0]['paper_stage_number'],3)
+        self.assertEqual(pub['stage_counts']['3'],1)
+        mtf['candidates'][0]['frames']['1H']['close']=101
+        ledger,pub=early.build(mtf,market,{'scan_id':'scan-other','source_mtf_at':mtf['fetched_at']},ledger,{'scan_id':'scan-other','records':[]},NOW+30000)
+        self.assertNotEqual(pub['candidates'][0]['paper_stage_number'],3)
+        self.assertTrue(pub['stage_3_requires_closed_1h_breakout'])
     def test_weak_volume_but_aligned_candles_still_alert(self):
         x=early.detect(candidate(),quote(),NOW)
         self.assertIsNotNone(x)

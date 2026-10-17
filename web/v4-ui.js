@@ -329,10 +329,10 @@
    const priorityShown=!stale&&Boolean((r.spotlight||[]).length||(r.motion||[]).length);
    if($('v4PriorityArea'))$('v4PriorityArea').hidden=!priorityShown; // stage counters retain empty stages without boxes
    if($('v4PriorityEmpty'))$('v4PriorityEmpty').hidden=priorityShown;
-   const tiers=store.early?.counts||{};
-   $('v4WatchCount').textContent=stale?'—':tiers.KIVILCIM??'—';
-   $('v4MotionCount').textContent=stale?'—':tiers.ERKEN_SINYAL??'—';
-   $('v4SpotCount').textContent=stale?'—':tiers.ISIK_GUCLENIYOR??'—';
+   const tiers=store.early?.stage_counts||{};
+   $('v4WatchCount').textContent=stale?'—':tiers['1']??'—';
+   $('v4MotionCount').textContent=stale?'—':tiers['2']??'—';
+   $('v4SpotCount').textContent=stale?'—':tiers['3']??'—';
    $('v4RecheckCount').textContent=r.counts?.recheck_pending??'—';
    $('v4ArchivedCount').textContent=r.counts?.archived_total??'—';
    document.querySelectorAll('[data-v4-symbol]').forEach(b=>b.onclick=()=>{
