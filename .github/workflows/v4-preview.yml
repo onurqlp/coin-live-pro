@@ -12,6 +12,7 @@ on:
       - ui-readable-20261017
       - more-early-signals-20261017
       - ui-ordered-stages-chart-scenarios-20261017
+      - ui-minimal-actual-dashboard-20261017
     paths:
       - '.github/workflows/v4-preview.yml'
       - 'engine/v4_**'
@@ -100,9 +101,11 @@ jobs:
               assert m and m.group(1).strip(),id+' failed to render'
           assert 'id="v4Early"' in doc and 'id="v4EarlyCount"' in doc,'Early watch UI missing'
           assert 'id="v4RadarSearch"' in doc and 'id="v4RadarSide"' in doc,'Radar filters missing'
-          assert 'ui-refresh.css?v=3' in doc,'Readable CSS layer not linked'
+          assert 'ui-refresh.css?v=4' in doc,'Readable CSS layer not linked'
           assert 'V4 veri kontrolü:' not in doc,'V4 manifest fetch or hash validation failed'
           assert 'id="chartScenario"' in doc,'Chart scenario details missing'
+          assert 'id="headerMore"' in doc and 'id="radarMetaDetails"' in doc,'Minimal UX disclosures missing'
+          assert 'class="v4MarketSummary"' in doc,'Collapsed stats must remain available'
           assert 'Model ne düşünüyor?' in doc,'Thesis must display'
           assert 'id="v4PaperKpis"' in doc
           import re

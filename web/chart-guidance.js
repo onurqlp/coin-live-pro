@@ -128,23 +128,29 @@
       reasons};
  }
  function render(plan){
-   if(!plan)return '<div class="chartScenarioPending">Coin seçildiğinde modelin seviyeleri görünecek.</div>';
-   const headline=plan.side?plan.side+' · '+String(plan.stage||'İZLE').replace(/_/g,' '):
-     'YÖN TESPİT EDİLEMEDİ';
-   const freshness=plan.fresh?'Merkezi kaynak son taramada doğrulandı':
-      'ESKİ / DOĞRULANMAMIŞ TARİHSEL KAYNAK — güncel sinyal değildir';
-   const levelCell=plan.levels.map(x=>'<div class="chartScenarioLevel '+x.kind+
-      '"><small>'+esc(x.label)+'</small><strong>'+esc(format(x.value))+'</strong></div>').join('');
-   return '<div class="chartScenarioTop"><div><b>'+esc(plan.symbol)+' · '+esc(headline)+
-    '</b><small>'+esc(plan.sourceTier)+' · '+esc(freshness)+'</small></div>'+
-    '<span class="chartScenarioUncertain">'+(plan.mode==='SOURCE_RESEARCH_LEVELS'?
-      'KAYNAK SEVİYELERİ':plan.mode==='ATR_RESEARCH_PROJECTION'?'KOŞULLU TP SENARYOSU':'EŞİK BEKLENİYOR')+
-    '</span></div>'+
-    '<p class="chartScenarioThesis"><strong>Model ne düşünüyor?</strong> '+esc(plan.why)+'</p>'+
-    '<div class="chartScenarioLevels">'+(levelCell||'<span class="chartScenarioMissing">Şu an çizilebilir doğrulanmış eşik/TP yok. Kaynak gelmeden fiyat uydurulmaz.</span>')+'</div>'+
-    '<p class="chartScenarioNext"><strong>Ne olursa önemli?</strong> '+esc(plan.next)+'</p>'+
-    '<small class="chartScenarioFoot">'+esc(plan.note)+' · '+esc(time(plan.sourceAt))+
-    ' · Puan varsa yalnız sıralama, başarı olasılığı değildir.</small>';
+   if(!plan)return '<div class="chartScenarioPending">Coin seçince seviyeler görünür.</div>';
+   const label=plan.side?plan.side+' · '+String(plan.stage||'İZLE').replace(/_/g,' '):
+     'YÖN BELİRSİZ';
+   const state=plan.mode==='SOURCE_RESEARCH_LEVELS'?'KAYNAK HEDEFLERİ':
+     plan.mode==='ATR_RESEARCH_PROJECTION'?'KOŞULLU TP SENARYOSU':'SEVİYE BEKLENİYOR';
+   const levels=plan.levels.map(x=>'<div class="chartScenarioLevel '+x.kind+
+       '"><small>'+esc(x.label)+'</small><strong>'+esc(format(x.value))+'</strong></div>').join('');
+   const direction=plan.side==='LONG'?'Yükseliş':'Düşüş';
+   const strength=plan.supportCount>=2?'4H/günlük destekliyor':
+     plan.supportCount===1?'Kısmi yön desteği':'Yön teyidi zayıf';
+   const risk=plan.why.includes('Hacim desteği zayıf')?' · Hacim zayıf':'';
+   const compact=plan.side?direction+' izleniyor · '+strength+risk:
+     'Henüz yön hipotezi yok';
+   return '<div class="chartScenarioTop"><div><b>'+esc(plan.symbol)+' · '+esc(label)+
+      '</b></div><span class="chartScenarioUncertain">'+esc(state)+'</span></div>'+
+     (plan.fresh?'':'<small class="chartScenarioStale">GÜNCEL VERİ YOK — yalnız geçmiş kaynak</small>')+
+     '<p class="chartScenarioThesis"><strong>Model:</strong> '+esc(compact)+'</p>'+
+     '<div class="chartScenarioLevels">'+(levels||'<span class="chartScenarioMissing">Kaynakta eşik/TP verisi yok.</span>')+'</div>'+
+     '<details class="chartScenarioMore"><summary>Gerekçe ve uyarılar</summary>'+
+        '<p class="chartScenarioThesis"><strong>Model ne düşünüyor?</strong> '+esc(plan.why)+'</p>'+
+        '<p class="chartScenarioNext"><strong>Ne olursa önemli?</strong> '+esc(plan.next)+'</p>'+
+        '<small class="chartScenarioFoot">'+esc(plan.note)+' · '+esc(time(plan.sourceAt))+
+          ' · Puan başarı olasılığı değildir.</small></details>';
  }
  global.CoinLiveChartGuidance={build,render,format};
 })(globalThis);

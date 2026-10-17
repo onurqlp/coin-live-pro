@@ -1,21 +1,26 @@
 {
   "product_version": "4.01",
   "version_change_owner": "USER_APPROVAL_ONLY",
-  "release_id": "UI-20261017-1045",
-  "updated_at_utc": "2026-10-17T10:45:20.075Z",
+  "release_id": "MINI-20261017-1059",
+  "updated_at_utc": "2026-10-17T10:59:00.993Z",
   "timestamp_basis": "UTC",
   "market_data_timestamp_separate": true,
   "change_summary": [
-    "Kanıt gücüne göre önce GÖZ ÖNÜNDE, HAREKET, İZLE, en sonda ayrı erken KIVILCIM araştırması",
-    "Üst aşama boş olsa bile görünür; tahmin gücü ile kazanma olasılığı karıştırılmıyor",
-    "Tüm grafik periyotlarında gerçek 1H/4H/1D kırılım eşikleri ve mevcut koşullu V4 seviyeleri",
-    "Teyitli plan olmayanlarda yalnız kapanmış 1H ATR verisine dayalı açıklamalı koşullu stop / TP1/TP2/TP3",
-    "Seçilen LONG/SHORT korunur, fiyat hassasiyeti küçük coinlerde kaybolmaz; kaynak eksikse sayı uydurulmaz",
-    "Grafikte model gerekçesi, sonraki 1H eşik şartı ve kaynak yaşı gösterilir; 4.01 ürün sürümü, paper ve risk kuralları korunur"
+    "Tek satır logo + OKX durum + yenile + detay menüsü; eski risk hesaplayıcı ve sürüm geçmişi menüde",
+    "Kalabalık durum ve özet bantları ana sayfadan kaldırıldı, analiz/90 gün/UTC ayrıntıları açık erişimli bölüme taşındı",
+    "Fırsatlar başlangıç ekranında öne çıkarıldı: dört sade aşama sayacı, coin arama, aday ve aynı sayfa grafik",
+    "Boş üst aşama kartları ve büyük yinelenen açıklamalar gizlendi; izleme ve kıvılcım verileri korunuyor",
+    "Grafikte ana yorum, eşik ve koşullu TP seviyeleri görünür, ayrıntılı model açıklaması açılır",
+    "Fiyat kaynağı gecikir veya sorun olursa uyarı görünür; sinyal, arşiv ve V4 paper algoritması değişmedi"
   ],
   "no_real_orders": true,
   "not_a_trading_signal": true,
   "change_log": [
+    {
+      "release_id": "MINI-20261017-1059",
+      "updated_at_utc": "2026-10-17T10:59:00.993Z",
+      "summary": "Mobil ve masaüstü minimal fırsat ekranı: durum bantları/tekrar eden açıklamalar kaldırıldı, araçlar açılır menüye alındı, kartlar ve grafik tek bakışta. 4.01 ürün sürümü, veri doğrulama ve sanal hesap kuralları korundu."
+    },
     {
       "release_id": "UI-20261017-1045",
       "updated_at_utc": "2026-10-17T10:45:20.075Z",

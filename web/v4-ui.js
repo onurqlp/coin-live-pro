@@ -127,22 +127,22 @@
  }
  function card(x){
    const st=x.lifecycle_stage,stage=st==='SPOTLIGHT'?'GÖZ ÖNÜNDE':st==='MOTION'?'HAREKET':'İZLE';
-   const state=x.review_state==='FRESH'?'Yeniden değerlendirildi':'Yeniden kontrol bekliyor';
+   const state=x.review_state==='FRESH'?'Güncel':'Kontrol bekliyor';
    const motion=x.confirmation_state==='CONFIRMED'?' · strateji teyidi var':' · giriş teyidi yok';
    return '<article class="v4Opportunity" data-v4-pair="'+safe(x.symbol)+
      '" data-v4-direction="'+safe(x.side)+'" data-v4-strategy="'+safe(names[x.strategy_id]||x.strategy_id)+'"><div class="v4CardTop"><b>'+safe(x.symbol)+
      ' <span class="chip '+(x.side==='LONG'?'long':'short')+'">'+safe(x.side)+'</span></b>'+
      '<span class="v4Small">'+safe(stage)+' · '+safe(state)+'</span></div>'+
      '<div class="v4Sub">'+safe(names[x.strategy_id]||x.strategy_id)+'</div>'+
-     '<div class="v4CardScore"><span>Aday puanı <strong>'+safe(x.score)+'/100</strong></span>'+
-     '<span>Yapı riski '+safe(x.risk_score)+'/100</span></div>'+
+     '<div class="v4CardScore"><span>Güç <strong>'+safe(x.score)+'/100</strong></span>'+
+     '<span class="riskNote">Risk '+safe(x.risk_score)+'/100</span></div>'+
      '<div class="v4Reason">'+safe(explanation(x))+'</div>'+mainFrameSummary(x)+
-     '<details class="v4Evidence"><summary>Göstergeler ve 1m–1W yönleri</summary>'+
-     timeframeLadder(x)+factorLamps(x)+'</details>'+
+     '<details class="v4Evidence"><summary>Detay</summary>'+
+     timeframeLadder(x)+factorLamps(x)+'<div class="v4Meta">İlk kayıt: '+safe(date(x.first_seen_at))+'</div></details>'+
      '<div class="v4Meta">Son kontrol: '+safe(date(x.last_evaluated_at))+
-     ' · İlk kayıt: '+safe(date(x.first_seen_at))+safe(motion)+'</div>'+
+     safe(motion)+'</div>'+
      '<button type="button" class="v4GoChart" data-v4-symbol="'+safe(x.symbol)+
-     '" data-v4-side="'+safe(x.side)+'">Grafiği aç →</button></article>';
+     '" data-v4-side="'+safe(x.side)+'">Grafik ↗</button></article>';
  }
  function observationProgress(){
    const started=Date.parse(store.paper?.pilot_started_at||'');
@@ -275,18 +275,18 @@
        '" data-v4-direction="'+safe(x.side)+'" data-v4-strategy="'+safe((x.reasons||[]).join(' '))+'">'+
        '<div class="v4CardTop"><b>'+safe(x.symbol)+' <span class="chip '+(x.side==='LONG'?'long':'short')+'">'+safe(x.side)+'</span></b>'+
        '<span class="v4EarlyTier">'+safe(type[x.research_tier]||'İZLE')+'</span></div>'+
-       '<div class="v4CardScore">İşaret gücü <strong>'+safe(x.research_rank)+'/100</strong> · <small>başarı % değildir</small></div>'+
+       '<div class="v4CardScore">Güç <strong>'+safe(x.research_rank)+'/100</strong></div>'+
        '<div class="v4TrendMini">'+indicators.map(([tf,v])=>
           '<span class="'+((x.side==='LONG'&&v==='UP')||(x.side==='SHORT'&&v==='DOWN')?'aligned':
              v==='SIDEWAYS'?'neutral':v==='UP'||v==='DOWN'?'opposed':'unknown')+'">'+tf+' <strong>'+
              (v==='UP'?'↑':v==='DOWN'?'↓':v==='SIDEWAYS'?'↔':'?')+'</strong></span>').join('')+'</div>'+
-       '<p class="v4EarlyReason">'+safe((x.reasons||[]).slice(0,3).map(z=>reason[z]||z).join(' · '))+'</p>'+
+       '<p class="v4EarlyReason">'+safe((x.reasons||[]).slice(0,2).map(z=>reason[z]||z).join(' · '))+'</p>'+
        '<p class="v4EarlyNext">'+safe(condition)+'</p>'+
        (caution?'<small class="v4EarlyCaution">DİKKAT: '+safe((x.reasons||[]).filter(z=>reason[z]&&(z==='WEAK_RELATIVE_VOLUME'||z==='WEEKLY_OPPOSITION_CAUTION')).map(z=>reason[z]).join(' · '))+'</small>':'')+
        '<div class="v4Meta">İlk kayıt: '+safe(date(x.first_seen_at_utc))+
        ' · kaynak: '+safe(date(x.source_observed_at_utc))+'</div>'+
        '<button type="button" class="v4GoChart" data-v4-symbol="'+safe(x.symbol)+
-       '" data-v4-side="'+safe(x.side)+'">4H grafiğinde incele →</button>'+
+       '" data-v4-side="'+safe(x.side)+'">Grafik ↗</button>'+
        '</article>';
    }).join('')||'<div class="v4Empty">Bu turda yeterli kapanmış mum/küçük kıpırdanma görülmedi. Sistem boş sinyal üretmez.</div>';
    if(history){
@@ -307,7 +307,7 @@
    renderGlobalResearch(r,manifest);
    renderEarly(manifest,stale);
    const status=$('v4Status');status.textContent=stale?'V4 KAYNAK GECİKMİŞ · GÜNCEL TEYİT YOK':
-     'V4 · '+ago(r.updated_at)+' önce merkezi değerlendirme · otomatik emir YOK';
+     'Son analiz '+ago(r.updated_at)+' önce · sanal takip';
    status.className='v4Status '+(stale?'v4Stale':'');
    const groups=[
      ['v4Spotlight',stale?[]:r.spotlight,'Şu an yeni verilerle bu kaliteyi sağlayan fırsat yok.'],
@@ -317,7 +317,7 @@
    for(const [id,items,empty] of groups)$(id).innerHTML=items.length?items.map(card).join(''):
      '<div class="v4Empty">'+safe(stale?'Merkezi veri eski; yeni aşama/işlem uygunluğu gösterilmez.':empty)+'</div>';
    const priorityShown=!stale&&Boolean((r.spotlight||[]).length||(r.motion||[]).length);
-   if($('v4PriorityArea'))$('v4PriorityArea').hidden=false; // preserve ranking even when top stages are empty
+   if($('v4PriorityArea'))$('v4PriorityArea').hidden=!priorityShown; // stage counters retain empty stages without boxes
    if($('v4PriorityEmpty'))$('v4PriorityEmpty').hidden=priorityShown;
    $('v4WatchCount').textContent=r.counts?.watch??'—';
    $('v4MotionCount').textContent=stale?'—':r.counts?.motion??'—';
@@ -337,6 +337,14 @@
      // Keep the route. Only scroll when the in-page chart is below/above view.
      if(rect.top>window.innerHeight*.67||rect.bottom<30)
        pane.scrollIntoView({behavior:'smooth',block:'start'});
+   });
+   // Whole card opens the same chart; small Grafik link is keyboard-accessible.
+   document.querySelectorAll('.v4Opportunity[data-v4-pair]').forEach(tile=>{
+     const link=tile.querySelector('[data-v4-symbol]');
+     if(link)tile.addEventListener('click',ev=>{
+       if(ev.target.closest('button,a,summary,details,input,select'))return;
+       link.click();
+     });
    });
    applyRadarFilter();
    if(!store.initialChartSelected){

@@ -95,7 +95,7 @@ for(const id of ['watchArchiveRefresh','watchArchiveRows','watchArchivePeriod','
 assert.ok(watchCode.includes("crypto.subtle.digest")&&watchCode.includes("'v4-watch-archive'"),'Archive must verify SHA256');
 assert.ok(html.includes('watch-archive-ui.js'),'Archive JavaScript missing');
 const ui=fs.readFileSync('web/ui-refresh.css','utf8');
-assert.ok(html.includes('ui-refresh.css?v=3'),'UI design tokens must be linked');
+assert.ok(html.includes('ui-refresh.css?v=4'),'UI design tokens must be linked');
 for(const id of ['v4RadarSearch','v4RadarSide','v4RadarFilterStatus'])
   assert.ok(ids.includes(id),'Radar search & side filters must be present: '+id);
 assert.ok(v4code.includes('applyRadarFilter();')&&v4code.includes("mainFrameSummary(x)"),
@@ -117,7 +117,7 @@ assert.ok(html.indexOf('id="v4Spotlight"')<html.indexOf('id="v4Motion"')&&
  'Stage evidence order must be SPOTLIGHT -> MOTION -> WATCH -> EARLY');
 for(const id of ['chartScenario','v4StagePath'])assert.ok(html.includes('id="'+id+'"')||
  html.includes('class="'+id+'"'),'Model scenario and stage staircase missing '+id);
-assert.ok(html.includes('chart-guidance.js?v=1')&&code.includes('CoinLiveChartGuidance?.build'),
+assert.ok(html.includes('chart-guidance.js?v=2')&&code.includes('CoinLiveChartGuidance?.build'),
  'Canvas must draw independent verified research thresholds on every selected timeframe');
 assert.ok(v4code.includes("'mtf'].map(k=>readJson(k,m))")&&v4code.includes('mtf.fetched_at!==m.started_at_utc'),
  'HTF model must be SHA-verified and stamped to manifest');
@@ -125,6 +125,25 @@ assert.ok(code.includes('selectedSide')&&v4code.includes('b.dataset.v4Side'),
  'Clicked LONG/SHORT direction must stay selected through chart analysis');
 assert.ok(guidance.includes("ATR_RESEARCH_PROJECTION")&&guidance.includes("SOURCE_RESEARCH_LEVELS")&&
  guidance.includes("NO_LEVEL"),'Do not fake targets or treat ATR projections as traded levels');
+const firstScreen=html.slice(html.indexOf('<main class="workspaceView" data-view="radar"'),
+ html.indexOf('id="v4Watch"'));
+assert.ok(!firstScreen.includes('class="v4MarketSummary"') &&
+ !firstScreen.includes('class="v4StagePath"') &&
+ !firstScreen.includes('class="v4UtcBar"') &&
+ !firstScreen.includes('class="v4Observation"'),
+ 'Verbose market metadata must be after opportunity panels inside disclosure');
+assert.ok(html.includes('id="radarMetaDetails"')&&html.includes('id="headerMore"'),
+ 'Technical info and older pilot must remain reachable in disclosure');
+assert.ok(html.includes('class="header minimalHeader"')&&html.includes('class="headerActions"'),
+ 'Minimal main header missing');
+assert.ok(html.includes('id="calculator"')&&html.includes('id="releaseHistory"') &&
+ html.includes('id="v4ArchivedCount"'), 'Collapse must not delete features');
+assert.ok(v4code.includes("hidden=!priorityShown"),
+ 'Empty higher-stages must not consume the viewport');
+assert.ok(ui.includes('.banner:not(.stale):not(.warn)'),
+ 'Healthy redundant status banners must not take vertical screen space');
+assert.ok(html.includes('quickTfOptional')&&html.includes('id="chartTf"'),
+ 'Timeframes must remain accessible through ONE control');
 assert.ok(!html.includes('Gerçek emir aç'),'No claims of real trading');
 console.log('PASS: Early LONG/SHORT lights independently research-only, plus V4 4.01 core.');
 
