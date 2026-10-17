@@ -21,7 +21,7 @@ def cohort(t):
     bb=h.get('bb_compression_percentile')
     hist=h.get('macd_hist_pct')
     side=1 if t['side']=='LONG' else -1
-    keys=['TÜMÜ',f"AŞAMA_{t.get('stage',1)}",t['side']]
+    keys=['TÜMÜ',f"AŞAMA_{paper.TIER_STAGE.get(t.get('stage_at_birth'),1)}",t['side']]
     keys+=['RSI_4H_30_50' if 30<=rsi<50 else 'RSI_4H_50_70' if 50<=rsi<=70 else 'RSI_4H_DIĞER'] if isinstance(rsi,(float,int)) else ['RSI_4H_BİLİNMİYOR']
     keys+=['MACD_4H_DESTEK' if isinstance(hist,(float,int)) and hist*side>0 else 'MACD_4H_ZAYIF']
     keys+=['BB_4H_SIKIŞMA' if isinstance(bb,(float,int)) and bb<=30 else 'BB_4H_DİĞER']
