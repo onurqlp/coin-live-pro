@@ -147,6 +147,13 @@ jobs:
           assert v4['v4-early']['research_only'] is True and v4['v4-early']['no_paper_entries'] is True
           assert v4['v4-spark-paper']['no_real_orders'] and not v4['v4-spark-paper']['combined_with_strict_paper_cash']
           assert v4['v4-spark-paper']['archive_is_persistent'] is True
+          assert 'today' in v4['v4-spark-paper']['daily']
+          assert v4['v4-spark-paper']['daily']['timezone']=='UTC'
+          assert v4['v4-spark-paper']['geldi_intent_total']==sum(
+              x.get('entry_class')=='GELDI' for x in v4['v4-spark-paper']['recent_tickets'])
+          assert all(x.get('paper_intent_created') and not x.get('is_real_trade')
+              and x.get('signal_at_utc') for x in v4['v4-spark-paper']['recent_tickets']
+              if x.get('entry_class')=='GELDI')
           assert v4['v4-spark-review']['needs_out_of_sample_validation'] is True
           assert v4['v4-spark-review']['new_rules_applied_automatically'] is False
           assert v4['v4-paper']['starting_balance_usdt']==10000
@@ -157,7 +164,7 @@ jobs:
           assert set(v4['v4-radar']['counts']) >= {'spotlight','motion','watch','active_total'}
           from pathlib import Path
           release=json.loads(Path('web/release.json').read_text())
-          assert release['product_version']=='4.02' and release['version_change_owner']=='AUTOMATIC_MINOR_WITHIN_4'
+          assert release['product_version']=='4.03' and release['version_change_owner']=='AUTOMATIC_MINOR_WITHIN_4'
           study=v4['v4-radar'].get('anomaly_research',{})
           assert study.get('not_used_in_v4_score') is True
           assert study.get('no_real_orders') is True
