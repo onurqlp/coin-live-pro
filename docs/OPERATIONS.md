@@ -13,7 +13,7 @@
 
 1. Scheduled Actions and optional Google heartbeat are best-effort; measure runs over an uninterrupted 24-hour interval before describing them as reliable. For SLA-level collection, migrate *only* the scheduler/collector to a persistent worker with a database and leave Pages/CD on GitHub.
 2. The 5-minute market job still saves current research ledgers into Git history at its current cadence. Do **not** throttle or delete those commits until durable external storage with tested restore is configured: doing so could lose real forward events.
-3. GitHub repository code changes do **not** deploy any Google Apps Script source already installed in a spreadsheet. The V4 Sheets integration must be installed/updated separately and then checked against real sheet row counts.
+3. The Google V4 destination tabs have been created and seeded in the existing COIN.LIVE report sheet. GitHub repository code changes do **not** deploy any Google Apps Script source already installed in a spreadsheet: copy `integrations/google-v4-sync.gs` into that existing Apps Script project, execute `installCoinLiveV4Sync()` once, then confirm 10-minute updates. It never removes old V3 triggers or historical rows. Without that explicit installation, the new tabs are a **snapshot**, not continuously synced.
 4. Product release stays `4.03`; no automatic real-money mode, strategy threshold change, or retroactive success attribution.
 
 ## Runbook

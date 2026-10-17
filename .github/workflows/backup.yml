@@ -1,6 +1,10 @@
 name: COIN.LIVE — Verified 90-Day Archive Snapshots
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/backup.yml'
   schedule:
     - cron: '17 2 * * *'
 permissions:

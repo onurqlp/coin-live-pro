@@ -1,6 +1,11 @@
 name: COIN.LIVE — Daily Quant Evidence
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ops-quant-report.yml'
+      - 'scripts/quant_report.py'
   schedule:
     - cron: '41 1 * * *'
     - cron: '41 2 * * 1'
