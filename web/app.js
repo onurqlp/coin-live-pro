@@ -24,8 +24,8 @@ function refreshState(){
  const active=currentRadar(),live=S.live&&Date.now()-S.lastRefresh<60000;
  const trusted=active.mode==='SERVER';
  $('health').className='banner '+(trusted&&live?'live':trusted?'warn':'stale');
- $('healthTitle').textContent=trusted&&live?'CANLI FİYAT + MERKEZİ RADAR':trusted?
-   'MERKEZİ ANALİZ GÜNCEL • FİYAT BAĞLANTISI YOK':'ANALİZ ESKİ • YENİ GİRİŞ YOK';
+ $('healthTitle').textContent=trusted&&live?'Analiz ve fiyat güncel':trusted?
+   'Analiz güncel · canlı fiyat bekleniyor':'Analiz gecikti · yeni giriş yok';
  $('healthExplain').textContent=trusted?
    'Kıvılcım yalnız günlük + 4H trend uyumuyla oluşur. 1H/15m teyit, 5m/1m ek kontrol; gerçek emir yok.':
    'Sunucu '+(Number.isFinite(radarAge)?radarAge+' dk':'—')+' önce analiz yaptı. Yeni kıvılcım kapalı. Üstteki yenile yalnız veriyi tekrar kontrol eder, yeni sunucu taraması başlatmaz.';
@@ -326,12 +326,34 @@ if(!lineLevels.length&&signal&&signal.primary_tf===S.chartTf){
   lineLevels.push({label:'RİSK',v:signal.stop,color:'#ff8296'});
   (signal.targets||[]).forEach((t,i)=>lineLevels.push({label:(i+1)+'R',v:t,color:'#4ce2b4'}));
  }
-}for(const l of lineLevels){if(Number.isFinite(l.v)&&l.v>0){lo=Math.min(lo,l.v);hi=Math.max(hi,l.v);}}if(spot!==null){lo=Math.min(lo,spot);hi=Math.max(hi,spot);}const pad=(hi-lo)*.12||hi*.003;lo-=pad;hi+=pad;const yy=v=>top+(hi-v)/(hi-lo)*(h-top-bottom),xx=i=>left+(i+.5)*(w-left-right)/candles.length;ctx.font='10px system-ui';for(let i=0;i<=5;i++){const y=top+(h-top-bottom)*i/5;ctx.strokeStyle='#27374e';ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(w-right,y);ctx.stroke();ctx.fillStyle='#819dbb';ctx.fillText(window.CoinLiveChartGuidance?.format(hi-(hi-lo)*i/5)||fmt(hi-(hi-lo)*i/5),w-right+6,y+3,94);}for(let i=0;i<candles.length;i++){const b=candles[i],x=xx(i),col=b.c>=b.o?'#48d7b0':'#fc8098';ctx.strokeStyle=col;ctx.beginPath();ctx.moveTo(x,yy(b.h));ctx.lineTo(x,yy(b.l));ctx.stroke();ctx.fillStyle=col;ctx.fillRect(x-Math.max(2,Math.min(6,(w-left-right)/candles.length*.65))/2,Math.min(yy(b.o),yy(b.c)),Math.max(2,Math.min(6,(w-left-right)/candles.length*.65)),Math.max(1.5,Math.abs(yy(b.c)-yy(b.o))));}for(const l of lineLevels){ctx.setLineDash([4,4]);ctx.strokeStyle=l.color;const y=yy(l.v);ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(w-right,y);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle=l.color;ctx.font='bold 10px system-ui';ctx.fillText(l.label+' '+(window.CoinLiveChartGuidance?.format(l.v)||fmt(l.v)),w-right+5,y-5,94);}
+}for(const l of lineLevels){if(Number.isFinite(l.v)&&l.v>0){lo=Math.min(lo,l.v);hi=Math.max(hi,l.v);}}if(spot!==null){lo=Math.min(lo,spot);hi=Math.max(hi,spot);}const pad=(hi-lo)*.12||hi*.003;lo-=pad;hi+=pad;const yy=v=>top+(hi-v)/(hi-lo)*(h-top-bottom),xx=i=>left+(i+.5)*(w-left-right)/candles.length;ctx.font='10px system-ui';for(let i=0;i<=5;i++){const y=top+(h-top-bottom)*i/5;ctx.strokeStyle='#27374e';ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(w-right,y);ctx.stroke();ctx.fillStyle='#819dbb';ctx.fillText(window.CoinLiveChartGuidance?.format(hi-(hi-lo)*i/5)||fmt(hi-(hi-lo)*i/5),w-right+6,y+3,94);}for(let i=0;i<candles.length;i++){const b=candles[i],x=xx(i),col=b.c>=b.o?'#48d7b0':'#fc8098';ctx.strokeStyle=col;ctx.beginPath();ctx.moveTo(x,yy(b.h));ctx.lineTo(x,yy(b.l));ctx.stroke();ctx.fillStyle=col;ctx.fillRect(x-Math.max(2,Math.min(6,(w-left-right)/candles.length*.65))/2,Math.min(yy(b.o),yy(b.c)),Math.max(2,Math.min(6,(w-left-right)/candles.length*.65)),Math.max(1.5,Math.abs(yy(b.c)-yy(b.o))));}// Draw every verified level at its actual value, without hiding evidence.
+// On narrow canvases the full numerical ledger is in the disclosure above;
+// short labels avoid overlapping/clipped values falsely implying precision.
+const smallChart=w<540;
+let lastLabelY=-25;
+const significant=l=>/STOP|TP1|GİRİŞ|ENTRY|1H EŞİK|RİSK/.test(l.label);
+for(const l of lineLevels){
+ const y=yy(l.v);
+ ctx.setLineDash([4,4]);ctx.strokeStyle=l.color;
+ ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(w-right,y);ctx.stroke();
+ ctx.setLineDash([]);
+}
+for(const l of [...lineLevels].sort((a,b)=>yy(a.v)-yy(b.v))){
+ const y=yy(l.v);
+ if(smallChart&&!significant(l))continue;
+ if(y-lastLabelY<(smallChart?15:12))continue;
+ lastLabelY=y;
+ ctx.fillStyle=l.color;ctx.font='bold 10px system-ui';
+ const short=l.label.replace(/^KOŞULLU /,'').replace(/^SENARYO /,'')
+   .replace(/^V4 /,'').replace(/^PAPER /,'').replace(/ EŞİK$/,'');
+ const name=smallChart?short:l.label+' '+(window.CoinLiveChartGuidance?.format(l.v)||fmt(l.v));
+ ctx.fillText(name,w-right+5,Math.max(12,y-5),right-9);
+}
 // The aqua line is the current ticker, NOT a confirmed candle or an entry.
 if(spot!==null){const spotY=yy(spot);ctx.save();ctx.setLineDash([2,3]);ctx.strokeStyle='#8ddcff';
 ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(left,spotY);ctx.lineTo(w-right,spotY);ctx.stroke();
 ctx.setLineDash([]);ctx.fillStyle='#8ddcff';ctx.font='bold 10px system-ui';
-ctx.fillText('CANLI '+fmt(spot),w-right+5,Math.max(11,spotY-6));ctx.restore();}
+ctx.fillText((smallChart?'ANLIK':'CANLI '+fmt(spot)),w-right+5,Math.max(11,spotY-6),right-9);ctx.restore();}
 const ticks=w<390?2:4;for(let i=0;i<ticks;i++){const idx=Math.round(i*(candles.length-1)/(ticks-1));ctx.fillStyle='#8aa6c0';ctx.font='10px system-ui';ctx.fillText(new Date(candles[idx].t).toLocaleString('tr-TR',S.chartTf==='1D'||S.chartTf==='1W'?{timeZone:'UTC',day:'2-digit',month:'2-digit'}:{timeZone:'UTC',day:'2-digit',hour:'2-digit',minute:'2-digit'}),xx(idx)-15,h-8);}$('chartCaption').textContent=(guide?.mode==='ATR_RESEARCH_PROJECTION'?'KOŞULLU 1H ATR SENARYOSU · ':guide?.mode==='SOURCE_RESEARCH_LEVELS'?'V4 KAYNAK PLAN SEVİYELERİ · ':'EŞİK / TP VERİSİ BEKLENİYOR · ')+(guide&&!guide.fresh?'KAYNAK ESKİ, GÜNCEL TEYİT YOK · ':'')+S.selected+' · OKX kapanmış '+S.chartTf+' mumları (UTC) · '+(signal?signal.side+' '+(signal.stage==='CONFIRMED'&&signal.review_state==='FRESH'?'TEYİT':signal.review_state==='INVALIDATED'?'GEÇERSİZ':signal.review_state==='RECHECK_PENDING'?'TEKRAR KONTROL':'İZLE')+' · ana periyot '+signal.primary_tf+' · '+signal.expected_holding:'Serbest fiyat incelemesi')+' · '+(cache?.source==='SERVER_OKX'?'Merkezi kapanmış OKX mumları, '+clock(Date.parse(cache.sourceAt)):cache?'Doğrudan OKX mumları':'kaynak bekleniyor')+(spot!==null?' · CANLI '+fmt(spot)+' (yalnız gösterim)':'')+(paperPos&&document.body.dataset.route==='portfoy'?' · PAPER giriş/stop/hedef: tahmini, gerçek emir yok':'')+' · referans seviyeler emir değildir.';}
 function renderSwingHistory(){
  const target=$('swingHistoryRows');if(!target)return;
