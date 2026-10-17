@@ -1,8 +1,8 @@
 {
   "product_version": "4.03",
   "version_change_owner": "AUTOMATIC_MINOR_WITHIN_4",
-  "release_id": "GELDI-20261017-1142",
-  "updated_at_utc": "2026-10-17T11:42:43.664Z",
+  "release_id": "CHART-20261017-1227",
+  "updated_at_utc": "2026-10-17T12:27:22Z",
   "timestamp_basis": "UTC",
   "market_data_timestamp_separate": true,
   "change_summary": [
@@ -12,11 +12,17 @@
     "Her GELDİ'nin RSI/MACD/BB özellikleri, o anki fiyat, 1H kaynak, stop ve TP1/2/3 kayıtlı; veri boşluğu gizlenmez.",
     "Ana sayfada sade tek günlük sayaç, Sanal Kasa alanında GELDİ pozisyonları ve 14 günlük performans.",
     "AR-GE raporundaki Binance küçük coin kapsamı ve haber/mikroyapı eksiklikleri sonraki araştırmaya ayrıldı; mevcut OKX motorları ve 7 strateji değiştirilmedi.",
-    "Gerçek emir yok, 10 USDT nominal sanal bilet ve ayrı 10.000 USDT deney kasası; ana V4 10k portföy değişmedi."
+    "Gerçek emir yok, 10 USDT nominal sanal bilet ve ayrı 10.000 USDT deney kasası; ana V4 10k portföy değişmedi.",
+    "Kurumsal mobil/tablet/masaüstü grafik görünümü: tek dokunuşla grafik sekmesi, doğrulanmış merkezi kapanmış OHLC yedeği, veri kaynağı durumu ve küçük ekranlara uyumlu mum çizimi; sinyal/ledger/paper kuralları değişmedi."
   ],
   "no_real_orders": true,
   "not_a_trading_signal": true,
   "change_log": [
+    {
+      "release_id": "CHART-20261017-1227",
+      "updated_at_utc": "2026-10-17T12:27:22Z",
+      "summary": "4.03 tasarım ve grafik erişim düzeltmesi: mobil karttan doğrudan grafik, sunucudan doğrulanmış kapanmış mum yedeği, responsive grafik ve açık kaynak durumu; ürün sürümü değişmedi."
+    },
     {
       "release_id": "GELDI-20261017-1142",
       "updated_at_utc": "2026-10-17T11:42:43.664Z",
