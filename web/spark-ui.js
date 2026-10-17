@@ -13,8 +13,8 @@
     const liveGeldi=(a.recent_tickets||[]).filter(t=>t.entry_class==='GELDI'&&t.status==='OPEN').length;
     strip.innerHTML=metric('Bugün GELDİ',today.geldi||0)+
       metric('GELDİ sanal açık',liveGeldi)+
-      metric('Bugün gerçekleşen',num(today.realized_net_usdt||0)+' USDT')+
-      metric('Açık toplam PnL',num(today.unrealized_all_usdt||0)+' USDT');
+      metric('GELDİ bugün net',num(today.geldi_realized_net_usdt||0)+' USDT')+
+      metric('Açık GELDİ PnL',num(today.unrealized_geldi_usdt||0)+' USDT');
     strip.title='UTC: bugün gerçekleşen PnL yalnız bugün yapılan sanal çıkışlardan; açık PnL ayrı son doğrulanmış kapanış fiyatına göre ve önceki günlerden taşınan pozisyonları da içerir.';
   }
   if(!root)return;
@@ -61,7 +61,7 @@
   if(!stats||!paper){root.textContent='Karşılaştırma kaynağı doğrulanamadı.';return;}
   const base=stats.cohorts?.TÜMÜ||{},q=paper.summary||{};
   const groups=[['3 · Geldi','AŞAMA_3'],['2 · Gelmekte','AŞAMA_2'],
-    ['1 · İzlenen','AŞAMA_1'],['LONG','LONG'],['SHORT','SHORT'],
+    ['1 · İzlenen','AŞAMA_1'],['GELDİ sanal giriş','GELDI_OTOMATIK_GIRIS'],['Diğer araştırma','ERKEN_ARASTIRMA'],['LONG','LONG'],['SHORT','SHORT'],
     ['RSI 30–50','RSI_4H_30_50'],['MACD destek','MACD_4H_DESTEK'],['BB sıkışma','BB_4H_SIKIŞMA']];
   root.innerHTML='<h3>Sanal sonuçların otomatik karşılaştırması</h3>'+
     '<div class="sparkPaperStats">'+metric('Tüm denemeler',stats.total_ever_tickets)+
