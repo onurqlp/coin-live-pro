@@ -1,7 +1,7 @@
 'use strict';
 (()=>{
 const $=id=>document.getElementById(id);
-const S={market:[],radar:[],swingEvents:[],provider:'',stamps:{},window:7,selected:null,selectedSide:null,live:false,loading:false,lastRefresh:0,initialized:false,chartCache:new Map(),chartLoading:null,chartTf:'4H',forward:{reports:[],events:[]},quoteLoading:false,quoteRowsCache:new Map(),quoteLastError:'',quoteUpdates:0};
+const S={market:[],radar:[],swingEvents:[],provider:'',stamps:{},window:7,selected:null,selectedSide:null,live:false,loading:false,lastRefresh:0,initialized:false,chartCache:new Map(),chartLoading:null,chartTf:'4H',forward:{reports:[],events:[]},quoteLoading:false,quoteRowsCache:new Map(),quoteLastError:'',quoteUpdates:0,chartPack:null,chartPackLoading:null,chartError:''};
 const safe=x=>String(x??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const number=x=>x===null||x===undefined||x===''?NaN:Number(x);
 const fmt=x=>!Number.isFinite(Number(x))?'—':Number(x)>=1000?Number(x).toLocaleString('en-US',{maximumFractionDigits:2}):Number(x)>=1?Number(x).toFixed(3):Number(x)>=.01?Number(x).toFixed(5):Number(x).toFixed(8);
@@ -213,29 +213,86 @@ function renderRadar(){
  highlightSpark();
 }
 
+// Chart access is browser-independent whenever the current GitHub scan has
+// exported a verified chart-only snapshot. Neither source changes any signal.
+const chartDurations={'1m':60000,'5m':300000,'15m':900000,'1H':3600000,'4H':14400000,
+ '12H':43200000,'1D':86400000,'1W':604800000};
+function verifiedChartBars(rows,tf){
+ const duration=chartDurations[tf],now=Date.now();
+ if(!duration||!Array.isArray(rows))return [];
+ const unique=new Map();
+ for(const x of rows){
+   if(!Array.isArray(x)||x.length<6)continue;
+   const data=x.slice(0,6).map(Number);
+   const [t,o,h,l,close,v]=data;
+   if(data.every(Number.isFinite)&&t>0&&t+duration<now-1000&&
+      o>0&&h>0&&l>0&&close>0&&h>=Math.max(o,close,l)&&l<=Math.min(o,close,h)&&v>=0)unique.set(t,data);
+ }
+ return [...unique.values()].sort((x,y)=>x[0]-y[0]);
+}
+async function directCandles(symbol,tf){
+ const inst=symbol.replace(/USDT$/,'-USDT-SWAP');
+ if(!/^[A-Z0-9]+-USDT-SWAP$/.test(inst))throw Error('Geçersiz parite');
+ const bars={'1m':'1m','5m':'5m','15m':'15m','1H':'1H','4H':'4H','12H':'12Hutc','1D':'1Dutc','1W':'1Wutc'};
+ const json=await get('https://www.okx.com/api/v5/market/candles?instId='+
+   encodeURIComponent(inst)+'&bar='+bars[tf]+'&limit=90');
+ if(json.code!=='0'||!Array.isArray(json.data))throw Error('OKX mum API erişimi yok');
+ const verified=json.data.filter(x=>Array.isArray(x)&&x.length>=9&&String(x[8])==='1')
+   .map(x=>x.slice(0,6));
+ const data=verifiedChartBars(verified,tf);
+ if(data.length<14)throw Error('Yeterli kapanmış mum yok');
+ return {data,source:'DIRECT_OKX',sourceAt:new Date().toISOString()};
+}
+async function publishedCandles(symbol,tf){
+ if(tf==='1m')throw Error('1m merkezi yedekte yok');
+ if(!S.chartPack||Date.now()-S.chartPack.checkedAt>180000){
+   if(!S.chartPackLoading)S.chartPackLoading=get('./data/chart-pack.json')
+     .then(doc=>{
+       if(doc.schema_version!==1||doc.source!=='OKX_CLOSED_CANDLES'||
+          doc.source_mtf_at!==doc.fetched_at||doc.chart_only!==true)
+         throw Error('Merkezi grafik kaynağı doğrulanamadı');
+       S.chartPack={doc,checkedAt:Date.now()};
+       return doc;
+     }).finally(()=>{S.chartPackLoading=null;});
+   await S.chartPackLoading;
+ }
+ const doc=S.chartPack.doc;
+ const data=verifiedChartBars(doc.candles_by_symbol?.[symbol]?.[tf],tf);
+ if(data.length<10)throw Error('Bu parite/periyot merkezi yedekte yok');
+ return {data,source:'SERVER_OKX',sourceAt:doc.fetched_at};
+}
 async function ensureChart(force=false){
  if(!S.selected)return;
- const symbol=S.selected,tf=S.chartTf;
- const key=symbol+'|'+tf;
+ const symbol=S.selected,tf=S.chartTf,key=symbol+'|'+tf;
  const current=S.chartCache.get(key);
  if(!force&&current&&Date.now()-current.at<60000)return;
  if(S.chartLoading===key)return;
- S.chartLoading=key;
+ S.chartLoading=key;S.chartError='';
+ const state=$('chartDataStatus');
+ if(state){state.textContent='Grafik verisi yükleniyor';state.dataset.state='loading';}
+ let result=null;
  try{
-  const inst=symbol.replace(/USDT$/,'-USDT-SWAP');
-  if(!/^[A-Z0-9]+-USDT-SWAP$/.test(inst))throw Error('Geçersiz coin');
-  const bars={'1m':'1m','5m':'5m','15m':'15m','1H':'1H','4H':'4H','12H':'12Hutc','1D':'1Dutc','1W':'1Wutc'};
-  const duration={'1m':60000,'5m':300000,'15m':900000,'1H':3600000,'4H':14400000,'12H':43200000,'1D':86400000,'1W':604800000};
-  const json=await get('https://www.okx.com/api/v5/market/candles?instId='+encodeURIComponent(inst)+'&bar='+bars[tf]+'&limit=90');
-  if(json.code!=='0'||!Array.isArray(json.data))throw Error('OKX mum yanıtı yok');
-  const now=Date.now();
-  const lines=json.data.filter(x=>Array.isArray(x)&&x.length>=9&&String(x[8])==='1').map(x=>[+x[0],+x[1],+x[2],+x[3],+x[4],+x[5]])
-    .filter(x=>x.every(Number.isFinite)&&x[0]+duration[tf]<now-1000)
-    .sort((a,b)=>a[0]-b[0]);
-  if(lines.length<Math.min(14,90))throw Error('Bu zaman diliminde yeterince geçmiş mum yok');
-  S.chartCache.set(key,{at:Date.now(),data:lines});
- }catch(e){console.warn('COIN.LIVE chart source:',symbol,e.message);}
- finally{S.chartLoading=null;if(S.selected===symbol&&S.chartTf===tf)drawChart();}
+   // Parallel mobile sources avoid waiting for a blocked OKX endpoint timeout.
+   const mobile=window.matchMedia('(max-width:930px)').matches;
+   result=mobile?await Promise.any([directCandles(symbol,tf),publishedCandles(symbol,tf)]):
+     await directCandles(symbol,tf).catch(()=>publishedCandles(symbol,tf));
+   S.chartCache.set(key,{at:Date.now(),...result});
+ }catch(e){
+   S.chartError='OKX ve merkezi grafik kaynağına ulaşılamadı. TradingView bağlantısını kullanabilirsin.';
+   console.warn('COIN.LIVE chart unavailable:',symbol,tf,String(e?.message||e));
+ }finally{
+   if(S.chartLoading===key)S.chartLoading=null;
+   if(S.selected===symbol&&S.chartTf===tf){
+     drawChart();
+     if(state){
+       const cache=S.chartCache.get(key);
+       const cached=cache?.source==='SERVER_OKX';
+       state.dataset.state=cache?(cached?'snapshot':'ready'):'unavailable';
+       state.textContent=cache?(cached?'Kapanmış mum · sunucu yedeği':'Kapanmış mum · OKX'):'Grafik verisi alınamadı';
+     }
+     if(S.chartError&&!S.chartCache.has(key))$('chartCaption').textContent=S.chartError;
+   }
+ }
 }
 function renderQuickTf(){const g=$('chartQuickFrames');if(!g)return;const spark=currentRadar().items.find(x=>x.symbol===S.selected);const primary=spark?.primary_tf||'4H';for(const b of g.querySelectorAll('[data-quick-tf]')){const tf=b.dataset.quickTf,active=tf==='AUTO'?S.chartTf===primary:S.chartTf===tf&&S.chartTf!==primary;b.classList.toggle('active',active);b.setAttribute('aria-pressed',active?'true':'false');if(tf==='AUTO')b.textContent='🎯 Ana ('+primary+')';}}
 function renderChartSelector(){const prior=S.selected;const options=[...new Set([...currentRadar().items.map(x=>x.symbol),...S.swingEvents.slice(-80).map(x=>x.symbol),...S.market.map(x=>x.symbol),...(window.CoinV4?.radar?.watch||[]).map(x=>x.symbol),...(window.CoinV4?.radar?.motion||[]).map(x=>x.symbol),...(window.CoinV4?.radar?.spotlight||[]).map(x=>x.symbol),...(window.CoinV4?.early?.candidates||[]).map(x=>x.symbol),...(window.CoinV4?.paper?.open_positions||[]).map(x=>x.symbol)])];if(!options.length)options.push('BTCUSDT','ETHUSDT');if(!options.includes(S.selected))S.selected=options[0];const existing=[...$('chartCoin').options].map(x=>x.value).join('|');if(existing!==options.join('|'))$('chartCoin').innerHTML=options.map(x=>`<option value="${safe(x)}">${safe(x.replace('USDT',''))} / USDT</option>`).join('');$('chartCoin').value=S.selected;const link='https://www.tradingview.com/chart/?symbol='+encodeURIComponent('OKX:'+S.selected.replace('USDT','')+'USDT.P');$('tvLink').href=link;drawChart();renderQuickTf();ensureChart();}
@@ -246,13 +303,13 @@ const guide=window.CoinLiveChartGuidance?.build({
 const details=$('chartScenario');
 if(details)details.innerHTML=window.CoinLiveChartGuidance?.render(guide)||
   '<div class="chartScenarioPending">Veri doğrulandığında modelin senaryosu açılacak.</div>';
-const c=$('candleChart'),ctx=c.getContext('2d'),r=c.getBoundingClientRect();const w=Math.max(300,r.width||500),h=340,ratio=Math.min(2,window.devicePixelRatio||1);c.width=Math.floor(w*ratio);c.height=Math.floor(h*ratio);ctx.setTransform(ratio,0,0,ratio,0,0);ctx.fillStyle='#0b1421';ctx.fillRect(0,0,w,h);const signal=currentRadar().items.find(x=>x.symbol===S.selected)||null;const cache=S.chartCache.get(S.selected+'|'+S.chartTf);
+const c=$('candleChart'),ctx=c.getContext('2d'),r=c.getBoundingClientRect();const w=Math.max(240,Math.floor(r.width||c.parentElement?.clientWidth||320)),h=window.matchMedia('(max-width:640px)').matches?282:340,ratio=Math.min(2,window.devicePixelRatio||1);c.style.height=h+'px';c.width=Math.floor(w*ratio);c.height=Math.floor(h*ratio);ctx.setTransform(ratio,0,0,ratio,0,0);ctx.fillStyle='#0b1421';ctx.fillRect(0,0,w,h);const signal=currentRadar().items.find(x=>x.symbol===S.selected)||null;const cache=S.chartCache.get(S.selected+'|'+S.chartTf);
 const visibleIndicators=$('chartIndicatorsToggle')?.checked===true;
 const pane=$('chartIndicatorsCanvas'),foot=$('chartIndicatorsFoot');
 if(pane)pane.hidden=!visibleIndicators;
-if(foot)foot.hidden=!visibleIndicators;const raw=(cache&&Date.now()-cache.at<900000?cache.data:null)||[];const candles=raw.slice(-52).map(x=>({t:x[0],o:x[1],h:x[2],l:x[3],c:x[4]}));
+if(foot)foot.hidden=!visibleIndicators;const raw=(cache&&Date.now()-cache.at<900000?cache.data:null)||[];const candles=raw.slice(-(w<380?32:w<540?42:52)).map(x=>({t:x[0],o:x[1],h:x[2],l:x[3],c:x[4]}));
 if(visibleIndicators&&window.CoinLiveIndicators?.render)window.CoinLiveIndicators.render(pane,raw);
-if(candles.length<10){ctx.fillStyle='#adc1dc';ctx.font='13px system-ui';ctx.fillText('Bu coin için kapanmış mum grafiği henüz alınmadı.',17,36);$('chartCaption').textContent='OKX '+S.chartTf+' kapanmış mumları bekleniyor. Kaynak erişimi yoksa uydurma seviye çizilmez.';return;}const left=12,right=96,top=16,bottom=29;let lo=Math.min(...candles.map(x=>x.l)),hi=Math.max(...candles.map(x=>x.h));const lineLevels=(guide?.levels||[]).filter(x=>Number.isFinite(x.value)&&x.value>0).map(x=>({label:x.label,v:x.value,color:x.kind==='stop'?'#ff8296':x.kind==='target'?'#4ce2b4':x.kind==='entry'?'#93cced':'#f7cc7d'}));
+if(candles.length<10){ctx.fillStyle='#adc1dc';ctx.font='13px system-ui';ctx.fillText('Bu coin için kapanmış mum grafiği henüz alınmadı.',17,36);$('chartCaption').textContent='OKX '+S.chartTf+' kapanmış mumları bekleniyor. Kaynak erişimi yoksa uydurma seviye çizilmez.';return;}const left=12,right=w<390?74:96,top=16,bottom=29;let lo=Math.min(...candles.map(x=>x.l)),hi=Math.max(...candles.map(x=>x.h));const lineLevels=(guide?.levels||[]).filter(x=>Number.isFinite(x.value)&&x.value>0).map(x=>({label:x.label,v:x.value,color:x.kind==='stop'?'#ff8296':x.kind==='target'?'#4ce2b4':x.kind==='entry'?'#93cced':'#f7cc7d'}));
 const paperPos=window.CoinV4?.position;
 if(document.body.dataset.route==='portfoy'&&paperPos?.status==='FILLED'&&paperPos.symbol===S.selected){
  lineLevels.push({label:'PAPER ENTRY',v:paperPos.fill_price,color:'#93cced'});
@@ -269,13 +326,13 @@ if(!lineLevels.length&&signal&&signal.primary_tf===S.chartTf){
   lineLevels.push({label:'RİSK',v:signal.stop,color:'#ff8296'});
   (signal.targets||[]).forEach((t,i)=>lineLevels.push({label:(i+1)+'R',v:t,color:'#4ce2b4'}));
  }
-}for(const l of lineLevels){if(Number.isFinite(l.v)&&l.v>0){lo=Math.min(lo,l.v);hi=Math.max(hi,l.v);}}if(spot!==null){lo=Math.min(lo,spot);hi=Math.max(hi,spot);}const pad=(hi-lo)*.12||hi*.003;lo-=pad;hi+=pad;const yy=v=>top+(hi-v)/(hi-lo)*(h-top-bottom),xx=i=>left+(i+.5)*(w-left-right)/candles.length;ctx.font='10px system-ui';for(let i=0;i<=5;i++){const y=top+(h-top-bottom)*i/5;ctx.strokeStyle='#27374e';ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(w-right,y);ctx.stroke();ctx.fillStyle='#819dbb';ctx.fillText(window.CoinLiveChartGuidance?.format(hi-(hi-lo)*i/5)||fmt(hi-(hi-lo)*i/5),w-right+6,y+3,94);}for(let i=0;i<candles.length;i++){const b=candles[i],x=xx(i),col=b.c>=b.o?'#48d7b0':'#fc8098';ctx.strokeStyle=col;ctx.beginPath();ctx.moveTo(x,yy(b.h));ctx.lineTo(x,yy(b.l));ctx.stroke();ctx.fillStyle=col;ctx.fillRect(x-3,Math.min(yy(b.o),yy(b.c)),6,Math.max(1.5,Math.abs(yy(b.c)-yy(b.o))));}for(const l of lineLevels){ctx.setLineDash([4,4]);ctx.strokeStyle=l.color;const y=yy(l.v);ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(w-right,y);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle=l.color;ctx.font='bold 10px system-ui';ctx.fillText(l.label+' '+(window.CoinLiveChartGuidance?.format(l.v)||fmt(l.v)),w-right+5,y-5,94);}
+}for(const l of lineLevels){if(Number.isFinite(l.v)&&l.v>0){lo=Math.min(lo,l.v);hi=Math.max(hi,l.v);}}if(spot!==null){lo=Math.min(lo,spot);hi=Math.max(hi,spot);}const pad=(hi-lo)*.12||hi*.003;lo-=pad;hi+=pad;const yy=v=>top+(hi-v)/(hi-lo)*(h-top-bottom),xx=i=>left+(i+.5)*(w-left-right)/candles.length;ctx.font='10px system-ui';for(let i=0;i<=5;i++){const y=top+(h-top-bottom)*i/5;ctx.strokeStyle='#27374e';ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(w-right,y);ctx.stroke();ctx.fillStyle='#819dbb';ctx.fillText(window.CoinLiveChartGuidance?.format(hi-(hi-lo)*i/5)||fmt(hi-(hi-lo)*i/5),w-right+6,y+3,94);}for(let i=0;i<candles.length;i++){const b=candles[i],x=xx(i),col=b.c>=b.o?'#48d7b0':'#fc8098';ctx.strokeStyle=col;ctx.beginPath();ctx.moveTo(x,yy(b.h));ctx.lineTo(x,yy(b.l));ctx.stroke();ctx.fillStyle=col;ctx.fillRect(x-Math.max(2,Math.min(6,(w-left-right)/candles.length*.65))/2,Math.min(yy(b.o),yy(b.c)),Math.max(2,Math.min(6,(w-left-right)/candles.length*.65)),Math.max(1.5,Math.abs(yy(b.c)-yy(b.o))));}for(const l of lineLevels){ctx.setLineDash([4,4]);ctx.strokeStyle=l.color;const y=yy(l.v);ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(w-right,y);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle=l.color;ctx.font='bold 10px system-ui';ctx.fillText(l.label+' '+(window.CoinLiveChartGuidance?.format(l.v)||fmt(l.v)),w-right+5,y-5,94);}
 // The aqua line is the current ticker, NOT a confirmed candle or an entry.
 if(spot!==null){const spotY=yy(spot);ctx.save();ctx.setLineDash([2,3]);ctx.strokeStyle='#8ddcff';
 ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(left,spotY);ctx.lineTo(w-right,spotY);ctx.stroke();
 ctx.setLineDash([]);ctx.fillStyle='#8ddcff';ctx.font='bold 10px system-ui';
 ctx.fillText('CANLI '+fmt(spot),w-right+5,Math.max(11,spotY-6));ctx.restore();}
-for(let i=0;i<4;i++){const idx=Math.round(i*(candles.length-1)/3);ctx.fillStyle='#8aa6c0';ctx.font='10px system-ui';ctx.fillText(new Date(candles[idx].t).toLocaleString('tr-TR',S.chartTf==='1D'||S.chartTf==='1W'?{timeZone:'UTC',day:'2-digit',month:'2-digit'}:{timeZone:'UTC',day:'2-digit',hour:'2-digit',minute:'2-digit'}),xx(idx)-15,h-8);}$('chartCaption').textContent=(guide?.mode==='ATR_RESEARCH_PROJECTION'?'KOŞULLU 1H ATR SENARYOSU · ':guide?.mode==='SOURCE_RESEARCH_LEVELS'?'V4 KAYNAK PLAN SEVİYELERİ · ':'EŞİK / TP VERİSİ BEKLENİYOR · ')+(guide&&!guide.fresh?'KAYNAK ESKİ, GÜNCEL TEYİT YOK · ':'')+S.selected+' · OKX kapanmış '+S.chartTf+' mumları (UTC) · '+(signal?signal.side+' '+(signal.stage==='CONFIRMED'&&signal.review_state==='FRESH'?'TEYİT':signal.review_state==='INVALIDATED'?'GEÇERSİZ':signal.review_state==='RECHECK_PENDING'?'TEKRAR KONTROL':'İZLE')+' · ana periyot '+signal.primary_tf+' · '+signal.expected_holding:'Serbest fiyat incelemesi')+' · '+(cache?'doğrudan OKX mumları':'kaynak bekleniyor')+(spot!==null?' · CANLI '+fmt(spot)+' (yalnız gösterim)':'')+(paperPos&&document.body.dataset.route==='portfoy'?' · PAPER giriş/stop/hedef: tahmini, gerçek emir yok':'')+' · referans seviyeler emir değildir.';}
+const ticks=w<390?2:4;for(let i=0;i<ticks;i++){const idx=Math.round(i*(candles.length-1)/(ticks-1));ctx.fillStyle='#8aa6c0';ctx.font='10px system-ui';ctx.fillText(new Date(candles[idx].t).toLocaleString('tr-TR',S.chartTf==='1D'||S.chartTf==='1W'?{timeZone:'UTC',day:'2-digit',month:'2-digit'}:{timeZone:'UTC',day:'2-digit',hour:'2-digit',minute:'2-digit'}),xx(idx)-15,h-8);}$('chartCaption').textContent=(guide?.mode==='ATR_RESEARCH_PROJECTION'?'KOŞULLU 1H ATR SENARYOSU · ':guide?.mode==='SOURCE_RESEARCH_LEVELS'?'V4 KAYNAK PLAN SEVİYELERİ · ':'EŞİK / TP VERİSİ BEKLENİYOR · ')+(guide&&!guide.fresh?'KAYNAK ESKİ, GÜNCEL TEYİT YOK · ':'')+S.selected+' · OKX kapanmış '+S.chartTf+' mumları (UTC) · '+(signal?signal.side+' '+(signal.stage==='CONFIRMED'&&signal.review_state==='FRESH'?'TEYİT':signal.review_state==='INVALIDATED'?'GEÇERSİZ':signal.review_state==='RECHECK_PENDING'?'TEKRAR KONTROL':'İZLE')+' · ana periyot '+signal.primary_tf+' · '+signal.expected_holding:'Serbest fiyat incelemesi')+' · '+(cache?.source==='SERVER_OKX'?'Merkezi kapanmış OKX mumları, '+clock(Date.parse(cache.sourceAt)):cache?'Doğrudan OKX mumları':'kaynak bekleniyor')+(spot!==null?' · CANLI '+fmt(spot)+' (yalnız gösterim)':'')+(paperPos&&document.body.dataset.route==='portfoy'?' · PAPER giriş/stop/hedef: tahmini, gerçek emir yok':'')+' · referans seviyeler emir değildir.';}
 function renderSwingHistory(){
  const target=$('swingHistoryRows');if(!target)return;
  const list=S.swingEvents.filter(x=>x.model_version==='3.0.0-htf-sparks'&&Date.now()-Number(x.at_ms)<=14*86400000)
