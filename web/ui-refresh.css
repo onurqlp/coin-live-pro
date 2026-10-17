@@ -562,3 +562,14 @@ footer{color:#aabed2;font-size:12px}
  .sparkCompareRow{grid-template-columns:minmax(85px,1.2fr) .5fr .75fr .95fr;padding:6px;font-size:10px}
  .sparkFocus .v4EarlyGrid{max-height:460px}
 }
+
+/* 4.03: four live figures, not four new actions. */
+.sparkDailyStrip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+ gap:5px;margin:0 0 10px}
+.sparkDailyStrip .sparkMetric{padding:8px 10px;background:#122b40;border:1px solid #2f4a61}
+.sparkDailyStrip .sparkMetric strong{font-size:16px}
+.sparkPaperPanel h4{font-size:12px;margin:14px 0 6px;color:#e3f0fa}
+.sparkPaperPanel .sparkResearchHistory{margin-top:12px;border-top:1px solid #31516b}
+.sparkPaperPanel .sparkResearchHistory>summary{cursor:pointer;color:#9fc9e3;font-size:12px;padding:11px 0}
+.sparkTicket span{overflow-wrap:anywhere}
+@media(max-width:650px){.sparkDailyStrip{grid-template-columns:repeat(2,minmax(0,1fr))}.sparkDailyStrip .sparkMetric strong{font-size:14px}}
