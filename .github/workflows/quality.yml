@@ -20,6 +20,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - run: node --check web/chart-indicators.js
+      - run: node tests/chart-indicators.test.mjs
       - run: node --check web/chart-guidance.js
       - run: node tests/chart-guidance.test.mjs
       - run: node --check web/app.js
@@ -29,5 +31,5 @@ jobs:
       - run: node --check web/pilot-ui.js
       - run: node --check web/router.js
       - run: node tests/verify.mjs
-      - run: python3 -m py_compile engine/collector.py engine/mtf.py engine/swing.py engine/spark.py engine/forward.py engine/paper.py engine/health.py engine/v4_strategies.py engine/v4_lifecycle.py engine/v4_paper.py engine/v4_shadow.py engine/v4_forward.py engine/v4_oi.py engine/v4_lab.py engine/v4_publication.py engine/v4_historical.py engine/v4_anomaly.py engine/v4_context.py engine/v4_watch_archive.py engine/v4_early.py
+      - run: python3 -m py_compile engine/collector.py engine/mtf.py engine/swing.py engine/spark.py engine/forward.py engine/paper.py engine/health.py engine/v4_strategies.py engine/v4_lifecycle.py engine/v4_paper.py engine/v4_shadow.py engine/v4_forward.py engine/v4_oi.py engine/v4_lab.py engine/v4_publication.py engine/v4_historical.py engine/v4_anomaly.py engine/v4_context.py engine/v4_watch_archive.py engine/v4_early.py engine/v4_spark_paper.py engine/v4_spark_review.py
       - run: python3 -m unittest discover -s tests -v
