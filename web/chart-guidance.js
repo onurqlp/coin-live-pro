@@ -129,28 +129,42 @@
  }
  function render(plan){
    if(!plan)return '<div class="chartScenarioPending">Coin seçince seviyeler görünür.</div>';
-   const label=plan.side?plan.side+' · '+String(plan.stage||'İZLE').replace(/_/g,' '):
+   const label=plan.side?(plan.side==='LONG'?'LONG · yükseliş':'SHORT · düşüş'):
      'YÖN BELİRSİZ';
    const state=plan.mode==='SOURCE_RESEARCH_LEVELS'?'KAYNAK HEDEFLERİ':
      plan.mode==='ATR_RESEARCH_PROJECTION'?'KOŞULLU TP SENARYOSU':'SEVİYE BEKLENİYOR';
-   const levels=plan.levels.map(x=>'<div class="chartScenarioLevel '+x.kind+
-       '"><small>'+esc(x.label)+'</small><strong>'+esc(format(x.value))+'</strong></div>').join('');
+   const card=x=>'<div class="chartScenarioLevel '+x.kind+'"><small>'+esc(x.label)+
+     '</small><strong>'+esc(format(x.value))+'</strong></div>';
+   // One meaningful threshold / entry, one stop and one nearest TP in the
+   // primary view. Preserve all 1H/4H/1D and TP2/TP3 evidence behind a disclosure.
+   const preferred=[
+     plan.levels.find(x=>x.kind==='entry')||plan.levels.find(x=>x.kind==='threshold'),
+     plan.levels.find(x=>x.kind==='stop'),
+     plan.levels.find(x=>x.kind==='target')
+   ].filter(Boolean);
+   const ids=new Set(preferred);
+   const additional=plan.levels.filter(x=>!ids.has(x));
+   const featured=preferred.map(card).join('');
+   const extra=additional.map(card).join('');
    const direction=plan.side==='LONG'?'Yükseliş':'Düşüş';
-   const strength=plan.supportCount>=2?'4H/günlük destekliyor':
-     plan.supportCount===1?'Kısmi yön desteği':'Yön teyidi zayıf';
-   const risk=plan.why.includes('Hacim desteği zayıf')?' · Hacim zayıf':'';
-   const compact=plan.side?direction+' izleniyor · '+strength+risk:
-     'Henüz yön hipotezi yok';
+   const strength=plan.supportCount>=2?'4H ve günlük yön desteği var':
+     plan.supportCount===1?'Yön desteği kısmi':'Yön teyidi zayıf';
+   const compact=plan.side?direction+' izleniyor. '+strength+'.':
+     'Şu anda net yön hipotezi yok.';
    return '<div class="chartScenarioTop"><div><b>'+esc(plan.symbol)+' · '+esc(label)+
-      '</b></div><span class="chartScenarioUncertain">'+esc(state)+'</span></div>'+
+      '</b><small>Takip aşaması: '+esc(String(plan.stage||'İZLE').replace(/_/g,' '))+
+      '</small></div><span class="chartScenarioUncertain">'+esc(state)+'</span></div>'+
      (plan.fresh?'':'<small class="chartScenarioStale">GÜNCEL VERİ YOK — yalnız geçmiş kaynak</small>')+
-     '<p class="chartScenarioThesis"><strong>Model:</strong> '+esc(compact)+'</p>'+
-     '<div class="chartScenarioLevels">'+(levels||'<span class="chartScenarioMissing">Kaynakta eşik/TP verisi yok.</span>')+'</div>'+
-     '<details class="chartScenarioMore"><summary>Gerekçe ve uyarılar</summary>'+
-        '<p class="chartScenarioThesis"><strong>Model ne düşünüyor?</strong> '+esc(plan.why)+'</p>'+
-        '<p class="chartScenarioNext"><strong>Ne olursa önemli?</strong> '+esc(plan.next)+'</p>'+
-        '<small class="chartScenarioFoot">'+esc(plan.note)+' · '+esc(time(plan.sourceAt))+
-          ' · Puan başarı olasılığı değildir.</small></details>';
+     '<p class="chartScenarioThesis">'+esc(compact)+'</p>'+
+     '<div class="chartScenarioLevels chartPrimaryLevels">'+
+        (featured||'<span class="chartScenarioMissing">Henüz doğrulanmış eşik/TP yok.</span>')+'</div>'+
+     (additional.length?'<details class="chartExtraLevels"><summary>Diğer '+additional.length+
+       ' seviyeyi göster</summary><div class="chartScenarioLevels">'+extra+'</div></details>':'')+
+     '<details class="chartScenarioMore"><summary>Model ne düşünüyor? · ayrıntılar</summary>'+
+       '<p class="chartScenarioThesis"><strong>Model ne düşünüyor?</strong> '+esc(plan.why)+'</p>'+
+       '<p class="chartScenarioNext"><strong>Ne olursa önemli?</strong> '+esc(plan.next)+'</p>'+
+       '<small class="chartScenarioFoot">'+esc(plan.note)+' · '+esc(time(plan.sourceAt))+
+         ' · Puan başarı olasılığı değildir.</small></details>';
  }
  global.CoinLiveChartGuidance={build,render,format};
 })(globalThis);

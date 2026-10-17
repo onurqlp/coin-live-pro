@@ -262,43 +262,66 @@
       '4H_MACD_DIRECTION':'4H MACD yön destekliyor',
       'WEEKLY_OPPOSITION_CAUTION':'Haftalık yön ters',
       'WEAK_RELATIVE_VOLUME':'Hacim henüz zayıf'};
+   // Keep all evidence available, but lead with a plain-language answer and
+   // one obvious action. Disclosure is per-card; it never edits research data.
    const cardHtml=items.map(x=>{
-      const caution=(x.reasons||[]).some(v=>v==='WEEKLY_OPPOSITION_CAUTION'||v==='WEAK_RELATIVE_VOLUME');
-      const close=(x.hourly_level_state==='CLOSED_1H_LEVEL_BREACHED');
-      const condition=close?'1H seviye kapanışla aşılmış · takip teyidi gerekir':
-        x.hourly_level?'1H kapanışında '+(x.side==='LONG'?'üzerinde':'altında')+
-           ' beklenen seviye '+Number(x.hourly_level).toLocaleString('en-US',{maximumFractionDigits:8}):
-           'Henüz net 1H seviye yok · 4H yönünü takip et';
-      const indicators=[
-        ['4H',x.trend_4h],['1D',x.trend_1d],['1W',x.trend_1w]];
-      return '<article class="v4Opportunity v4EarlyCard" data-v4-pair="'+safe(x.symbol)+
-       '" data-v4-direction="'+safe(x.side)+'" data-v4-strategy="'+safe((x.reasons||[]).join(' '))+'">'+
-       '<div class="v4CardTop"><b>'+safe(x.symbol)+' <span class="chip '+(x.side==='LONG'?'long':'short')+'">'+safe(x.side)+'</span></b>'+
-       '<span class="v4EarlyTier">'+safe(type[x.research_tier]||'İZLE')+'</span></div>'+
-       '<div class="v4CardScore">Güç <strong>'+safe(x.research_rank)+'/100</strong></div>'+
-       '<div class="v4TrendMini">'+indicators.map(([tf,v])=>
-          '<span class="'+((x.side==='LONG'&&v==='UP')||(x.side==='SHORT'&&v==='DOWN')?'aligned':
-             v==='SIDEWAYS'?'neutral':v==='UP'||v==='DOWN'?'opposed':'unknown')+'">'+tf+' <strong>'+
-             (v==='UP'?'↑':v==='DOWN'?'↓':v==='SIDEWAYS'?'↔':'?')+'</strong></span>').join('')+'</div>'+
-       '<p class="v4EarlyReason">'+safe((x.reasons||[]).slice(0,2).map(z=>reason[z]||z).join(' · '))+'</p>'+
-       '<p class="v4EarlyNext">'+safe(condition)+'</p>'+
-       (caution?'<small class="v4EarlyCaution">DİKKAT: '+safe((x.reasons||[]).filter(z=>reason[z]&&(z==='WEAK_RELATIVE_VOLUME'||z==='WEEKLY_OPPOSITION_CAUTION')).map(z=>reason[z]).join(' · '))+'</small>':'')+
-       '<div class="v4Meta">İlk kayıt: '+safe(date(x.first_seen_at_utc))+
-       ' · kaynak: '+safe(date(x.source_observed_at_utc))+'</div>'+
-       '<button type="button" class="v4GoChart" data-v4-symbol="'+safe(x.symbol)+
-       '" data-v4-side="'+safe(x.side)+'">Grafiği aç</button>'+
-       '</article>';
+     const caution=(x.reasons||[]).some(v=>v==='WEEKLY_OPPOSITION_CAUTION'||v==='WEAK_RELATIVE_VOLUME');
+     const close=x.hourly_level_state==='CLOSED_1H_LEVEL_BREACHED';
+     const level=Number(x.hourly_level);
+     const hasLevel=Number.isFinite(level)&&level>0;
+     const condition=close?'1 saatlik kapanış eşiği aşıldı. Yeni teyit yine gerekli.':
+       hasLevel?'1 saatlik mum '+(x.side==='LONG'?'bu seviyenin üzerinde':'bu seviyenin altında')+
+          ' kapanmalı: '+level.toLocaleString('en-US',{maximumFractionDigits:8}):
+          'Henüz kesin 1 saatlik seviye yok.';
+     const indicators=[['4H',x.trend_4h],['1D',x.trend_1d],['1W',x.trend_1w]];
+     const signal=(x.reasons||[]).slice(0,2).map(z=>reason[z]||z).join(' · ')||
+       'Kapanmış mumlar izleniyor';
+     const dir=x.side==='SHORT'?'Düşüş':'Yükseliş';
+     return '<article class="v4Opportunity v4EarlyCard" data-v4-pair="'+safe(x.symbol)+
+      '" data-v4-direction="'+safe(x.side)+'" data-v4-strategy="'+safe((x.reasons||[]).join(' '))+'">'+
+      '<div class="v4CardTop"><b>'+safe(x.symbol.replace(/USDT$/,''))+' <small>/ USDT</small></b>'+
+      '<span class="chip '+(x.side==='LONG'?'long':'short')+'">'+safe(x.side)+' · '+dir+'</span></div>'+
+      '<div class="sparkCardOverview"><span>'+safe(signal)+'</span>'+
+      '<span class="sparkCardStrength">Puan <strong>'+safe(x.research_rank)+'/100</strong></span></div>'+
+      '<div class="sparkCardCondition"><span class="sparkCardConditionLabel">Takip edilen koşul</span><span>'+safe(condition)+'</span></div>'+
+      '<button type="button" class="v4GoChart" data-v4-symbol="'+safe(x.symbol)+
+      '" data-v4-side="'+safe(x.side)+'">Grafiği incele</button>'+
+      '<details class="sparkCardMore"><summary>İndikatörler ve kaynak</summary>'+
+      '<div class="v4TrendMini">'+indicators.map(([tf,v])=>
+         '<span class="'+((x.side==='LONG'&&v==='UP')||(x.side==='SHORT'&&v==='DOWN')?'aligned':
+            v==='SIDEWAYS'?'neutral':v==='UP'||v==='DOWN'?'opposed':'unknown')+'">'+tf+' <strong>'+
+            (v==='UP'?'↑':v==='DOWN'?'↓':v==='SIDEWAYS'?'↔':'?')+'</strong></span>').join('')+'</div>'+
+      '<div class="sparkCardSource">Araştırma aşaması: '+safe(type[x.research_tier]||'İZLE')+
+      ' · İlk gözlem: '+safe(date(x.first_seen_at_utc))+
+      ' · Son kaynak: '+safe(date(x.source_observed_at_utc))+'</div>'+
+      (caution?'<small class="v4EarlyCaution">DİKKAT: '+safe((x.reasons||[]).filter(z=>reason[z]&&(z==='WEAK_RELATIVE_VOLUME'||z==='WEEKLY_OPPOSITION_CAUTION')).map(z=>reason[z]).join(' · '))+'</small>':'')+
+      '<p class="sparkCardSource">Puan başarı olasılığı veya işlem tavsiyesi değildir.</p></details>'+
+      '</article>';
    });
    const byStage={1:[],2:[],3:[]};
    items.forEach((x,i)=>{
      const stage=x.paper_stage_number||({KIVILCIM:1,ERKEN_SINYAL:2,ISIK_GUCLENIYOR:3}[x.research_tier]||1);
-     byStage[stage].push(cardHtml[i]);
+     if(byStage[stage])byStage[stage].push(cardHtml[i]);
    });
-   container.innerHTML=[3,2,1].map(stage=>'<section class="sparkLane tier'+stage+'">'+
-     '<h4>'+stage+' · '+({3:'GELDİ',2:'GELMEKTE OLAN',1:'İZLENEN'}[stage])+
-     ' <small>'+byStage[stage].length+'</small></h4>'+
-     '<div class="sparkLaneCards">'+(byStage[stage].join('')||
-     '<div class="v4Empty">Bu aşamada henüz aday yok</div>')+'</div></section>').join('');
+   const compact=window.matchMedia('(max-width:680px)').matches;
+   const stageTitle={
+     3:['GELDİ','1 saatlik seviye aşıldı · işlem garantisi değil'],
+     2:['GELMEKTE','Hareket var · henüz son aşama değil'],
+     1:['İZLENİYOR','Erken araştırma · sadece takip']
+   };
+   container.innerHTML=[3,2,1].map(stage=>{
+     const rows=byStage[stage],limit=compact?3:rows.length;
+     const first=rows.slice(0,limit).join('');
+     const rest=rows.slice(limit).join('');
+     return '<section class="sparkLane tier'+stage+'">'+
+       '<h4><span><span class="sparkStageIndex">'+stage+'</span>'+stageTitle[stage][0]+
+       '<small class="sparkLaneHelp">'+stageTitle[stage][1]+'</small></span>'+
+       '<span class="sparkLaneCount">'+rows.length+' coin</span></h4>'+
+       '<div class="sparkLaneCards">'+(first||'<div class="v4Empty">Şu anda bu aşamada aday yok.</div>')+
+       (rest?'<details class="sparkLaneMore"><summary>Diğer '+(rows.length-limit)+
+         ' coini göster</summary><div class="sparkLaneExtra">'+rest+'</div></details>':'')+
+       '</div></section>';
+   }).join('');
    if(history){
       const h=data.prior_watch_directional_observations||{},a=h['1H']||{},b=h['4H']||{};
       history.textContent='Önceki İZLE kayıtları: 1H '+(a.observed||0)+' ölçümde '+(a.positive_direction||0)+
