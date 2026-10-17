@@ -149,8 +149,11 @@ jobs:
           assert v4['v4-spark-paper']['archive_is_persistent'] is True
           assert 'today' in v4['v4-spark-paper']['daily']
           assert v4['v4-spark-paper']['daily']['timezone']=='UTC'
-          assert v4['v4-spark-paper']['geldi_intent_total']==sum(
-              x.get('entry_class')=='GELDI' for x in v4['v4-spark-paper']['recent_tickets'])
+          assert v4['v4-spark-paper']['geldi_intent_total']>=sum(
+              x.get('entry_class')=='GELDI' for x in v4['v4-spark-paper']['recent_tickets']), 'recent sample cannot exceed cumulative GELDI count'
+          assert (len(v4['v4-spark-paper']['recent_tickets']) >= 220 or
+                  v4['v4-spark-paper']['geldi_intent_total']==sum(
+                  x.get('entry_class')=='GELDI' for x in v4['v4-spark-paper']['recent_tickets'])), 'untruncated GELDI count mismatch'
           assert all(x.get('paper_intent_created') and not x.get('is_real_trade')
               and x.get('signal_at_utc') for x in v4['v4-spark-paper']['recent_tickets']
               if x.get('entry_class')=='GELDI')
