@@ -470,3 +470,16 @@ footer{color:#aabed2;font-size:12px}
  .v4EarlyIndicator{white-space:normal}
  .chartControls #tvLink{display:none}
 }
+
+/* Notes are optional; the model's one-line thesis and exact prices remain visible. */
+.chartScenarioMore{font-size:11px;border-top:1px solid #2f475d;padding-top:6px;color:#bbcede}
+.chartScenarioMore>summary{display:inline-block;cursor:pointer;list-style:none;color:#9fcfe8;font-size:11px;padding:4px 0}
+.chartScenarioMore>summary::-webkit-details-marker{display:none}
+.chartScenarioMore>summary::before{content:"＋ ";font-size:12px}
+.chartScenarioMore[open]>summary::before{content:"− "}
+.chartScenarioMore .chartScenarioThesis,.chartScenarioMore .chartScenarioNext{margin-top:9px;line-height:1.5}
+.chartScenarioMore .chartScenarioFoot{display:block;margin-top:10px}
+.chartScenarioStale{color:#ffce93;font-size:11px;font-weight:750}
+.v4Opportunity .riskNote{color:#95aec4}
+.v4Opportunity .v4Meta{font-size:10px}
+#v4RadarSearch:focus-visible,.headerMore summary:focus-visible{outline-offset:2px}
