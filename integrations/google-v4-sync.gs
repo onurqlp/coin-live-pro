@@ -108,10 +108,19 @@ function syncCoinLiveV4() {
     // Bootstrap all historical tickets only while the archive remains reasonably sized.
     // When it grows large, the last 220 live tickets are still incrementally upserted.
     let tickets=spark.recent_tickets||[];
-    try {
-      const archive=clv4FetchJson_('archive/v4-spark-paper-ledger.json');
-      if(Array.isArray(archive.tickets)&&archive.tickets.length<20000)tickets=archive.tickets;
-    } catch (ex) { console.warn('Archive unavailable, recent tickets used: '+String(ex).slice(0,120)); }
+    let fullBackfillDone=false;
+    const properties=PropertiesService.getScriptProperties();
+    if(properties.getProperty('CLV4_FULL_BACKFILL_DONE')!=='1'){
+      try{
+        const archive=clv4FetchJson_('archive/v4-spark-paper-ledger.json');
+        if(Array.isArray(archive.tickets)&&archive.tickets.length<=1000){
+          tickets=archive.tickets;
+          fullBackfillDone=true;
+        } else {
+          console.warn('Archive too large for Apps Script bootstrap; recent 220 tickets used');
+        }
+      } catch(ex){console.warn('Archive bootstrap unavailable: '+String(ex).slice(0,120));}
+    }
     const ticketRows=tickets.map(x=>[
       x.event_id,x.signal_at_utc,x.symbol,x.side,x.entry_class||'ERKEN_ARASTIRMA',
       x.stage_at_birth,x.status,x.filled_at_utc||'',x.fill_price??'',
@@ -129,6 +138,7 @@ function syncCoinLiveV4() {
         manifest.candidate_counts?.v4?.motion,manifest.candidate_counts?.v4?.watch,
         manifest.provider,'NONE']])
     };
+    if(fullBackfillDone)properties.setProperty('CLV4_FULL_BACKFILL_DONE','1');
     console.log('V4 SYNC OK '+JSON.stringify({date,scan:manifest.scan_id,age_minutes:Math.round(age),inserted:counts}));
     return counts;
   } finally{lock.releaseLock();}
