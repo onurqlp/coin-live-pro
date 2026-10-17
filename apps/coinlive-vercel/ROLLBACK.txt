@@ -1,0 +1,8 @@
+COIN.LIVE 5.0 PREVIEW ROLLBACK / STOP
+
+NO PRODUCTION CUTOVER WAS ATTEMPTED. The existing site remains https://onurqlp.github.io/coin-live-pro/ and product_version 4.03.
+- To suspend preview (after authorized Vercel deployment), disable access or unassign the preview deployment on the separate coinlive-v5-preview project; NEVER repoint the existing Pages domain to it.
+- Feature branch name: preview/coinlive-v5-vercel-20261018. No main merge, no branch delete necessary for rollback.
+- Source Python engine, workflows, main V4 cash ledger and Spark ledger remain authoritative unchanged.
+- Error investigation: capture UTC, immutable Git SHA, manifest scan_id, source integrity status, and Vercel request ID.
+- Do not replay paper fills, recompute historical net PnL, or clear original ledgers to fix a UI defect.

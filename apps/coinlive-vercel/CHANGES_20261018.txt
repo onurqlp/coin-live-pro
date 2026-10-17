@@ -1,0 +1,17 @@
+COIN.LIVE PRO — 5.0.0 PREVIEW CHANGE LOG
+Date: 2026-10-18
+SOURCE PRODUCT: 4.03 (untouched)
+BASELINE HEAD: 68f7cd31b628d1a23c515d43ed0c44c597f5ceff (2026-10-17 23:02 UTC)
+
+1. Added standalone Vercel PWA with five routes/tabs: Radar, Chart/source, Paper, Forward, System.
+2. Enlarged initial four-source API verification to nine mandatory datasets from the same immutable Git SHA. Manifest SHA-256 + bytes must match.
+3. Suppressed any RECHECK_PENDING/INVALIDATED item from the current candidate list; stale source >20 minutes suppresses all live candidates.
+4. Added strict separation assertions for main 10k account and independent Spark 10k account. Display experimental cash accounting and review cohort separately without merging.
+5. Added 7/14/30/90-day strategy horizon counts, reason tags and sample-insufficient handling.
+6. Kept unmanifested OHLC chart rendering disabled instead of implying verified prices; Graph tab shows source conditional levels when provided.
+7. Added MAKINE optional read-only, NOT_CONNECTED endpoint, no side effects.
+8. Added PWA shell cache (never caches /api), small-screen navigation, semantic buttons and explicit no-order labeling.
+9. Extended local automated tests 6 -> 11; ran responsive DOM smoke checks at 360/390/768/1366 px.
+10. NO original Python / archive / main/spark ledger / GitHub Pages / product release / workflow modifications were made in this package.
+
+Vercel project creation requested but rejected with 403 forbidden on connected user scope, preview not published.
