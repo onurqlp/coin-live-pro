@@ -95,7 +95,7 @@ for(const id of ['watchArchiveRefresh','watchArchiveRows','watchArchivePeriod','
 assert.ok(watchCode.includes("crypto.subtle.digest")&&watchCode.includes("'v4-watch-archive'"),'Archive must verify SHA256');
 assert.ok(html.includes('watch-archive-ui.js'),'Archive JavaScript missing');
 const ui=fs.readFileSync('web/ui-refresh.css','utf8');
-assert.ok(html.includes('ui-refresh.css?v=7'),'Institutional UI stylesheet must be linked');
+assert.ok(html.includes('ui-refresh.css?v=8'),'Institutional UI stylesheet must be linked');
 for(const id of ['v4RadarSearch','v4RadarSide','v4RadarFilterStatus'])
   assert.ok(ids.includes(id),'Radar search & side filters must be present: '+id);
 assert.ok(v4code.includes('applyRadarFilter();')&&v4code.includes("mainFrameSummary(x)"),
@@ -124,7 +124,7 @@ assert.ok(v4code.includes('paper_stage_number')&&v4code.includes('GELDİ'),
  '1-2-3 spark classification not automatic');
 for(const id of ['chartScenario','v4StagePath'])assert.ok(html.includes('id="'+id+'"')||
  html.includes('class="'+id+'"'),'Model scenario and stage staircase missing '+id);
-assert.ok(html.includes('chart-guidance.js?v=2')&&code.includes('CoinLiveChartGuidance?.build'),
+assert.ok(html.includes('chart-guidance.js?v=3')&&code.includes('CoinLiveChartGuidance?.build'),
  'Canvas must draw independent verified research thresholds on every selected timeframe');
 assert.ok(v4code.includes("'v4-spark-review'].map(k=>readJson(k,m))")&&v4code.includes('mtf.fetched_at!==m.started_at_utc'),
  'HTF model must be SHA-verified and stamped to manifest');
@@ -156,6 +156,15 @@ assert.ok(code.includes('verifiedChartBars')&&code.includes('source_mtf_at'),
   'Central chart snapshots must be validated independently of signal engine');
 assert.ok(ui.includes('grid-template-columns:minmax(310px,.9fr)')&&ui.includes('max-width:680px'),
   'Desktop trading panel and mobile workspace layout must be responsive');
+assert.ok(html.includes('class="navIcon"')&&html.includes('id="healthDetails"')&&
+  html.includes('class="chartTechnicalNotes"'),'Mobile navigation and collapsible explanations missing');
+assert.ok(ui.includes('grid-template-columns:repeat(6,minmax(0,1fr))')&&
+  ui.includes('body[data-route="radar"] .sparkFocus>#chartHostRadar{display:none!important}'),
+  'Phone must lead with research cards, not an oversized chart');
+assert.ok(v4code.includes('sparkCardMore')&&v4code.includes('sparkLaneMore')&&
+  v4code.includes('compact?3:rows.length'),'Mobile shortlist needs expandable cards and an unlimited evidence ledger');
+assert.ok(guidance.includes('chartExtraLevels')&&guidance.includes('chartPrimaryLevels'),
+  'Chart must show primary levels first but retain remaining verified levels');
 assert.ok(html.includes('quickTfOptional')&&html.includes('id="chartTf"'),
  'Timeframes must remain accessible through ONE control');
 assert.ok(!html.includes('Gerçek emir aç'),'No claims of real trading');
