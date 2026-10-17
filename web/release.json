@@ -1,7 +1,7 @@
 {
   "product_version": "4.02",
   "version_change_owner": "AUTOMATIC_MINOR_WITHIN_4",
-  "release_id": "SPARK-20261017-11undefined16",
+  "release_id": "SPARK-20261017-1116",
   "updated_at_utc": "2026-10-17T11:16:30.962Z",
   "timestamp_basis": "UTC",
   "market_data_timestamp_separate": true,
@@ -18,7 +18,7 @@
   "not_a_trading_signal": true,
   "change_log": [
     {
-      "release_id": "SPARK-20261017-11undefined16",
+      "release_id": "SPARK-20261017-1116",
       "updated_at_utc": "2026-10-17T11:16:30.962Z",
       "summary": "Üç aşamalı kendi kendini ölçen kıvılcım sistemi, gelecekte kapanan 5m mumlarla otomatik sanal ticket ve TP/stop takibi, RSI/MACD/BB kanıtı ve tek tuş performans karşılaştırması. 4.02; 5.0 kullanıcı onayıyla."
     },
