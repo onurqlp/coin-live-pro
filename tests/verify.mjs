@@ -104,4 +104,12 @@ assert.ok(ui.includes('prefers-reduced-motion')&&ui.includes(':focus-visible'),
   'Keyboard focus and reduced motion styles must exist');
 assert.equal(JSON.parse(fs.readFileSync('web/release.json')).product_version,'4.01',
   'Cosmetic updates cannot increment user-controlled product version');
-console.log('PASS: V4 4.01 news/history, safe paper and source integrity checks.');
+for(const id of ['v4Early','v4EarlyCount','v4EarlyStatus','v4EarlyLabel','v4EarlyHistoryHint'])
+  assert.ok(ids.includes(id),'Independent early alert UI missing '+id);
+assert.ok(v4code.includes("readJson(k,m)")&&v4code.includes("'v4-early'"),'Early research must be SHA256 source verified');
+assert.ok(v4code.includes('no_paper_entries')||v4code.includes('paper_eligible===false'),'Early watch cannot become paper entry');
+assert.ok(v4code.includes('renderEarly(manifest,stale)'),'Early cards must respect V4 source freshness');
+assert.ok(html.indexOf('id="v4Early"')<html.indexOf('id="v4Spotlight"'),'Research hints must be visible ahead of strict zero-confirmation columns');
+assert.ok(!html.includes('Gerçek emir aç'),'No claims of real trading');
+console.log('PASS: Early LONG/SHORT lights independently research-only, plus V4 4.01 core.');
+
