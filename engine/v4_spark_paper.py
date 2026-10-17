@@ -52,7 +52,7 @@ def ledger_stats(tickets):
         state=t['status']
         totals[state]=totals.get(state,0)+1
         realized+=float(t.get('realized_net_usdt') or 0)
-        floating+=float(t.get('unrealized_net_usdt') or 0)
+        if state=='OPEN':floating+=float(t.get('unrealized_net_usdt') or 0)
         fees+=float(t.get('fees_estimated_usdt') or 0)
         if state=='OPEN':exposure+=float(t.get('remaining_notional_usdt') or 0)
     return {'counts':totals,'virtual_equity_usdt':round(START_CASH+realized+floating,5),
