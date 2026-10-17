@@ -11,6 +11,7 @@ on:
       - v4-go-archive-context-20261017
       - ui-readable-20261017
       - more-early-signals-20261017
+      - ui-ordered-stages-chart-scenarios-20261017
     paths:
       - '.github/workflows/v4-preview.yml'
       - 'engine/v4_**'
@@ -99,15 +100,17 @@ jobs:
               assert m and m.group(1).strip(),id+' failed to render'
           assert 'id="v4Early"' in doc and 'id="v4EarlyCount"' in doc,'Early watch UI missing'
           assert 'id="v4RadarSearch"' in doc and 'id="v4RadarSide"' in doc,'Radar filters missing'
-          assert 'ui-refresh.css?v=2' in doc,'Readable CSS layer not linked'
+          assert 'ui-refresh.css?v=3' in doc,'Readable CSS layer not linked'
           assert 'V4 veri kontrolü:' not in doc,'V4 manifest fetch or hash validation failed'
+          assert 'id="chartScenario"' in doc,'Chart scenario details missing'
+          assert 'Model ne düşünüyor?' in doc,'Thesis must display'
           assert 'id="v4PaperKpis"' in doc
           import re
           for target in ('v4MarketTotal','v4LongTotal','v4ShortTotal','v4LastAnalysis'):
               m=re.search(r'id="'+target+r'"[^>]*>(.*?)</',doc,re.S)
               assert m and m.group(1).strip() not in ('—',''), 'Summary KPI missing data: '+target
           assert 'id="v4TopRow"' not in doc  # CSS grid, not duplicated DOM ID
-          assert doc.index('id="v4Spotlight"')<doc.index('id="v4Motion"')<doc.index('id="v4Watch"')<doc.index('id="chartHostRadar"'), 'Stage order incorrect'
+          assert doc.index('id="v4Spotlight"')<doc.index('id="v4Motion"')<doc.index('id="v4Watch"')<doc.index('id="chartHostRadar"')<doc.index('id="v4Early"'), 'Stage order incorrect'
           assert doc.index('id="chartHostRadar"')<doc.index('id="legacyTechnicalDisclosure"'), 'Main chart trapped in closed technical details'
           print('V4_CHROMIUM_RENDER_OK')
           PY
