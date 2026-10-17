@@ -22,7 +22,7 @@
  FUNDING_CROWDING:'Fonlama kalabalıklaşması',NOT_LIQUIDATION_PROOF:'Tasfiye kanıtı değil',
  BEARISH_DAILY_4H:'1D ve 4H aşağı yön',SUPPORT_CLOSED_BREAK:'Destek kapanışta kırıldı',
  SUPPORT_WATCH:'Destek kırılımı bekleniyor'};
- const store={radar:null,paper:null,shadow:null,lab:null,history:null,early:null,mtf:null,manifest:null,position:null,lastFetch:0,loading:false,initialChartSelected:false};
+ const store={radar:null,paper:null,shadow:null,lab:null,history:null,early:null,mtf:null,sparkPaper:null,sparkReview:null,manifest:null,position:null,lastFetch:0,loading:false,initialChartSelected:false};
  window.CoinV4=store;
  function explanation(v){return (v?.reasons||[]).slice(0,3).map(s=>why[s]||s).join(' · ')||'Yeni kapanmış mum kanıtı bekleniyor';}
  const factorLabels={trend:'TREND',structure:'YAPI',volume:'HACİM',momentum:'MACD',liquidity:'LİKİDİTE'};
@@ -262,7 +262,7 @@
       '4H_MACD_DIRECTION':'4H MACD yön destekliyor',
       'WEEKLY_OPPOSITION_CAUTION':'Haftalık yön ters',
       'WEAK_RELATIVE_VOLUME':'Hacim henüz zayıf'};
-   container.innerHTML=items.map(x=>{
+   const cardHtml=items.map(x=>{
       const caution=(x.reasons||[]).some(v=>v==='WEEKLY_OPPOSITION_CAUTION'||v==='WEAK_RELATIVE_VOLUME');
       const close=(x.hourly_level_state==='CLOSED_1H_LEVEL_BREACHED');
       const condition=close?'1H seviye kapanışla aşılmış · takip teyidi gerekir':
@@ -288,7 +288,17 @@
        '<button type="button" class="v4GoChart" data-v4-symbol="'+safe(x.symbol)+
        '" data-v4-side="'+safe(x.side)+'">Grafik ↗</button>'+
        '</article>';
-   }).join('')||'<div class="v4Empty">Bu turda yeterli kapanmış mum/küçük kıpırdanma görülmedi. Sistem boş sinyal üretmez.</div>';
+   });
+   const byStage={1:[],2:[],3:[]};
+   items.forEach((x,i)=>{
+     const stage=x.paper_stage_number||({KIVILCIM:1,ERKEN_SINYAL:2,ISIK_GUCLENIYOR:3}[x.research_tier]||1);
+     byStage[stage].push(cardHtml[i]);
+   });
+   container.innerHTML=[3,2,1].map(stage=>'<section class="sparkLane tier'+stage+'">'+
+     '<h4>'+stage+' · '+({3:'GELDİ',2:'GELMEKTE OLAN',1:'İZLENEN'}[stage])+
+     ' <small>'+byStage[stage].length+'</small></h4>'+
+     '<div class="sparkLaneCards">'+(byStage[stage].join('')||
+     '<div class="v4Empty">Bu aşamada henüz aday yok</div>')+'</div></section>').join('');
    if(history){
       const h=data.prior_watch_directional_observations||{},a=h['1H']||{},b=h['4H']||{};
       history.textContent='Önceki İZLE kayıtları: 1H '+(a.observed||0)+' ölçümde '+(a.positive_direction||0)+
@@ -319,9 +329,10 @@
    const priorityShown=!stale&&Boolean((r.spotlight||[]).length||(r.motion||[]).length);
    if($('v4PriorityArea'))$('v4PriorityArea').hidden=!priorityShown; // stage counters retain empty stages without boxes
    if($('v4PriorityEmpty'))$('v4PriorityEmpty').hidden=priorityShown;
-   $('v4WatchCount').textContent=r.counts?.watch??'—';
-   $('v4MotionCount').textContent=stale?'—':r.counts?.motion??'—';
-   $('v4SpotCount').textContent=stale?'—':r.counts?.spotlight??'—';
+   const tiers=store.early?.counts||{};
+   $('v4WatchCount').textContent=stale?'—':tiers.KIVILCIM??'—';
+   $('v4MotionCount').textContent=stale?'—':tiers.ERKEN_SINYAL??'—';
+   $('v4SpotCount').textContent=stale?'—':tiers.ISIK_GUCLENIYOR??'—';
    $('v4RecheckCount').textContent=r.counts?.recheck_pending??'—';
    $('v4ArchivedCount').textContent=r.counts?.archived_total??'—';
    document.querySelectorAll('[data-v4-symbol]').forEach(b=>b.onclick=()=>{
@@ -480,12 +491,12 @@
      if(!response.ok)throw Error('V4 henüz sunucuya yayınlanmadı');
      const m=await response.json();
      if(!m.publication_valid||m.model_version!=='4.0.0-manifest-a1')throw Error('V4 manifest geçersiz');
-     const [r,p,sh,lab,history,early,mtf]=await Promise.all(
-       ['v4-radar','v4-paper','v4-shadow','v4-lab','v4-history-index','v4-early','mtf'].map(k=>readJson(k,m)));
-     if([r,p,sh,lab,history,early].some(x=>x.scan_id!==m.scan_id)||mtf.fetched_at!==m.started_at_utc)
+     const [r,p,sh,lab,history,early,mtf,sparkPaper,sparkReview]=await Promise.all(
+       ['v4-radar','v4-paper','v4-shadow','v4-lab','v4-history-index','v4-early','mtf','v4-spark-paper','v4-spark-review'].map(k=>readJson(k,m)));
+     if([r,p,sh,lab,history,early,sparkPaper,sparkReview].some(x=>x.scan_id!==m.scan_id)||mtf.fetched_at!==m.started_at_utc)
        throw Error('V4 farklı tarama verileri karışmış');
-     store.manifest=m;store.radar=r;store.paper=p;store.shadow=sh;store.lab=lab;store.history=history;store.early=early;store.mtf=mtf;
-     store.lastFetch=Date.now();drawBoard();renderDesk();renderLab();renderHistory();
+     store.manifest=m;store.radar=r;store.paper=p;store.shadow=sh;store.lab=lab;store.history=history;store.early=early;store.mtf=mtf;store.sparkPaper=sparkPaper;store.sparkReview=sparkReview;
+     store.lastFetch=Date.now();drawBoard();renderDesk();renderLab();renderHistory();renderSparkAccount();if(!$('sparkCompareReport')?.hidden)showSparkComparison();
      window.CoinLivePro?.refreshChartGuide?.();
    }catch(error){
      $('v4Status').textContent='V4 veri kontrolü: '+error.message;
