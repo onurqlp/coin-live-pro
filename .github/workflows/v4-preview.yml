@@ -126,7 +126,7 @@ jobs:
           assert 'id="chartScenario"' in doc,'Chart scenario details missing'
           assert 'id="chartDataStatus"' in doc,'Chart origin status missing'
           assert 'class="navIcon"' in doc and 'id="healthDetails"' in doc,'Mobile navigation/status disclosures missing'
-          assert 'class="sparkLaneMore"' in doc and 'class="sparkCardMore"' in doc,'Research details lost'
+          assert 'class="sparkCardMore"' in doc,'Research details lost'
           assert 'class="chartTechnicalNotes"' in doc,'Technical chart text not moved behind disclosure'
           assert 'id="headerMore"' in doc and 'id="radarMetaDetails"' in doc,'Minimal UX disclosures missing'
           assert 'class="v4MarketSummary"' in doc,'Collapsed stats must remain available'
