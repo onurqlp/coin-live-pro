@@ -483,3 +483,82 @@ footer{color:#aabed2;font-size:12px}
 .v4Opportunity .riskNote{color:#95aec4}
 .v4Opportunity .v4Meta{font-size:10px}
 #v4RadarSearch:focus-visible,.headerMore summary:focus-visible{outline-offset:2px}
+
+/* 4.02 clean research desk: one primary comparison action, three evidence lanes. */
+.sparkActionBar{display:flex;justify-content:space-between;align-items:center;gap:12px;
+ margin:8px 0 10px;padding:9px 0;border-top:1px solid #253c50}
+.sparkActionBar>div{display:grid;gap:2px}
+.sparkActionBar strong{font-size:13px;color:#eef5ff}
+.sparkActionBar small{font-size:11px;color:#a4bbcf}
+#sparkCompare{min-height:38px;min-width:155px;border-radius:8px;
+ background:#245271;border:1px solid #448bae;color:#fff;font-weight:750;
+ font-size:12px;padding:8px 12px;cursor:pointer}
+#sparkCompare:hover{background:#306887}
+.sparkFocus{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;
+ align-items:start}
+.sparkFocus>.v4EarlyArea,.sparkFocus>.radarChartHost{min-width:0;margin:0}
+.sparkFocus .v4EarlyArea{padding:10px;border-color:#485c6a}
+.sparkFocus .v4EarlyHeader{align-items:center;gap:7px}
+.sparkFocus .v4EarlyHeader p{display:none}
+.sparkFocus .v4EarlyIndicator{font-size:9px;max-width:100px}
+.sparkFocus .v4EarlyGrid{display:grid;grid-template-columns:1fr;gap:8px;max-height:685px;overflow:auto}
+.sparkLane{border:1px solid #334b62;background:#0f2032;border-radius:9px;overflow:hidden}
+.sparkLane h4{display:flex;align-items:center;justify-content:space-between;gap:6px;
+ font-size:12px;font-weight:850;margin:0;padding:8px 10px;background:#172a3e}
+.sparkLane h4 small{font-weight:750;color:#abc5db}
+.sparkLane.tier3{border-color:#42826a}.sparkLane.tier3 h4{color:#a8f1d2}
+.sparkLane.tier2{border-color:#3b6d88}.sparkLane.tier2 h4{color:#ace0f8}
+.sparkLane.tier1{border-color:#847148}.sparkLane.tier1 h4{color:#f0d397}
+.sparkLaneCards{display:grid;grid-template-columns:1fr;gap:4px;padding:5px}
+.sparkLaneCards>.v4Opportunity{margin:0}
+.sparkLaneCards .v4CardTop{gap:7px}
+.sparkLaneCards .v4EarlyTier{display:none}
+.sparkLaneCards .v4EarlyNext{display:none}
+.sparkLaneCards .v4EarlyCaution{font-size:10px;margin:2px}
+.sparkLaneCards .v4EarlyReason{font-size:11px!important;margin:4px 0}
+.sparkLaneCards .v4TrendMini{margin:4px 0}
+.sparkLaneCards .v4Meta{display:none}
+.sparkFocus .chartControls{flex-wrap:wrap}
+.indicatorSwitch{display:flex;align-items:center;justify-content:center;gap:6px;
+ margin:3px 9px;color:#bad7e9;font-size:11px;cursor:pointer;user-select:none}
+.indicatorSwitch input{accent-color:#55b7df;width:16px;height:16px}
+#chartIndicatorsCanvas{width:100%;height:238px;background:#0e1d2d;display:block}
+#chartIndicatorsCanvas[hidden],#chartIndicatorsFoot[hidden]{display:none!important}
+#chartIndicatorsFoot{font-size:10px;padding:5px 10px;color:#91a9c1}
+.sparkCompareReport{padding:12px;margin:8px 0;border:1px solid #3e6380;border-radius:10px;background:#102237}
+.sparkCompareReport[hidden]{display:none!important}
+.sparkCompareReport h3{font-size:15px;margin:0 0 10px}
+.sparkPaperPanel{margin:0 0 12px;padding:12px;border:1px solid #406381;background:#102237;border-radius:12px}
+.sparkPaperPanel h3{font-size:17px;margin:0 0 7px}
+.sparkPaperStats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:8px 0}
+.sparkMetric{padding:9px;border-radius:8px;background:#142d42;min-width:0}
+.sparkMetric small{display:block;font-size:10px;color:#aac5dc}
+.sparkMetric strong{display:block;font-size:15px;color:#e8f7ff;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.sparkCompareTable{display:grid;gap:0;border:1px solid #304e67;border-radius:8px;overflow:hidden;margin-top:9px}
+.sparkCompareRow{display:grid;grid-template-columns:minmax(100px,1.5fr) .7fr .9fr 1fr;align-items:center;gap:6px;
+ padding:8px 10px;font-size:11px;border-bottom:1px solid #294257}
+.sparkCompareRow:last-child{border-bottom:0}
+.sparkCompareRow.head{background:#1b3850;color:#c7dcea;font-weight:800}
+.sparkCompareRow span:last-child{text-align:right}
+.sparkPaperList{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;max-height:430px;overflow:auto}
+.sparkTicket{padding:9px;border:1px solid #32516a;border-radius:8px;background:#132c40}
+.sparkTicket strong{display:block;font-size:12px}
+.sparkTicket span{display:block;font-size:11px;color:#bad0e1;margin-top:5px}
+.sparkDisclaimer{font-size:11px;line-height:1.5;color:#b0c9dc;margin:9px 0}
+.sparkStrictDetails{border-top:1px solid #2d4053;margin:12px 0}
+.sparkStrictDetails>summary{font-size:11px;color:#849eb4;padding:10px 0;cursor:pointer}
+.sparkStrictDetails .v4TopRow{margin-top:10px}
+.sparkStrictDetails .v4LowerRow{display:block}
+.sparkStrictDetails .v4LowerRow>.v4Column{max-height:500px;overflow:auto}
+.sparkStrictDetails .v4RadarTools{margin-top:6px}
+@media(max-width:930px){.sparkFocus{grid-template-columns:1fr}.sparkFocus .v4EarlyGrid{max-height:485px}}
+@media(max-width:600px){
+ .sparkActionBar{align-items:flex-start}
+ .sparkActionBar small{font-size:10px}
+ #sparkCompare{min-width:145px;padding:7px;font-size:11px}
+ .sparkFocus{gap:8px}
+ .sparkPaperStats{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .sparkPaperList{grid-template-columns:1fr}
+ .sparkCompareRow{grid-template-columns:minmax(85px,1.2fr) .5fr .75fr .95fr;padding:6px;font-size:10px}
+ .sparkFocus .v4EarlyGrid{max-height:460px}
+}
