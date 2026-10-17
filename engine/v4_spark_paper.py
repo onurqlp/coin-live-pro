@@ -44,12 +44,6 @@ def initial(now_ms):
       'last_scan_id':None,'last_run_ms':now_ms,'tickets':[],
       'starting_balance_usdt':START_CASH,'ticket_notional_usdt':NOTIONAL,
       'no_real_orders':True,'no_historical_backfill':True}
-def symbol_bars(t,bars):
-    items=bars.get(t['symbol']) or []
-    return sorted([x for x in items if isinstance(x,dict) and
-      all(valid(x.get(k)) for k in ('o','h','l','c')) and
-      isinstance(x.get('t'),int) and x['l']<=x['h'] and
-      x['t']+BAR<=t],key=lambda x:x['t'])
 def ledger_stats(tickets):
     totals={'WAITING_FUTURE_BAR':0,'OPEN':0,'CLOSED':0,
             'DATA_GAP':0,'INVALID_LEVEL':0,'CAPACITY_BLOCKED':0}
@@ -142,7 +136,6 @@ def advance(prior,early,mtf_doc,now_ms,candles):
     # A hard funding cap prevents silently creating executable-looking exposure.
     for t in sorted(index.values(),key=lambda v:(v['entry_at_ms'],v['event_id'])):
         if t['status'] not in ('OPEN','WAITING_FUTURE_BAR'):continue
-        bars=symbol_bars(now_ms,candles)
         rows=sorted([x for x in (candles.get(t['symbol']) or []) if
           isinstance(x,dict) and isinstance(x.get('t'),int) and
           x['t']+BAR<=now_ms-1500],key=lambda x:x['t'])
