@@ -370,7 +370,7 @@ def main():
     # never becomes a fabricated zero or inferred liquidation.
     previous=read(DATA/'mtf.json',{})
     prev_by_symbol={x.get('symbol'):x for x in previous.get('candidates',[])}
-    errors=[];out=[]
+    errors=[];out=[];chart_sources={}
     def work(pair):
         symbol,side=pair;m=rows[symbol]
         inst=m.get('instrument',symbol[:-4]+'-USDT-SWAP')
@@ -391,13 +391,25 @@ def main():
                         deriv['oi_change_interval_minutes']=round(age/60,2)
                 except (ValueError,TypeError,KeyError):
                     pass
-            return assess(m,frames,side,deriv)
+            evaluated=assess(m,frames,side,deriv)
+            # Chart-only evidence from the SAME verified closed UTC candles as MTF.
+            # These snapshots never participate in scores, lifecycle, or paper orders.
+            preview={}
+            for tf in ('1W','1D','12H','4H','1H','15m','5m'):
+                preview[tf]=[[int(b['t']),b['o'],b['h'],b['l'],b['c'],b['v']]
+                             for b in frames[tf][-60:]
+                             if all(math.isfinite(b[k]) for k in ('o','h','l','c','v'))]
+            return evaluated,preview
         except Exception as exc:
             errors.append(symbol+': '+str(exc)[:110])
             return None
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
-        for x in pool.map(work,candidates.items()):
-            if x:out.append(x)
+        for item in pool.map(work,candidates.items()):
+            if item:
+                x,preview=item
+                if x:
+                    out.append(x)
+                    chart_sources[x['symbol']]=preview
     if len(out)<max(3,len(candidates)//3):raise RuntimeError('Insufficient multi-timeframe coverage; keeping last verified output')
     output={'model_version':MODEL,'provider':'OKX','fetched_at':STAMP,'attempted':len(candidates),
         'analyzed':len(out),'candidates':sorted(out,key=lambda x:x['score'],reverse=True),
@@ -407,5 +419,11 @@ def main():
         'swing_horizon':'1-7 gün','micro_candles_role':'confirmation_and_entry_only',
         'risk_note':'Structure flags are heuristics, not manipulation proof or calibrated win probabilities.'}
     write(DATA/'mtf.json',output)
+    # Standalone chart pack. Browser fallback is immutable closed-candle evidence;
+    # missing frames remain missing rather than being synthesized from price ticks.
+    write(DATA/'chart-pack.json',{'schema_version':1,'source':'OKX_CLOSED_CANDLES',
+         'fetched_at':STAMP,'source_mtf_at':output['fetched_at'],
+         'candles_by_symbol':chart_sources,'chart_only':True,
+         'no_real_orders':True})
     print(f'MTF {STAMP} attempted={len(candidates)} verified={len(out)} model={MODEL}',flush=True)
 if __name__=='__main__':main()

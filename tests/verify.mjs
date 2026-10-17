@@ -29,7 +29,7 @@ assert.ok(html.includes('1H/15m TEYİT; 5m/1m ek kontrol.'),'Microframes used on
 assert.ok(html.includes('legacyTechnicalDisclosure')&&html.includes('legacyReportDisclosure'),'Technical/old reports must be collapsed, not deleted');
 assert.ok(html.includes('v4ObservationStatus')&&html.includes('<option value="3" selected>90 gün</option>'),'90-day observation default missing');
 assert.ok(!html.includes('BETA'),'No beta labels in released site');
-assert.ok(v4code.includes("select(symbol,'4H',false,false,b.dataset.v4Side)"),'V4 opportunities must select SAME PAGE chart and the clicked LONG/SHORT direction');
+assert.ok(v4code.includes("select(symbol,'4H',mobileChart,false,b.dataset.v4Side)"),'V4 cards must open visible mobile chart workspace and retain selected LONG/SHORT');
 assert.ok(v4code.includes('showMarketSummary(r,manifest,stale)'),'V4 KPIs must render verified manifest data');
 assert.ok(v4code.includes("new Set(rows.filter(x=>x.side===side)"),'LONG / SHORT counts must deduplicate multi-strategy symbol');
 assert.ok(v4code.includes('store.initialChartSelected'),'Auto-select initial V4 candidate once');
@@ -95,7 +95,7 @@ for(const id of ['watchArchiveRefresh','watchArchiveRows','watchArchivePeriod','
 assert.ok(watchCode.includes("crypto.subtle.digest")&&watchCode.includes("'v4-watch-archive'"),'Archive must verify SHA256');
 assert.ok(html.includes('watch-archive-ui.js'),'Archive JavaScript missing');
 const ui=fs.readFileSync('web/ui-refresh.css','utf8');
-assert.ok(html.includes('ui-refresh.css?v=6'),'UI design tokens must be linked');
+assert.ok(html.includes('ui-refresh.css?v=7'),'Institutional UI stylesheet must be linked');
 for(const id of ['v4RadarSearch','v4RadarSide','v4RadarFilterStatus'])
   assert.ok(ids.includes(id),'Radar search & side filters must be present: '+id);
 assert.ok(v4code.includes('applyRadarFilter();')&&v4code.includes("mainFrameSummary(x)"),
@@ -149,6 +149,13 @@ assert.ok(v4code.includes("hidden=!priorityShown"),
  'Empty higher-stages must not consume the viewport');
 assert.ok(ui.includes('.banner:not(.stale):not(.warn)'),
  'Healthy redundant status banners must not take vertical screen space');
+assert.ok(ids.includes('chartDataStatus'),'Chart load status must be visible and accessible');
+assert.ok(code.includes('Promise.any([directCandles(symbol,tf),publishedCandles(symbol,tf)])'),
+  'Mobile chart must race direct and central OKX closed-candle sources');
+assert.ok(code.includes('verifiedChartBars')&&code.includes('source_mtf_at'),
+  'Central chart snapshots must be validated independently of signal engine');
+assert.ok(ui.includes('grid-template-columns:minmax(310px,.9fr)')&&ui.includes('max-width:680px'),
+  'Desktop trading panel and mobile workspace layout must be responsive');
 assert.ok(html.includes('quickTfOptional')&&html.includes('id="chartTf"'),
  'Timeframes must remain accessible through ONE control');
 assert.ok(!html.includes('Gerçek emir aç'),'No claims of real trading');

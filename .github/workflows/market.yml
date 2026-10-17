@@ -177,13 +177,32 @@ jobs:
           print('Verified V4 scan',sid,'three stages + isolated 10k ledger, shadow and report') 
           print('Verified: 100-pair public radar, scanned',files['market']['analyzed'],'v3 events',len(files['swing-history']['events']),'and clean forward audit')
           PY
+      - name: Validate closed-candle chart fallback
+        run: |
+          python3 - <<'PY'
+          import json, pathlib
+          root=pathlib.Path('web/data')
+          pack=json.loads((root/'chart-pack.json').read_text())
+          mtf=json.loads((root/'mtf.json').read_text())
+          assert pack['schema_version']==1 and pack['source']=='OKX_CLOSED_CANDLES'
+          assert pack['source_mtf_at']==mtf['fetched_at']==pack['fetched_at']
+          assert pack['chart_only'] is True and pack['no_real_orders'] is True
+          valid={row['symbol'] for row in mtf['candidates']}
+          assert valid==set(pack['candles_by_symbol'])
+          for symbol,frames in pack['candles_by_symbol'].items():
+              for tf,rows in frames.items():
+                  assert tf in ('1W','1D','12H','4H','1H','15m','5m')
+                  assert len(rows)<=60 and all(len(row)==6 for row in rows)
+                  assert all(rows[i][0]<rows[i+1][0] for i in range(len(rows)-1))
+          print('Verified chart-only closed-candle pack:',len(valid),'symbols')
+          PY
       - name: Publish only validated data
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add web/data/market.json
-          git add web/data/mtf.json web/data/paper.json web/data/health.json
+          git add web/data/mtf.json web/data/chart-pack.json web/data/paper.json web/data/health.json
           git add web/data/v4-oi.json web/data/v4-radar.json web/data/v4-paper.json
           git add web/data/v4-history-index.json web/data/v4-shadow.json
           git add web/data/v4-lab.json web/data/v4-forward.json web/data/v4-manifest.json

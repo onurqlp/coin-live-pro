@@ -142,7 +142,7 @@
      '<div class="v4Meta">Son kontrol: '+safe(date(x.last_evaluated_at))+
      safe(motion)+'</div>'+
      '<button type="button" class="v4GoChart" data-v4-symbol="'+safe(x.symbol)+
-     '" data-v4-side="'+safe(x.side)+'">Grafik ↗</button></article>';
+     '" data-v4-side="'+safe(x.side)+'">Grafiği aç</button></article>';
  }
  function observationProgress(){
    const started=Date.parse(store.paper?.pilot_started_at||'');
@@ -286,7 +286,7 @@
        '<div class="v4Meta">İlk kayıt: '+safe(date(x.first_seen_at_utc))+
        ' · kaynak: '+safe(date(x.source_observed_at_utc))+'</div>'+
        '<button type="button" class="v4GoChart" data-v4-symbol="'+safe(x.symbol)+
-       '" data-v4-side="'+safe(x.side)+'">Grafik ↗</button>'+
+       '" data-v4-side="'+safe(x.side)+'">Grafiği aç</button>'+
        '</article>';
    });
    const byStage={1:[],2:[],3:[]};
@@ -339,11 +339,12 @@
      const select=window.CoinLiveSelectSpark;
      if(typeof select!=='function')return;
      const symbol=b.dataset.v4Symbol;
-     select(symbol,'4H',false,false,b.dataset.v4Side);
+     const mobileChart=window.matchMedia('(max-width:930px)').matches;
+     select(symbol,'4H',mobileChart,false,b.dataset.v4Side);
      document.querySelectorAll('[data-v4-symbol]').forEach(item=>
        item.classList.toggle('v4Selected',item.dataset.v4Symbol===symbol));
      const pane=$('chartHostRadar');
-     if(!pane)return;
+     if(mobileChart||!pane)return;
      const rect=pane.getBoundingClientRect();
      // Keep the route. Only scroll when the in-page chart is below/above view.
      if(rect.top>window.innerHeight*.67||rect.bottom<30)
