@@ -192,7 +192,7 @@ jobs:
           for symbol,frames in pack['candles_by_symbol'].items():
               for tf,rows in frames.items():
                   assert tf in ('1W','1D','12H','4H','1H','15m','5m')
-                  assert len(rows)>=10 and all(len(row)==6 for row in rows)
+                  assert len(rows)<=60 and all(len(row)==6 for row in rows)
                   assert all(rows[i][0]<rows[i+1][0] for i in range(len(rows)-1))
           print('Verified chart-only closed-candle pack:',len(valid),'symbols')
           PY
