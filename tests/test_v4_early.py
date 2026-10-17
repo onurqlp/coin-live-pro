@@ -19,9 +19,12 @@ def make_frame(tf,trend):
             'macd_12_26_9':{'hist_pct':.02},
             'fakeout_up_on_close':False,'fakeout_down_on_close':False}
 def candidate(side='LONG',trend='UP',risk=10):
+    frames={tf:make_frame(tf,trend) for tf in ('1W','1D','4H','1H','15m','5m')}
+    for frame in frames.values():
+        frame['macd_12_26_9']['hist_pct']=-.02 if side=='SHORT' else .02
     return {'symbol':'BTCUSDT','side':side,'quality':'COMPLETE',
             'structure_risk_score':risk,'observed_at_utc':iso(NOW-1000),
-            'frames':{tf:make_frame(tf,trend) for tf in ('1W','1D','4H','1H','15m','5m')}}
+            'frames':frames}
 def quote():
     return {'symbol':'BTCUSDT','volume':100_000_000,'price':100.,
             'spread_bps':1.,'listing_age_days':500,'instrument_state':'live'}
@@ -49,6 +52,8 @@ class TestEarlyResearch(unittest.TestCase):
     def test_one_primary_and_one_hour_support_is_enough(self):
         x=candidate()
         x['frames']['1D']['trend']='SIDEWAYS'
+        x['frames']['15m']['trend']='SIDEWAYS'
+        x['frames']['5m']['trend']='SIDEWAYS'
         result=early.detect(x,quote(),NOW)
         self.assertIsNotNone(result)
         self.assertEqual(result['research_tier'],'KIVILCIM')
