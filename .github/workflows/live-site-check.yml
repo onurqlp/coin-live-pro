@@ -7,6 +7,8 @@ on:
       - '.github/workflows/live-site-check.yml'
       - 'web/index.html'
       - 'web/app.js'
+      - 'web/chart-guidance.js'
+      - 'web/ui-refresh.css'
       - 'web/v4-ui.js'
       - 'web/watch-archive-ui.js'
       - 'web/release.json'
@@ -64,6 +66,8 @@ jobs:
           grep -q 'id="chartHostRadar"' /tmp/site.html
           grep -q 'id="chartHostAdvanced"' /tmp/site.html
           grep -q 'id="chartQuickFrames"' /tmp/site.html
+          grep -q 'id="chartScenario"' /tmp/site.html
+          grep -q 'id="v4StagePath"' /tmp/site.html || grep -q 'class="v4StagePath"' /tmp/site.html
           grep -q 'id="swingHistoryRows"' /tmp/site.html
           grep -q 'id="forwardRows"' /tmp/site.html
           grep -q 'id="routeStatus"' /tmp/site.html

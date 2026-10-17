@@ -20,6 +20,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - run: node --check web/chart-guidance.js
+      - run: node tests/chart-guidance.test.mjs
       - run: node --check web/app.js
       - run: node --check web/v4-ui.js
       - run: node --check web/watch-archive-ui.js

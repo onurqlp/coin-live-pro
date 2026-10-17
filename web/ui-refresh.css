@@ -261,3 +261,56 @@ footer{color:#aabed2;font-size:12px}
  .v4EarlyHeader h3{font-size:18px}
  .v4EarlyCard{padding:12px}
 }
+
+/* Main work order: strongest observed source stage first, earliest separate research last. */
+.v4StagePath{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:14px 0 7px}
+.v4StagePath .step{display:flex;flex-direction:column;gap:3px;min-width:0;
+ background:#14253a;border:1px solid #425d74;border-top:3px solid #7699b6;
+ border-radius:10px;padding:10px 12px;line-height:1.3}
+.v4StagePath .step b{font-size:12px;color:#eaf5ff}
+.v4StagePath .step small{font-size:11px;color:#b1c9d9}
+.v4StagePath .high{border-top-color:#4dd4a0}
+.v4StagePath .mid{border-top-color:#78cbfa}
+.v4StagePath .watch{border-top-color:#e9c17e}
+.v4StagePath .early{border-top-color:#b49bb4}
+.v4StageExplain{font-size:12px;line-height:1.6;color:#b7cbe1;margin:4px 0 13px}
+.v4TopRow{scroll-margin-top:110px}
+.v4TopRow>.v4Column{min-height:90px}
+.v4TopRow .v4Cards{max-height:325px}
+.v4EarlyArea{margin-top:20px;scroll-margin-top:85px}
+.v4EarlyArea .v4EarlyHeader h3{font-size:clamp(17px,2.15vw,22px)}
+/* Verified graph context and conditional ATR plan: cannot be confused with executed order. */
+.chartScenario{margin:10px 13px 0;padding:13px;border-radius:12px;background:#111f32;
+ border:1px solid #43607a;color:#eaf4ff;display:grid;gap:10px}
+.chartScenarioPending,.chartScenarioMissing{font-size:12px;color:#bdcfe0;line-height:1.6}
+.chartScenarioTop{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.chartScenarioTop b{font-size:15px;display:block}
+.chartScenarioTop small{display:block;font-size:11px;color:#b9cee0;margin-top:4px;max-width:500px}
+.chartScenarioUncertain{border:1px solid #947744;background:#3f3020;color:#ffdfa5;
+ border-radius:8px;padding:7px 10px;font-size:10px;font-weight:800;line-height:1.35}
+.chartScenarioThesis,.chartScenarioNext{font-size:12px;line-height:1.6;margin:0;color:#d2e4f1}
+.chartScenarioThesis strong,.chartScenarioNext strong{color:#f0faff}
+.chartScenarioLevels{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:7px}
+.chartScenarioLevel{min-width:0;display:grid;gap:2px;background:#0f1d2f;border:1px solid #365069;
+ border-left:3px solid #d8b579;border-radius:9px;padding:9px 10px}
+.chartScenarioLevel small{font-size:10px;letter-spacing:.015em;color:#bdd1e2}
+.chartScenarioLevel strong{font-size:14px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.chartScenarioLevel.threshold{border-left-color:#edc77d}
+.chartScenarioLevel.entry{border-left-color:#8bd2ef}
+.chartScenarioLevel.stop{border-left-color:#ff859e}
+.chartScenarioLevel.target{border-left-color:#51d8ad}
+.chartScenarioLevel.target strong{color:#7ce9c5}
+.chartScenarioLevel.stop strong{color:#ffafbf}
+.chartScenarioNext{border-top:1px solid #38536e;padding-top:9px}
+.chartScenarioFoot{font-size:11px;line-height:1.55;color:#b3c5db}
+#chartPanel #candleChart{margin-top:5px}
+@media(max-width:770px){
+ .v4StagePath{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+ .v4StagePath .step{padding:9px}
+ .v4StagePath .step b{font-size:11px}
+ .chartScenario{margin:8px 7px 0;padding:11px;gap:8px}
+ .chartScenarioLevels{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .chartScenarioLevel{padding:9px 8px}
+ .chartScenarioLevel strong{font-size:12px}
+}
+@media(max-width:350px){.v4StagePath{grid-template-columns:1fr 1fr}.chartScenarioLevels{grid-template-columns:1fr 1fr}}

@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 
 const html=fs.readFileSync('web/index.html','utf8');
 const code=fs.readFileSync('web/app.js','utf8');
+const guidance=fs.readFileSync('web/chart-guidance.js','utf8');
+new Function(guidance);
 const pilot=fs.readFileSync('web/pilot-ui.js','utf8');
 const router=fs.readFileSync('web/router.js','utf8');
 const v4code=fs.readFileSync('web/v4-ui.js','utf8');
@@ -27,7 +29,7 @@ assert.ok(html.includes('1H/15m TEYİT; 5m/1m ek kontrol.'),'Microframes used on
 assert.ok(html.includes('legacyTechnicalDisclosure')&&html.includes('legacyReportDisclosure'),'Technical/old reports must be collapsed, not deleted');
 assert.ok(html.includes('v4ObservationStatus')&&html.includes('<option value="3" selected>90 gün</option>'),'90-day observation default missing');
 assert.ok(!html.includes('BETA'),'No beta labels in released site');
-assert.ok(v4code.includes("select(symbol,'4H',false)"),'V4 opportunities must select SAME PAGE chart');
+assert.ok(v4code.includes("select(symbol,'4H',false,false,b.dataset.v4Side)"),'V4 opportunities must select SAME PAGE chart and the clicked LONG/SHORT direction');
 assert.ok(v4code.includes('showMarketSummary(r,manifest,stale)'),'V4 KPIs must render verified manifest data');
 assert.ok(v4code.includes("new Set(rows.filter(x=>x.side===side)"),'LONG / SHORT counts must deduplicate multi-strategy symbol');
 assert.ok(v4code.includes('store.initialChartSelected'),'Auto-select initial V4 candidate once');
@@ -93,7 +95,7 @@ for(const id of ['watchArchiveRefresh','watchArchiveRows','watchArchivePeriod','
 assert.ok(watchCode.includes("crypto.subtle.digest")&&watchCode.includes("'v4-watch-archive'"),'Archive must verify SHA256');
 assert.ok(html.includes('watch-archive-ui.js'),'Archive JavaScript missing');
 const ui=fs.readFileSync('web/ui-refresh.css','utf8');
-assert.ok(html.includes('ui-refresh.css?v=2'),'UI design tokens must be linked');
+assert.ok(html.includes('ui-refresh.css?v=3'),'UI design tokens must be linked');
 for(const id of ['v4RadarSearch','v4RadarSide','v4RadarFilterStatus'])
   assert.ok(ids.includes(id),'Radar search & side filters must be present: '+id);
 assert.ok(v4code.includes('applyRadarFilter();')&&v4code.includes("mainFrameSummary(x)"),
@@ -109,7 +111,20 @@ for(const id of ['v4Early','v4EarlyCount','v4EarlyStatus','v4EarlyLabel','v4Earl
 assert.ok(v4code.includes("readJson(k,m)")&&v4code.includes("'v4-early'"),'Early research must be SHA256 source verified');
 assert.ok(v4code.includes('no_paper_entries')||v4code.includes('paper_eligible===false'),'Early watch cannot become paper entry');
 assert.ok(v4code.includes('renderEarly(manifest,stale)'),'Early cards must respect V4 source freshness');
-assert.ok(html.indexOf('id="v4Early"')<html.indexOf('id="v4Spotlight"'),'Research hints must be visible ahead of strict zero-confirmation columns');
+assert.ok(html.indexOf('id="v4Spotlight"')<html.indexOf('id="v4Motion"')&&
+ html.indexOf('id="v4Motion"')<html.indexOf('id="v4Watch"')&&
+ html.indexOf('id="v4Watch"')<html.indexOf('id="v4Early"'),
+ 'Stage evidence order must be SPOTLIGHT -> MOTION -> WATCH -> EARLY');
+for(const id of ['chartScenario','v4StagePath'])assert.ok(html.includes('id="'+id+'"')||
+ html.includes('class="'+id+'"'),'Model scenario and stage staircase missing '+id);
+assert.ok(html.includes('chart-guidance.js?v=1')&&code.includes('CoinLiveChartGuidance?.build'),
+ 'Canvas must draw independent verified research thresholds on every selected timeframe');
+assert.ok(v4code.includes("'mtf'].map(k=>readJson(k,m))")&&v4code.includes('mtf.fetched_at!==m.started_at_utc'),
+ 'HTF model must be SHA-verified and stamped to manifest');
+assert.ok(code.includes('selectedSide')&&v4code.includes('b.dataset.v4Side'),
+ 'Clicked LONG/SHORT direction must stay selected through chart analysis');
+assert.ok(guidance.includes("ATR_RESEARCH_PROJECTION")&&guidance.includes("SOURCE_RESEARCH_LEVELS")&&
+ guidance.includes("NO_LEVEL"),'Do not fake targets or treat ATR projections as traded levels');
 assert.ok(!html.includes('Gerçek emir aç'),'No claims of real trading');
 console.log('PASS: Early LONG/SHORT lights independently research-only, plus V4 4.01 core.');
 

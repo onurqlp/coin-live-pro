@@ -22,7 +22,7 @@
  FUNDING_CROWDING:'Fonlama kalabalıklaşması',NOT_LIQUIDATION_PROOF:'Tasfiye kanıtı değil',
  BEARISH_DAILY_4H:'1D ve 4H aşağı yön',SUPPORT_CLOSED_BREAK:'Destek kapanışta kırıldı',
  SUPPORT_WATCH:'Destek kırılımı bekleniyor'};
- const store={radar:null,paper:null,shadow:null,lab:null,history:null,early:null,manifest:null,position:null,lastFetch:0,loading:false,initialChartSelected:false};
+ const store={radar:null,paper:null,shadow:null,lab:null,history:null,early:null,mtf:null,manifest:null,position:null,lastFetch:0,loading:false,initialChartSelected:false};
  window.CoinV4=store;
  function explanation(v){return (v?.reasons||[]).slice(0,3).map(s=>why[s]||s).join(' · ')||'Yeni kapanmış mum kanıtı bekleniyor';}
  const factorLabels={trend:'TREND',structure:'YAPI',volume:'HACİM',momentum:'MACD',liquidity:'LİKİDİTE'};
@@ -317,7 +317,7 @@
    for(const [id,items,empty] of groups)$(id).innerHTML=items.length?items.map(card).join(''):
      '<div class="v4Empty">'+safe(stale?'Merkezi veri eski; yeni aşama/işlem uygunluğu gösterilmez.':empty)+'</div>';
    const priorityShown=!stale&&Boolean((r.spotlight||[]).length||(r.motion||[]).length);
-   if($('v4PriorityArea'))$('v4PriorityArea').hidden=!priorityShown;
+   if($('v4PriorityArea'))$('v4PriorityArea').hidden=false; // preserve ranking even when top stages are empty
    if($('v4PriorityEmpty'))$('v4PriorityEmpty').hidden=priorityShown;
    $('v4WatchCount').textContent=r.counts?.watch??'—';
    $('v4MotionCount').textContent=stale?'—':r.counts?.motion??'—';
@@ -328,7 +328,7 @@
      const select=window.CoinLiveSelectSpark;
      if(typeof select!=='function')return;
      const symbol=b.dataset.v4Symbol;
-     select(symbol,'4H',false);
+     select(symbol,'4H',false,false,b.dataset.v4Side);
      document.querySelectorAll('[data-v4-symbol]').forEach(item=>
        item.classList.toggle('v4Selected',item.dataset.v4Symbol===symbol));
      const pane=$('chartHostRadar');
@@ -345,7 +345,7 @@
      const candidate=legacy||(!stale?store.early?.candidates?.[0]:null);
      if(candidate&&typeof window.CoinLiveSelectSpark==='function'){
        store.initialChartSelected=true;
-       window.CoinLiveSelectSpark(candidate.symbol,'4H',false,true);
+       window.CoinLiveSelectSpark(candidate.symbol,'4H',false,true,candidate.side);
      }
    }
  }
@@ -472,12 +472,13 @@
      if(!response.ok)throw Error('V4 henüz sunucuya yayınlanmadı');
      const m=await response.json();
      if(!m.publication_valid||m.model_version!=='4.0.0-manifest-a1')throw Error('V4 manifest geçersiz');
-     const [r,p,sh,lab,history,early]=await Promise.all(
-       ['v4-radar','v4-paper','v4-shadow','v4-lab','v4-history-index','v4-early'].map(k=>readJson(k,m)));
-     if([r,p,sh,lab,history,early].some(x=>x.scan_id!==m.scan_id))
+     const [r,p,sh,lab,history,early,mtf]=await Promise.all(
+       ['v4-radar','v4-paper','v4-shadow','v4-lab','v4-history-index','v4-early','mtf'].map(k=>readJson(k,m)));
+     if([r,p,sh,lab,history,early].some(x=>x.scan_id!==m.scan_id)||mtf.fetched_at!==m.started_at_utc)
        throw Error('V4 farklı tarama verileri karışmış');
-     store.manifest=m;store.radar=r;store.paper=p;store.shadow=sh;store.lab=lab;store.history=history;store.early=early;
+     store.manifest=m;store.radar=r;store.paper=p;store.shadow=sh;store.lab=lab;store.history=history;store.early=early;store.mtf=mtf;
      store.lastFetch=Date.now();drawBoard();renderDesk();renderLab();renderHistory();
+     window.CoinLivePro?.refreshChartGuide?.();
    }catch(error){
      $('v4Status').textContent='V4 veri kontrolü: '+error.message;
      $('v4PaperStatus').textContent='V4 sunucu verisi doğrulanamadı; yeni sanal sonuç yok';
