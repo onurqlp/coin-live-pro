@@ -1,20 +1,26 @@
 {
   "product_version": "4.01",
   "version_change_owner": "USER_APPROVAL_ONLY",
-  "release_id": "EARLY-20261017-1026",
-  "updated_at_utc": "2026-10-17T10:26:04.180Z",
+  "release_id": "UI-20261017-1045",
+  "updated_at_utc": "2026-10-17T10:45:20.075Z",
   "timestamp_basis": "UTC",
   "market_data_timestamp_separate": true,
   "change_summary": [
-    "12 saatlik arşiv denetimi: çok sayıda WATCH kaydına rağmen sıfır üst aşama; ayrı erken sinyal akışı",
-    "Gerçek kapanmış 1H/4H/1D mumlardan daha cömert KIVILCIM / ERKEN SİNYAL / IŞIK GÜÇLENİYOR araştırması",
-    "LONG/SHORT parite ve yön tekilleştirilmiş, ilk gözlem UTC ve fiyatıyla kalıcı arşiv",
-    "Zayıf hacim, haftalık ters yön ve eksik zaman dilimi şeffaf; araştırma puanı kazanma olasılığı değil",
-    "V4 sanal kasa, gerçek emir yasağı, eski WATCH arşivi ve aşama teyit kuralları değişmedi"
+    "Kanıt gücüne göre önce GÖZ ÖNÜNDE, HAREKET, İZLE, en sonda ayrı erken KIVILCIM araştırması",
+    "Üst aşama boş olsa bile görünür; tahmin gücü ile kazanma olasılığı karıştırılmıyor",
+    "Tüm grafik periyotlarında gerçek 1H/4H/1D kırılım eşikleri ve mevcut koşullu V4 seviyeleri",
+    "Teyitli plan olmayanlarda yalnız kapanmış 1H ATR verisine dayalı açıklamalı koşullu stop / TP1/TP2/TP3",
+    "Seçilen LONG/SHORT korunur, fiyat hassasiyeti küçük coinlerde kaybolmaz; kaynak eksikse sayı uydurulmaz",
+    "Grafikte model gerekçesi, sonraki 1H eşik şartı ve kaynak yaşı gösterilir; 4.01 ürün sürümü, paper ve risk kuralları korunur"
   ],
   "no_real_orders": true,
   "not_a_trading_signal": true,
   "change_log": [
+    {
+      "release_id": "UI-20261017-1045",
+      "updated_at_utc": "2026-10-17T10:45:20.075Z",
+      "summary": "Ana ekran güç sıralaması: GÖZ ÖNÜNDE→HAREKET→İZLE→KIVILCIM. Grafiklerde doğrulanmış eşik + V4 hedefleri veya yalnız koşullu 1H ATR senaryo stop/TP'leri ve modelin neden düşündüğü. Risk/paper/ürün sürümü değişmedi."
+    },
     {
       "release_id": "EARLY-20261017-1026",
       "updated_at_utc": "2026-10-17T10:26:04.180Z",
