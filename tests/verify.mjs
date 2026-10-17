@@ -93,7 +93,7 @@ for(const id of ['watchArchiveRefresh','watchArchiveRows','watchArchivePeriod','
 assert.ok(watchCode.includes("crypto.subtle.digest")&&watchCode.includes("'v4-watch-archive'"),'Archive must verify SHA256');
 assert.ok(html.includes('watch-archive-ui.js'),'Archive JavaScript missing');
 const ui=fs.readFileSync('web/ui-refresh.css','utf8');
-assert.ok(html.includes('ui-refresh.css?v=1'),'UI design tokens must be linked');
+assert.ok(html.includes('ui-refresh.css?v=2'),'UI design tokens must be linked');
 for(const id of ['v4RadarSearch','v4RadarSide','v4RadarFilterStatus'])
   assert.ok(ids.includes(id),'Radar search & side filters must be present: '+id);
 assert.ok(v4code.includes('applyRadarFilter();')&&v4code.includes("mainFrameSummary(x)"),
