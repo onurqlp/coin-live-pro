@@ -314,3 +314,159 @@ footer{color:#aabed2;font-size:12px}
  .chartScenarioLevel strong{font-size:12px}
 }
 @media(max-width:350px){.v4StagePath{grid-template-columns:1fr 1fr}.chartScenarioLevels{grid-template-columns:1fr 1fr}}
+
+/* Compact desk. Keep ALL research and legacy features; remove repeated first-screen chrome. */
+.shell{max-width:1540px;padding:9px clamp(11px,2.25vw,27px) 24px}
+.minimalHeader{position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;
+ padding:4px 0 10px;min-height:57px;flex-wrap:nowrap}
+.minimalHeader .brand{font-size:clamp(23px,2.45vw,30px);line-height:1.1}
+.minimalHeader .brand small{font-size:11px;font-weight:750;letter-spacing:.02em;color:#9fbed5}
+.headerActions{display:flex;align-items:center;gap:8px;min-width:0}
+.minimalHeader .source{max-width:178px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+ padding:5px 9px;font-size:10px;border-color:#2c4c60;background:#101e2d}
+#refresh.minimalRefresh{min-width:37px;max-width:37px;height:37px;min-height:37px;
+ padding:0!important;border-radius:9px;font-size:0!important;line-height:1;
+ background:#173148;border:1px solid #3c627f;color:#e9f8ff;display:grid;place-items:center}
+#refresh.minimalRefresh::before{content:"↻";font-size:21px}
+#refresh.minimalRefresh:hover{background:#24506b}
+.headerMore{position:relative;flex:0 0 auto}
+.headerMore>summary{display:grid;place-items:center;cursor:pointer;list-style:none;
+ width:37px;height:37px;border-radius:9px;border:1px solid #3a566c;
+ background:#14263a;color:#dceafb;font-size:24px;line-height:1}
+.headerMore>summary::-webkit-details-marker{display:none}
+.headerMore>summary::after{content:none}
+.headerMorePanel{position:absolute;top:calc(100% + 8px);right:0;z-index:90;
+ width:min(365px,calc(100vw - 24px));padding:13px;display:flex;flex-direction:column;align-items:stretch;gap:11px;
+ border:1px solid #456780;background:#12253a;border-radius:12px;box-shadow:0 19px 55px #000a}
+.headerMorePanel .quoteClock{width:auto!important;order:unset!important;text-align:left;font-size:11px}
+.headerMorePanel .releaseMeta{margin:0;gap:6px;display:grid}
+.headerMorePanel .releaseHistory{margin:0}
+.headerMorePanel #calculator{min-height:38px;border:1px solid #34516a;border-radius:9px;background:#192e45;
+ color:#cbdfee;font-size:12px;padding:8px 11px;cursor:pointer;text-align:left}
+.headerSystemLink{font-size:12px}
+.workspaceNav{top:0;gap:2px;padding:3px 0 6px;background:#0a1525;border-bottom:1px solid #273e53;
+ overflow:auto;scrollbar-width:none;white-space:nowrap}
+.workspaceNav::-webkit-scrollbar{display:none}
+.workspaceNav a{border:none;background:transparent!important;box-shadow:none!important;min-height:38px;
+ border-radius:6px;font-weight:650;color:#9eb5cb!important;padding:8px 12px;font-size:12px}
+.workspaceNav a.active,.workspaceNav a[aria-current="page"]{color:#f4faff!important;
+ background:#1a344c!important;box-shadow:inset 0 -2px #76c9ed!important}
+.workspaceNav a:hover{background:#13283d!important;color:#ebf7ff!important}
+.routeStatus{display:none!important}
+.banner:not(.stale):not(.warn){display:none!important}
+.banner.stale,.banner.warn{margin:7px 0;padding:9px 12px;font-size:11px}
+.v4Area{margin:9px 0}
+.v4Header{display:flex;align-items:center;justify-content:space-between;gap:6px 20px;
+ margin:0;flex-wrap:wrap}
+.v4Header h2{font-size:clamp(19px,2.4vw,24px);margin:0}
+.v4Header p{display:none}
+.v4Counts{gap:6px;align-items:center;justify-content:flex-end;margin-left:auto}
+.v4Counts span{border-radius:7px;background:#102034;padding:4px 7px;font-size:11px;
+ border:1px solid #304b63;color:#bcd0df;line-height:1.25}
+.v4Counts span:nth-child(n+4){background:#102034;border-color:#564d40;color:#e1c898}
+.v4Counts strong{font-size:12px}
+.v4Counts .v4CountHigh{border-color:#37785e;color:#90dfbd}
+.v4Counts .v4CountMotion{border-color:#40758b;color:#9fdbef}
+.v4Status{display:inline-block;width:auto;font-size:11px;font-weight:500;
+ margin:4px 0 9px;padding:1px 0;color:#a9c0d3!important;border:none!important;background:none!important}
+.v4Status.v4Stale{color:#ffd394!important;font-weight:800}
+.v4RadarTools{display:flex;align-items:center;gap:8px;flex-wrap:nowrap;margin:0 0 10px;
+ padding:0;background:transparent;border:none}
+.v4RadarTools label{display:block;flex:1 1 auto}
+.v4RadarTools label.v4DirectionField{flex:0 0 155px}
+.v4RadarTools .fieldLabel{display:none}
+.v4RadarTools input,.v4RadarTools select{min-height:39px!important;border-radius:8px!important;
+ font-size:12px!important;background:#102134!important;padding:7px 10px!important}
+.visuallyHidden{position:absolute!important;width:1px!important;height:1px!important;
+ padding:0!important;margin:-1px!important;overflow:hidden!important;
+ clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+#v4PriorityEmpty{display:none!important}
+.v4TopRow{margin:0 0 7px;gap:9px}
+.v4TopRow[hidden]{display:none!important}
+.v4LowerRow{gap:9px}
+.v4Column{border-radius:10px;box-shadow:none}
+.v4Column h3{font-size:12px;padding:9px 11px;background:#15293b}
+.v4Column h3 small{display:none}
+.v4Cards{gap:5px;padding:6px}
+.v4Opportunity{cursor:pointer;padding:10px;border-radius:8px;background:#10253a;
+ border-color:#304a60;box-shadow:none}
+.v4Opportunity:hover,.v4Opportunity:focus-visible{background:#18334a;border-color:#78bce7}
+.v4CardTop b{font-size:13px}
+.v4CardTop .v4Small{font-size:10px}
+.v4Opportunity .v4Sub{display:none}
+.v4Opportunity .v4Reason{font-size:11px;margin:5px 0;line-height:1.4;
+ display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.v4Opportunity .v4CardScore{font-size:11px;gap:5px;margin:3px 0}
+.v4Opportunity .v4CardScore strong{font-size:12px}
+.v4Opportunity .v4TrendMini{gap:5px;margin:5px 0}
+.v4Opportunity .v4TrendMini span{padding:2px 6px;font-size:10px;min-width:48px}
+.v4Opportunity .v4TrendMini strong{font-size:12px}
+.v4Opportunity>.v4Meta{display:none}
+.v4Opportunity .v4GoChart{display:inline-flex;align-items:center;justify-content:flex-start;
+ width:auto;min-height:28px;padding:2px 0;margin:4px 0 0;background:none;border:none;
+ font-size:11px;font-weight:750;color:#a0dfff;border-radius:0}
+.v4Opportunity .v4GoChart:hover{background:none;text-decoration:underline}
+.v4Opportunity .v4GoChart.v4Selected{background:none}
+.v4Opportunity .v4Evidence{margin:5px 0;border-radius:7px}
+.v4Opportunity .v4Evidence summary{padding:6px 0;font-size:11px}
+.v4EarlyArea{padding:11px;margin:12px 0;border-color:#576374;background:#101f2e;box-shadow:none}
+.v4EarlyHeader h3{font-size:15px!important;color:#f5dbb0}
+.v4EarlyHeader p{font-size:11px;line-height:1.35;margin:4px 0}
+.v4EarlyIndicator{font-size:10px;padding:4px 7px}
+.v4EarlyStatus{display:none}
+.v4EarlyGrid{gap:6px;max-height:480px}
+.v4EarlyCard .v4EarlyReason{font-size:11px;margin:5px 0}
+.v4EarlyCard .v4EarlyNext{font-size:11px;padding:5px 7px;margin:4px 0}
+.v4EarlyCard .v4Meta{display:none}
+.v4EarlyHistoryHint{font-size:10px;color:#8ea9be}
+.v4ChartHost #chartPanel{border-radius:10px}
+.v4ChartHost #chartPanel .panelHead{padding:9px 11px}
+.v4ChartHost .panelHead h2{font-size:14px}
+.v4ChartHost .panelHead p{display:none}
+.chartControls{gap:7px;padding:8px 10px}
+.chartControls label{font-size:10px}
+.chartControls select{min-width:0;max-width:none;flex:1;min-height:39px;font-size:12px}
+.chartControls #tvLink{font-size:10px}
+.quickTfOptional{display:none!important} /* all timeframes remain in #chartTf */
+.chartScenario{gap:7px;margin:6px 9px 0;padding:9px;border:1px solid #314c63;box-shadow:none;border-radius:8px}
+.chartScenarioTop b{font-size:13px}
+.chartScenarioTop small{font-size:10px}
+.chartScenarioThesis,.chartScenarioNext{font-size:11px;line-height:1.4}
+.chartScenarioLevels{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+.chartScenarioLevel{padding:6px 7px;border-radius:6px}
+.chartScenarioLevel small{font-size:9px}
+.chartScenarioLevel strong{font-size:11px}
+.chartScenarioFoot{font-size:10px}
+.radarMetaDetails{margin:12px 0;border-top:1px solid #263c54}
+.radarMetaDetails>summary{padding:10px 0;font-size:11px;color:#88a7c0;cursor:pointer}
+.radarMetaBody{display:grid;gap:12px;padding:7px 0}
+.v4MetaCounts{display:flex;flex-wrap:wrap;gap:12px;font-size:11px;color:#a9c0d3}
+.v4StagePath{margin:4px 0}
+.v4StageExplain{font-size:11px}
+.v4Guide{margin:0}
+.v4MarketSummary{margin:0}
+.v4Legend{margin:0}
+.v4UtcBar{margin:0}
+.v4Observation{margin:0}
+@media(max-width:820px){
+ .v4Header{align-items:flex-start}
+ .v4Counts{width:100%;margin-left:0;justify-content:flex-start}
+ .v4Counts span{font-size:10px}
+ .chartScenarioLevels{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:520px){
+ .minimalHeader .source{max-width:92px;font-size:9px}
+ .minimalHeader .brand{font-size:23px}
+ .minimalHeader .brand small{font-size:9px}
+ .headerActions{gap:5px}
+ .workspaceNav a{padding:7px 9px;font-size:11px;min-height:36px}
+ .v4RadarTools label.v4DirectionField{flex-basis:115px}
+ .v4Counts{gap:4px}
+ .v4Counts span{font-size:9px;padding:5px}
+ .v4Counts strong{font-size:11px}
+ .v4TopRow{grid-template-columns:1fr}
+ .v4LowerRow{grid-template-columns:1fr}
+ .v4EarlyHeader{gap:5px}
+ .v4EarlyIndicator{white-space:normal}
+ .chartControls #tvLink{display:none}
+}
