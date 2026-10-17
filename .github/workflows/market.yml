@@ -199,11 +199,19 @@ jobs:
                   assert all(rows[i][0]<rows[i+1][0] for i in range(len(rows)-1))
           print('Verified chart-only closed-candle pack:',len(valid),'symbols')
           PY
+      - name: Produce independent forward-evidence ops report (non-blocking)
+        run: |
+          if python3 scripts/quant_report.py; then
+            echo "Supplementary report regenerated from verified market data"
+          else
+            echo "::warning::Supplementary report failed; core market publication continues"
+          fi
       - name: Publish only validated data
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if [ -f web/data/ops-report.json ]; then git add web/data/ops-report.json; fi
           git add web/data/market.json
           git add web/data/mtf.json web/data/chart-pack.json web/data/paper.json web/data/health.json
           git add web/data/v4-oi.json web/data/v4-radar.json web/data/v4-paper.json

@@ -1,3 +1,6 @@
+
+> **Operational guide (17.10.2026):** [COIN.LIVE 4.03 Operations & Recovery](docs/OPERATIONS.md). The separate read-only Quant evidence report is at `web/data/ops-report.json` after the next successful market run. No real orders.
+
 # COIN.LIVE PRO 4.0 — 90 günlük gözlem
 
 **Üretim:** [COIN.LIVE PRO 4.0](https://onurqlp.github.io/coin-live-pro/). Canlı V4 araştırma sistemi otomatik veri biriktirir; işlem yapmaz.

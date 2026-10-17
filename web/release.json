@@ -1,11 +1,12 @@
 {
   "product_version": "4.03",
   "version_change_owner": "AUTOMATIC_MINOR_WITHIN_4",
-  "release_id": "UX-20261017-1249",
-  "updated_at_utc": "2026-10-17T12:49:20Z",
+  "release_id": "OPS-20261017-4_03",
+  "updated_at_utc": "2026-10-17T16:34:08.491Z",
   "timestamp_basis": "UTC",
   "market_data_timestamp_separate": true,
   "change_summary": [
+    "4.03 operasyonel sertleştirme: veri akışında 220 bilet sınırı regresyonu düzeltildi; bağımsız watchdog, günlük/haftalık quant raporu, 90 gün tutulabilen günlük yedek artifact, CodeQL/Dependabot, çakışmasız MAKINE yayın yolu ve kaynak güvenilirliği testi eklendi.",
     "4.03 GELDİ otomatik sanal emir talebi: kapanmış 1H eşiği doğrulanmış her benzersiz GELDİ sinyalinde anında kayıt; ileri 5m kapanışı olmadan sahte dolum yok.",
     "4.02 erken sanal işlemler ve arşiv korunarak 4.03'e taşındı; GELDİ giriş kohortu araştırma denemelerinden ayrıldı.",
     "UTC gün gün rapor: GELDİ sayısı, sanal giriş, kapanan, gerçekleşen net PnL ve açık PnL fonlama hariç.",
@@ -19,6 +20,11 @@
   "no_real_orders": true,
   "not_a_trading_signal": true,
   "change_log": [
+    {
+      "release_id": "OPS-20261017-4_03",
+      "updated_at_utc": "2026-10-17T16:34:08.491Z",
+      "summary": "Mevcut 4.03 stratejileri, ana sanal kasa ve arşivleri değiştirmeyen altyapı sertleştirmesi. Gerçek işlem yok; harici kalıcı yedek/Google V4 kurulumları ayrıca gerekir."
+    },
     {
       "release_id": "UX-20261017-1249",
       "updated_at_utc": "2026-10-17T12:49:20Z",

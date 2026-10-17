@@ -3,9 +3,13 @@ on:
   push:
     paths:
       - 'engine/**'
+      - 'scripts/**'
       - 'web/**'
       - 'tests/**'
+      - '.github/workflows/**'
       - '.github/workflows/quality.yml'
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
@@ -32,4 +36,6 @@ jobs:
       - run: node --check web/router.js
       - run: node tests/verify.mjs
       - run: python3 -m py_compile engine/collector.py engine/mtf.py engine/swing.py engine/spark.py engine/forward.py engine/paper.py engine/health.py engine/v4_strategies.py engine/v4_lifecycle.py engine/v4_paper.py engine/v4_shadow.py engine/v4_forward.py engine/v4_oi.py engine/v4_lab.py engine/v4_publication.py engine/v4_historical.py engine/v4_anomaly.py engine/v4_context.py engine/v4_watch_archive.py engine/v4_early.py engine/v4_spark_paper.py engine/v4_spark_review.py
+      - run: cp integrations/google-v4-sync.gs /tmp/coin-live-v4-sync.js && node --check /tmp/coin-live-v4-sync.js
+      - run: python3 -m py_compile scripts/quant_report.py scripts/watchdog.py
       - run: python3 -m unittest discover -s tests -v

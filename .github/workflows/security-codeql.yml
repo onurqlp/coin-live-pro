@@ -1,0 +1,33 @@
+name: COIN.LIVE — CodeQL Security
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'engine/**'
+      - 'scripts/**'
+      - 'web/**.js'
+      - '.github/workflows/security-codeql.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'engine/**'
+      - 'scripts/**'
+      - 'web/**.js'
+  schedule:
+    - cron: '29 4 * * 2'
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+jobs:
+  analyze:
+    name: CodeQL (Python and JavaScript)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: python,javascript-typescript
+      - uses: github/codeql-action/analyze@v3
