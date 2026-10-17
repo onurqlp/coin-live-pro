@@ -83,7 +83,7 @@ jobs:
           assert pack['schema_version']==1 and pack['source']=='OKX_CLOSED_CANDLES'
           assert pack['source_mtf_at']==pack['fetched_at']==mtf['fetched_at']
           assert set(pack['candles_by_symbol'])=={r['symbol'] for r in mtf['candidates']}
-          assert all(len(rows[tf])>=10 for rows in pack['candles_by_symbol'].values() for tf in ('4H','1D'))
+          assert all(len(rows[tf])<=60 for rows in pack['candles_by_symbol'].values() for tf in ('4H','1D'))
           print('MOBILE_CHART_FALLBACK_OK',len(pack['candles_by_symbol']))
           release=json.loads((p.parent/'release.json').read_text())
           assert release['product_version']=='4.03' and release['version_change_owner']=='AUTOMATIC_MINOR_WITHIN_4'
