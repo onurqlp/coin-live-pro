@@ -573,3 +573,298 @@ footer{color:#aabed2;font-size:12px}
 .sparkPaperPanel .sparkResearchHistory>summary{cursor:pointer;color:#9fc9e3;font-size:12px;padding:11px 0}
 .sparkTicket span{overflow-wrap:anywhere}
 @media(max-width:650px){.sparkDailyStrip{grid-template-columns:repeat(2,minmax(0,1fr))}.sparkDailyStrip .sparkMetric strong{font-size:14px}}
+
+
+/* OCT 2026 · Institutional trading research UI. One system, three viewports. */
+:root{
+ --bg:#0b111a;--panel:#101b28;--panel2:#142338;--line:#2a3d50;
+ --text:#edf4fb;--muted:#a6bbcf;--blue:#8cbfe4;
+ --green:#5bd7aa;--red:#f78e9a;--amber:#e7c383;
+}
+html{scroll-padding-top:76px}
+body{
+ background:#0b111a;
+ color:#edf4fb;
+ font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+ -webkit-font-smoothing:antialiased;
+}
+.shell{max-width:1580px}
+.header{border-bottom:1px solid #273d50}
+.minimalHeader .brand{font-weight:820;letter-spacing:-.85px}
+.minimalHeader .brand span{color:#85b9dd}
+.workspaceNav{
+ border-bottom:1px solid #2b4052;
+ background:#0d1723;
+ padding:8px 2px;
+}
+.workspaceNav a{
+ border:1px solid transparent;
+ border-radius:8px;
+ color:#a9bdce;
+ font-weight:650;
+ letter-spacing:0;
+}
+.workspaceNav a.active,
+.workspaceNav a[aria-current=page]{
+ color:#f3f8fd;
+ background:#1d3247;
+ border-color:#38536b;
+}
+.routeStatus{color:#bac9d6;border-color:#263a4c}
+.routeStatus small{color:#9eb5c7}
+.banner{background:#122131;border-color:#314b60}
+.banner.live{background:#112823;border-color:#2e6656}
+.banner.stale{background:#302128;border-color:#7c4b59}
+.v4Header h2,.pageIntro h1{letter-spacing:-.55px;font-weight:740}
+.v4Header p{color:#a6b9c8}
+.v4Status,.sparkDailyStrip .sparkMetric{
+ background:#112234;border-color:#294357;
+}
+.sparkActionBar{border-color:#294153}
+#sparkCompare{
+ background:#234963;
+ color:#f4faff;
+ border-color:#3e7697;
+ font-weight:700;
+}
+#sparkCompare:hover{background:#2b5875}
+.sparkFocus{
+ grid-template-columns:minmax(310px,.9fr) minmax(0,1.35fr);
+ gap:14px;
+}
+.sparkFocus .v4EarlyArea,.sparkFocus .v4ChartHost #chartPanel{
+ background:#111e2d;
+ border:1px solid #30485c;
+ border-radius:12px;
+ box-shadow:none;
+}
+.sparkFocus .v4EarlyGrid{
+ scrollbar-color:#425a71 transparent;
+}
+.sparkLane,.v4Opportunity{
+ box-shadow:none;
+ background:#132337;
+ border-color:#30485a;
+}
+.sparkLane h4{
+ font-weight:720;
+ letter-spacing:-.1px;
+ background:#1a2e42;
+}
+.sparkLane.tier3{border-color:#326b5e}
+.sparkLane.tier2{border-color:#3a6680}
+.sparkLane.tier1{border-color:#756448}
+.sparkLaneCards .v4Opportunity{
+ transition:background-color .13s ease,border-color .13s ease;
+}
+.sparkLaneCards .v4Opportunity:hover{border-color:#6891ac;background:#192e43}
+.v4Opportunity .v4GoChart{
+ min-height:38px;
+ padding:6px 11px;
+ margin-top:9px;
+ border:1px solid #3c6784;
+ background:#1a3951;
+ color:#d4ecff;
+ border-radius:7px;
+ font-size:12px;
+ font-weight:720;
+ text-decoration:none;
+}
+.v4Opportunity .v4GoChart::after{content:" →";margin-left:6px}
+.v4Opportunity .v4GoChart:hover{
+ background:#254f6a;
+ text-decoration:none;
+ border-color:#6eabc9;
+}
+.v4Opportunity .v4GoChart:focus-visible,
+#tvLink:focus-visible,
+.workspaceNav a:focus-visible{
+ outline:2px solid #b7deff;
+ outline-offset:3px;
+}
+#chartPanel{
+ overflow:hidden;
+ border-color:#344f65;
+ background:#101e2d;
+}
+#chartPanel .panelHead{
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ gap:12px;
+ background:#142539;
+ border-bottom:1px solid #304759;
+}
+#chartPanel .panelHead h2{font-size:17px;font-weight:730}
+#chartPanel .panelHead p{
+ display:block;
+ font-size:11px;
+ color:#9eb7c9;
+ margin-top:2px;
+}
+.chartDataStatus{
+ display:inline-flex;
+ align-items:center;
+ gap:7px;
+ font-size:11px;
+ line-height:1.3;
+ color:#b7d1e2;
+ white-space:normal;
+ text-align:right;
+}
+.chartDataStatus::before{
+ content:"";
+ width:7px;height:7px;flex:none;
+ border-radius:50%;
+ background:#8eaabd;
+}
+.chartDataStatus[data-state=ready]::before{background:#5bd7aa}
+.chartDataStatus[data-state=snapshot]::before{background:#e7c383}
+.chartDataStatus[data-state=unavailable]::before{background:#f78e9a}
+.chartControls{display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:11px 13px}
+.chartControls label{
+ color:#9cb2c5;
+ font-size:11px;
+ letter-spacing:.25px;
+}
+.chartControls select{
+ flex:0 1 auto;
+ width:auto;
+ min-width:122px;
+ max-width:calc(50% - 35px);
+ min-height:40px;
+ padding:8px 31px 8px 10px;
+ font-size:13px;
+ border:1px solid #49637c;
+ background-color:#152b3f;
+ color:#edf6fd;
+ border-radius:7px;
+}
+.chartControls #tvLink{
+ display:inline-flex!important;
+ align-items:center;
+ margin-left:auto;
+ font-size:11px;
+ text-decoration:none;
+ color:#b2dcfa;
+ border-bottom:1px solid transparent;
+}
+.chartControls #tvLink:hover{border-bottom-color:#b2dcfa}
+.chartScenario{
+ background:#111f30;
+ border-color:#304a5e;
+ border-radius:9px;
+}
+#chartPanel #candleChart{
+ display:block;
+ width:100%;
+ max-width:100%;
+ min-height:0;
+ background:#0d1927;
+ touch-action:pan-y;
+}
+#chartPanel .chartFoot{
+ overflow-wrap:anywhere;
+ color:#a8bed0;
+ font-size:11px;
+ line-height:1.5;
+}
+#chartHostAdvanced #chartPanel{
+ max-width:100%;
+ margin-top:0;
+}
+#view-grafikler .chartsLayout{
+ width:100%;
+ min-width:0;
+ margin:0 0 15px;
+}
+.pageIntro{
+ border-color:#31475a;
+ border-radius:12px;
+ background:#111f2e;
+ box-shadow:none;
+}
+.pageIntro h1{font-size:clamp(21px,2.4vw,30px)}
+.pageIntro p{line-height:1.55}
+@media(min-width:1280px){
+ .sparkFocus{grid-template-columns:minmax(340px,.82fr) minmax(0,1.3fr)}
+ #chartPanel .panelHead{padding:13px 16px}
+ .sparkFocus .v4EarlyGrid{max-height:780px}
+}
+@media(min-width:931px) and (max-width:1279px){
+ .sparkFocus{grid-template-columns:minmax(295px,.9fr) minmax(0,1.1fr)}
+}
+@media(max-width:930px){
+ .sparkFocus{display:flex;flex-direction:column;gap:12px}
+ .sparkFocus>#chartHostRadar{order:-1;width:100%}
+ .sparkFocus>.v4EarlyArea{width:100%}
+ .sparkFocus .v4EarlyGrid{max-height:520px}
+ .chartDataStatus{max-width:42%}
+ #chartHostAdvanced #chartPanel{margin-top:0}
+}
+@media(max-width:680px){
+ .shell{padding:10px 12px 26px}
+ .workspaceNav{
+  position:sticky;
+  top:0;
+  z-index:20;
+  display:flex;
+  flex-wrap:nowrap;
+  overflow-x:auto;
+  gap:5px;
+  overscroll-behavior-x:contain;
+  -webkit-overflow-scrolling:touch;
+  padding:8px 0;
+ }
+ .workspaceNav a{
+  flex:0 0 auto;
+  font-size:12px;
+  padding:10px 13px;
+  min-height:44px;
+ }
+ .routeStatus{font-size:11px}
+ .sparkActionBar{align-items:center}
+ #sparkCompare{min-width:0;min-height:44px}
+ .sparkFocus{gap:10px}
+ .sparkFocus .v4EarlyGrid{max-height:530px}
+ .sparkLaneCards .v4Opportunity{padding:12px}
+ .v4Opportunity .v4GoChart{min-height:44px;padding:9px 12px;font-size:13px}
+ #chartPanel .panelHead{
+  padding:12px;
+  flex-wrap:wrap;
+  align-items:flex-start;
+ }
+ #chartPanel .panelHead h2{font-size:17px}
+ .chartDataStatus{max-width:100%;text-align:left;font-size:11px}
+ .chartControls{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;padding:12px}
+ .chartControls label{font-size:10px;align-self:end}
+ .chartControls select{
+  min-width:0;max-width:100%;width:100%;min-height:44px;
+  padding:10px 8px;
+  font-size:13px;
+ }
+ .chartControls #tvLink{
+  grid-column:1/-1;
+  margin:4px 0 0;
+  min-height:36px;
+  justify-self:start;
+  font-size:12px;
+ }
+ .chartScenario{margin:8px 10px;padding:9px}
+ .chartScenarioLevels{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .indicatorSwitch{justify-content:flex-start;margin:10px 13px;min-height:34px;font-size:12px}
+ #chartPanel .chartFoot{padding:10px 12px;font-size:11px}
+ #chartHostAdvanced{margin-top:10px}
+ #view-grafikler .pageIntro{margin:10px 0;padding:14px}
+ #view-grafikler .pageIntro p{font-size:12px}
+ .pageIntro h1{font-size:20px}
+}
+@media(max-width:360px){
+ .shell{padding-inline:9px}
+ .chartControls{gap:5px}
+ .sparkActionBar{gap:6px}
+ #sparkCompare{font-size:10px}
+}
+@media(prefers-reduced-motion:reduce){
+ .sparkLaneCards .v4Opportunity{transition:none}
+}
