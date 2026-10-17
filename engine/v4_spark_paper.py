@@ -16,7 +16,7 @@ import v4_early
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 DATA=ROOT/'web'/'data'
 ARCH=ROOT/'archive'/'v4-spark-paper-ledger.json'
-VERSION='4.0.2-spark-paper-a1'
+VERSION='4.0.3-spark-paper-a1'
 BAR=300000
 DAY=86400000
 NOTIONAL=10.0
@@ -59,6 +59,71 @@ def ledger_stats(tickets):
             'realized_net_usdt':round(realized,5),'unrealized_net_usdt':round(floating,5),
             'open_reference_exposure_usdt':round(exposure,4),
             'estimated_fees_usdt':round(fees,5)}
+def utc_day(value):
+    try:
+        ts=dt.datetime.fromisoformat(str(value).replace('Z','+00:00'))
+        return ts.astimezone(dt.timezone.utc).date().isoformat() if ts.tzinfo else None
+    except (ValueError,TypeError,OverflowError):return None
+
+def compute_daily(tickets,now_ms):
+    """UTC cohort and cash results from immutable events, never price backfill.
+
+    Realized PnL is booked on exit dates, including partial TPs. Open mark PnL
+    is separate and may be stale. No daily profit is invented for missing data.
+    """
+    today=dt.datetime.fromtimestamp(now_ms/1000,dt.timezone.utc).date().isoformat()
+    groups={}
+    def day(k):
+        if k not in groups:
+            groups[k]={'date_utc':k,'geldi':0,'all_sparks':0,'new_opened':0,
+                'new_geldi_opened':0,'closed':0,'geldi_closed':0,
+                'positive_closures':0,'negative_closures':0,
+                'realized_net_usdt':0.0,'geldi_realized_net_usdt':0.0,
+                'unrealized_geldi_usdt':0.0,'unrealized_all_usdt':0.0,
+                'waiting_geldi':0,'blocked_geldi':0}
+        return groups[k]
+    for t in tickets:
+        is_geldi=t.get('entry_class')=='GELDI'
+        first=utc_day(t.get('signal_at_utc'))
+        if first:
+            a=day(first)
+            if is_geldi:
+                a['geldi']+=1
+                if t['status']=='WAITING_FUTURE_BAR':a['waiting_geldi']+=1
+                if t['status'] in ('INVALID_LEVEL','CAPACITY_BLOCKED','DATA_GAP'):
+                    a['blocked_geldi']+=1
+            else:a['all_sparks']+=1
+        opened=utc_day(t.get('filled_at_utc'))
+        if opened:
+            a=day(opened);a['new_opened']+=1
+            if is_geldi:a['new_geldi_opened']+=1
+        if t['status']=='OPEN':
+            u=float(t.get('unrealized_net_usdt') or 0)
+            day(today)['unrealized_all_usdt']+=u
+            if is_geldi:day(today)['unrealized_geldi_usdt']+=u
+        for e in t.get('exits',[]):
+            exit_day=utc_day(e.get('closed_at_utc'))
+            if exit_day:
+                a=day(exit_day);net=float(e.get('net_usdt') or 0)
+                a['realized_net_usdt']+=net
+                if is_geldi:a['geldi_realized_net_usdt']+=net
+        if t['status']=='CLOSED':
+            key=utc_day(t.get('closed_at_utc'))
+            if key:
+                a=day(key);a['closed']+=1
+                if is_geldi:a['geldi_closed']+=1
+                net=float(t.get('realized_net_usdt') or 0)
+                a['positive_closures']+=int(net>0);a['negative_closures']+=int(net<0)
+    day(today)
+    for a in groups.values():
+        for k in ('realized_net_usdt','geldi_realized_net_usdt','unrealized_all_usdt','unrealized_geldi_usdt'):
+            a[k]=round(a[k],7)
+    days=sorted(groups.values(),key=lambda x:x['date_utc'],reverse=True)
+    return {'timezone':'UTC','today_utc':today,'today':groups[today],
+            'days':days[:90],'all_time_days':len(days),'per_event_deduplicated':True,
+            'realized_assigned_to_exit_day':True,'funding_state':'UNMODELED',
+            'paper_intent_not_guaranteed_fill':True}
+
 def settle(t,raw,share,label,ts):
     side=1 if t['side']=='LONG' else -1
     qty=min(t['remaining_qty'],t['total_qty']*share)
@@ -88,7 +153,10 @@ def advance(prior,early,mtf_doc,now_ms,candles):
         raise RuntimeError('spark-mixed-mtf')
     if early.get('research_only') is not True or early.get('no_paper_entries') is not True:
         raise RuntimeError('early-research-policy-corruption')
-    old=prior if prior.get('model_version')==VERSION else initial(now_ms)
+    # Preserve every real 4.02 virtual ticket and its original first-seen
+    # price/status. 4.03 is a schema upgrade, not a new/backfilled experiment.
+    old=dict(prior) if prior.get('model_version') in (VERSION,'4.0.2-spark-paper-a1') else initial(now_ms)
+    old['model_version']=VERSION
     if old['last_scan_id']==early.get('scan_id'):
         # Idempotent replay; no second fill, fee, or duplicate event.
         pass
@@ -150,6 +218,55 @@ def advance(prior,early,mtf_doc,now_ms,candles):
                 ticket.setdefault('stage_transitions',[]).append({
                     'at_utc':stamp(now_ms),'stage':current,
                     'tier':candidate['research_tier']})
+    # A3 -> GELDİ ALWAYS creates its own separate, timestamped paper intent
+    # from the current scan price, even when the lower-stage research ticket
+    # already exists or has expired. It is NEVER an exchange fill at signal time.
+    # An existing stage-3 event is first observed at 4.03 activation, not
+    # retroactively filled from its earlier watch timestamp.
+    for x in early.get('candidates',[]):
+        if x.get('paper_stage_number')!=3 or x.get('hourly_level_state')!='CLOSED_1H_LEVEL_BREACHED':
+            continue
+        if x.get('paper_eligible') is not False or x.get('real_order_eligible') is not False:
+            continue
+        if x.get('side') not in ('LONG','SHORT') or not valid(x.get('price_at_scan')):
+            continue
+        original=x.get('event_id')
+        if not original or old.get('last_scan_id')==early.get('scan_id'):
+            continue
+        key='GELDI:'+original
+        if key in index:continue
+        src=frames.get((x['symbol'],x['side'])) or {}
+        h=(src.get('frames') or {}).get('1H') or {}
+        atr=h.get('atr_pct')
+        price=x['price_at_scan']
+        sign=1 if x['side']=='LONG' else -1
+        gap=price*atr/100 if valid(atr) and atr<35 else None
+        ok=bool(gap and gap<price)
+        entry={'event_id':key,'origin_event_id':original,'entry_class':'GELDI',
+            'paper_intent_created':True,'paper_intent_created_at_utc':stamp(now_ms),
+            'symbol':x['symbol'],'side':x['side'],'signal_at_utc':stamp(now_ms),
+            'signal_price':price,'stage_at_birth':'GELDI',
+            'stage_at_birth_number':3,'stage_definition':'CLOSED_1H_BREAKOUT_REQUIRED',
+            'stage':3,'stage_transitions':[{'at_utc':stamp(now_ms),'stage':3,'tier':'GELDI'}],
+            'rank_at_birth':x.get('research_rank'),
+            'source_1h_candle':x.get('source_closed_1h_at_utc'),
+            'features_at_birth':feature_snap(src),'reasons_at_birth':x.get('reasons',[]),
+            'hourly_threshold':x.get('hourly_level'),
+            'status':'WAITING_FUTURE_BAR' if ok else 'INVALID_LEVEL',
+            'stop':price-sign*gap if ok else None,
+            'tp1':price+sign*gap if ok else None,
+            'tp2':price+sign*2*gap if ok else None,
+            'tp3':price+sign*3*gap if ok else None,
+            'atr_pct_used':atr if ok else None,'reference_notional_usdt':NOTIONAL,
+            'entry_at_ms':now_ms,'price_source':'FUTURE_CLOSED_5M_OPEN_ESTIMATED',
+            'fill_price':None,'total_qty':0.0,'remaining_qty':0.0,
+            'realized_net_usdt':0.0,'unrealized_net_usdt':0.0,
+            'fees_estimated_usdt':0.0,'funding':'UNMODELED',
+            'is_real_trade':False,'estimated_only':True,'exits':[],
+            'last_processed_ms':None,
+            'valuation_status':'WAITING_FUTURE_OHLC' if ok else 'ATR_LEVEL_UNAVAILABLE',
+            'no_backfilled_fill':True}
+        index[key]=entry
     # All orders are independent *tickets* in one cost-accounted virtual study.
     # A hard funding cap prevents silently creating executable-looking exposure.
     for t in sorted(index.values(),key=lambda v:(v['entry_at_ms'],v['event_id'])):
@@ -218,9 +335,11 @@ def advance(prior,early,mtf_doc,now_ms,candles):
     doc={**old,'tickets':tickets,'last_scan_id':early['scan_id'],
         'last_run_ms':now_ms,'updated_at':stamp(now_ms)}
     stats=ledger_stats(tickets)
+    days=compute_daily(tickets,now_ms)
     published={'model_version':VERSION,'scan_id':early['scan_id'],'updated_at':stamp(now_ms),
         'source_mtf_at':mtf_doc['fetched_at'],'started_at':doc['started_at'],
-        'summary':stats,'recent_tickets':tickets[:220],
+        'summary':stats,'daily':days,'geldi_intent_total':sum(t.get('entry_class')=='GELDI' for t in tickets),
+        'recent_tickets':tickets[:220],
         'all_events_count':len(tickets),'archive_is_persistent':True,
         'no_real_orders':True,'combined_with_strict_paper_cash':False,
         'starting_balance_usdt':START_CASH,'reference_ticket_notional_usdt':NOTIONAL,
@@ -237,7 +356,12 @@ def main():
     pending=[t['symbol'] for t in prior.get('tickets',[]) if t['status'] in ('OPEN','WAITING_FUTURE_BAR')]
     fresh=[t['symbol'] for t in early.get('candidates',[]) if
         (v4_early.epoch(t.get('first_seen_at_utc')) or 0)>=now-90000]
-    symbols=sorted(set(pending+fresh))
+    # Promotions to GELDİ are not necessarily newly discovered events:
+    # always fetch their prospective candles this cycle as well.
+    promoted=[x['symbol'] for x in early.get('candidates',[])
+              if x.get('paper_stage_number')==3 and
+                 x.get('hourly_level_state')=='CLOSED_1H_LEVEL_BREACHED']
+    symbols=sorted(set(pending+fresh+promoted))
     candles={}
     for symbol in symbols:
         try:
