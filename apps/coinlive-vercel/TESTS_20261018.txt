@@ -6,7 +6,10 @@ PASS — DOM/UI synthetic smoke checks at widths 360, 390, 768, 1366: no horizon
 PASS — Original repository is still on 4.03 according to retrieved production release.json.
 PASS — Last observed production manifest has 23/23 scan verification and OKX schedule trigger, UTC 2026-10-17T23:02:14.563 (point-in-time; subsequent runs may have occurred).
 PASS — Independent schedule Action succeeded on run 39077406116; many other successful runs use workflow_dispatch, not equivalent proof of unattended cron.
-BLOCKED — Live hosted Vercel response/URL, production-vs-preview HTTP latency, true API integration, full multi-device touch and offline install: Vercel project creation 403 forbidden.
+PASS — Independent Vercel project created and staging build READY (deployment dpl_7mc5rR3NWkyoLUGY46WrPeLqZmum); protected Vercel URL is https://coinlive-v5-preview-3a6412et1-onurqlp-7179.vercel.app .
+BLOCKED — Protected Vercel HTTP page/API checks and request latency: network isolation/SSO prevents access; Vercel runtime/build logs API responded 403 despite READY deployment; not an API pass.
+WARNING — First isolated Vercel project build was implicitly production-target on new protected test project, NOT existing GitHub Pages main. Separate staging target READY.
+PASS — Fixed misleading radar wording (unconfirmed WATCH is not a confirmed signal); removed misleading null-origin CORS header.
 BLOCKED — Local direct-browser HTTP integration: browser sandbox blocked localhost; DOM injected fixture instead (test passed).
 NOT IMPLEMENTED — Verified closed-OHLC price plot/markers (chart-pack not in published manifest); MAKINE CORE real API overlay; push notification delivery; mobile installability audit. These are NOT falsely reported as passes.
 OBSERVED DATA WARNING — On snapshot, strict account equity 10000 USDT, strict realized 0 and strict open 0. Spark summary cash equity 9994.7328, accounting realized -5.88156; review cohort 396 closed, cohort sum -12.24469. Different metrics must not be treated as one PnL.

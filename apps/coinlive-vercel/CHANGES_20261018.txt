@@ -14,4 +14,7 @@ BASELINE HEAD: 68f7cd31b628d1a23c515d43ed0c44c597f5ceff (2026-10-17 23:02 UTC)
 9. Extended local automated tests 6 -> 11; ran responsive DOM smoke checks at 360/390/768/1366 px.
 10. NO original Python / archive / main/spark ledger / GitHub Pages / product release / workflow modifications were made in this package.
 
-Vercel project creation requested but rejected with 403 forbidden on connected user scope, preview not published.
+Vercel project coinlive-v5-preview was created independently; a protected staging build reached READY at https://coinlive-v5-preview-3a6412et1-onurqlp-7179.vercel.app . Initial Vercel project creation with an explicit teamId was 403; retrying the same connected identity without teamId worked. IMPORTANT: the first deployment in this isolated Vercel project was automatically targeted production by Vercel; existing GitHub Pages main/4.03 was NOT changed and SSO protection remains enabled. A separate staging build was then created. No cutover to original live site occurred.
+
+11. Mobile radar label changed to "güncel araştırma kaydı" instead of incorrectly implying WATCH candidates are confirmed.
+12. Same-origin Vercel JSON API no longer sends misleading CORS null-origin header.

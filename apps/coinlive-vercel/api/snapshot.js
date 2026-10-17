@@ -3,7 +3,6 @@ export default async function handler(req, res) {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.setHeader('Cache-Control', 'no-store');
   res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('Access-Control-Allow-Origin', 'null');
   if (req.method !== 'GET') return res.status(405).json({state:'NO_VERIFIED_DATA',error:'METHOD_NOT_ALLOWED'});
   try { return res.status(200).json(await loadSnapshot()); }
   catch (error) { return res.status(error instanceof SourceError ? error.status : 503).json({

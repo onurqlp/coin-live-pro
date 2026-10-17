@@ -9,7 +9,7 @@ function candidateCard(x){const v=el('button','card clickable'),top=el('div','ca
  v.addEventListener('click',()=>{selected=x;$('chartInfo').replaceChildren(el('strong','',`${x.symbol} · ${x.side} · ${x.stage}`),el('p','',`Kaynak: ${x.strategy||'—'} · teyit: ${x.confirmation||'—'}`),el('p','',`Gözlem: ${x.observedAtUtc||'—'} · fiyat: ${num(x.price)} · stop: ${num(x.stop)} · hedef: ${(x.targets||[]).map(num).join(' / ')||'doğrulanmadı'}`),el('p','muted',(x.reasons||[]).join(', ')||'Gerekçe kaynakta mevcut değil'));section('chart');});return v;}
 function renderRadar(){const v=$('cards');clear(v);const e=$('early');clear(e);
  if(!state||state.source.status!=='VERIFIED'){v.append(el('div','empty','Güncel doğrulanmış veri yok: hiçbir aktif sinyal gösterilmiyor.'));$('count').textContent='0 güncel aday';return;}
- const a=(state.radar.candidates||[]).filter(x=>stage==='ALL'||x.stage===stage);$('count').textContent=`${a.length} teyitli-güncel kayıt · ${state.radar.pendingCount} yeniden kontrol bekliyor`;
+ const a=(state.radar.candidates||[]).filter(x=>stage==='ALL'||x.stage===stage);$('count').textContent=`${a.length} güncel araştırma kaydı · ${state.radar.pendingCount} yeniden kontrol bekliyor`;
  if(!a.length)v.append(el('div','empty','Bu aşamada güncel kanıtlı aday yok. RECHECK_PENDING saklandı.'));
  for(const x of a)v.append(candidateCard(x));for(const x of state.radar.early||[]){const c=el('div','card');c.append(el('strong','',`${x.symbol} · ${x.side}`),el('div','meta',`${x.tier} / ${num(x.rank)} puan`),el('small','muted','Giriş emri değildir'));e.append(c);}
 }
