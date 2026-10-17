@@ -15,6 +15,7 @@ on:
       - ui-minimal-actual-dashboard-20261017
       - v4-02-self-measuring-sparks-20261017
       - v4-03-geldi-daily-paper-audit-20261017
+      - fix-mobile-charts-corporate-20261017
     paths:
       - '.github/workflows/v4-preview.yml'
       - 'engine/v4_**'
@@ -77,6 +78,13 @@ jobs:
           assert anomaly.get('no_real_orders') is True
           assert anomaly.get('hourly',{}).get('time_basis')=='UTC'
           assert anomaly.get('clock',{}).get('window_is_not_manipulation_evidence') is True
+          pack=json.loads((p/'chart-pack.json').read_text())
+          mtf=json.loads((p/'mtf.json').read_text())
+          assert pack['schema_version']==1 and pack['source']=='OKX_CLOSED_CANDLES'
+          assert pack['source_mtf_at']==pack['fetched_at']==mtf['fetched_at']
+          assert set(pack['candles_by_symbol'])=={r['symbol'] for r in mtf['candidates']}
+          assert all(len(rows[tf])>=10 for rows in pack['candles_by_symbol'].values() for tf in ('4H','1D'))
+          print('MOBILE_CHART_FALLBACK_OK',len(pack['candles_by_symbol']))
           release=json.loads((p.parent/'release.json').read_text())
           assert release['product_version']=='4.03' and release['version_change_owner']=='AUTOMATIC_MINOR_WITHIN_4'
           assert all(data[k]['scan_id']==sid for k in ('v4-radar','v4-history-index','v4-paper','v4-shadow','v4-forward','v4-watch-archive','v4-early','v4-spark-paper','v4-spark-review','v4-lab'))
@@ -112,9 +120,10 @@ jobs:
               assert m and m.group(1).strip(),id+' failed to render'
           assert 'id="v4Early"' in doc and 'id="v4EarlyCount"' in doc,'Early watch UI missing'
           assert 'id="v4RadarSearch"' in doc and 'id="v4RadarSide"' in doc,'Radar filters missing'
-          assert 'ui-refresh.css?v=6' in doc,'Readable CSS layer not linked'
+          assert 'ui-refresh.css?v=7' in doc,'Readable CSS layer not linked'
           assert 'V4 veri kontrolü:' not in doc,'V4 manifest fetch or hash validation failed'
           assert 'id="chartScenario"' in doc,'Chart scenario details missing'
+          assert 'id="chartDataStatus"' in doc,'Chart origin status missing'
           assert 'id="headerMore"' in doc and 'id="radarMetaDetails"' in doc,'Minimal UX disclosures missing'
           assert 'class="v4MarketSummary"' in doc,'Collapsed stats must remain available'
           assert 'Model ne düşünüyor?' in doc,'Thesis must display'
@@ -131,6 +140,15 @@ jobs:
           assert doc.index('id="chartHostRadar"')<doc.index('id="legacyTechnicalDisclosure"'), 'Main chart trapped in closed technical details'
           print('V4_CHROMIUM_RENDER_OK')
           PY
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=390,844 --virtual-time-budget=14000 --dump-dom "http://127.0.0.1:8765/#grafikler" > /tmp/v4-mobile-chart-dom.html 2>/tmp/v4-mobile-chart-chrome.log
+          python3 - <<'PY'
+          page=open('/tmp/v4-mobile-chart-dom.html').read()
+          assert 'data-view="grafikler"' in page and 'id="chartHostAdvanced"' in page
+          assert 'id="chartPanel"' in page and 'id="candleChart"' in page
+          assert 'chart-pack.json' not in page or 'chartDataStatus' in page
+          assert 'id="chartDataStatus"' in page and 'Dış grafikte aç' in page
+          print('CHART_MOBILE_WORKSPACE_OK')
+          PY
           for pair in '1920,1080:widescreen' '1366,900:desktop' '1024,768:tablet' '768,1024:smalldesktop' '430,932:mobile430' '390,844:mobile' '360,800:mobile360' '320,740:smallmobile'; do
             dimensions=${pair%:*}
             label=${pair#*:}
@@ -142,6 +160,8 @@ jobs:
           name: v4-isolated-read-only-preview
           path: |
             /tmp/v4-dom.html
+            /tmp/v4-mobile-chart-dom.html
+            /tmp/v4-mobile-chart-chrome.log
             /tmp/v4-chrome.log
             /tmp/v4-desktop.png
             /tmp/v4-mobile.png
