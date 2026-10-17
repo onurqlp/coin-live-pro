@@ -13,7 +13,7 @@ import v4_spark_paper as paper
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 DATA=ROOT/'web'/'data'
 ARCH=ROOT/'archive'/'v4-spark-paper-ledger.json'
-VERSION='4.0.2-spark-review-a1'
+VERSION='4.0.3-spark-review-a1'
 def cohort(t):
     feats=t.get('features_at_birth') or {}
     h=feats.get('4H') or {}
@@ -21,7 +21,8 @@ def cohort(t):
     bb=h.get('bb_compression_percentile')
     hist=h.get('macd_hist_pct')
     side=1 if t['side']=='LONG' else -1
-    keys=['TÜMÜ',t['side']]
+    keys=['TÜMÜ',t['side'],
+          'GELDI_OTOMATIK_GIRIS' if t.get('entry_class')=='GELDI' else 'ERKEN_ARASTIRMA']
     if t.get('stage_definition')=='CLOSED_1H_BREAKOUT_REQUIRED':
         keys.append(f"AŞAMA_{t.get('stage_at_birth_number',paper.TIER_STAGE.get(t.get('stage_at_birth'),1))}")
     else:
@@ -75,6 +76,7 @@ def build(ledger,early,now_ms):
     result={'model_version':VERSION,'scan_id':early['scan_id'],'updated_at':paper.stamp(now_ms),
         'source_spark_paper_at':ledger['updated_at'],'total_ever_tickets':len(tickets),
         'cohorts':{k:v for k,v in cohorts},'conclusions':conclusions[:18],
+        'geldi_auto_entry_cohort_separate':True,
         'new_rules_applied_automatically':False,'forward_only_training_samples':True,
         'needs_out_of_sample_validation':True,'archive_is_persistent':True,'no_real_orders':True,
         'not_a_win_probability':True}

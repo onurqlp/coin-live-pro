@@ -78,7 +78,7 @@ jobs:
           python3 - <<'PYRELEASE'
           import json,datetime
           d=json.load(open('/tmp/release.json'))
-          assert d['product_version']=='4.02', 'User-authorized automatic 4.xx version mismatch'
+          assert d['product_version']=='4.03', 'User-authorized automatic 4.xx version mismatch'
           assert d['version_change_owner']=='AUTOMATIC_MINOR_WITHIN_4' and d['major_version_5_requires_user_approval'] is True
           assert d['timestamp_basis']=='UTC' and d['market_data_timestamp_separate']
           assert datetime.datetime.fromisoformat(d['updated_at_utc']).tzinfo is not None

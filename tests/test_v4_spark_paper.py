@@ -69,6 +69,81 @@ class TestSparkPaper(unittest.TestCase):
         e,m=docs();e['candidates'][0]['first_seen_at_utc']=stamp(NOW-4*3600000)
         l,_=paper.advance({},e,m,NOW,{})
         self.assertEqual(l['tickets'],[])
+    def test_geldi_generates_automatic_distinct_intent_from_scan_not_history(self):
+        e,m=docs()
+        e['candidates'][0].update(paper_stage_number=3,
+             hourly_level_state='CLOSED_1H_LEVEL_BREACHED',
+             price_at_scan=102.,first_seen_at_utc=stamp(NOW-3*3600000))
+        ledger,pub=paper.advance({},e,m,NOW,{})
+        self.assertEqual(pub['geldi_intent_total'],1)
+        self.assertEqual(pub['daily']['today']['geldi'],1)
+        self.assertEqual(pub['daily']['today']['new_geldi_opened'],0)
+        self.assertEqual(len(ledger['tickets']),1)
+        order=ledger['tickets'][0]
+        self.assertEqual(order['event_id'],'GELDI:ticket-unique-1')
+        self.assertEqual(order['signal_price'],102.)
+        self.assertEqual(order['status'],'WAITING_FUTURE_BAR')
+        self.assertIsNone(order['fill_price'])
+        self.assertTrue(order['paper_intent_created'])
+        self.assertFalse(order['is_real_trade'])
+        replay,_=paper.advance(ledger,e,m,NOW+1000,{})
+        self.assertEqual(len(replay['tickets']),1)
+
+    def test_existing_early_ticket_promotion_also_creates_one_geldi_intent(self):
+        e,m=docs()
+        first,_=paper.advance({},e,m,NOW,{})
+        self.assertEqual(len(first['tickets']),1)
+        upgrade={**e,'scan_id':'case-promotion','candidates':[
+            {**e['candidates'][0],'paper_stage_number':3,
+             'hourly_level_state':'CLOSED_1H_LEVEL_BREACHED',
+             'price_at_scan':101.5}]}
+        second,pub=paper.advance(first,upgrade,m,NOW+1000,{})
+        self.assertEqual(len(second['tickets']),2)
+        self.assertEqual(pub['geldi_intent_total'],1)
+        self.assertEqual([t for t in second['tickets'] if t.get('entry_class')=='GELDI'][0]['signal_price'],101.5)
+
+    def test_geldi_forward_fill_and_daily_realized_loss(self):
+        e,m=docs()
+        e['candidates'][0].update(paper_stage_number=3,
+            hourly_level_state='CLOSED_1H_LEVEL_BREACHED',price_at_scan=100.)
+        ledger,_=paper.advance({},e,m,NOW,{})
+        start=((NOW//paper.BAR)+1)*paper.BAR
+        fill=bar(start,100,100.3,99.7,100.2)
+        ledger,pub=paper.advance(ledger,{**e,'scan_id':'next','candidates':[]},m,
+            start+paper.BAR+4000,{'BTCUSDT':[fill]})
+        geldi=[t for t in ledger['tickets'] if t.get('entry_class')=='GELDI'][0]
+        self.assertEqual(geldi['status'],'OPEN')
+        self.assertEqual(pub['daily']['today']['new_geldi_opened'],1)
+        self.assertEqual(pub['daily']['today']['geldi'],1)
+        close=bar(start+paper.BAR,100.,100.2,98.7,99.2)
+        ledger,pub=paper.advance(ledger,{**e,'scan_id':'next2','candidates':[]},m,
+            start+2*paper.BAR+4000,{'BTCUSDT':[fill,close]})
+        geldi=[t for t in ledger['tickets'] if t.get('entry_class')=='GELDI'][0]
+        self.assertEqual(geldi['status'],'CLOSED')
+        self.assertLess(geldi['realized_net_usdt'],0)
+        self.assertEqual(pub['daily']['today']['geldi_closed'],1)
+        self.assertLess(pub['daily']['today']['geldi_realized_net_usdt'],0)
+        self.assertTrue(pub['daily']['paper_intent_not_guaranteed_fill'])
+
+    def test_migration_preserves_all_402_tickets_without_backfill(self):
+        e,m=docs()
+        old,_=paper.advance({},e,m,NOW,{})
+        old['model_version']='4.0.2-spark-paper-a1'
+        previous=old['tickets'][0].copy()
+        new,pub=paper.advance(old,{**e,'scan_id':'migration','candidates':[]},m,NOW+1000,{})
+        self.assertEqual(new['model_version'],'4.0.3-spark-paper-a1')
+        self.assertEqual(new['tickets'][0]['event_id'],previous['event_id'])
+        self.assertEqual(new['tickets'][0]['signal_price'],previous['signal_price'])
+        self.assertEqual(len(new['tickets']),1)
+        self.assertEqual(pub['geldi_intent_total'],0)
+
+    def test_no_geldi_trigger_without_closed_break(self):
+        e,m=docs()
+        e['candidates'][0].update(paper_stage_number=3,
+            hourly_level_state='WAIT_FOR_NEW_1H_CLOSE',price_at_scan=100.)
+        ledger,pub=paper.advance({},e,m,NOW,{})
+        self.assertEqual(pub['geldi_intent_total'],0)
+
     def test_corrupted_mixed_snapshot_fails(self):
         e,m=docs();m['fetched_at']='2001-01-01T00:00:00Z'
         with self.assertRaisesRegex(RuntimeError,'mixed'):
