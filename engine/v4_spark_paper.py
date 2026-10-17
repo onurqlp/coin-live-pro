@@ -115,6 +115,7 @@ def advance(prior,early,mtf_doc,now_ms,candles):
            'signal_at_utc':x['first_seen_at_utc'],'signal_price':price,
            'stage_at_birth':x['research_tier'],
            'stage_at_birth_number':x.get('paper_stage_number',TIER_STAGE.get(x['research_tier'],1)),
+           'stage_definition':'CLOSED_1H_BREAKOUT_REQUIRED',
            'stage':x.get('paper_stage_number',TIER_STAGE.get(x['research_tier'],1)),
            'stage_transitions':[{'at_utc':stamp(now_ms),'stage':x.get('paper_stage_number',TIER_STAGE.get(x['research_tier'],1)),
                                   'tier':x['research_tier']}],
