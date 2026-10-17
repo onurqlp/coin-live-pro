@@ -73,7 +73,7 @@ assert.ok(v4code.includes("timeZone:'UTC'"),'V4 displayed market timestamps must
 assert.ok(v4code.includes('renderGlobalResearch(r,manifest)'),'UTC market research view unconnected');
 assert.ok(v4code.includes('loadRelease();load()'),'Version release.json not loaded');
 const release=JSON.parse(fs.readFileSync('web/release.json','utf8'));
-assert.equal(release.product_version,'4.02','Automatic 4.xx minor update from user approval');
+assert.equal(release.product_version,'4.03','Automatic 4.xx minor update from user approval');
 assert.equal(release.version_change_owner,'AUTOMATIC_MINOR_WITHIN_4');
 assert.ok(Number.isFinite(Date.parse(release.updated_at_utc)),'Update stamp missing');
 assert.ok(html.includes('releaseHistoryList')&&v4code.includes('meta.change_log'),'UTC release history missing');
@@ -95,7 +95,7 @@ for(const id of ['watchArchiveRefresh','watchArchiveRows','watchArchivePeriod','
 assert.ok(watchCode.includes("crypto.subtle.digest")&&watchCode.includes("'v4-watch-archive'"),'Archive must verify SHA256');
 assert.ok(html.includes('watch-archive-ui.js'),'Archive JavaScript missing');
 const ui=fs.readFileSync('web/ui-refresh.css','utf8');
-assert.ok(html.includes('ui-refresh.css?v=5'),'UI design tokens must be linked');
+assert.ok(html.includes('ui-refresh.css?v=6'),'UI design tokens must be linked');
 for(const id of ['v4RadarSearch','v4RadarSide','v4RadarFilterStatus'])
   assert.ok(ids.includes(id),'Radar search & side filters must be present: '+id);
 assert.ok(v4code.includes('applyRadarFilter();')&&v4code.includes("mainFrameSummary(x)"),
@@ -104,7 +104,7 @@ assert.ok(v4code.includes('v4Evidence')&&v4code.includes('factorLamps(x)'),
   'Collapsible research details must retain real source metrics');
 assert.ok(ui.includes('prefers-reduced-motion')&&ui.includes(':focus-visible'),
   'Keyboard focus and reduced motion styles must exist');
-assert.equal(JSON.parse(fs.readFileSync('web/release.json')).product_version,'4.02',
+assert.equal(JSON.parse(fs.readFileSync('web/release.json')).product_version,'4.03',
   'User approved automatic 4.xx revisions; only 5.0 requires approval');
 for(const id of ['v4Early','v4EarlyCount','v4EarlyStatus','v4EarlyLabel','v4EarlyHistoryHint'])
   assert.ok(ids.includes(id),'Independent early alert UI missing '+id);
@@ -114,7 +114,7 @@ assert.ok(v4code.includes('renderEarly(manifest,stale)'),'Early cards must respe
 assert.ok(html.indexOf('id="v4Early"')<html.indexOf('id="chartHostRadar"')&&
  html.indexOf('id="chartHostRadar"')<html.indexOf('id="sparkStrictDetails"'),
  'Primary 1-2-3 alert stages and chart must precede strict advanced radar');
-assert.ok(html.includes('id="sparkCompare"')&&html.includes('id="sparkCompareReport"')&&
+assert.ok(html.includes('id="sparkCompare"')&&html.includes('id="sparkDailyStrip"')&&html.includes('id="sparkCompareReport"')&&
  html.includes('id="sparkPaperPanel"'),'Automatic comparison and paper panel missing');
 assert.ok(html.includes('id="chartIndicatorsToggle"')&&html.includes('id="chartIndicatorsCanvas"')&&
  html.includes('chart-indicators.js'),'Opt-in RSI MACD BB chart proof missing');
@@ -152,5 +152,5 @@ assert.ok(ui.includes('.banner:not(.stale):not(.warn)'),
 assert.ok(html.includes('quickTfOptional')&&html.includes('id="chartTf"'),
  'Timeframes must remain accessible through ONE control');
 assert.ok(!html.includes('Gerçek emir aç'),'No claims of real trading');
-console.log('PASS: 4.02 automatic early staged virtual paper + forward-only comparison, readable chart.');
+console.log('PASS: 4.03 automatic early staged virtual paper + forward-only comparison, readable chart.');
 
