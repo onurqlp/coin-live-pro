@@ -9,14 +9,13 @@
   const a=store.sparkPaper,root=$('sparkPaperPanel'),strip=$('sparkDailyStrip');
   if(!a)return;
   const q=a.summary||{},c=q.counts||{},daily=a.daily||{},today=daily.today||{};
-  const todayNet=(today.realized_net_usdt||0)+(today.unrealized_all_usdt||0);
   if(strip){
     const liveGeldi=(a.recent_tickets||[]).filter(t=>t.entry_class==='GELDI'&&t.status==='OPEN').length;
     strip.innerHTML=metric('Bugün GELDİ',today.geldi||0)+
       metric('GELDİ sanal açık',liveGeldi)+
-      metric('Bugün toplam kapanan',today.closed||0)+
-      metric('Bugün net, fonlama hariç',num(todayNet)+' USDT');
-    strip.title='UTC. Net: bugün kapanan işlemlerin tahmini PnL’si ve açık pozisyonların son kapanmış mumdaki PnL’si. Önceki günden taşınan açık PnL bugüne dahil olabilir.';
+      metric('Bugün gerçekleşen',num(today.realized_net_usdt||0)+' USDT')+
+      metric('Açık toplam PnL',num(today.unrealized_all_usdt||0)+' USDT');
+    strip.title='UTC: bugün gerçekleşen PnL yalnız bugün yapılan sanal çıkışlardan; açık PnL ayrı son doğrulanmış kapanış fiyatına göre ve önceki günlerden taşınan pozisyonları da içerir.';
   }
   if(!root)return;
   const labels={WAITING_FUTURE_BAR:'Giriş bekliyor',OPEN:'Sanal açık',CLOSED:'Kapandı',
