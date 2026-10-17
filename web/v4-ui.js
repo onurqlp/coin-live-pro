@@ -476,6 +476,8 @@
      ' sonuç · belirsiz '+p.shadow.ambiguous+' · boşluk '+p.shadow.data_gap+
      ' · kasa emri '+p.paper.created+' · fonlama bilinmiyor. Kazanma ihtimali değildir.';
  }
+ function renderSparkAccount(){window.CoinSparkUI?.renderAccount(store);}
+ function showSparkComparison(){window.CoinSparkUI?.compare(store);}
  async function readJson(name,manifest){
    const r=await fetch('./data/'+name+'.json?version='+Date.now(),{cache:'no-store'});
    if(!r.ok)throw Error(name+' HTTP '+r.status);
