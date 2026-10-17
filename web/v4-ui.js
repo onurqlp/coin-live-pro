@@ -22,7 +22,7 @@
  FUNDING_CROWDING:'Fonlama kalabalıklaşması',NOT_LIQUIDATION_PROOF:'Tasfiye kanıtı değil',
  BEARISH_DAILY_4H:'1D ve 4H aşağı yön',SUPPORT_CLOSED_BREAK:'Destek kapanışta kırıldı',
  SUPPORT_WATCH:'Destek kırılımı bekleniyor'};
- const store={radar:null,paper:null,shadow:null,lab:null,history:null,manifest:null,position:null,lastFetch:0,loading:false,initialChartSelected:false};
+ const store={radar:null,paper:null,shadow:null,lab:null,history:null,early:null,manifest:null,position:null,lastFetch:0,loading:false,initialChartSelected:false};
  window.CoinV4=store;
  function explanation(v){return (v?.reasons||[]).slice(0,3).map(s=>why[s]||s).join(' · ')||'Yeni kapanmış mum kanıtı bekleniyor';}
  const factorLabels={trend:'TREND',structure:'YAPI',volume:'HACİM',momentum:'MACD',liquidity:'LİKİDİTE'};
@@ -97,7 +97,7 @@
    const term=($('v4RadarSearch')?.value||'').trim().toLocaleUpperCase('tr-TR');
    const side=$('v4RadarSide')?.value||'ALL';
    let total=0,shown=0;
-   for(const id of ['v4Spotlight','v4Motion','v4Watch']){
+   for(const id of ['v4Early','v4Spotlight','v4Motion','v4Watch']){
      const panel=$(id);if(!panel)continue;
      const cards=[...panel.querySelectorAll('.v4Opportunity[data-v4-pair]')];
      let visible=0;
@@ -234,6 +234,69 @@
        'Veri gecikmiş · yeni teyit gösterilmez':
        'Son kapanmış mum analizi · '+ago(manifest.started_at_utc)+' önce';
  }
+
+ function renderEarly(manifest,stale){
+   const data=store.early;
+   const container=$('v4Early'),info=$('v4EarlyStatus'),count=$('v4EarlyCount'),tag=$('v4EarlyLabel'),history=$('v4EarlyHistoryHint');
+   if(!container||!info||!count||!tag)return;
+   if(!data){count.textContent='—';info.textContent='Erken işaret araştırma kaynağı henüz yayımlanmadı.';return;}
+   if(stale){
+     count.textContent='—';
+     tag.textContent='GECİKMİŞ';
+     info.textContent='Merkezi veri 25 dakikadan eski. Güncel erken sinyal gösterilmiyor; eski kayıtlar arşivde.';
+     container.innerHTML='<div class="v4Empty">Yeni sinyal için doğrulanmış merkezi tarama bekleniyor.</div>';
+     return;
+   }
+   const items=(data.candidates||[]).filter(x=>x.source_quality==='VERIFIED_CLOSED_OHLC'
+      &&x.paper_eligible===false&&x.real_order_eligible===false);
+   count.textContent=String(items.length);
+   tag.textContent=items.length?'◌ '+items.length+' ERKEN İŞARET':'KAPANMIŞ MUM BEKLENİYOR';
+   info.textContent=items.length+' ayrı coin/yön araştırması · son kaynak '+date(data.source_mtf_at)+
+     ' · yeni liste yaklaşık 5 dakikalık best-effort taramayla değişir · başarı olasılığı değildir.';
+   const type={KIVILCIM:'KIVILCIM',ERKEN_SINYAL:'ERKEN SİNYAL',ISIK_GUCLENIYOR:'IŞIK GÜÇLENİYOR'};
+   const reason={
+      '1D_4H_ALIGNED':'1D + 4H aynı yönde',
+      '4H_TREND':'4H yönü destekliyor','1D_TREND':'Günlük yön destekliyor',
+      '1H_SUPPORT':'1 saatlik yön aynı','15M_SUPPORT':'15 dakikalık destek',
+      '4H_VOLUME_0_8PLUS':'4H hacmi artıyor','1H_VOLUME_1PLUS':'1H hacmi hareketli',
+      '4H_MACD_DIRECTION':'4H MACD yön destekliyor',
+      'WEEKLY_OPPOSITION_CAUTION':'Haftalık yön ters',
+      'WEAK_RELATIVE_VOLUME':'Hacim henüz zayıf'};
+   container.innerHTML=items.map(x=>{
+      const caution=(x.reasons||[]).some(v=>v==='WEEKLY_OPPOSITION_CAUTION'||v==='WEAK_RELATIVE_VOLUME');
+      const close=(x.hourly_level_state==='CLOSED_1H_LEVEL_BREACHED');
+      const condition=close?'1H seviye kapanışla aşılmış · takip teyidi gerekir':
+        x.hourly_level?'1H kapanışında '+(x.side==='LONG'?'üzerinde':'altında')+
+           ' beklenen seviye '+Number(x.hourly_level).toLocaleString('en-US',{maximumFractionDigits:8}):
+           'Henüz net 1H seviye yok · 4H yönünü takip et';
+      const indicators=[
+        ['4H',x.trend_4h],['1D',x.trend_1d],['1W',x.trend_1w]];
+      return '<article class="v4Opportunity v4EarlyCard" data-v4-pair="'+safe(x.symbol)+
+       '" data-v4-direction="'+safe(x.side)+'" data-v4-strategy="'+safe((x.reasons||[]).join(' '))+'">'+
+       '<div class="v4CardTop"><b>'+safe(x.symbol)+' <span class="chip '+(x.side==='LONG'?'long':'short')+'">'+safe(x.side)+'</span></b>'+
+       '<span class="v4EarlyTier">'+safe(type[x.research_tier]||'İZLE')+'</span></div>'+
+       '<div class="v4CardScore">İşaret gücü <strong>'+safe(x.research_rank)+'/100</strong> · <small>başarı % değildir</small></div>'+
+       '<div class="v4TrendMini">'+indicators.map(([tf,v])=>
+          '<span class="'+((x.side==='LONG'&&v==='UP')||(x.side==='SHORT'&&v==='DOWN')?'aligned':
+             v==='SIDEWAYS'?'neutral':v==='UP'||v==='DOWN'?'opposed':'unknown')+'">'+tf+' <strong>'+
+             (v==='UP'?'↑':v==='DOWN'?'↓':v==='SIDEWAYS'?'↔':'?')+'</strong></span>').join('')+'</div>'+
+       '<p class="v4EarlyReason">'+safe((x.reasons||[]).slice(0,3).map(z=>reason[z]||z).join(' · '))+'</p>'+
+       '<p class="v4EarlyNext">'+safe(condition)+'</p>'+
+       (caution?'<small class="v4EarlyCaution">DİKKAT: '+safe((x.reasons||[]).filter(z=>reason[z]&&(z==='WEAK_RELATIVE_VOLUME'||z==='WEEKLY_OPPOSITION_CAUTION')).map(z=>reason[z]).join(' · '))+'</small>':'')+
+       '<div class="v4Meta">İlk kayıt: '+safe(date(x.first_seen_at_utc))+
+       ' · kaynak: '+safe(date(x.source_observed_at_utc))+'</div>'+
+       '<button type="button" class="v4GoChart" data-v4-symbol="'+safe(x.symbol)+
+       '" data-v4-side="'+safe(x.side)+'">4H grafiğinde incele →</button>'+
+       '</article>';
+   }).join('')||'<div class="v4Empty">Bu turda yeterli kapanmış mum/küçük kıpırdanma görülmedi. Sistem boş sinyal üretmez.</div>';
+   if(history){
+      const h=data.prior_watch_directional_observations||{},a=h['1H']||{},b=h['4H']||{};
+      history.textContent='Önceki İZLE kayıtları: 1H '+(a.observed||0)+' ölçümde '+(a.positive_direction||0)+
+       ' yönsel artı / '+(a.negative_direction||0)+' yönsel eksi · 4H '+(b.observed||0)+' ölçümde '+
+       (b.positive_direction||0)+' artı / '+(b.negative_direction||0)+' eksi. Bunlar kâr veya kazanma oranı değildir.';
+   }
+ }
+
  function drawBoard(){
    const r=store.radar,manifest=store.manifest;
    if(!r)return;
@@ -242,6 +305,7 @@
    const stale=!Number.isFinite(minutes)||minutes>25;
    showMarketSummary(r,manifest,stale);
    renderGlobalResearch(r,manifest);
+   renderEarly(manifest,stale);
    const status=$('v4Status');status.textContent=stale?'V4 KAYNAK GECİKMİŞ · GÜNCEL TEYİT YOK':
      'V4 · '+ago(r.updated_at)+' önce merkezi değerlendirme · otomatik emir YOK';
    status.className='v4Status '+(stale?'v4Stale':'');
@@ -276,8 +340,9 @@
    });
    applyRadarFilter();
    if(!store.initialChartSelected){
-     const candidate=[...(r.spotlight||[]),...(r.motion||[]),...(r.watch||[])]
+     const legacy=[...(r.spotlight||[]),...(r.motion||[]),...(r.watch||[])]
        .find(x=>x.review_state==='FRESH');
+     const candidate=legacy||(!stale?store.early?.candidates?.[0]:null);
      if(candidate&&typeof window.CoinLiveSelectSpark==='function'){
        store.initialChartSelected=true;
        window.CoinLiveSelectSpark(candidate.symbol,'4H',false,true);
@@ -407,11 +472,11 @@
      if(!response.ok)throw Error('V4 henüz sunucuya yayınlanmadı');
      const m=await response.json();
      if(!m.publication_valid||m.model_version!=='4.0.0-manifest-a1')throw Error('V4 manifest geçersiz');
-     const [r,p,sh,lab,history]=await Promise.all(
-       ['v4-radar','v4-paper','v4-shadow','v4-lab','v4-history-index'].map(k=>readJson(k,m)));
-     if([r,p,sh,lab,history].some(x=>x.scan_id!==m.scan_id))
+     const [r,p,sh,lab,history,early]=await Promise.all(
+       ['v4-radar','v4-paper','v4-shadow','v4-lab','v4-history-index','v4-early'].map(k=>readJson(k,m)));
+     if([r,p,sh,lab,history,early].some(x=>x.scan_id!==m.scan_id))
        throw Error('V4 farklı tarama verileri karışmış');
-     store.manifest=m;store.radar=r;store.paper=p;store.shadow=sh;store.lab=lab;store.history=history;
+     store.manifest=m;store.radar=r;store.paper=p;store.shadow=sh;store.lab=lab;store.history=history;store.early=early;
      store.lastFetch=Date.now();drawBoard();renderDesk();renderLab();renderHistory();
    }catch(error){
      $('v4Status').textContent='V4 veri kontrolü: '+error.message;

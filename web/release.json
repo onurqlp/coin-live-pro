@@ -1,20 +1,25 @@
 {
   "product_version": "4.01",
   "version_change_owner": "USER_APPROVAL_ONLY",
-  "release_id": "UI-20261016-2350",
-  "updated_at_utc": "2026-10-16T23:50:05.843Z",
+  "release_id": "EARLY-20261017-1026",
+  "updated_at_utc": "2026-10-17T10:26:04.180Z",
   "timestamp_basis": "UTC",
   "market_data_timestamp_separate": true,
   "change_summary": [
-    "Mobile-first okunaklı koyu tema, güçlü kontrast ve renkli LONG/SHORT ayrımı",
-    "Fırsat panosunda coin arama ve yön filtresi, anlaşılır kılavuz",
-    "4H/1D/1W yön özeti önde; 1m–1W indikatörler isteğe bağlı açılır",
-    "Altı çalışma alanı yalın Türkçe adlarla, klavye odağı ve mobil dokunma hedefleri",
-    "Teknik sinyal, geçmiş, sanal kasa, UTC veri kaynakları değişmedi; ürün sürümü 4.01"
+    "12 saatlik arşiv denetimi: çok sayıda WATCH kaydına rağmen sıfır üst aşama; ayrı erken sinyal akışı",
+    "Gerçek kapanmış 1H/4H/1D mumlardan daha cömert KIVILCIM / ERKEN SİNYAL / IŞIK GÜÇLENİYOR araştırması",
+    "LONG/SHORT parite ve yön tekilleştirilmiş, ilk gözlem UTC ve fiyatıyla kalıcı arşiv",
+    "Zayıf hacim, haftalık ters yön ve eksik zaman dilimi şeffaf; araştırma puanı kazanma olasılığı değil",
+    "V4 sanal kasa, gerçek emir yasağı, eski WATCH arşivi ve aşama teyit kuralları değişmedi"
   ],
   "no_real_orders": true,
   "not_a_trading_signal": true,
   "change_log": [
+    {
+      "release_id": "EARLY-20261017-1026",
+      "updated_at_utc": "2026-10-17T10:26:04.180Z",
+      "summary": "12s denetimi ve bonkör erken araştırma: 1D/4H ışığı, HAREKET teyidi beklemeden Kıvılcım/Erken Sinyal/Işık Güçleniyor, UTC arşivi ve ölçülmüş 1H/4H yön karşılaştırması. Ürün sürümü 4.01."
+    },
     {
       "release_id": "UI-20261016-2350",
       "updated_at_utc": "2026-10-16T23:50:05.843Z",

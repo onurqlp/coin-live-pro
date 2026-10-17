@@ -228,3 +228,36 @@ footer{color:#aabed2;font-size:12px}
 .v4PriorityEmpty{font-size:12px;line-height:1.65;color:#c8dbec;
  border:1px solid #496378;background:#14283d;padding:11px 13px;border-radius:10px;margin:0 0 12px}
 .v4PriorityEmpty strong{color:#f2c780}
+
+/* Low-friction pre-signal research. Amber is discovery, never an entry/fill. */
+.v4Counts .v4EarlyBadge{border-color:#b58a45;background:#392b17;color:#ffe6ad}
+.v4EarlyArea{background:linear-gradient(150deg,#1d2938,#131f31);border:1px solid #82663e;
+ border-radius:15px;margin:15px 0;padding:13px 14px;box-shadow:0 12px 32px #0002}
+.v4EarlyHeader{display:flex;justify-content:space-between;gap:12px;align-items:start;flex-wrap:wrap}
+.v4EarlyHeader h3{font-size:clamp(17px,2.1vw,23px);margin:0;color:#ffe8b5;letter-spacing:-.45px}
+.v4EarlyHeader p{font-size:12px;line-height:1.65;color:#c9d7e4;margin:6px 0 4px;max-width:850px}
+.v4EarlyHeader strong{color:#fbd59d}
+.v4EarlyIndicator{color:#ffdfa0;background:#342d1f;border:1px solid #846a44;
+ border-radius:99px;font-size:11px;font-weight:750;padding:6px 10px;white-space:nowrap}
+.v4EarlyStatus{font-size:12px;color:#c9d7e6;margin:10px 0;line-height:1.55}
+.v4EarlyGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;max-height:680px;overflow:auto;padding:2px}
+.v4EarlyCard{background:#152536;border-color:#4c5c70;min-width:0;display:flex;flex-direction:column}
+.v4EarlyCard .v4CardTop{align-items:start}
+.v4EarlyCard .v4CardTop b{font-size:15px}
+.v4EarlyCard .v4GoChart{margin-top:auto}
+.v4EarlyTier{font-size:10px;font-weight:800;color:#f8d28c;background:#493720;
+ border:1px solid #9b7136;border-radius:7px;padding:5px 7px;letter-spacing:.02em}
+.v4EarlyReason{margin:6px 0;color:#f1f6ff;font-size:12px;line-height:1.55}
+.v4EarlyNext{margin:6px 0;padding:8px 9px;font-size:12px;color:#bde1fc;
+ background:#102536;border-radius:7px;border:1px solid #3f6682;line-height:1.6}
+.v4EarlyCaution{display:block;color:#ffd39b;font-size:11px;line-height:1.4;margin:3px 0 8px}
+.v4EarlyCard .v4Meta{font-size:11px;color:#a6c0d5}
+.v4EarlyHistoryHint{margin-top:12px;padding-top:10px;border-top:1px solid #465568;
+ font-size:11px;line-height:1.55;color:#b7c9d8}
+@media(max-width:1120px){.v4EarlyGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:720px){
+ .v4EarlyArea{padding:12px;margin:12px 0}
+ .v4EarlyGrid{grid-template-columns:1fr;max-height:625px}
+ .v4EarlyHeader h3{font-size:18px}
+ .v4EarlyCard{padding:12px}
+}
