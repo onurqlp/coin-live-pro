@@ -38,8 +38,8 @@ assert.ok(html.indexOf('id="chartHostRadar"')<html.indexOf('id="legacyTechnicalD
   'Chart should always be visible on main radar, never in collapsed technical details');
 assert.ok(html.indexOf('id="v4Spotlight"')<html.indexOf('id="v4Motion"')&&
   html.indexOf('id="v4Motion"')<html.indexOf('id="v4Watch"')&&
-  html.indexOf('id="v4Watch"')<html.indexOf('id="chartHostRadar"'),
-  'Main radar must show spotlight/motion above watch and chart');
+  html.indexOf('id="v4Watch"')<html.indexOf('id="legacyTechnicalDisclosure"'),
+  'Preserve strict older stage details behind disclosure');
 for(const id of ['v4MarketTotal','v4LongTotal','v4ShortTotal','v4LastAnalysis'])
   assert.ok(ids.includes(id),'Missing summary KPI: '+id);
 assert.ok(code.includes("mode:'SERVER'")&&code.includes("mode:'STALE'"),'Central data gate must fail closed');
@@ -73,8 +73,8 @@ assert.ok(v4code.includes("timeZone:'UTC'"),'V4 displayed market timestamps must
 assert.ok(v4code.includes('renderGlobalResearch(r,manifest)'),'UTC market research view unconnected');
 assert.ok(v4code.includes('loadRelease();load()'),'Version release.json not loaded');
 const release=JSON.parse(fs.readFileSync('web/release.json','utf8'));
-assert.equal(release.product_version,'4.01','GO-approved 4.01; major number unchanged');
-assert.equal(release.version_change_owner,'USER_APPROVAL_ONLY');
+assert.equal(release.product_version,'4.02','Automatic 4.xx minor update from user approval');
+assert.equal(release.version_change_owner,'AUTOMATIC_MINOR_WITHIN_4');
 assert.ok(Number.isFinite(Date.parse(release.updated_at_utc)),'Update stamp missing');
 assert.ok(html.includes('releaseHistoryList')&&v4code.includes('meta.change_log'),'UTC release history missing');
 assert.ok(!code.includes('Europe/Istanbul'),'No Turkey-specific analysis clocks in legacy UI');
@@ -95,7 +95,7 @@ for(const id of ['watchArchiveRefresh','watchArchiveRows','watchArchivePeriod','
 assert.ok(watchCode.includes("crypto.subtle.digest")&&watchCode.includes("'v4-watch-archive'"),'Archive must verify SHA256');
 assert.ok(html.includes('watch-archive-ui.js'),'Archive JavaScript missing');
 const ui=fs.readFileSync('web/ui-refresh.css','utf8');
-assert.ok(html.includes('ui-refresh.css?v=4'),'UI design tokens must be linked');
+assert.ok(html.includes('ui-refresh.css?v=5'),'UI design tokens must be linked');
 for(const id of ['v4RadarSearch','v4RadarSide','v4RadarFilterStatus'])
   assert.ok(ids.includes(id),'Radar search & side filters must be present: '+id);
 assert.ok(v4code.includes('applyRadarFilter();')&&v4code.includes("mainFrameSummary(x)"),
@@ -104,22 +104,29 @@ assert.ok(v4code.includes('v4Evidence')&&v4code.includes('factorLamps(x)'),
   'Collapsible research details must retain real source metrics');
 assert.ok(ui.includes('prefers-reduced-motion')&&ui.includes(':focus-visible'),
   'Keyboard focus and reduced motion styles must exist');
-assert.equal(JSON.parse(fs.readFileSync('web/release.json')).product_version,'4.01',
-  'Cosmetic updates cannot increment user-controlled product version');
+assert.equal(JSON.parse(fs.readFileSync('web/release.json')).product_version,'4.02',
+  'User approved automatic 4.xx revisions; only 5.0 requires approval');
 for(const id of ['v4Early','v4EarlyCount','v4EarlyStatus','v4EarlyLabel','v4EarlyHistoryHint'])
   assert.ok(ids.includes(id),'Independent early alert UI missing '+id);
 assert.ok(v4code.includes("readJson(k,m)")&&v4code.includes("'v4-early'"),'Early research must be SHA256 source verified');
 assert.ok(v4code.includes('no_paper_entries')||v4code.includes('paper_eligible===false'),'Early watch cannot become paper entry');
 assert.ok(v4code.includes('renderEarly(manifest,stale)'),'Early cards must respect V4 source freshness');
-assert.ok(html.indexOf('id="v4Spotlight"')<html.indexOf('id="v4Motion"')&&
- html.indexOf('id="v4Motion"')<html.indexOf('id="v4Watch"')&&
- html.indexOf('id="v4Watch"')<html.indexOf('id="v4Early"'),
- 'Stage evidence order must be SPOTLIGHT -> MOTION -> WATCH -> EARLY');
+assert.ok(html.indexOf('id="v4Early"')<html.indexOf('id="chartHostRadar"')&&
+ html.indexOf('id="chartHostRadar"')<html.indexOf('id="sparkStrictDetails"'),
+ 'Primary 1-2-3 alert stages and chart must precede strict advanced radar');
+assert.ok(html.includes('id="sparkCompare"')&&html.includes('id="sparkCompareReport"')&&
+ html.includes('id="sparkPaperPanel"'),'Automatic comparison and paper panel missing');
+assert.ok(html.includes('id="chartIndicatorsToggle"')&&html.includes('id="chartIndicatorsCanvas"')&&
+ html.includes('chart-indicators.js'),'Opt-in RSI MACD BB chart proof missing');
+assert.ok(html.includes('spark-ui.js')&&v4code.includes("'v4-spark-paper'")&&
+ v4code.includes("'v4-spark-review'"),'Unsigned unverified spark outcome source');
+assert.ok(v4code.includes('paper_stage_number')&&v4code.includes('GELDİ'),
+ '1-2-3 spark classification not automatic');
 for(const id of ['chartScenario','v4StagePath'])assert.ok(html.includes('id="'+id+'"')||
  html.includes('class="'+id+'"'),'Model scenario and stage staircase missing '+id);
 assert.ok(html.includes('chart-guidance.js?v=2')&&code.includes('CoinLiveChartGuidance?.build'),
  'Canvas must draw independent verified research thresholds on every selected timeframe');
-assert.ok(v4code.includes("'mtf'].map(k=>readJson(k,m))")&&v4code.includes('mtf.fetched_at!==m.started_at_utc'),
+assert.ok(v4code.includes("'v4-spark-review'].map(k=>readJson(k,m))")&&v4code.includes('mtf.fetched_at!==m.started_at_utc'),
  'HTF model must be SHA-verified and stamped to manifest');
 assert.ok(code.includes('selectedSide')&&v4code.includes('b.dataset.v4Side'),
  'Clicked LONG/SHORT direction must stay selected through chart analysis');
@@ -145,5 +152,5 @@ assert.ok(ui.includes('.banner:not(.stale):not(.warn)'),
 assert.ok(html.includes('quickTfOptional')&&html.includes('id="chartTf"'),
  'Timeframes must remain accessible through ONE control');
 assert.ok(!html.includes('Gerçek emir aç'),'No claims of real trading');
-console.log('PASS: Early LONG/SHORT lights independently research-only, plus V4 4.01 core.');
+console.log('PASS: 4.02 automatic early staged virtual paper + forward-only comparison, readable chart.');
 
