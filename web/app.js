@@ -30,9 +30,9 @@ function refreshState(){
    'Kıvılcım yalnız günlük + 4H trend uyumuyla oluşur. 1H/15m teyit, 5m/1m ek kontrol; gerçek emir yok.':
    'Sunucu '+(Number.isFinite(radarAge)?radarAge+' dk':'—')+' önce analiz yaptı. Yeni kıvılcım kapalı. Üstteki yenile yalnız veriyi tekrar kontrol eder, yeni sunucu taraması başlatmaz.';
  const quoteSeconds=Math.max(0,Math.floor((Date.now()-S.lastRefresh)/1000));
- $('healthTime').textContent='Analiz '+(Number.isFinite(radarAge)?radarAge+' dk':'—')+
-   (live?' · OKX canlı fiyat '+quoteSeconds+' sn önce':' · Yedek fiyat '+(Number.isFinite(marketAge)?marketAge+' dk':'—')+
-     ' · '+(S.quoteLastError?'OKX erişim sorunu':'Canlı bağlantı bekleniyor'));
+ $('healthTime').textContent='Analiz '+(Number.isFinite(radarAge)?radarAge+' dk önce':'bekleniyor')+
+   ' · '+(live?'canlı fiyat '+quoteSeconds+' sn önce':
+      'fiyat yedeği '+(Number.isFinite(marketAge)?marketAge+' dk önce':'bekleniyor'));
  const clock=$('quoteClock');
  if(clock){clock.className='quoteClock '+(live?'active':'inactive');
    clock.textContent=live?'↻ OKX fiyat '+quoteSeconds+' sn önce · otomatik 20 sn':
