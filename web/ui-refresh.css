@@ -606,9 +606,10 @@ body{
 }
 .workspaceNav a.active,
 .workspaceNav a[aria-current=page]{
- color:#f3f8fd;
- background:#1d3247;
- border-color:#38536b;
+ color:#f3f8fd!important;
+ background:#1d3247!important;
+ border-color:#38536b!important;
+ box-shadow:none!important;
 }
 .routeStatus{color:#bac9d6;border-color:#263a4c}
 .routeStatus small{color:#9eb5c7}
