@@ -85,6 +85,10 @@ jobs:
           assert data['v4-early']['no_paper_entries'] is True
           assert data['v4-spark-paper']['daily']['timezone']=='UTC'
           assert data['v4-spark-paper']['geldi_intent_total']>=0
+          assert data['v4-spark-paper']['daily']['today_utc']==data['v4-spark-paper']['daily']['today']['date_utc']
+          assert all(x.get('paper_intent_created_at_utc') and not x.get('is_real_trade') for x in
+                     data['v4-spark-paper']['recent_tickets'] if x.get('entry_class')=='GELDI')
+          assert data['v4-spark-paper']['daily']['per_event_deduplicated'] is True
           assert data['v4-spark-paper']['no_real_orders'] is True
           assert data['v4-context']['score_not_used_for_paper_or_v4_stage'] is True
           assert data['v4-paper']['starting_balance_usdt']==10000
