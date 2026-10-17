@@ -1,6 +1,7 @@
 name: COIN.LIVE PRO — Quality
 on:
   push:
+    branches: [main]
     paths:
       - 'engine/**'
       - 'scripts/**'
