@@ -16,6 +16,7 @@ on:
       - v4-02-self-measuring-sparks-20261017
       - v4-03-geldi-daily-paper-audit-20261017
       - fix-mobile-charts-corporate-20261017
+      - ux-mobile-clarity-20261017
     paths:
       - '.github/workflows/v4-preview.yml'
       - 'engine/v4_**'
@@ -120,10 +121,13 @@ jobs:
               assert m and m.group(1).strip(),id+' failed to render'
           assert 'id="v4Early"' in doc and 'id="v4EarlyCount"' in doc,'Early watch UI missing'
           assert 'id="v4RadarSearch"' in doc and 'id="v4RadarSide"' in doc,'Radar filters missing'
-          assert 'ui-refresh.css?v=7' in doc,'Readable CSS layer not linked'
+          assert 'ui-refresh.css?v=8' in doc,'Readable CSS layer not linked'
           assert 'V4 veri kontrolü:' not in doc,'V4 manifest fetch or hash validation failed'
           assert 'id="chartScenario"' in doc,'Chart scenario details missing'
           assert 'id="chartDataStatus"' in doc,'Chart origin status missing'
+          assert 'class="navIcon"' in doc and 'id="healthDetails"' in doc,'Mobile navigation/status disclosures missing'
+          assert 'class="sparkLaneMore"' in doc and 'class="sparkCardMore"' in doc,'Research details lost'
+          assert 'class="chartTechnicalNotes"' in doc,'Technical chart text not moved behind disclosure'
           assert 'id="headerMore"' in doc and 'id="radarMetaDetails"' in doc,'Minimal UX disclosures missing'
           assert 'class="v4MarketSummary"' in doc,'Collapsed stats must remain available'
           assert 'Model ne düşünüyor?' in doc,'Thesis must display'
@@ -139,6 +143,14 @@ jobs:
           assert doc.index('id="v4Early"')<doc.index('id="chartHostRadar"')<doc.index('id="sparkStrictDetails"'), '3 stage desk not prominent'
           assert doc.index('id="chartHostRadar"')<doc.index('id="legacyTechnicalDisclosure"'), 'Main chart trapped in closed technical details'
           print('V4_CHROMIUM_RENDER_OK')
+          PY
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=390,844 --virtual-time-budget=14000 --dump-dom "http://127.0.0.1:8765/#radar" > /tmp/v4-mobile-radar-dom.html 2>/tmp/v4-mobile-radar-chrome.log
+          python3 - <<'PY'
+          page=open('/tmp/v4-mobile-radar-dom.html').read()
+          assert 'Güncel fırsat listesi' in page
+          assert 'Grafiği incele' in page
+          assert 'Takip edilen koşul' in page
+          print('MOBILE_COIN_SHORTLIST_OK')
           PY
           "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size=390,844 --virtual-time-budget=14000 --dump-dom "http://127.0.0.1:8765/#grafikler" > /tmp/v4-mobile-chart-dom.html 2>/tmp/v4-mobile-chart-chrome.log
           python3 - <<'PY'
@@ -161,6 +173,8 @@ jobs:
           path: |
             /tmp/v4-dom.html
             /tmp/v4-mobile-chart-dom.html
+            /tmp/v4-mobile-radar-dom.html
+            /tmp/v4-mobile-radar-chrome.log
             /tmp/v4-mobile-chart-chrome.log
             /tmp/v4-chrome.log
             /tmp/v4-desktop.png
