@@ -169,13 +169,19 @@ def build(mtf,market,radar,prior,watch,now_ms):
                'first_research_tier':x['research_tier'],'first_rank':x['research_rank'],
                'observation_count':1,'last_seen_at_utc':stamp(now_ms),
                'last_research_tier':x['research_tier'],
+               'stage_history':[{'at_utc':stamp(now_ms),'tier':x['research_tier'],'research_rank':x['research_rank']}],
                'not_executed_trade':True,'outcome':'NOT_MEASURED'}
         else:
             # A stale replay with identical scan ID is not a fresh re-evaluation.
             if prior.get('last_scan_id')!=radar['scan_id']:
                 prior_event['observation_count']=int(prior_event.get('observation_count',1))+1
                 prior_event['last_seen_at_utc']=stamp(now_ms)
+                if prior_event.get('last_research_tier')!=x['research_tier']:
+                    prior_event.setdefault('stage_history',[]).append({
+                       'at_utc':stamp(now_ms),'tier':x['research_tier'],'research_rank':x['research_rank']})
                 prior_event['last_research_tier']=x['research_tier']
+        x['paper_stage_number']={'KIVILCIM':1,'ERKEN_SINYAL':2,'ISIK_GUCLENIYOR':3}[x['research_tier']]
+        x['paper_stage_name']={1:'İZLENEN',2:'GELMEKTE OLAN',3:'GELDİ'}[x['paper_stage_number']]
         x['event_id']=event_id
         x['first_seen_at_utc']=old[event_id]['first_seen_at_utc']
         x['first_seen_price']=old[event_id]['first_seen_price']

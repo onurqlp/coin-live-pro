@@ -13,6 +13,7 @@ on:
       - more-early-signals-20261017
       - ui-ordered-stages-chart-scenarios-20261017
       - ui-minimal-actual-dashboard-20261017
+      - v4-02-self-measuring-sparks-20261017
     paths:
       - '.github/workflows/v4-preview.yml'
       - 'engine/v4_**'
@@ -55,6 +56,8 @@ jobs:
           python3 engine/v4_forward.py
           python3 engine/v4_watch_archive.py
           python3 engine/v4_early.py
+          python3 engine/v4_spark_paper.py
+          python3 engine/v4_spark_review.py
           python3 engine/v4_lab.py
           python3 engine/forward.py
           python3 engine/paper.py
@@ -65,7 +68,7 @@ jobs:
           from pathlib import Path
           p=Path('web/data')
           data={k:json.loads((p/(k+'.json')).read_text()) for k in
-             ('v4-manifest','v4-radar','v4-history-index','v4-paper','v4-shadow','v4-forward','v4-watch-archive','v4-early','v4-context','v4-lab')}
+             ('v4-manifest','v4-radar','v4-history-index','v4-paper','v4-shadow','v4-forward','v4-watch-archive','v4-early','v4-spark-paper','v4-spark-review','v4-context','v4-lab')}
           sid=data['v4-manifest']['scan_id']
           assert data['v4-manifest']['publication_valid']
           anomaly=data['v4-radar'].get('anomaly_research',{})
@@ -74,8 +77,8 @@ jobs:
           assert anomaly.get('hourly',{}).get('time_basis')=='UTC'
           assert anomaly.get('clock',{}).get('window_is_not_manipulation_evidence') is True
           release=json.loads((p.parent/'release.json').read_text())
-          assert release['product_version']=='4.01' and release['version_change_owner']=='USER_APPROVAL_ONLY'
-          assert all(data[k]['scan_id']==sid for k in ('v4-radar','v4-history-index','v4-paper','v4-shadow','v4-forward','v4-watch-archive','v4-early','v4-lab'))
+          assert release['product_version']=='4.02' and release['version_change_owner']=='AUTOMATIC_MINOR_WITHIN_4'
+          assert all(data[k]['scan_id']==sid for k in ('v4-radar','v4-history-index','v4-paper','v4-shadow','v4-forward','v4-watch-archive','v4-early','v4-spark-paper','v4-spark-review','v4-lab'))
           assert data['v4-watch-archive']['scan_id']==sid
           assert data['v4-early']['research_only'] is True
           assert data['v4-early']['no_paper_entries'] is True
@@ -101,19 +104,21 @@ jobs:
               assert m and m.group(1).strip(),id+' failed to render'
           assert 'id="v4Early"' in doc and 'id="v4EarlyCount"' in doc,'Early watch UI missing'
           assert 'id="v4RadarSearch"' in doc and 'id="v4RadarSide"' in doc,'Radar filters missing'
-          assert 'ui-refresh.css?v=4' in doc,'Readable CSS layer not linked'
+          assert 'ui-refresh.css?v=5' in doc,'Readable CSS layer not linked'
           assert 'V4 veri kontrolü:' not in doc,'V4 manifest fetch or hash validation failed'
           assert 'id="chartScenario"' in doc,'Chart scenario details missing'
           assert 'id="headerMore"' in doc and 'id="radarMetaDetails"' in doc,'Minimal UX disclosures missing'
           assert 'class="v4MarketSummary"' in doc,'Collapsed stats must remain available'
           assert 'Model ne düşünüyor?' in doc,'Thesis must display'
+          assert 'id="sparkCompare"' in doc and 'id="sparkPaperPanel"' in doc,'Comparison and virtual ticket study missing'
+          assert 'id="chartIndicatorsCanvas"' in doc,'Opt-in indicators missing'
           assert 'id="v4PaperKpis"' in doc
           import re
           for target in ('v4MarketTotal','v4LongTotal','v4ShortTotal','v4LastAnalysis'):
               m=re.search(r'id="'+target+r'"[^>]*>(.*?)</',doc,re.S)
               assert m and m.group(1).strip() not in ('—',''), 'Summary KPI missing data: '+target
           assert 'id="v4TopRow"' not in doc  # CSS grid, not duplicated DOM ID
-          assert doc.index('id="v4Spotlight"')<doc.index('id="v4Motion"')<doc.index('id="v4Watch"')<doc.index('id="chartHostRadar"')<doc.index('id="v4Early"'), 'Stage order incorrect'
+          assert doc.index('id="v4Early"')<doc.index('id="chartHostRadar"')<doc.index('id="sparkStrictDetails"'), '3 stage desk not prominent'
           assert doc.index('id="chartHostRadar"')<doc.index('id="legacyTechnicalDisclosure"'), 'Main chart trapped in closed technical details'
           print('V4_CHROMIUM_RENDER_OK')
           PY

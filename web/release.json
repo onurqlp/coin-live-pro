@@ -1,21 +1,27 @@
 {
-  "product_version": "4.01",
-  "version_change_owner": "USER_APPROVAL_ONLY",
-  "release_id": "MINI-20261017-1059",
-  "updated_at_utc": "2026-10-17T10:59:00.993Z",
+  "product_version": "4.02",
+  "version_change_owner": "AUTOMATIC_MINOR_WITHIN_4",
+  "release_id": "SPARK-20261017-11undefined16",
+  "updated_at_utc": "2026-10-17T11:16:30.962Z",
   "timestamp_basis": "UTC",
   "market_data_timestamp_separate": true,
   "change_summary": [
-    "Tek satır logo + OKX durum + yenile + detay menüsü; eski risk hesaplayıcı ve sürüm geçmişi menüde",
-    "Kalabalık durum ve özet bantları ana sayfadan kaldırıldı, analiz/90 gün/UTC ayrıntıları açık erişimli bölüme taşındı",
-    "Fırsatlar başlangıç ekranında öne çıkarıldı: dört sade aşama sayacı, coin arama, aday ve aynı sayfa grafik",
-    "Boş üst aşama kartları ve büyük yinelenen açıklamalar gizlendi; izleme ve kıvılcım verileri korunuyor",
-    "Grafikte ana yorum, eşik ve koşullu TP seviyeleri görünür, ayrıntılı model açıklaması açılır",
-    "Fiyat kaynağı gecikir veya sorun olursa uyarı görünür; sinyal, arşiv ve V4 paper algoritması değişmedi"
+    "Yeni 3 erken sinyal aşaması: 1 İZLENEN → 2 GELMEKTE OLAN → 3 GELDİ; her biri sanal deneme ve ayrı arşiv",
+    "İlk oluşum anındaki mum/RSI/MACD/Bollinger durumu değiştirilemez kayıt; sonuç yalnız sonraki kapanmış 5m mumlarla",
+    "Bağımsız 10.000 USDT deney kasası, her yeni kıvılcıma 10 USDT nominal sanal ticket, TP1/2/3 ve STOP, ücret/kayma varsayımları",
+    "Tek Sonuçları Karşılaştır eylemi: 3 aşama, LONG/SHORT, RSI/MACD/BB gruplarının gerçek ileri sanal sonuçları",
+    "Grafik isteğe bağlı RSI14, MACD12/26/9 ve Bollinger20/2 göstergeleri; coin arama yalnız ayrıntıda",
+    "Mevcut ana V4 sanal kasa/gerçek emir yasağı korunur; geçmişe sanal fill uydurulmaz",
+    "Sürüm otomatik küçük artış 4.02; 4.03 vb sonraki güncellemeler, 5.0 yalnız kullanıcı onayı ile"
   ],
   "no_real_orders": true,
   "not_a_trading_signal": true,
   "change_log": [
+    {
+      "release_id": "SPARK-20261017-11undefined16",
+      "updated_at_utc": "2026-10-17T11:16:30.962Z",
+      "summary": "Üç aşamalı kendi kendini ölçen kıvılcım sistemi, gelecekte kapanan 5m mumlarla otomatik sanal ticket ve TP/stop takibi, RSI/MACD/BB kanıtı ve tek tuş performans karşılaştırması. 4.02; 5.0 kullanıcı onayıyla."
+    },
     {
       "release_id": "MINI-20261017-1059",
       "updated_at_utc": "2026-10-17T10:59:00.993Z",
@@ -51,5 +57,6 @@
       "updated_at_utc": "2026-10-16T22:36:05.003Z",
       "summary": "İlk global UTC/anomali araştırması ve son kod güncelleme etiketi."
     }
-  ]
+  ],
+  "major_version_5_requires_user_approval": true
 }

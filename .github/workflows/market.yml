@@ -67,6 +67,10 @@ jobs:
         run: python3 engine/v4_watch_archive.py
       - name: Publish generous independent early LONG SHORT research alerts
         run: python3 engine/v4_early.py
+      - name: Open independent virtual tickets for every NEW spark and settle on later 5m bars
+        run: python3 engine/v4_spark_paper.py
+      - name: Compare 1-2-3 stage strategy outcomes against frozen signal indicators
+        run: python3 engine/v4_spark_review.py
       - name: Compute V4 7/14/30/90 day research lab
         run: python3 engine/v4_lab.py
       - name: Evaluate forward-only 3.0 observations on fully closed 4H candles
@@ -135,12 +139,16 @@ jobs:
           assert all(e.get('model_version')=='3.0.0-htf-sparks' for e in files['swing-history']['events']),'old history leaked'
           assert files['paper']['starting_usdt']==100,'pilot balance changed'
           assert files['health']['last_scan_id'],'missing scan provenance'
-          required=('v4-oi','v4-radar','v4-paper','v4-shadow','v4-forward','v4-watch-archive','v4-early','v4-context','v4-lab','v4-manifest')
+          required=('v4-oi','v4-radar','v4-paper','v4-shadow','v4-forward','v4-watch-archive','v4-early','v4-spark-paper','v4-spark-review','v4-context','v4-lab','v4-manifest')
           v4={name:json.loads((p/f'{name}.json').read_text()) for name in required}
           sid=v4['v4-manifest']['scan_id']
           assert v4['v4-manifest']['publication_valid'] is True
-          assert all(v4[name].get('scan_id')==sid for name in ('v4-radar','v4-paper','v4-shadow','v4-forward','v4-watch-archive','v4-early','v4-lab'))
+          assert all(v4[name].get('scan_id')==sid for name in ('v4-radar','v4-paper','v4-shadow','v4-forward','v4-watch-archive','v4-early','v4-spark-paper','v4-spark-review','v4-lab'))
           assert v4['v4-early']['research_only'] is True and v4['v4-early']['no_paper_entries'] is True
+          assert v4['v4-spark-paper']['no_real_orders'] and not v4['v4-spark-paper']['combined_with_strict_paper_cash']
+          assert v4['v4-spark-paper']['archive_is_persistent'] is True
+          assert v4['v4-spark-review']['needs_out_of_sample_validation'] is True
+          assert v4['v4-spark-review']['new_rules_applied_automatically'] is False
           assert v4['v4-paper']['starting_balance_usdt']==10000
           assert v4['v4-paper']['legacy_v3_balance_included'] is False
           assert v4['v4-paper']['no_real_orders'] is True
@@ -149,7 +157,7 @@ jobs:
           assert set(v4['v4-radar']['counts']) >= {'spotlight','motion','watch','active_total'}
           from pathlib import Path
           release=json.loads(Path('web/release.json').read_text())
-          assert release['product_version']=='4.01' and release['version_change_owner']=='USER_APPROVAL_ONLY'
+          assert release['product_version']=='4.02' and release['version_change_owner']=='AUTOMATIC_MINOR_WITHIN_4'
           study=v4['v4-radar'].get('anomaly_research',{})
           assert study.get('not_used_in_v4_score') is True
           assert study.get('no_real_orders') is True
@@ -172,10 +180,10 @@ jobs:
           git add web/data/v4-oi.json web/data/v4-radar.json web/data/v4-paper.json
           git add web/data/v4-history-index.json web/data/v4-shadow.json
           git add web/data/v4-lab.json web/data/v4-forward.json web/data/v4-manifest.json
-          git add web/data/v4-watch-archive.json web/data/v4-context.json web/data/v4-early.json
+          git add web/data/v4-watch-archive.json web/data/v4-context.json web/data/v4-early.json web/data/v4-spark-paper.json web/data/v4-spark-review.json
           git add web/data/swing-radar.json web/data/swing-history.json web/data/swing-outcomes.json
           git add archive/pilot-ledger.json archive/scan-health.json archive/swing-sparks-ledger.json archive/swing-active-ledger.json archive/swing-outcomes-ledger.json
-          git add archive/v3-paper-legacy-snapshot.json archive/v4-lifecycle-ledger.json archive/v4-paper-ledger.json archive/v4-shadow-ledger.json archive/v4-forward-ledger.json archive/v4-oi-timeseries.json archive/v4-anomaly-study.json archive/v4-watch-ledger.json archive/v4-context-ledger.json archive/v4-early-ledger.json
+          git add archive/v3-paper-legacy-snapshot.json archive/v4-lifecycle-ledger.json archive/v4-paper-ledger.json archive/v4-shadow-ledger.json archive/v4-forward-ledger.json archive/v4-oi-timeseries.json archive/v4-anomaly-study.json archive/v4-watch-ledger.json archive/v4-context-ledger.json archive/v4-early-ledger.json archive/v4-spark-paper-ledger.json
           if git diff --cached --quiet; then exit 0; fi
           git commit -m 'data: 7-timeframe radar, paper pilot, 90-day event and cron provenance [skip ci]'
           for try in 1 2 3; do

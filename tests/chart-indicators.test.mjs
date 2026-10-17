@@ -1,0 +1,15 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+import vm from 'node:vm';
+const c={};vm.runInNewContext(fs.readFileSync('web/chart-indicators.js','utf8'),c);
+const a=c.CoinLiveIndicators;
+const prices=Array.from({length:90},(_,i)=>100+i*.3+Math.sin(i/5)*.8);
+const one=a.indicators(prices),two=a.indicators(prices);
+assert.equal(one.rsi.length,90);
+assert.ok(one.rsi[89]>=0&&one.rsi[89]<=100);
+assert.ok(Number.isFinite(one.macd[89])&&Number.isFinite(one.hist[89]));
+assert.ok(Number.isFinite(one.bb[89].upper));
+assert.ok(one.bb[89].lower<one.bb[89].mid&&one.bb[89].upper>one.bb[89].mid);
+assert.equal(one.bb[89].widthPct,two.bb[89].widthPct);
+assert.equal(one.rsi[0],null);
+console.log('PASS opt-in closed OHLC indicators RSI MACD BB.');
