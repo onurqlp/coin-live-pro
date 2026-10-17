@@ -1,4 +1,4 @@
-<!doctype html><html lang="tr"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta name="theme-color" content="#08101c"/><title>COIN.LIVE PRO 4.01 | 90 Günlük Canlı Gözlem</title><meta name="description" content="LONG/SHORT kanıta dayalı İZLE HAREKET GÖZ ÖNÜNDE radarı, 10.000 USDT sanal Futures Desk, 1H–7D ileri takip ve 7/14/30/90 günlük rapor. Gerçek emir yok."/><link rel="stylesheet" href="./style.css?v=14"/><link rel="stylesheet" href="./v4-style.css?v=8"/><link rel="stylesheet" href="./ui-refresh.css?v=1"/></head>
+<!doctype html><html lang="tr"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta name="theme-color" content="#08101c"/><title>COIN.LIVE PRO 4.01 | 90 Günlük Canlı Gözlem</title><meta name="description" content="LONG/SHORT kanıta dayalı İZLE HAREKET GÖZ ÖNÜNDE radarı, 10.000 USDT sanal Futures Desk, 1H–7D ileri takip ve 7/14/30/90 günlük rapor. Gerçek emir yok."/><link rel="stylesheet" href="./style.css?v=14"/><link rel="stylesheet" href="./v4-style.css?v=8"/><link rel="stylesheet" href="./ui-refresh.css?v=2"/></head>
 <body><div class="shell"><header class="header"><div><div class="brand">COIN<span>.LIVE</span><small> PRO 4.01 / 90 GÜN GÖZLEM</small></div><div class="sub">LONG ve SHORT fırsat takibi · 4H + günlük ana yön · 10.000 USDT sanal kasa</div>
 <div class="releaseMeta" aria-label="Sürüm ve son kod güncellemesi"><strong id="releaseVersion">Sürüm 4.01</strong><small id="releaseUpdated">Son kod güncellemesi kontrol ediliyor · UTC</small></div><details class="releaseHistory" id="releaseHistory"><summary>Güncelleme geçmişi (UTC)</summary><ol id="releaseHistoryList"><li>Yayın kayıtları yükleniyor…</li></ol><small>Sürümü yalnız siz değiştirirsiniz. Kod tarihi, son analiz zamanı ve mum kapanışı ayrı kayıtlardır.</small></details></div><div class="buttons"><span class="source" id="source">Veriler kontrol ediliyor</span><span class="quoteClock" id="quoteClock">Fiyat bağlantısı bekleniyor</span><button id="refresh" class="primary">↻ Güncelliği Kontrol Et</button><button id="calculator" title="Eski V3 100 USDT hesabı için örnek matematik">▦ Risk Hesabı (Eski Pilot)</button></div></header>
 <nav class="workspaceNav" aria-label="COIN.LIVE PRO çalışma alanları" id="workspaceNav">
@@ -18,8 +18,8 @@
 <main class="workspaceView" data-view="radar" id="view-radar" >
 <section class="v4Area" id="v4Board" aria-labelledby="v4Title">
  <div class="v4Header"><div><h2 id="v4Title">Fırsat Radarı</h2>
- <p>Adayları karşılaştır, coini seç ve grafiği kontrol et. <strong>Puan başarı yüzdesi değildir.</strong></p></div>
- <div class="v4Counts"><span>İZLE <strong id="v4WatchCount">—</strong></span><span>HAREKET <strong id="v4MotionCount">—</strong></span>
+ <p>Adayları karşılaştır, ilk ışığı yakala, grafikte kontrol et. <strong>Erken işaretler daha sık gelebilir; isabet garantisi değildir.</strong></p></div>
+ <div class="v4Counts"><span class="v4EarlyBadge">ERKEN <strong id="v4EarlyCount">—</strong></span><span>İZLE <strong id="v4WatchCount">—</strong></span><span>HAREKET <strong id="v4MotionCount">—</strong></span>
  <span>GÖZ ÖNÜNDE <strong id="v4SpotCount">—</strong></span>
  <span>Yeniden kontrol <strong id="v4RecheckCount">—</strong></span>
  <span>Arşiv <strong id="v4ArchivedCount">—</strong></span></div></div>
@@ -55,8 +55,18 @@
  </label>
  <span id="v4RadarFilterStatus" role="status" aria-live="polite">Radar yükleniyor…</span>
 </div>
-<div class="v4Legend" aria-label="Renklerin anlamları"><span class="long"><i></i> LONG · yükseliş yönlü</span><span class="short"><i></i> SHORT · düşüş yönlü</span><span class="wait"><i></i> İZLE · teyit bekliyor</span></div>
-<p id="v4PriorityEmpty" class="v4PriorityEmpty" role="status" hidden>Şu an üst düzey teyitli fırsat yok veya teyit doğrulanamıyor. Aşağıdaki <strong>İZLE</strong> adaylarını araştırabilirsin; bu liste işlem önerisi değildir.</p>
+<div class="v4Legend" aria-label="Renklerin anlamları"><span class="long"><i></i> LONG · yükseliş yönlü</span><span class="short"><i></i> SHORT · düşüş yönlü</span><span class="wait"><i></i> ERKEN · araştırma, işlem teyidi değil</span></div>
+<section class="v4EarlyArea" aria-labelledby="v4EarlyTitle">
+  <header class="v4EarlyHeader">
+    <div><h3 id="v4EarlyTitle">⚡ Yeni Kıvılcımlar — Erken LONG / SHORT İşaretleri</h3>
+    <p>İlk ışığı gösteriyoruz: 4 saatlik veya günlük yön destekliyorsa bütün göstergelerin yeşile dönmesini beklemiyoruz. <strong>Buradakiler giriş emri veya teyitli işlem değildir.</strong></p></div>
+    <span class="v4EarlyIndicator" id="v4EarlyLabel">KAYNAK KONTROLÜ</span>
+  </header>
+  <div id="v4EarlyStatus" class="v4EarlyStatus" role="status">Kapanmış mum araştırması yükleniyor…</div>
+  <div id="v4Early" class="v4EarlyGrid"><div class="v4Empty">Doğrulanmış erken işaret bekleniyor.</div></div>
+  <div id="v4EarlyHistoryHint" class="v4EarlyHistoryHint">Önceki İZLE gözlemlerinin sonraki 1H/4H sonuçları ayrı ölçülür; oran, kazanma ihtimali değildir.</div>
+</section>
+<p id="v4PriorityEmpty" class="v4PriorityEmpty" role="status" hidden><strong>HAREKET / GÖZ ÖNÜNDE teyidi henüz yok.</strong> Üstteki ERKEN İŞARETLER daha gevşek araştırma kurallarıyla gelir; teyitli işlem anlamına gelmez.</p>
 <div class="v4TopRow" id="v4PriorityArea" aria-label="Öncelikli fırsatlar">
    <section class="v4Column spotlight" aria-label="Göz önünde olan fırsatlar"><h3><span>◎ GÖZ ÖNÜNDE</span><small>Güçlü gözlem · işlem garantisi değil</small></h3><div id="v4Spotlight" class="v4Cards"><div class="v4Empty">Kaynak bekleniyor</div></div></section>
    <section class="v4Column motion" aria-label="Hareketi başlayan fırsatlar"><h3><span>↗ HAREKET</span><small>Hareket gözleniyor</small></h3><div id="v4Motion" class="v4Cards"><div class="v4Empty">Kaynak bekleniyor</div></div></section>
@@ -131,4 +141,4 @@
 <header class="pageIntro"><div class="kicker">DATA & OTOMASYON</div><h1>Sistem sağlığı</h1><p>Son gerçek analiz, atlanan döngüler, tarama kapsamı ve otomatik zamanlama kanıtı. GitHub push başarısı 24/7 schedule garantisi değildir.</p></header><section class="panel" id="systemPanel"><div class="panelHead"><div><h2>🩺 Sistem Sağlığı · Gerçek Cron Kanıtı</h2><p>Push ile çalışan işler otomatik zamanlama başarısı kabul edilmez. Veri yaşlanırsa yeni işlem açılmaz.</p></div><span class="tag" id="systemStatus">ÖLÇÜLÜYOR</span></div><div class="v2kpis" id="systemKpis"></div><div id="systemDetail" class="quality"></div></section>
 
 </main><div id="calcModal" class="modal" aria-modal="true" role="dialog" aria-label="Risk hesaplama"><div class="modalCard"><div class="modalHead"><h3>Eski V3 Risk Hesabı · Örnek</h3><button id="calcClose">✕</button></div><p>Eski <b>100 USDT sanal pilotu</b> için matematiksel örnek. Yeni 10.000 USDT V4 kasasının işlem ayarı değildir. İZLE ile işlem açılmaz. Stop kayması nedeniyle hedeflenen risk aşılabilir.</p><label>Bakiye (USDT)<input id="balanceInput" type="number" min="10" max="1000000" value="100" step="10"/></label><div id="calcResult" class="quality"></div></div></div>
-<footer><span id="releaseFooter">Sürüm 4.01 · UTC yayın kaydı kontrol ediliyor</span> · COIN.LIVE 90 günlük ileriye dönük LONG/SHORT araştırması · 10.000 USDT yalnız sanal kasa · gerçek emir ve bildirim yok. Mumlar UTC kapanışıyla değerlendirilir; zamanlayıcı gecikebilir.</footer></div><script defer src="./app.js?v=22"></script><script defer src="./pilot-ui.js?v=9"></script><script defer src="./router.js?v=4"></script><script defer src="./v4-ui.js?v=9"></script><script defer src="./watch-archive-ui.js?v=1"></script></body></html>
+<footer><span id="releaseFooter">Sürüm 4.01 · UTC yayın kaydı kontrol ediliyor</span> · COIN.LIVE 90 günlük ileriye dönük LONG/SHORT araştırması · 10.000 USDT yalnız sanal kasa · gerçek emir ve bildirim yok. Mumlar UTC kapanışıyla değerlendirilir; zamanlayıcı gecikebilir.</footer></div><script defer src="./app.js?v=22"></script><script defer src="./pilot-ui.js?v=9"></script><script defer src="./router.js?v=4"></script><script defer src="./v4-ui.js?v=10"></script><script defer src="./watch-archive-ui.js?v=1"></script></body></html>
