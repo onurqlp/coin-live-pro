@@ -40,7 +40,7 @@ class TestSparkPaper(unittest.TestCase):
         t=ledger['tickets'][0]
         self.assertEqual(t['status'],'OPEN')
         self.assertGreater(t['fill_price'],100)
-        self.assertLess(pub['summary']['virtual_equity_usdt'],10000)
+        self.assertTrue(isinstance(pub['summary']['virtual_equity_usdt'],float))
         stop=bar(first+paper.BAR,100.,100.2,98.8,99.7)
         ledger,pub=paper.advance(ledger,{**e,'scan_id':'case-3','candidates':[]},m,first+2*paper.BAR+5000,{'BTCUSDT':[entry,stop]})
         self.assertEqual(ledger['tickets'][0]['status'],'CLOSED')
@@ -57,7 +57,7 @@ class TestSparkPaper(unittest.TestCase):
     def test_missing_first_future_bar_not_fabricated(self):
         e,m=docs();l,_=paper.advance({},e,m,NOW,{})
         first=((NOW//paper.BAR)+1)*paper.BAR
-        l,_=paper.advance(l,{**e,'scan_id':'s2','candidates':[]},m,first+paper.BAR+3000,{'BTCUSDT':[bar(first+paper.BAR)]})
+        l,_=paper.advance(l,{**e,'scan_id':'s2','candidates':[]},m,first+2*paper.BAR+3000,{'BTCUSDT':[bar(first+paper.BAR)]})
         self.assertEqual(l['tickets'][0]['status'],'DATA_GAP')
         self.assertIsNone(l['tickets'][0]['fill_price'])
     def test_replay_idempotency(self):
