@@ -99,7 +99,7 @@ jobs:
               assert m and m.group(1).strip(),id+' failed to render'
           assert 'id="v4Early"' in doc and 'id="v4EarlyCount"' in doc,'Early watch UI missing'
           assert 'id="v4RadarSearch"' in doc and 'id="v4RadarSide"' in doc,'Radar filters missing'
-          assert 'ui-refresh.css?v=1' in doc,'Readable CSS layer not linked'
+          assert 'ui-refresh.css?v=2' in doc,'Readable CSS layer not linked'
           assert 'V4 veri kontrolü:' not in doc,'V4 manifest fetch or hash validation failed'
           assert 'id="v4PaperKpis"' in doc
           import re
