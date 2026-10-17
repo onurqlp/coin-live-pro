@@ -56,6 +56,8 @@ jobs:
           python3 engine/v4_forward.py
           python3 engine/v4_watch_archive.py
           python3 engine/v4_early.py
+          python3 engine/v4_spark_paper.py
+          python3 engine/v4_spark_review.py
           python3 engine/v4_lab.py
           python3 engine/forward.py
           python3 engine/paper.py
@@ -66,7 +68,7 @@ jobs:
           from pathlib import Path
           p=Path('web/data')
           data={k:json.loads((p/(k+'.json')).read_text()) for k in
-             ('v4-manifest','v4-radar','v4-history-index','v4-paper','v4-shadow','v4-forward','v4-watch-archive','v4-early','v4-context','v4-lab')}
+             ('v4-manifest','v4-radar','v4-history-index','v4-paper','v4-shadow','v4-forward','v4-watch-archive','v4-early','v4-spark-paper','v4-spark-review','v4-context','v4-lab')}
           sid=data['v4-manifest']['scan_id']
           assert data['v4-manifest']['publication_valid']
           anomaly=data['v4-radar'].get('anomaly_research',{})
