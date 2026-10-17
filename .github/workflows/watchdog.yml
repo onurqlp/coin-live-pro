@@ -1,0 +1,24 @@
+name: COIN.LIVE — Independent Pipeline Watchdog
+on:
+  schedule:
+    - cron: '14 * * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+  issues: write
+jobs:
+  watchdog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Check latest published scan and consecutive failures; dedupe GitHub Issues
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.COINLIVE_TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.COINLIVE_TELEGRAM_CHAT_ID }}
+        run: python3 scripts/watchdog.py

@@ -1,0 +1,28 @@
+name: COIN.LIVE — Verified 90-Day Archive Snapshots
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 2 * * *'
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate tamper-evident archive and checksums (no order credentials)
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          find archive research web/data config -type f -print0 | sort -z | xargs -0 sha256sum > artifacts/SOURCE_CHECKSUMS.sha256
+          tar -czf artifacts/coin-live-${{ github.run_id }}.tar.gz archive research web/data config web/release.json
+          tar -tzf artifacts/coin-live-${{ github.run_id }}.tar.gz >/dev/null
+          sha256sum artifacts/*.tar.gz > artifacts/ARCHIVE_CHECKSUMS.sha256
+          wc -l artifacts/SOURCE_CHECKSUMS.sha256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coin-live-snapshot-${{ github.run_id }}
+          path: artifacts/
+          retention-days: 90
+          if-no-files-found: error

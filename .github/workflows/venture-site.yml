@@ -1,28 +1,24 @@
-name: MAKINE 2.0 — Partner Presentation Pages
+name: MAKINE 2.0 — Partner Presentation Validation
 on:
   workflow_dispatch:
   push:
     branches: [main]
     paths:
-      - "web/fikir-laboratuvari/**"
-      - ".github/workflows/venture-site.yml"
+      - 'web/fikir-laboratuvari/**'
+      - '.github/workflows/venture-site.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'web/fikir-laboratuvari/**'
 permissions:
   contents: read
-  pages: write
-  id-token: write
-concurrency:
-  group: coin-live-pro-pages
-  cancel-in-progress: false
 jobs:
-  publish:
+  validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - name: Quick static validation
+      - name: Validate retained partner page (normal Pages workflow publishes web/)
         run: |
           test -s web/fikir-laboratuvari/index.html
           test -s web/fikir-laboratuvari/style.css
@@ -30,10 +26,3 @@ jobs:
           test -s web/fikir-laboratuvari/app.js
           node --check web/fikir-laboratuvari/models.js
           node --check web/fikir-laboratuvari/app.js
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: web
-      - name: Deploy full site including partner presentation
-        id: deploy
-        uses: actions/deploy-pages@v4
