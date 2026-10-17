@@ -134,7 +134,7 @@ assert.ok(!firstScreen.includes('class="v4MarketSummary"') &&
  'Verbose market metadata must be after opportunity panels inside disclosure');
 assert.ok(html.includes('id="radarMetaDetails"')&&html.includes('id="headerMore"'),
  'Technical info and older pilot must remain reachable in disclosure');
-assert.ok(html.includes('class="minimalHeader"')&&html.includes('class="headerActions"'),
+assert.ok(html.includes('class="header minimalHeader"')&&html.includes('class="headerActions"'),
  'Minimal main header missing');
 assert.ok(html.includes('id="calculator"')&&html.includes('id="releaseHistory"') &&
  html.includes('id="v4ArchivedCount"'), 'Collapse must not delete features');
