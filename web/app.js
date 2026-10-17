@@ -246,7 +246,13 @@ const guide=window.CoinLiveChartGuidance?.build({
 const details=$('chartScenario');
 if(details)details.innerHTML=window.CoinLiveChartGuidance?.render(guide)||
   '<div class="chartScenarioPending">Veri doğrulandığında modelin senaryosu açılacak.</div>';
-const c=$('candleChart'),ctx=c.getContext('2d'),r=c.getBoundingClientRect();const w=Math.max(300,r.width||500),h=340,ratio=Math.min(2,window.devicePixelRatio||1);c.width=Math.floor(w*ratio);c.height=Math.floor(h*ratio);ctx.setTransform(ratio,0,0,ratio,0,0);ctx.fillStyle='#0b1421';ctx.fillRect(0,0,w,h);const signal=currentRadar().items.find(x=>x.symbol===S.selected)||null;const cache=S.chartCache.get(S.selected+'|'+S.chartTf);const raw=(cache&&Date.now()-cache.at<900000?cache.data:null)||[];const candles=raw.slice(-52).map(x=>({t:x[0],o:x[1],h:x[2],l:x[3],c:x[4]}));if(candles.length<10){ctx.fillStyle='#adc1dc';ctx.font='13px system-ui';ctx.fillText('Bu coin için kapanmış mum grafiği henüz alınmadı.',17,36);$('chartCaption').textContent='OKX '+S.chartTf+' kapanmış mumları bekleniyor. Kaynak erişimi yoksa uydurma seviye çizilmez.';return;}const left=12,right=96,top=16,bottom=29;let lo=Math.min(...candles.map(x=>x.l)),hi=Math.max(...candles.map(x=>x.h));const lineLevels=(guide?.levels||[]).filter(x=>Number.isFinite(x.value)&&x.value>0).map(x=>({label:x.label,v:x.value,color:x.kind==='stop'?'#ff8296':x.kind==='target'?'#4ce2b4':x.kind==='entry'?'#93cced':'#f7cc7d'}));
+const c=$('candleChart'),ctx=c.getContext('2d'),r=c.getBoundingClientRect();const w=Math.max(300,r.width||500),h=340,ratio=Math.min(2,window.devicePixelRatio||1);c.width=Math.floor(w*ratio);c.height=Math.floor(h*ratio);ctx.setTransform(ratio,0,0,ratio,0,0);ctx.fillStyle='#0b1421';ctx.fillRect(0,0,w,h);const signal=currentRadar().items.find(x=>x.symbol===S.selected)||null;const cache=S.chartCache.get(S.selected+'|'+S.chartTf);
+const visibleIndicators=$('chartIndicatorsToggle')?.checked===true;
+const pane=$('chartIndicatorsCanvas'),foot=$('chartIndicatorsFoot');
+if(pane)pane.hidden=!visibleIndicators;
+if(foot)foot.hidden=!visibleIndicators;const raw=(cache&&Date.now()-cache.at<900000?cache.data:null)||[];const candles=raw.slice(-52).map(x=>({t:x[0],o:x[1],h:x[2],l:x[3],c:x[4]}));
+if(visibleIndicators&&window.CoinLiveIndicators?.render)window.CoinLiveIndicators.render(pane,raw);
+if(candles.length<10){ctx.fillStyle='#adc1dc';ctx.font='13px system-ui';ctx.fillText('Bu coin için kapanmış mum grafiği henüz alınmadı.',17,36);$('chartCaption').textContent='OKX '+S.chartTf+' kapanmış mumları bekleniyor. Kaynak erişimi yoksa uydurma seviye çizilmez.';return;}const left=12,right=96,top=16,bottom=29;let lo=Math.min(...candles.map(x=>x.l)),hi=Math.max(...candles.map(x=>x.h));const lineLevels=(guide?.levels||[]).filter(x=>Number.isFinite(x.value)&&x.value>0).map(x=>({label:x.label,v:x.value,color:x.kind==='stop'?'#ff8296':x.kind==='target'?'#4ce2b4':x.kind==='entry'?'#93cced':'#f7cc7d'}));
 const paperPos=window.CoinV4?.position;
 if(document.body.dataset.route==='portfoy'&&paperPos?.status==='FILLED'&&paperPos.symbol===S.selected){
  lineLevels.push({label:'PAPER ENTRY',v:paperPos.fill_price,color:'#93cced'});
@@ -348,6 +354,7 @@ $('calcClose').onclick=()=>{$('calcModal').classList.remove('open');};
 $('calcModal').onclick=e=>{if(e.target===$('calcModal'))$('calcModal').classList.remove('open');};
 $('balanceInput').oninput=calculator;
 
+$('chartIndicatorsToggle')?.addEventListener('change',()=>drawChart());
 window.CoinLivePro={state:S,render,currentRadar,get,fmt,age,notify,refreshState,selectSpark,refreshChartGuide:renderChartSelector};
 window.addEventListener('resize',()=>{if(S.selected)drawChart();});
 refresh();
