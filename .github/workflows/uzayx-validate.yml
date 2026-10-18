@@ -7,6 +7,7 @@ on:
       - 'tests/uzayx-learning.test.cjs'
       - 'tests/uzayx-chart-archive.test.cjs'
       - 'tests/uzayx-watchdesk.test.cjs'
+      - 'tests/uzayx-support-proof.test.cjs'
       - '.github/workflows/uzayx-validate.yml'
   workflow_dispatch:
 permissions:
@@ -28,8 +29,9 @@ jobs:
           node --check web/uzayx/archive.js
           node --check web/uzayx/watch.js
           node --check web/uzayx/portfolio.js
+          node --check web/uzayx/support-proof.js
       - name: Adaptive learning invariants
-        run: node --test tests/uzayx-learning.test.cjs tests/uzayx-chart-archive.test.cjs tests/uzayx-watchdesk.test.cjs
+        run: node --test tests/uzayx-learning.test.cjs tests/uzayx-chart-archive.test.cjs tests/uzayx-watchdesk.test.cjs tests/uzayx-support-proof.test.cjs
       - name: Static integration contract
         run: |
           node - <<'NODE'

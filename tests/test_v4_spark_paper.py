@@ -144,6 +144,64 @@ class TestSparkPaper(unittest.TestCase):
         ledger,pub=paper.advance({},e,m,NOW,{})
         self.assertEqual(pub['geldi_intent_total'],0)
 
+    def test_confirmed_opposite_closes_only_on_next_future_closed_bar(self):
+        e,m=docs()
+        ledger,_=paper.advance({},e,m,NOW,{})
+        first=((NOW//paper.BAR)+1)*paper.BAR
+        base=bar(first,o=100.,h=100.3,l=99.8,c=100.1)
+        ledger,_=paper.advance(ledger,{**e,'scan_id':'old-open','candidates':[]},
+                               m,first+paper.BAR+5000,{'BTCUSDT':[base]})
+        original=ledger['tickets'][0]
+        self.assertEqual(original['status'],'OPEN')
+        signal_at=first+paper.BAR+10000
+        reverse={**e['candidates'][0],
+                 'event_id':'verified-opposite','side':'SHORT',
+                 'first_seen_at_utc':stamp(signal_at-1000),
+                 'first_seen_price':100.,
+                 'price_at_scan':100.,
+                 'paper_stage_number':3,
+                 'hourly_level_state':'CLOSED_1H_LEVEL_BREACHED'}
+        short={**m['candidates'][0], 'side':'SHORT'}
+        next_m={**m,'candidates':m['candidates']+[short]}
+        reversal={**e,'scan_id':'opposite-scan','candidates':[reverse]}
+        ledger,pub=paper.advance(ledger,reversal,next_m,signal_at,{'BTCUSDT':[base]})
+        original=next(x for x in ledger['tickets'] if x['event_id']=='ticket-unique-1')
+        self.assertEqual(original['status'],'OPEN')
+        self.assertEqual(original['realized_net_usdt'],0)
+        self.assertIn('opposition_close_after_ms',original)
+        self.assertEqual(pub['opposite_pending_count'],1)
+        future=original['opposition_close_after_ms']
+        first_intermediate=bar(first+paper.BAR,o=100.1,h=100.4,l=99.8,c=100.2)
+        exit_candle=bar(future,o=100.5,h=100.7,l=100.3,c=100.6)
+        ledger,pub=paper.advance(ledger,{**reversal,'scan_id':'after-opposite','candidates':[]},
+                                 next_m,future+paper.BAR+5000,
+                                 {'BTCUSDT':[base,first_intermediate,exit_candle]})
+        t=next(x for x in ledger['tickets'] if x['event_id']=='ticket-unique-1')
+        self.assertEqual(t['status'],'CLOSED')
+        self.assertEqual(t['outcome'],'OPPOSITE_SIGNAL_EXIT')
+        self.assertEqual(t['exits'][-1]['closed_at_utc'],stamp(future+paper.BAR))
+        self.assertEqual(t['unrealized_net_usdt'],0.0)
+        self.assertEqual(pub['opposite_closed_total'],1)
+        self.assertEqual(pub['summary']['counts']['CLOSED']>=1,True)
+        self.assertTrue(pub['no_real_orders'])
+        self.assertEqual(len(pub['open_positions']),
+                         pub['summary']['counts']['OPEN'])
+
+    def test_opposite_pending_cancellation_has_no_imaginary_fill(self):
+        e,m=docs();l,_=paper.advance({},e,m,NOW,{})
+        reverse={**e['candidates'][0],'event_id':'opp2','side':'SHORT',
+                 'first_seen_at_utc':stamp(NOW+1000),
+                 'first_seen_price':100.,'price_at_scan':100.,
+                 'paper_stage_number':3,'hourly_level_state':'CLOSED_1H_LEVEL_BREACHED'}
+        m2={**m,'candidates':m['candidates']+[{**m['candidates'][0],'side':'SHORT'}]}
+        l,p=paper.advance(l,{**e,'scan_id':'s2','candidates':[reverse]},
+                          m2,NOW+2000,{})
+        old=next(x for x in l['tickets'] if x['event_id']=='ticket-unique-1')
+        self.assertEqual(old['status'],'OPPOSITE_CANCELLED')
+        self.assertIsNone(old['fill_price'])
+        self.assertEqual(old['realized_net_usdt'],0)
+        self.assertEqual(p['opposite_cancelled_total'],1)
+        self.assertEqual(p['summary']['counts']['OPPOSITE_CANCELLED'],1)
     def test_corrupted_mixed_snapshot_fails(self):
         e,m=docs();m['fetched_at']='2001-01-01T00:00:00Z'
         with self.assertRaisesRegex(RuntimeError,'mixed'):

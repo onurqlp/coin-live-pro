@@ -27,11 +27,73 @@
  function positions(doc,filter='OPEN',search=''){
    const list=Array.isArray(doc?.recent_tickets)?doc.recent_tickets:[];
    const query=String(search).trim().toUpperCase();
-   return list.filter(t=>filter==='ALL'||t.status===filter)
+   const verifiedFullOpen=doc?.open_positions_complete===true&&Array.isArray(doc.open_positions)&&
+     doc.open_positions.length===doc?.summary?.counts?.OPEN;
+   const openPositions=verifiedFullOpen?doc.open_positions:[];
+   const combined=filter==='OPEN'&&verifiedFullOpen?openPositions:
+     filter==='ALL'&&verifiedFullOpen?
+       [...openPositions,...list.filter(t=>t.status!=='OPEN')]:list;
+   return combined.filter(t=>filter==='ALL'||t.status===filter)
      .filter(t=>!query||String(t.symbol||'').toUpperCase().includes(query))
      .sort((a,b)=>(Date.parse(b.filled_at_utc||b.signal_at_utc)||0)-(Date.parse(a.filled_at_utc||a.signal_at_utc)||0));
  }
- let source=null,filter='OPEN',query='',selectedId=null,focused=null;
+ let source=null,filter='OPEN',query='',selectedId=null,focused=null,homeSearch='';
+ function completeOpenPositions(doc){
+   const total=doc?.summary?.counts?.OPEN;
+   const a=doc?.open_positions;
+   if(doc?.open_positions_complete===true&&Number.isInteger(total)&&Array.isArray(a)&&
+      a.length===total&&a.every(t=>t.status==='OPEN'&&t.is_real_trade!==true))
+     return {complete:true,rows:a};
+   return {complete:false,rows:Array.isArray(doc?.recent_tickets)?
+     doc.recent_tickets.filter(x=>x.status==='OPEN'):[]};
+ }
+ function renderHome(){
+   const box=$('home-open-list');if(!box)return;
+   const doc=source?.db?.spark||{},s=source?.db?.manifest||{},full=completeOpenPositions(doc);
+   const valid=source?.sourceCommit&&s.publication_valid===true&&
+     doc.scan_id===s.scan_id&&source?.db?.paper?.scan_id===s.scan_id&&doc.no_real_orders===true;
+   const age=Date.now()-Date.parse(s.finished_at_utc||'');
+   const fresh=Number.isFinite(age)&&age>=-120000&&age<=25*60000;
+   const all=full.rows;
+   const rows=all.filter(x=>String(x.symbol||'').includes(homeSearch)).sort((a,b)=>
+     (Date.parse(b.filled_at_utc||b.signal_at_utc)||0)-(Date.parse(a.filled_at_utc||a.signal_at_utc)||0));
+   $('home-open-count').textContent=Number.isInteger(doc.summary?.counts?.OPEN)?String(doc.summary.counts.OPEN):'—';
+   $('home-open-time').textContent='Kayıt '+stamp(doc.updated_at)+' · '+(valid&&fresh?'Güncel':valid?'Gecikmiş':'Doğrulanamadı');
+   const opposite=Number.isInteger(doc.opposite_pending_count)?doc.opposite_pending_count:0;
+   $('home-open-note').textContent=(full.complete?
+     'Bütün '+all.length+' açık sanal bilet listelendi.':
+     'Kısmi liste: '+all.length+' son kayıttaki açık bilet. Tam liste sonraki motor taramasıyla yayınlanır.')+
+     (opposite?' · Karşı sinyal kapanışı için doğrulanmış 5 dk mum bekleyen: '+opposite:'')+
+     ' · Gerçek emir yok.';
+   box.replaceChildren();
+   if(!rows.length){box.append(node('p','muted',valid?'Eşleşen açık sanal pozisyon yok.':'Sanal kasa doğrulanamadı.'));return;}
+   rows.forEach(t=>{
+     const btn=node('button','home-open-row');btn.type='button';
+     const n=node('span','home-position-symbol');
+     n.append(node('b','',String(t.symbol||'—')),node('small','',String(t.side||'')));
+     const raw=(typeof t.unrealized_net_usdt==='number'?t.unrealized_net_usdt:0);
+     const pnl=node('span','home-position-pnl '+(raw<0?'negative':'positive'),signed(raw)+' USDT');
+     btn.append(n,node('span','home-position-fill',fmt(t.fill_price,5)),pnl,node('span','home-position-caret','›'));
+     btn.title='Ana sayfada bu paritenin grafiğini incele';
+     btn.addEventListener('click',()=>{
+       const candidate={symbol:t.symbol,side:t.side,kind:'PAPER',price:t.mark_price||t.fill_price,
+         stop:t.stop,targets:[t.tp1,t.tp2,t.tp3],score:0,
+         last_evaluated_at:doc.updated_at,review_state:'PAPER_ONLY',
+         paper_entry_state:'NOT_ELIGIBLE',confirmation_state:'SANAL_ACIK'};
+       root.dispatchEvent(new CustomEvent('uzayx:select-coin',{detail:{candidate}}));
+       const detail=$('watch-detail');if(detail){
+         detail.hidden=false;
+         $('watch-detail-title').textContent=t.symbol+' · '+t.side+' · SANAL';
+         $('watch-detail-meta').textContent='Açık sanal pozisyon · giriş '+stamp(t.filled_at_utc);
+         $('watch-detail-price').textContent=fmt(t.fill_price,5);
+         $('watch-detail-stop').textContent=fmt(t.stop,5);
+         $('watch-detail-tps').textContent=[t.tp1,t.tp2,t.tp3].map((v,i)=>'TP'+(i+1)+' '+fmt(v,5)).join(' · ');
+         $('watch-detail-paper').textContent='Açık PnL: '+signed(raw)+' USDT · emir gönderilmez';
+       }
+     });
+     box.append(btn);
+   });
+ }
  function moneyCell(label,value){const n=node('div','position-stat');n.append(node('small','',label),node('b','',value));return n;}
  function renderDaily(doc){
    const canvas=$('cash-performance');if(!canvas)return;
@@ -114,7 +176,7 @@
    $('cash-asof').textContent='Kayıt: '+stamp(doc.updated_at)+' · '+(valid?'Kaynak uyumlu':'Kontrol gerekli');
    $('cash-main').textContent=money(paper.equity_usdt);
    $('cash-main-open').textContent=fmt(paper.open_positions?.length||0,0)+' ana pozisyon';
-   renderDaily(doc);renderRows();
+   renderDaily(doc);renderRows();renderHome();
  }
  if(root.document){
    root.addEventListener('uzayx:loaded',e=>{source=e.detail;render();});
@@ -125,9 +187,10 @@
        filter=b.dataset.positionFilter;renderRows();
      }));
      $('position-search')?.addEventListener('input',e=>{query=e.target.value.toUpperCase().trim();renderRows();});
+     $('home-position-search')?.addEventListener('input',e=>{homeSearch=e.target.value.toUpperCase().trim();renderHome();});
      $('cash-reload')?.addEventListener('click',()=>root.document.getElementById('reload')?.click());
      $('cash-audit')?.addEventListener('click',()=>root.document.querySelector('[data-tab="system"]')?.click());
    });
  }
- return {reconcile,positions};
+ return {reconcile,positions,completeOpenPositions};
 });

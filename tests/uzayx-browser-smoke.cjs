@@ -49,6 +49,20 @@ async function run(){
      const visible=await page.$eval('#watch-items',x=>x.textContent);
      assert.ok(visible.trim().length>0,'Watchdesk should report its current state');
    }
+   await page.waitForFunction(()=>document.querySelector('#home-open-count')?.textContent!=='—',{timeout:20000});
+   const summary=await page.evaluate(()=>({
+     open:document.querySelector('#home-open-count')?.textContent,
+     rows:document.querySelectorAll('#home-open-list .home-open-row').length,
+     note:document.querySelector('#home-open-note')?.textContent,
+     age:document.querySelector('#home-open-time')?.textContent
+   }));
+   assert.ok(Number(summary.open.replaceAll('.',''))>=0,'Open position count is not numeric');
+   if(Number(summary.open.replaceAll('.',''))>0)assert.ok(summary.rows>0,'Home must show open positions');
+   const firstOpen=await page.$('.home-open-row');
+   if(firstOpen){
+     await firstOpen.click();
+     assert.equal(new URL(page.url()).hash,'#overview','Open position click must stay on homepage');
+   }
    await page.screenshot({path:'/tmp/uzayx-'+name+'-home.png',fullPage:true});
    await page.locator('[data-tab="chart"]').click();
    await page.waitForFunction(()=>document.querySelector('#chart')?.classList.contains('active'),{timeout:5000});
@@ -81,6 +95,15 @@ async function run(){
    await page.locator('#position-rows .position-row').click();
    await page.waitForFunction(()=>document.querySelector('#position-detail .position-stat'),{timeout:5000});
    await page.screenshot({path:'/tmp/uzayx-'+name+'-cash.png',fullPage:true});
+   await page.locator('[data-tab="research"]').click();
+   await page.waitForFunction(()=>document.querySelectorAll('#module-grid .proof-module').length===6,{timeout:12000});
+   const modules=await page.evaluate(()=>[...document.querySelectorAll('#module-grid .proof-module')].map(x=>({
+     id:x.querySelector('.id')?.textContent,status:x.querySelector('.chip')?.textContent,
+     explanation:x.querySelector('.proof-explain')?.textContent,btn:x.querySelector('button.proof-btn')?.textContent
+   })));
+   assert.equal(modules.length,6);
+   assert.deepEqual(modules.map(x=>x.id),['A1','A2','A3','B1','B2','T0']);
+   assert.ok(modules.every(x=>x.explanation?.length>15&&x.btn==='Kaynağı denetle'));
    await page.locator('[data-tab="learn"]').click();
    const demo={schema:'uzayx.lessons.archive.v1',records:[{day_utc:'2026-10-17',cohort_statistics:{'TÜMÜ':{closed:2,positive:1,net_usdt:-1.2}}}]};
    const sample=path.join(os.tmpdir(),'uzayx-smoke-sample-'+name+'.json');
@@ -90,7 +113,7 @@ async function run(){
    await page.waitForFunction(()=>document.querySelectorAll('#archive-comparison .archive-compare-card').length>0,{timeout:10000});
    await page.locator('[data-tab="system"]').click();
    assert.ok(await page.$('#system-rows .system-row'),'Health diagnostics missing');
-   console.log('UX_SMOKE_OK',name,JSON.stringify({home,chart,cash}));
+   console.log('UX_SMOKE_OK',name,JSON.stringify({home,summary,chart,cash,modules}));
    await page.close();
   }
  }finally{await browser.close();}
