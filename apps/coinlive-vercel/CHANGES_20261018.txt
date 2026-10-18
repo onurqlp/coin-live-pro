@@ -1,0 +1,28 @@
+COIN.LIVE PRO — 5.0.0 PREVIEW CHANGE LOG
+Date: 2026-10-18
+SOURCE PRODUCT: 4.03 (untouched)
+BASELINE HEAD: 68f7cd31b628d1a23c515d43ed0c44c597f5ceff (2026-10-17 23:02 UTC)
+
+1. Added standalone Vercel PWA with five routes/tabs: Radar, Chart/source, Paper, Forward, System.
+2. Enlarged initial four-source API verification to nine mandatory datasets from the same immutable Git SHA. Manifest SHA-256 + bytes must match.
+3. Suppressed any RECHECK_PENDING/INVALIDATED item from the current candidate list; stale source >20 minutes suppresses all live candidates.
+4. Added strict separation assertions for main 10k account and independent Spark 10k account. Display experimental cash accounting and review cohort separately without merging.
+5. Added 7/14/30/90-day strategy horizon counts, reason tags and sample-insufficient handling.
+6. Added independent chart API verifying committed chart-pack Git blob SHA-1, V4 manifest SHA-256 for event history, identical scan timestamps and closed-only 1H/4H/1D OHLC. Candidate conditional stops/TPs and archive event dots drawn; invalid sources blocked.
+7. Added MAKINE optional read-only, NOT_CONNECTED endpoint, no side effects.
+8. Added PWA shell cache (never caches /api), small-screen navigation, semantic buttons and explicit no-order labeling.
+9. Extended local automated tests 6 -> 16, including chart source integrity and closed-bar gate; actual Chromium synthetic-fixture chart rendering, radar navigation and no horizontal overflow passed at 360/390/768/1366 px.
+10. NO original Python / archive / main/spark ledger / GitHub Pages / product release / workflow modifications were made in this package.
+
+Vercel project coinlive-v5-preview was created independently; a protected staging build reached READY at https://coinlive-v5-preview-11xshbnbr-onurqlp-7179.vercel.app . Initial Vercel project creation with an explicit teamId was 403; retrying the same connected identity without teamId worked. IMPORTANT: the first deployment in this isolated Vercel project was automatically targeted production by Vercel; existing GitHub Pages main/4.03 was NOT changed and SSO protection remains enabled. A separate staging build was then created. No cutover to original live site occurred.
+
+11. Mobile radar label changed to "güncel araştırma kaydı" instead of incorrectly implying WATCH candidates are confirmed.
+12. Same-origin Vercel JSON API no longer sends misleading CORS null-origin header.
+
+13. Added api/chart.js, lib/chart.mjs and five chart contract tests; README/package/vercel/serverless settings updated. Remote HTTP still blocked by SSO and restricted access; do not claim confirmed serverless response.
+
+14. 2026-10-18 V5.0 continued: MAKINE CORE handoff now fetched read-only from one immutable onurqlp/makine-core commit. Hardcoded allowlist, safety contract, SHA-256 of raw handoff, source stamp, 45min TTL. STALE research produces zero recommendations and zero signals; no COIN.LIVE policy/cash mutation.
+15. Updated /api/overlay, new lib/overlay.mjs and five new tests. UI now labels MAKINE age, stale state and differing scan provenance.
+16. Updated npm lint script for new module. Feature branch only; no changes to source main, Python, GitHub Pages release 4.03 or ledgers.
+17. New isolated Vercel staging deploy dpl_HJ5ta3j8eSRe8PWSUvyBaQJk3hnB reached READY at https://coinlive-v5-preview-p3zhjlh5d-onurqlp-7179.vercel.app/ . File deployment used after gitSource deployment dpl_2okikUhdPmQfhLKveYtV9wv2dESB failed git_info_fail. Vercel deployment tree confirms /api/snapshot, /api/chart and /api/overlay lambda outputs.
+18. Vercel HTTP authentication bypass and runtime logs remain restricted 403; endpoint latency/real browser validation is BLOCKED, not PASSED. No production promotion.

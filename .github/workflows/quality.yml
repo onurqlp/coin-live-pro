@@ -40,3 +40,16 @@ jobs:
       - run: cp integrations/google-v4-sync.gs /tmp/coin-live-v4-sync.js && node --check /tmp/coin-live-v4-sync.js
       - run: python3 -m py_compile scripts/quant_report.py scripts/watchdog.py
       - run: python3 -m unittest discover -s tests -v
+      - name: V5 preview contract tests (read-only, no account mutation)
+        run: npm --prefix apps/coinlive-vercel test
+      - name: V5 preview syntax lint
+        run: npm --prefix apps/coinlive-vercel run lint
+      - name: Install Chromium smoke test dependencies (preview only)
+        run: |
+          npm --prefix apps/coinlive-vercel install --no-save --ignore-scripts playwright@1.56.0
+          cd apps/coinlive-vercel
+          ./node_modules/.bin/playwright install chromium --with-deps
+      - name: V5 browser smoke on phone tablet and desktop
+        run: node apps/coinlive-vercel/tests/browser-smoke.mjs
+      - name: V5 real pinned source API integration (no market orders)
+        run: node apps/coinlive-vercel/tests/live-api-smoke.mjs
