@@ -1,0 +1,44 @@
+name: UzayX — Daily Research Lessons
+on:
+  schedule:
+    - cron: '43 1 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/uzayx_learning_archive.py'
+      - '.github/workflows/uzayx-learning.yml'
+permissions:
+  contents: write
+concurrency:
+  group: uzayx-daily-lessons
+  cancel-in-progress: false
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Append daily verified learning snapshot
+        run: python scripts/uzayx_learning_archive.py
+      - name: Commit only isolated journal file
+        run: |
+          if git diff --quiet -- web/data/uzayx-lessons-history.json; then
+            echo "No new UTC day to archive."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add web/data/uzayx-lessons-history.json
+          git commit -m "research: append UzayX daily lesson [skip ci]"
+          for n in 1 2 3 4; do
+            git pull --rebase origin main && git push origin HEAD:main && exit 0
+            sleep 5
+          done
+          echo "Could not publish after retries; no original market data modified." >&2
+          exit 1
