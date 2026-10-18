@@ -14,6 +14,10 @@ const signal={id:'paper-fixture-1',symbol:'BTCUSDT',side:'LONG',stage:'WATCH',
   strategy:'TREND_BREAKOUT',score:64,riskScore:25,reviewState:'FRESH',
   confirmation:'UNCONFIRMED',observedAtUtc:'2026-10-18T08:00:00Z',
   price:71000,stop:69000,targets:[73000,75000,77000],reasons:['SYNTHETIC_TEST_ONLY']};
+const fixtureCandidates=[signal,...[1,2,3].map(i=>({...signal,id:'fixture-'+i,symbol:['ETHUSDT','SOLUSDT','ADAUSDT'][i-1],score:60-i}))];
+const historyFixture={schema:'coinlive.v5.history.readonly.v1',sourceVerified:true,sourceStatus:'VERIFIED',commit,
+ events:[{id:'h1',symbol:'BTCUSDT',side:'LONG',type:'WATCH_STARTED',prev:null,next:'WATCH',strategy:'TREND_BREAKOUT',timeUtc:'2026-10-18T07:00:00Z',price:71000},
+ {id:'h2',symbol:'ETHUSDT',side:'SHORT',type:'INVALIDATED',prev:'WATCH',next:'ARCHIVED',strategy:'SHORT_BREAKDOWN',timeUtc:'2026-10-18T08:00:00Z',price:2400}]};
 const snapshot=()=>({
  schema:'coinlive.v5.readonly.v1',appVersion:'5.0.0-preview',sourceProductVersion:'4.03',
  source:{repo:'onurqlp/coin-live-pro',commit,scanId:'synthetic-scan',
@@ -21,7 +25,7 @@ const snapshot=()=>({
    healthStatus:'TEST',provider:'OKX',trigger:'TEST',attemptedPairs:1,testedPairs:1,
    scheduledRunsObserved:1,manifestVerified:true,payloadShaVerified:true,
    unscopedSources:[],healthLegacyScanId:'legacy-scan'},
- safety:{stale,noRealOrders:true},radar:{count:stale?0:1,candidates:stale?[]:[signal],
+ safety:{stale,noRealOrders:true},radar:{count:stale?0:4,candidates:stale?[]:fixtureCandidates,
    pendingCount:0,early:[],counts:{watch:1}},
  paper:{startingBalanceUsdt:10000,equityUsdt:10000,realizedUsdt:0,
    unrealizedUsdt:0,openCount:0,fundingState:'UNKNOWN_NOT_MODELED'},
@@ -47,6 +51,7 @@ const server=http.createServer(async(req,res)=>{
    res.setHeader('Cache-Control','no-store');
    const body=req.url.startsWith('/api/snapshot')?snapshot():
      req.url.startsWith('/api/chart')?chart:
+     req.url.startsWith('/api/history')?historyFixture:
      {source:'MAKINE_CORE',state:'STALE',readOnly:true,
       changesCoreSignals:false,evidence:{ageMinutes:1400,generatedAtUtc:'2026-10-17T00:00:00Z',
       basedOnCoinliveScanId:'old-scan'}};
@@ -91,7 +96,19 @@ try{
     assert.deepEqual(icons.results,[{width:192,height:192},{width:512,height:512}]);
   }
   await page.locator('#cards button').first().waitFor({timeout:10000});
-  assert.match(await page.locator('#count').innerText(),/1 güncel araştırma/);
+  assert.match(await page.locator('#count').innerText(),/4 güncel araştırma/);
+  assert.equal(await page.locator('#cards button').count(),3,'first glance must show only three coins');
+  assert.equal(await page.locator('#radarTotal').innerText(),'4');
+  await page.locator('#showAll').click();
+  assert.equal(await page.locator('#cards button').count(),4,'show all must reveal extra coin');
+  await page.locator('#showAll').click();
+  assert.equal(await page.locator('#cards button').count(),3);
+  await page.locator('[data-side="SHORT"]').click();
+  assert.equal(await page.locator('#cards button').count(),0,'direction filter must hide unmatched coins');
+  await page.locator('[data-side="ALL"]').click();
+  await page.locator('#coinSearch').fill('BTC');
+  assert.equal(await page.locator('#cards button').count(),1,'coin search must narrow results');
+  await page.locator('#coinSearch').fill('');
   assert.equal(await page.locator('#paperCards').innerText().then(t=>t.includes('10.000')),true);
   assert.equal(await page.locator('#health').innerText(),'✓ Doğrulanmış');
   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+1);
@@ -107,6 +124,14 @@ try{
   await page.locator('[data-tab="system"]').click();
   await page.waitForFunction(()=>document.querySelector('#overlayInfo')?.textContent?.includes('ESKİ'),null,{timeout:15000});
   assert.match(await page.locator('#systemInfo').innerText(),/4.03/);
+  await page.locator('[data-tab="history"]').click();
+  await page.locator('.history-event').first().waitFor({timeout:10000});
+  assert.match(await page.locator('#historyCount').innerText(),/2 olay/);
+  await page.locator('[data-history="INVALIDATED"]').click();
+  assert.equal(await page.locator('.history-event').count(),1);
+  assert.match(await page.locator('#historyCards').innerText(),/Geçersiz oldu/);
+  await page.locator('[data-history="ALL"]').click();
+  assert.equal(await page.locator('.history-event').count(),2);
   await page.locator('[data-tab="forward"]').click();
   assert.match(await page.locator('#forwardInfo').innerText(),/INSUFFICIENT_SAMPLE/);
   assert.deepEqual(failures,[],'page errors at '+width);
