@@ -19,7 +19,7 @@
   }
   const FILES = {
     manifest: 'v4-manifest.json', health: 'health.json', radar: 'v4-radar.json',
-    paper: 'v4-paper.json', spark: 'v4-spark-paper.json',
+    paper: 'v4-paper.json', spark: 'v4-spark-paper.json', early: 'v4-early.json',
     review: 'v4-spark-review.json', ops: 'ops-report.json', diary: 'uzayx-lessons-history.json'
   };
   const MAKINE = 'https://raw.githubusercontent.com/onurqlp/makine-core/main/site/data/support.json';
@@ -75,21 +75,27 @@
     n.append(actions);
     return n;
   }
-  const candidates=()=>[].concat(db.radar?.spotlight||[],db.radar?.motion||[],db.radar?.watch||[]);
+  function currentGroups(){
+    return window.UzayXWatchdesk?.buildGroups(db,sourceCommit)||
+      {valid:false,groups:{MOTION:[],WATCH:[],SPARK:[]}};
+  }
+  const candidates=()=>{const g=currentGroups().groups;return [].concat(g.MOTION||[],g.WATCH||[],g.SPARK||[]);};
   function renderTop() {
     const a=clear($('top-candidates')),radar=db.radar||{},manifest=db.manifest||{},review=db.review||{};
     const c=candidates().sort((x,y)=>(Number(y.score)||0)-(Number(x.score)||0));
-    if(!c.length)a.append(el('div','empty','Şu an listelenecek parite yok.'));
-    else c.slice(0,3).forEach(x=>a.append(candidateCard(x)));
+    // The former top-three cards were retired. The new watchdesk owns the visible list.
+    if(!c.length)a.append(el('div','empty','Yeni teyitli parite bekleniyor.'));
+    else a.append(el('span','',c.length+' güncel gözlem izleme listesinde.'));
+
     set('m-pairs',num(manifest.candidate_counts?.market_pairs,0));
-    set('m-watch',num(radar.counts?.watch,0));
+    set('m-watch',num(currentGroups().groups.WATCH.length,0));
     const ready=c.filter(p=>p.paper_entry_state==='ELIGIBLE'||p.paper_entry_state==='ENTRY_ELIGIBLE').length;
     set('m-ready',num(ready,0));
     set('m-age',ageLabel(manifest.finished_at_utc));
     set('snapshot-time','Son tarama: '+time(manifest.finished_at_utc));
     set('radar-age','Veri: '+ageLabel(manifest.finished_at_utc));
     const area=clear($('stage-grid'));
-    [['Gözlem',radar.counts?.spotlight],['Hareket',radar.counts?.motion],['Takip',radar.counts?.watch]].forEach(([name,qty])=>{
+    [['İzlenen',currentGroups().groups.WATCH.length],['Hareketlenen',currentGroups().groups.MOTION.length],['Kıvılcım',currentGroups().groups.SPARK.length]].forEach(([name,qty])=>{
       const x=el('div');x.append(el('small','',name),el('b','',num(qty,0)));area.append(x);
     });
     const fresh=age(manifest.finished_at_utc);
@@ -117,7 +123,7 @@
   function renderRadar() {
     const list=clear($('radar-list'));let all=candidates();
     const wanted=all.filter(p=>(mode==='ALL'||p.side===mode) &&
-      (stage==='ALL'||p.lifecycle_stage===stage) &&
+      (stage==='ALL'||(p.lifecycle_stage||p.stage)===stage||(stage==='SPOTLIGHT'&&p.kind==='SPARK')) &&
       (!search||String(p.symbol||'').toUpperCase().includes(search)||String(p.strategy_id||'').toUpperCase().includes(search)));
     wanted.sort((a,b)=>(Number(b.score)||0)-(Number(a.score)||0)).slice(0,40).forEach(p=>list.append(candidateCard(p)));
     if(!wanted.length)list.append(el('div','empty','Bu filtrede onaylı gözlem yok. Filtreleri değiştirebilirsin.'));
@@ -184,7 +190,7 @@
     set('module-source','Kaynak: makine-core / site/data/support.json · '+str(db.support?.state)+' · yeni emir yok');
   }
   function renderSystem(){
-    const n=clear($('system-rows'));const m=db.manifest||{},h=db.health||{},p=db.paper||{};
+    const n=clear($('system-rows'));const m=db.manifest||{},h=db.health||{},p=db.paper||{},sp=db.spark||{};
     [['Ürün kimliği','UzayX · Piyasa Terminali'],
      ['Kaynak taraması',str(m.scan_id)],
      ['Kaynak commit',sourceCommit||'Doğrulanamadı; en güncel RAW kullanıldı'],
@@ -202,6 +208,8 @@
      ['Araştırma sürümü',str(db.review?.model_version)],
      ['Araştırma modülü',str(db.support?.state||'ULAŞILAMIYOR')],
      ['Gerçek emir',m.no_real_orders===true?'KAPALI':'DOĞRULANAMADI'],
+     ['Kıvılcım sanal biletleri',num(sp.all_events_count,0)+' kayıt · '+num(sp.summary?.counts?.OPEN,0)+' açık · '+num(sp.summary?.counts?.WAITING_FUTURE_BAR,0)+' bekliyor'],
+     ['Veri uyumu (erken kaynak)',db.early?.scan_id===m.scan_id?'Aynı tarama':'DOĞRULANAMADI'],
      ['Başarısız kaynak',faults.length?faults.join(', '):'Yok']].forEach(([a,b])=>n.append(row(a,b)));
   }
   async function getJson(path){
@@ -218,7 +226,7 @@
     db=updated;
     const stamp=age(db.manifest?.finished_at_utc);
     const id=db.manifest?.scan_id;
-    const feeds=[db.radar,db.paper,db.spark,db.review];
+    const feeds=[db.radar,db.paper,db.spark,db.review,db.early];
     if(!id || feeds.some(f=>!f || f.scan_id!==id)){faults.push('SCAN_ID_MISMATCH');db.radar=null;}
     const healthy=db.manifest?.publication_valid===true && db.health?.status==='OK' && sourceCommit!==null && !faults.includes('SCAN_ID_MISMATCH') && stamp!==null && stamp>=0 && stamp<=25;
     set('connection',healthy?'Veri güncel':stamp===null?'Kaynak eksik':stamp>25?'Veri gecikmiş':'Kontrol gerekli');
@@ -231,6 +239,8 @@
   document.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.goto)));
   document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>go(b.dataset.tab)));
   $('reload').addEventListener('click',reload);
+  ['motor-check','system-check'].forEach(id=>$(id)?.addEventListener('click',reload));
+  $('system-archive')?.addEventListener('click',()=>go('learn'));
   $('search').addEventListener('input',e=>{search=e.target.value.trim().toUpperCase();renderRadar();});
   $('direction').addEventListener('change',e=>{mode=e.target.value;renderRadar();});
   $('stage').addEventListener('change',e=>{stage=e.target.value;renderRadar();});
