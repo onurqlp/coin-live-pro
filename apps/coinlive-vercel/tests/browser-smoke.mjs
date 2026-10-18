@@ -39,7 +39,7 @@ const candles=Array.from({length:28},(_,i)=>{
 const chart={symbol:'BTCUSDT',timeframe:'1H',commit,candleState:'CLOSED_ONLY',
  candles,excludedUnclosedCount:1,markers:[{type:'DISCOVERED',atUtc:'2026-10-17T06:00:00Z',notExecution:true}]};
 const mime={'html':'text/html; charset=utf-8','js':'text/javascript; charset=utf-8',
- 'css':'text/css; charset=utf-8','svg':'image/svg+xml','webmanifest':'application/manifest+json'};
+ 'css':'text/css; charset=utf-8','png':'image/png','svg':'image/svg+xml','webmanifest':'application/manifest+json'};
 const server=http.createServer(async(req,res)=>{
  try{
   if(req.url?.startsWith('/api/')){
@@ -54,7 +54,7 @@ const server=http.createServer(async(req,res)=>{
   }
   const u=new URL(req.url||'/', 'http://localhost');
   const name=(u.pathname==='/'?'/index.html':u.pathname);
-  if(!['/index.html','/app.js','/style.css','/sw.js','/icon.svg','/manifest.webmanifest'].includes(name)){
+  if(!['/index.html','/app.js','/style.css','/sw.js','/icon.svg','/icon-192.png','/icon-512.png','/manifest.webmanifest'].includes(name)){
    res.writeHead(404);res.end();return;
   }
   const file=path.join(baseDir,name.slice(1)),ext=name.split('.').at(-1);
@@ -74,6 +74,22 @@ try{
   const failures=[];
   page.on('pageerror',e=>failures.push(e.message));
   await page.goto(origin+'/',{waitUntil:'networkidle',timeout:20000});
+  if(width===360){
+    const icons=await page.evaluate(async()=>{
+      const manifest=await (await fetch('/manifest.webmanifest')).json();
+      const results=[];
+      for(const dim of [192,512]){
+        const meta=manifest.icons.find(x=>x.sizes===dim+'x'+dim&&x.type==='image/png');
+        if(!meta)return {id:manifest.id,results,missing:dim};
+        const image=new Image();image.src=meta.src;
+        await image.decode();
+        results.push({width:image.naturalWidth,height:image.naturalHeight});
+      }
+      return {id:manifest.id,results};
+    });
+    assert.equal(icons.id,'/');
+    assert.deepEqual(icons.results,[{width:192,height:192},{width:512,height:512}]);
+  }
   await page.locator('#cards button').first().waitFor({timeout:10000});
   assert.match(await page.locator('#count').innerText(),/1 güncel araştırma/);
   assert.equal(await page.locator('#paperCards').innerText().then(t=>t.includes('10.000')),true);
@@ -94,6 +110,18 @@ try{
   await page.locator('[data-tab="forward"]').click();
   assert.match(await page.locator('#forwardInfo').innerText(),/INSUFFICIENT_SAMPLE/);
   assert.deepEqual(failures,[],'page errors at '+width);
+  if(width===360){
+    await page.evaluate(()=>navigator.serviceWorker.ready);
+    await page.reload({waitUntil:'networkidle'});
+    const controlled=await page.evaluate(()=>!!navigator.serviceWorker.controller);
+    assert.equal(controlled,true,'PWA service worker must control reload');
+    await ctx.setOffline(true);
+    await page.reload({waitUntil:'load',timeout:12000});
+    await page.waitForFunction(()=>document.querySelector('#health')?.textContent?.includes('Veri doğrulanamadı'),null,{timeout:12000});
+    assert.equal(await page.locator('#cards button').count(),0,'offline PWA may never show active opportunities');
+    await ctx.setOffline(false);
+    console.log('PASS Chromium offline PWA: cached shell and no API signal replay');
+  }
   await ctx.close();count++;
   console.log('PASS Chromium '+width+'px: radar, chart, MAKINE stale warning, cash, history, overflow');
  }
