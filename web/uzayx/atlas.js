@@ -11,7 +11,7 @@
     SQUEEZE_THEN_CRASH:'Sıkışma → düşüş',FUTURES_SHORT_SQUEEZE:'Vadeli sıkışma',
     SECOND_WAVE_7D:'İkinci dalga',SECOND_LISTING_PUSH:'Listeleme sonrası dalga',
     LAUNCH_CONTINUATION:'Lansman devamı',TREND_CONTINUATION:'Trend devamı',
-    7D_SECTOR_ROTATION:'Sektör dönüşü',SECTOR_ROTATION:'Sektör dönüşü',
+    '7D_SECTOR_ROTATION':'Sektör dönüşü',SECTOR_ROTATION:'Sektör dönüşü',
     PEG_FAILURE:'Sabit fiyat kopması',CEX_FAILURE:'Borsa krizi',
     FLASH_COLLAPSE:'Ani çöküş',LIQUIDITY_REMOVAL:'Likidite çekilmesi',
     SPOT_LISTING:'Spot listeleme',RUG_LIQUIDITY_REMOVAL:'Likidite riski',
