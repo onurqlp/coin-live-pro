@@ -6,3 +6,9 @@ NO CUTOVER TO THE EXISTING GITHUB PAGES PRODUCTION WAS ATTEMPTED. An automatical
 - Source Python engine, workflows, main V4 cash ledger and Spark ledger remain authoritative unchanged.
 - Error investigation: capture UTC, immutable Git SHA, manifest scan_id, source integrity status, and Vercel request ID.
 - Do not replay paper fills, recompute historical net PnL, or clear original ledgers to fix a UI defect.
+
+2026-10-18 STAGING EXTENSION
+Last good new staging deployment ID: dpl_HJ5ta3j8eSRe8PWSUvyBaQJk3hnB
+URL: https://coinlive-v5-preview-p3zhjlh5d-onurqlp-7179.vercel.app/
+On error: stop using that preview and return to earlier READY dpl_DoonJwP8p6FzRZd2CFrHcbtDz4Ly. Do NOT promote to production automatically.
+Git source is isolated preview/coinlive-v5-vercel-20261018. No changes to main, market workflow, 7 strategies or original V4 and Spark ledgers. Existing GitHub Pages and product 4.03 continue independently. Deployment auth/log API lacks permission (403); user must authorize to enable live validation, not unprotect blindly.
