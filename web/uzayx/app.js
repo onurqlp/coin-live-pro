@@ -38,7 +38,8 @@
     document.querySelectorAll('.tab').forEach(b=>{const on=b.dataset.tab===tab;b.classList.toggle('active',on);if(on)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
     document.querySelectorAll('.workspace').forEach(p=>p.classList.toggle('active',p.id===tab));
     if(location.hash!=='#'+tab)history.replaceState(null,'','#'+tab);
-    window.scrollTo({top:document.querySelector('.tabs').getBoundingClientRect().top+scrollY-8,behavior:'auto'});
+    const anchor=window.innerWidth<=760?document.getElementById(tab):document.querySelector('.tabs');
+    if(anchor)window.scrollTo({top:Math.max(0,anchor.getBoundingClientRect().top+scrollY-12),behavior:'auto'});
     window.dispatchEvent(new CustomEvent('uzayx:tab',{detail:{tab}}));
   }
   function row(title,value){const n=el('div','system-row');n.append(el('span','',title),el('b','',value));return n;}
