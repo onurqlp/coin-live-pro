@@ -110,7 +110,7 @@ function syncUzayX() {
     const keyRows=new Map(savedKeys.map((key,i)=>[key,i+5]).filter(pair=>pair[0]));
     const histories=(s.spark.daily?.days||[]).slice().sort((a,b)=>a.date_utc.localeCompare(b.date_utc));
     histories.forEach(item=>{
-      if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(String(item.date_utc||'')))return;
+      if(!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(String(item.date_utc||'')))return;
       const values=[
         item.date_utc,item.all_sparks||0,item.geldi||0,item.closed||0,
         item.positive_closures||0,item.negative_closures||0,
