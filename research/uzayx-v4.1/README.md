@@ -1,6 +1,6 @@
 # UzayX Atlas V4 — Tam Kaynak Arşivi
 
-**Tam, kayıpsız Excel tablosu aktarımı:** `UZAYX_YANARDAG_ATLAS_V4_COMPLETE.json.br` (Brotli-sıkıştırılmış JSON). Yüklenen `UZAYX_YANARDAG_ATLAS_V4.xlsx` içindeki **altı veri sayfasının bütün sütunlarını ve 120 satırlık araştırma kayıtlarını** korur.
+**Tam, kayıpsız Excel tablosu aktarımı:** `UZAYX_YANARDAG_ATLAS_V4_COMPLETE.json.br` (Brotli-sıkıştırılmış JSON). Yüklenen `UZAYX_YANARDAG_ATLAS_V4.xlsx` içindeki **altı veri sayfasının bütün sütunlarını ve 150 satırlık araştırma kayıtlarını** korur.
 
 | Sayfa | Kayıt |
 |---|---:|
