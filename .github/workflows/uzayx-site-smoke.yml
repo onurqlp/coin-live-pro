@@ -26,13 +26,13 @@ jobs:
           ready=0
           for i in $(seq 1 36); do
             if curl -fsSL --max-time 15 "$ROOT?check=$(date +%s%N)" -o /tmp/uzayx-site.html; then
-              if grep -q 'id="chart-price"' /tmp/uzayx-site.html && grep -q 'src="./archive.js"' /tmp/uzayx-site.html && grep -q 'id="mini-price"' /tmp/uzayx-site.html; then ready=1;break;fi
+              if grep -q 'id="chart-price"' /tmp/uzayx-site.html && grep -q 'src="./archive.js"' /tmp/uzayx-site.html && grep -q 'id="mini-price"' /tmp/uzayx-site.html && grep -q 'id="home-open-count"' /tmp/uzayx-site.html && grep -q 'id="module-check-all"' /tmp/uzayx-site.html && grep -q 'src="./support-proof.js"' /tmp/uzayx-site.html; then ready=1;break;fi
             fi
             sleep 7
           done
           test "$ready" = 1
           test "$(grep -o 'https://www.binance.com/en/futures/home' /tmp/uzayx-site.html | wc -l)" = 1
-          for file in charts.js archive.js finish.css; do
+          for file in charts.js archive.js finish.css support-proof.js proof.css; do
             curl -fsSL --max-time 15 "$ROOT$file?check=$(date +%s%N)" -o "/tmp/uzayx-$file"
             test -s "/tmp/uzayx-$file"
           done
