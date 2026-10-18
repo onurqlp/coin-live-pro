@@ -43,6 +43,22 @@
          'Funding zaman/izin kanıtı eksik.'};
      }
      const x=obs.length===1?obs[0]:null;
+     if(id==='A1'||id==='A2'){
+       const pair=id==='A1'?['KO','PEP']:['IVV','VOO'];
+       const age=now-Date.parse(x?.asof_utc||'');
+       const changes=x?.return_20d_percent||{};
+       const good=x?.status==='INPUTS_ONLY'&&x?.actionable===false&&
+         ['NASDAQ_PUBLIC_HISTORY','YAHOO_CHART_UNOFFICIAL','MIXED_PUBLIC_EOD'].includes(x?.source)&&
+         Array.isArray(x?.symbols)&&x.symbols.join(',')===pair.join(',')&&
+         x.aligned_sessions>=260&&x.borrow_verified===false&&
+         x.redistribution_rights_verified===false&&
+         pair.every(k=>typeof changes[k]==='number'&&Number.isFinite(changes[k]))&&
+         Number.isFinite(age)&&age>=0&&age<=7*86400000;
+       return {state:good?'OBSERVED':'UNVERIFIED',ok:!!good,
+         message:good?pair.join(' / ')+' · '+x.aligned_sessions+
+           ' ortak kapanış seansı. Veri gözlemi açık; lisans, fiyat düzeltmesi, ETF NAV ve short erişimi teyitsiz.':
+           'Hisse/ETF günlük fiyat kaynağı veya zaman/izin doğrulaması eksik.'};
+     }
      if(id==='B2'){
        const quotes=x?.best_quotes;
        const ok=x?.status==='SCREEN_ONLY'&&x?.actionable===false&&
@@ -94,7 +110,7 @@
      const a=el('article','module proof-module');
      a.append(el('span','id',m.id),el('h3','',m.name),
        el('p','proof-explain',desc.what));
-     const names={B1:'FUNDING GÖZLEMİ',B2:'CANLI FİYAT TARAMASI',A3:'GÜNLÜK MUM VERİSİ',T0:'RESMÎ FAİZ VERİSİ'};
+     const names={A1:'HİSSE KAPANIŞ VERİSİ',A2:'ETF KAPANIŞ VERİSİ',B1:'FUNDING GÖZLEMİ',B2:'CANLI FİYAT TARAMASI',A3:'GÜNLÜK MUM VERİSİ',T0:'RESMÎ FAİZ VERİSİ'};
      const state=m.state==='OBSERVING'?(names[m.id]||'GÖZLEM'):
         m.state==='BLOCKED_SOURCE'?'VERİ ENGELİ':'DOĞRULANMADI';
      a.append(el('span','chip '+(m.state==='OBSERVING'?'':'amber'),state));
@@ -107,7 +123,19 @@
      details.append(row('İşlem yetkisi',m.executable===false?'YOK':'DOĞRULANAMADI'));
      if(m.state==='OBSERVING'){
        const observations=m.observations||[];
-       if(m.id==='B1'){
+       if(m.id==='A1'||m.id==='A2'){
+         const x=observations[0]||{};
+         details.append(row('Fiyat veri kaynağı',String(x.source||'—')),
+           row('Son kapalı seans',String(x.last_complete_session||'—')),
+           row('Ortak geçmiş',String(x.aligned_sessions||0)+' işlem günü'));
+         (x.symbols||[]).forEach(sym=>details.append(
+           row(sym+' son 20 gün',fmt(x.return_20d_percent?.[sym],3)+'%')));
+         details.append(row('20 günlük göreli değişim',
+           fmt(x.relative_return_20d_pct_points,3)+' yüzde puan'),
+           row('Fiyat düzeltmesi',String(x.adjustment_claim||'DOĞRULANMADI')),
+           row('Veri lisansı / kısa satış', 'DOĞRULANMADI'),
+           row('ETF NAV / uygulama hakkı','DOĞRULANMADI'));
+       }else if(m.id==='B1'){
          observations.forEach(x=>details.append(row(String(x.symbol)+' / '+String(x.venue),
            'Funding '+fmt(x.last_realized_rate_fraction_per_event*100,5)+'% · '+time(x.last_realized_time_utc))));
          details.append(row('Coin eşleşmesi',String(m.coinlive_watch_matches?.length||0)+' eşleşme'));
