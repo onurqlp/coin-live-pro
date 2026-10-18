@@ -3,6 +3,7 @@
 import argparse
 import datetime as dt
 import json
+import math
 import os
 from pathlib import Path
 
@@ -51,11 +52,26 @@ def build_report(root=ROOT, now=None):
     closed = int(total.get("closed", 0))
     positive = int(total.get("positive", 0))
     negative = int(total.get("negative", 0))
+    # "realized" across ALL tickets includes partial exits on still-open tickets.
+    # The review cohort sums realized PnL of FULLY CLOSED tickets only.
+    # Keep both namespaces explicit: their difference is not an accounting loss.
+    cash_realized = spark.get("summary", {}).get("realized_net_usdt")
+    closed_realized = total.get("realized_total_usdt")
+    closed_count_ledger = spark.get("summary", {}).get("counts", {}).get("CLOSED")
+    scan_id = manifest.get("scan_id")
+    aligned = bool(scan_id and scan_id == review.get("scan_id") == spark.get("scan_id"))
+    finite_amounts = all(type(x) in (int, float) and math.isfinite(x)
+                         for x in (cash_realized, closed_realized))
+    count_aligned = (type(closed_count_ledger) is int and closed_count_ledger == closed)
+    reconciliation_verified = aligned and finite_amounts and count_aligned
+    realized_nonclosed = round(cash_realized - closed_realized, 5) if reconciliation_verified else None
     health_time = as_utc(health.get("updated_at"))
     age = round((now - health_time).total_seconds() / 60, 2) if health_time else None
     warnings = ["Only forward-observed hypothetical fills; not real trading performance.",
                 "Funding, exact orderbook execution, liquidation and gaps are not fully modeled.",
                 "Overlapping cohort categories must never be summed as distinct tickets."]
+    if not reconciliation_verified:
+        warnings.append("Realized PnL cohort reconciliation UNVERIFIED: scan, counts or finite amounts differ.")
     if closed < 30:
         warnings.append("Insufficient closed-ticket sample: do not rank model profitability.")
     if age is None or age > 25 or age < -3:
@@ -87,6 +103,10 @@ def build_report(root=ROOT, now=None):
             "ticket_counts": spark.get("summary", {}).get("counts", {}),
             "virtual_equity_usdt": spark.get("summary", {}).get("virtual_equity_usdt"),
             "realized_net_usdt": spark.get("summary", {}).get("realized_net_usdt"),
+            "fully_closed_ticket_realized_net_usdt": closed_realized if reconciliation_verified else None,
+            "nonclosed_ticket_realized_net_usdt": realized_nonclosed,
+            "realized_reconciliation_verified": reconciliation_verified,
+            "realized_reconciliation_note": "All-ticket realized includes partial exits of nonclosed tickets; closed cohort excludes them.",
             "unrealized_net_usdt": spark.get("summary", {}).get("unrealized_net_usdt"),
             "closed_cohort_count": closed,
             "positive_closed": positive,
@@ -117,6 +137,7 @@ def markdown(report):
             str(exp["closed_cohort_count"]) + " (" + str(exp["positive_closed"]) +
             " positive / " + str(exp["negative_closed"]) + " negative)",
         "Experimental estimated equity: " + str(exp["virtual_equity_usdt"]) + " USDT",
+        "Closed-ticket realized PnL: " + str(exp["fully_closed_ticket_realized_net_usdt"]) + " USDT; realized on nonclosed tickets: " + str(exp["nonclosed_ticket_realized_net_usdt"]) + " USDT (verified: " + str(exp["realized_reconciliation_verified"]) + ")",
         "Do not infer a win probability or model superiority from small samples.",
         "",
         "| Lookback | Strategies tracked | Sample quality |",
