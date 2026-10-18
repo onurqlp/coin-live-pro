@@ -14,3 +14,13 @@ BLOCKED — Local direct-browser HTTP integration: browser sandbox blocked local
 PARTIALLY IMPLEMENTED — Verified Git-blob anchored price plot + V4 manifest-verified archive markers now implemented; live Vercel response remains unverified. NOT IMPLEMENTED — MAKINE CORE real API overlay; push notification delivery; mobile installability audit. These are NOT falsely reported as passes.
 OBSERVED DATA WARNING — On snapshot, strict account equity 10000 USDT, strict realized 0 and strict open 0. Spark summary cash equity 9994.7328, accounting realized -5.88156; review cohort 396 closed, cohort sum -12.24469. Different metrics must not be treated as one PnL.
 OBSERVED DATA WARNING — 3D and 7D forward sample counts zero across strategies, 7/14/30/90-day report describes insufficient sample, not an actual four-window independent history.
+
+2026-10-18 CONTINUED VERIFICATION
+- Latest observed main data SHA 4f33dd481f6d310b5bc6c47cad61db7df88f8845, manifest scan 91ff81faffa222430cef85f9, ended 2026-10-18 07:29:44.882 UTC. Source OKX, workflow_dispatch; 22 / 23 verified. Trigger does not constitute a proven unattended schedule; separate schedule events observed for other workflows.
+- Main product web/release.json 4.03, main account 10000 USDT starting/equity at inspection, strict realized 0 (not real money). Spark review total all 649 / closed 465 / +162 / -303 / cohort realized -16.74531 USDT. Spark accounting realized is a DIFFERENT metric and MUST NOT be conflated.
+- Local starter ZIP snapshot tests 6/6 PASS. New MAKiNE overlay tests 5/5 PASS and new API/module syntax PASS. The existing branch carried a prior recorded 16/16 Node test pass, but entire new remote branch suite was not rerun under CI after these commits. These are separate attestations, not a new verified 21/21 unified run.
+- Previous Chromium 360 / 390 / 768 / 1366 synthetic-fixture smoke checks PASS from earlier branch revision; new version has NOT been manually retested in these viewports on the hosted URL.
+- New Vercel direct file-based staging build dpl_HJ5ta3j8eSRe8PWSUvyBaQJk3hnB READY. Deployment file listing includes three API lambdas. Deployment presence alone is NOT proof of runtime correctness.
+- FAILURE: gitSource deployment dpl_2okikUhdPmQfhLKveYtV9wv2dESB state ERROR code git_info_fail. RECOVERED by inline files deployment.
+- BLOCKED: hosted HTTP /api/snapshot, chart and overlay response due to 403 on Vercel protection bypass read. Build/runtime logs similarly 403. Reconnect/authorize Vercel project team to lift testing blocker; do not disable SSO without approval.
+- Not claimed: live API response time, PWA installability on Android, actual Vercel browser E2E tests, push delivery, production adoption, zero regressions.
