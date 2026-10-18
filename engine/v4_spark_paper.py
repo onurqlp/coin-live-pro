@@ -46,7 +46,7 @@ def initial(now_ms):
       'no_real_orders':True,'no_historical_backfill':True}
 def ledger_stats(tickets):
     totals={'WAITING_FUTURE_BAR':0,'OPEN':0,'CLOSED':0,
-            'DATA_GAP':0,'INVALID_LEVEL':0,'CAPACITY_BLOCKED':0}
+            'DATA_GAP':0,'INVALID_LEVEL':0,'CAPACITY_BLOCKED':0,'OPPOSITE_CANCELLED':0}
     realized=0.0;floating=0.0;exposure=0.0;fees=0.0
     for t in tickets:
         state=t['status']
@@ -223,6 +223,7 @@ def advance(prior,early,mtf_doc,now_ms,candles):
     # already exists or has expired. It is NEVER an exchange fill at signal time.
     # An existing stage-3 event is first observed at 4.03 activation, not
     # retroactively filled from its earlier watch timestamp.
+    newly_confirmed_opposite=[]
     for x in early.get('candidates',[]):
         if x.get('paper_stage_number')!=3 or x.get('hourly_level_state')!='CLOSED_1H_LEVEL_BREACHED':
             continue
@@ -267,6 +268,28 @@ def advance(prior,early,mtf_doc,now_ms,candles):
             'valuation_status':'WAITING_FUTURE_OHLC' if ok else 'ATR_LEVEL_UNAVAILABLE',
             'no_backfilled_fill':True}
         index[key]=entry
+        newly_confirmed_opposite.append(entry)
+    # Independent, confirmed opposite GELDI intentions supersede an older paper
+    # exposure in the SAME symbol. Do not manufacture an exchange fill. Existing
+    # OPEN exposure remains open until the first qualifying NEW closed 5m bar.
+    # Pending opposite tickets have no fill and may be cancelled immediately.
+    for challenger in newly_confirmed_opposite:
+        for older in index.values():
+            if (older['event_id']==challenger['event_id'] or
+                older['symbol']!=challenger['symbol'] or
+                older['side']==challenger['side'] or
+                older.get('entry_at_ms',now_ms)>=challenger['entry_at_ms']):
+                continue
+            if older['status']=='WAITING_FUTURE_BAR':
+                older['status']='OPPOSITE_CANCELLED'
+                older['valuation_status']='CANCELLED_BEFORE_FILL_OPPOSITE_GELDI'
+                older['opposite_event_id']=challenger['event_id']
+                older['opposition_requested_at_utc']=stamp(now_ms)
+            elif older['status']=='OPEN' and not older.get('opposition_close_after_ms'):
+                older['opposition_close_after_ms']=((now_ms+BAR-1)//BAR)*BAR
+                older['opposition_requested_at_utc']=stamp(now_ms)
+                older['opposite_event_id']=challenger['event_id']
+                older['valuation_status']='OPPOSITE_EXIT_WAITING_CLOSED_5M'
     # All orders are independent *tickets* in one cost-accounted virtual study.
     # A hard funding cap prevents silently creating executable-looking exposure.
     for t in sorted(index.values(),key=lambda v:(v['entry_at_ms'],v['event_id'])):
@@ -306,6 +329,15 @@ def advance(prior,early,mtf_doc,now_ms,candles):
             if bar['t']!=expected or not all(valid(bar.get(k)) for k in ('o','h','l','c')):
                 t['status']='DATA_GAP';t['valuation_status']='NON_CONTIGUOUS_FUTURE_5M';break
             t['last_processed_ms']=bar['t']
+            if (t.get('opposition_close_after_ms') is not None and
+                bar['t']>=t['opposition_close_after_ms']):
+                # Conservative bar-open close, only after a newly VERIFIED future
+                # candle has fully closed. All modeled exit/slippage fees apply.
+                settle(t,bar['o'],t['remaining_qty']/t['total_qty'],
+                       'OPPOSITE_SIGNAL_EXIT',bar['t']+BAR)
+                t['unrealized_net_usdt']=0.0
+                t['valuation_status']='OPPOSITE_SETTLED_FUTURE_CLOSED_5M'
+                break
             sign=1 if t['side']=='LONG' else -1
             t['max_favorable_pct']=max(t.get('max_favorable_pct',0),
                 sign*((bar['h'] if sign>0 else bar['l'])/t['fill_price']-1)*100)
@@ -346,6 +378,25 @@ def advance(prior,early,mtf_doc,now_ms,candles):
         'virtual_account_is_estimated':True,'no_backfilled_outcomes':True,
         'fee_per_side_assumption':FEE,'slippage_per_side_assumption':SLIPPAGE,
         'max_hold_hours':24,
+        'opposition_policy':'CONFIRMED_GELDI_SAME_SYMBOL_CLOSE_ON_NEXT_VERIFIED_5M',
+        'opposite_pending_count':sum(t['status']=='OPEN' and t.get('opposition_close_after_ms') is not None for t in tickets),
+        'opposite_closed_total':sum(t.get('outcome')=='OPPOSITE_SIGNAL_EXIT' for t in tickets),
+        'opposite_cancelled_total':sum(t['status']=='OPPOSITE_CANCELLED' for t in tickets),
+        'open_positions':[{
+            'event_id':t['event_id'],'symbol':t['symbol'],'side':t['side'],
+            'status':t['status'],'signal_at_utc':t.get('signal_at_utc'),
+            'filled_at_utc':t.get('filled_at_utc'),
+            'fill_price':t.get('fill_price'),'mark_price':t.get('mark_price'),
+            'stop':t.get('stop'),'tp1':t.get('tp1'),
+            'tp2':t.get('tp2'),'tp3':t.get('tp3'),
+            'remaining_qty':t.get('remaining_qty'),
+            'realized_net_usdt':t.get('realized_net_usdt'),
+            'unrealized_net_usdt':t.get('unrealized_net_usdt'),
+            'reference_notional_usdt':t.get('reference_notional_usdt'),
+            'valuation_status':t.get('valuation_status'),
+            'opposition_requested_at_utc':t.get('opposition_requested_at_utc'),
+        } for t in tickets if t['status']=='OPEN'],
+        'open_positions_complete':True,
         'disclaimer':'Separate experimental cash-capped virtual tickets. Future closed 5m OHLC only; no real order, guarantee, or self-training. Funding/mark-to-market gap unknown.'}
     return doc,published
 def main():
