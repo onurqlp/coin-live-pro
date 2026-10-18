@@ -31,15 +31,50 @@
    }
    if(mod.state==='OBSERVING'){
      const obs=Array.isArray(mod.observations)?mod.observations:[];
-     const validated=obs.length>0&&obs.every(x=>x.venue==='OKX'&&x.executable===false&&
-       isVerifiedFraction(x.last_realized_rate_fraction_per_event)&&x.interval_hours>0&&
-       now-Date.parse(x.last_realized_time_utc||'')<=12*3600000&&
-       now-Date.parse(x.last_realized_time_utc||'')>=0);
-     const approved=validated&&doc.safety?.no_orders===true&&mod.executable===false;
-     return {state:approved?'OBSERVED':'UNVERIFIED',ok:approved,
-       message:approved?obs.length+' doğrulanabilir funding kaydı · son '+time(doc.generated_at_utc)+
-        ' · sadece gözlem · sinyal/emir yok':
-        'Funding verisi veya saat/izin kanıtı eksik. İşlem kararı verilmez.'};
+     const safe=doc.safety?.no_orders===true&&mod.executable===false&&mod.signal===false;
+     if(!safe)return {state:'UNVERIFIED',ok:false,message:'İşlem güvenlik doğrulaması eksik.'};
+     if(id==='B1'){
+       const approved=obs.length>0&&obs.every(x=>x.venue==='OKX'&&x.executable===false&&
+          isVerifiedFraction(x.last_realized_rate_fraction_per_event)&&x.interval_hours>0&&
+          now-Date.parse(x.last_realized_time_utc||'')<=12*3600000&&
+          now-Date.parse(x.last_realized_time_utc||'')>=0);
+       return {state:approved?'OBSERVED':'UNVERIFIED',ok:approved,message:approved?
+         obs.length+' OKX funding kaydı doğrulandı · yalnız gözlem, emir yok':
+         'Funding zaman/izin kanıtı eksik.'};
+     }
+     const x=obs.length===1?obs[0]:null;
+     if(id==='B2'){
+       const quotes=x?.best_quotes;
+       const ok=x?.status==='SCREEN_ONLY'&&x?.actionable===false&&
+        Array.isArray(x?.venues)&&x.venues.length===2&&x.venues.includes('OKX')&&
+        quotes&&x.venues.every(v=>typeof quotes[v]?.bid==='number'&&typeof quotes[v]?.ask==='number'&&
+          quotes[v].bid>0&&quotes[v].ask>quotes[v].bid)&&
+        Array.isArray(x.routes)&&x.routes.length===2&&x.routes.every(r=>
+          r.net_pnl===null&&r.net_spread_bps===null);
+       return {state:ok?'OBSERVED':'UNVERIFIED',ok:!!ok,
+         message:ok?'OKX + '+x.venues.find(v=>v!=='OKX')+' USDC/USDT: '+x.routes.length+
+           ' yön gerçek emir defterinden karşılaştırıldı. Brüt fark, net kazanç değildir.':
+           'B2 çift-borsa derinlik/veri doğrulaması eksik.'};
+     }
+     if(id==='A3'){
+       const a=now-Date.parse(x?.asof_utc||'');
+       const good=x?.status==='INPUTS_ONLY'&&x.actionable===false&&
+        Array.isArray(x.symbols)&&x.symbols.length===3&&x.aligned_closed_days>=50&&
+        Number.isFinite(a)&&a>=0&&a<7*86400000;
+       return {state:good?'OBSERVED':'UNVERIFIED',ok:!!good,
+         message:good?'OKX BTC/ETH/SOL · '+x.aligned_closed_days+
+            ' eşlenmiş kapanmış günlük mum var. Johansen / ileri test henüz yok.':
+            'A3 doğrulanmış günlük mum geçmişi eksik.'};
+     }
+     if(id==='T0'){
+       const a=now-Date.parse((x?.date_utc||'')+'T00:00:00Z');
+       const good=x?.status==='REFERENCE_ONLY'&&x.actionable===false&&
+        typeof x.yields_percent?.['10Y']==='number'&&Number.isFinite(a)&&a>=0&&a<10*86400000;
+       return {state:good?'OBSERVED':'UNVERIFIED',ok:!!good,
+         message:good?'ABD Hazine '+x.date_utc+' · 10 yıllık '+fmt(x.yields_percent['10Y'],2)+
+            '% resmî referans. Repo fiyatı ve teminatı doğrulanmadı.':
+            'T0 resmî getiri eğrisi kaynağı eksik.'};
+     }
    }
    return {state:'UNVERIFIED',ok:false,message:'Modül durumu tanınmıyor: '+String(mod.state)};
  }
@@ -59,7 +94,9 @@
      const a=el('article','module proof-module');
      a.append(el('span','id',m.id),el('h3','',m.name),
        el('p','proof-explain',desc.what));
-     const state=m.state==='OBSERVING'?'GÖZLEM':m.state==='BLOCKED_SOURCE'?'VERİ ENGELİ':'DOĞRULANMADI';
+     const names={B1:'FUNDING GÖZLEMİ',B2:'CANLI FİYAT TARAMASI',A3:'GÜNLÜK MUM VERİSİ',T0:'RESMÎ FAİZ VERİSİ'};
+     const state=m.state==='OBSERVING'?(names[m.id]||'GÖZLEM'):
+        m.state==='BLOCKED_SOURCE'?'VERİ ENGELİ':'DOĞRULANMADI';
      a.append(el('span','chip '+(m.state==='OBSERVING'?'':'amber'),state));
      const details=el('details','proof-details');
      details.append(el('summary','','Parametreler ve kanıt'));
@@ -69,9 +106,34 @@
      details.append(row('Veri etiketi',String(m.data_label||'—')));
      details.append(row('İşlem yetkisi',m.executable===false?'YOK':'DOĞRULANAMADI'));
      if(m.state==='OBSERVING'){
-       (m.observations||[]).forEach(x=>details.append(row(String(x.symbol)+' / '+String(x.venue),
-         '8s funding '+fmt((x.last_realized_rate_fraction_per_event||0)*100,5)+'% · '+time(x.last_realized_time_utc))));
-       details.append(row('Coin eşleşmesi',String(m.coinlive_watch_matches?.length||0)+' eşleşme'));
+       const observations=m.observations||[];
+       if(m.id==='B1'){
+         observations.forEach(x=>details.append(row(String(x.symbol)+' / '+String(x.venue),
+           'Funding '+fmt(x.last_realized_rate_fraction_per_event*100,5)+'% · '+time(x.last_realized_time_utc))));
+         details.append(row('Coin eşleşmesi',String(m.coinlive_watch_matches?.length||0)+' eşleşme'));
+       }else if(m.id==='B2'){
+         const x=observations[0]||{};
+         (x.venues||[]).forEach(v=>{
+           const q=x.best_quotes?.[v]||{};
+           details.append(row(v+' USDC/USDT', 'Bid '+fmt(q.bid,6)+' · Ask '+fmt(q.ask,6)));
+         });
+         (x.routes||[]).forEach(y=>details.append(row(y.buy_venue+' → '+y.sell_venue,
+           'Brüt '+fmt(y.gross_spread_bps,3)+' bps · NET bilinmiyor')));
+       }else if(m.id==='A3'){
+         const x=observations[0]||{};
+         details.append(row('Mum sayısı',String(x.aligned_closed_days||0)+' kapanmış gün'));
+         (x.symbols||[]).forEach(sym=>{
+           const base=sym.replace(/USDT$/,'');
+           details.append(row(sym+' kapanış',fmt(x.latest_close_usdt?.[base],3)+' USDT'));
+         });
+         details.append(row('Johansen / OOS','DOĞRULANMADI'));
+       }else if(m.id==='T0'){
+         const x=observations[0]||{};
+         details.append(row('Resmî tarih',String(x.date_utc||'—')));
+         Object.entries(x.yields_percent||{}).forEach(([k,v])=>
+           details.append(row('ABD Hazine '+k,fmt(v,2)+'%')));
+         details.append(row('Repo / dirty price','DOĞRULANMADI'));
+       }
      }else details.append(el('p','proof-blocker',String(m.blocker||'Giriş kaynağı eksik')));
      a.append(details);
      const actions=el('div','proof-actions');
@@ -118,8 +180,13 @@
        n.textContent=r.message;
        n.className='proof-result '+(r.ok?'proof-yes':'proof-no');
      });
-     if($('module-verified-at'))$('module-verified-at').textContent='6 modül kontrol edildi · '+time(new Date().toISOString())+
-        ' · çalışan 1 gözlem, 5 engelli kaynak (değişebilir)';
+     const counts=(doc.modules||[]).reduce((s,m)=>{
+       const r=evaluate(doc,m.id);if(r.state==='OBSERVED')s.observed++;
+       if(r.state==='BLOCKED')s.blocked++;
+       return s;
+     },{observed:0,blocked:0});
+     if($('module-verified-at'))$('module-verified-at').textContent='6 modül denetlendi · '+time(new Date().toISOString())+
+       ' · veri gözlemi '+counts.observed+' · engelli '+counts.blocked;
    }catch(e){if($('module-verified-at'))$('module-verified-at').textContent='Kaynak doğrulanamadı: '+String(e.message||e);}
    finally{if(btn)btn.disabled=false;}
  }
