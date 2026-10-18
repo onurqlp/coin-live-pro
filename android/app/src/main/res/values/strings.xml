@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">UzayX</string>
+    <string name="offline_title">UzayX bağlantısı kurulamadı</string>
+    <string name="offline_description">İnternet bağlantınızı kontrol edip yeniden deneyin. Canlı veriler bağlantı olmadan gösterilmez.</string>
+    <string name="retry">Yeniden dene</string>
+</resources>

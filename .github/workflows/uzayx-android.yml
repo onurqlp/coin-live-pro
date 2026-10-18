@@ -1,0 +1,50 @@
+name: UzayX — Build and Publish Android APK
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'android/**'
+      - '.github/workflows/uzayx-android.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: uzayx-android-apk-release
+  cancel-in-progress: false
+jobs:
+  android-apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Install Android SDK
+        run: sdkmanager --install "platforms;android-35" "build-tools;35.0.0"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10.2'
+      - name: Compile Android APK
+        run: gradle --no-daemon --console=plain -p android :app:assembleDebug
+      - name: Copy installable APK
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk UzayX.apk
+          test -s UzayX.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: UzayX-Android-APK
+          path: UzayX.apk
+          if-no-files-found: error
+          retention-days: 90
+      - name: Publish the stable download URL
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if ! gh release view uzayx-android >/dev/null 2>&1; then
+            gh release create uzayx-android --title "UzayX Android APK" --notes "UzayX Android WebView uygulaması. Ekranı ve piyasa verilerini güncel GitHub Pages sitesinden alır. Web sitesi değiştiğinde yeni APK gerekmez. Bu APK GitHub Actions tarafından geliştirme amaçlı imzalanmıştır; Play Store paketi değildir."
+          fi
+          gh release upload uzayx-android UzayX.apk --clobber
