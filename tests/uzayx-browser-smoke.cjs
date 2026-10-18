@@ -67,6 +67,10 @@ async function run(){
    await page.locator('[data-tab="chart"]').click();
    await page.waitForFunction(()=>document.querySelector('#chart')?.classList.contains('active'),{timeout:5000});
    await page.waitForFunction(()=>document.querySelector('#chart-symbol option[value]')!==null,{timeout:28000}).catch(()=>{});
+   await page.waitForFunction(()=>{
+     const el=document.querySelector('#chart-price');
+     return el && el.clientWidth>300 && el.width>(innerWidth<700?320:600);
+   },{timeout:18000});
    const chart=await page.evaluate(()=>({
     width:innerWidth,scrollWidth:document.documentElement.scrollWidth,
     priceCanvas:document.querySelector('#chart-price')?.width||0,
