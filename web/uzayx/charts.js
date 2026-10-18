@@ -103,8 +103,7 @@
         if(!chosen||!avail.includes(chosen)){
           const best=allCandidates().find(p=>avail.includes(p.symbol)&&p.review_state==='FRESH')||
             allCandidates().find(p=>avail.includes(p.symbol));
-          chosen=best?.symbol||avail.includes('BTCUSDT')?'BTCUSDT':avail[0]||null;
-          if(best)chosen=best.symbol;
+          chosen=best?.symbol||(avail.includes('BTCUSDT')?'BTCUSDT':avail[0]||null);
         }
         updateSelector();paint();
         return true;
@@ -249,12 +248,14 @@
     ensure();
   }
   function open(candidate){
-    chosen=typeof candidate==='string'?candidate:candidate?.symbol||chosen;
+    const requested=typeof candidate==='string'?candidate:candidate?.symbol||chosen;
+    chosen=requested;
     const tab=doc?.querySelector('[data-tab="chart"]');tab?.click();
-    ensure().then(()=>{if(pack?.candles_by_symbol?.[chosen]){$('chart-symbol').value=chosen;paint();}else{text('chart-message','Bu parite için doğrulanmış mum paketi yok. Listeden başka parite seçin.');}});
+    ensure().then(()=>{if(pack?.candles_by_symbol?.[requested]){chosen=requested;$('chart-symbol').value=chosen;paint();}else{text('chart-message','İstenen parite için doğrulanmış mum paketi yok. Listeden başka parite seçin.');}});
   }
   if(doc){
     root.addEventListener('uzayx:loaded',onLoaded);
+    root.addEventListener('uzayx:tab',e=>{if(e.detail?.tab==='chart'){ensure().then(ok=>{if(ok)paint();});}});
     root.addEventListener('resize',()=>{if(pack)paint();});
     doc.addEventListener('visibilitychange',()=>{if(!doc.hidden&&pack)paint();});
     doc.addEventListener('uzayx:open-chart',e=>open(e.detail?.candidate||e.detail?.symbol));
