@@ -217,7 +217,7 @@
     text('mini-chart-label',chosen+' · '+tf+' · '+(c?.side||'PİYASA'));
     text('chart-heading',chosen+' · '+tf);
     text('chart-message',state+' · OKX kapanmış mumları, işlem tavsiyesi değil');
-    text('mini-chart-state',state);
+    text('mini-chart-state',state+(c?' · Senaryo kaydı: '+date(c.last_evaluated_at):' · Senaryo seviyesi yok'));
     text('chart-last-candle',rows.length?'Son mum: '+date(new Date(rows.at(-1)[0]).toISOString())+' · '+rows.length+' kayıt':'Bu parite / periyotta mum bulunamadı');
     const badges=$('chart-indicators');if(badges){
       badges.replaceChildren();
