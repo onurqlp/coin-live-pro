@@ -1,0 +1,44 @@
+name: UzayX — V4.1 Hourly Atlas Research Archive
+on:
+  schedule:
+    - cron: '19 * * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/uzayx_atlas_watch.py'
+      - 'web/data/uzayx-atlas-v4.json'
+      - '.github/workflows/uzayx-atlas-watch.yml'
+permissions:
+  contents: write
+concurrency:
+  group: uzayx-atlas-append-only
+  cancel-in-progress: false
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Record an hourly research observation (not a trading signal)
+        run: python scripts/uzayx_atlas_watch.py
+      - name: Append only the separate Atlas research log
+        run: |
+          if git diff --quiet -- web/data/uzayx-atlas-watch-history.json; then
+            echo "No new research observation."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add web/data/uzayx-atlas-watch-history.json
+          git commit -m "research: append UzayX Atlas observation [skip ci]"
+          for n in 1 2 3; do
+            git pull --rebase origin main && git push origin HEAD:main && exit 0
+            sleep 5
+          done
+          exit 1
