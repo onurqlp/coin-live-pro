@@ -7,7 +7,7 @@
   root.UzayXLessonEngine=api;
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
   'use strict';
-  const val=x=>Number.isFinite(Number(x))?Number(x):null;
+  const val=x=>(x===null||x===undefined||x==='')?null:(Number.isFinite(Number(x))?Number(x):null);
   function analyze(review, spark, nowIso) {
     const cohorts=review?.cohorts||{}, results=[];
     const today=new Date(nowIso||Date.now());
