@@ -52,3 +52,30 @@ test('home open tickets, module verification controls, logo invariants',()=>{
  assert.match(page,/<img src="\.\.\/assets\/uzayx-logo.svg" alt="UZAYX"/);
  assert.equal((page.match(/binance\.com\/en\/futures\/home/g)||[]).length,1);
 });
+
+
+test('A3 B2 T0 become evidence-backed observations but never orders',()=>{
+ const s=support();
+ s.modules[2]={id:'A3',state:'OBSERVING',signal:false,executable:false,
+   observations:[{status:'INPUTS_ONLY',source:'OKX_SPOT',aligned_closed_days:80,
+     symbols:['BTCUSDT','ETHUSDT','SOLUSDT'],asof_utc:'2026-10-17T00:00:00Z',
+     actionable:false,latest_close_usdt:{BTC:80000,ETH:2400,SOL:100}}]};
+ s.modules[4]={id:'B2',state:'OBSERVING',signal:false,executable:false,
+   observations:[{status:'SCREEN_ONLY',actionable:false,venues:['OKX','KRAKEN'],
+    best_quotes:{OKX:{bid:1.001,ask:1.002},KRAKEN:{bid:1.001,ask:1.002}},
+    routes:[{net_pnl:null,net_spread_bps:null},{net_pnl:null,net_spread_bps:null}]}]};
+ s.modules[5]={id:'T0',state:'OBSERVING',signal:false,executable:false,
+   observations:[{status:'REFERENCE_ONLY',date_utc:'2026-10-16',actionable:false,
+     yields_percent:{'2Y':4.7,'10Y':5.09}}]};
+ s.modules[3].signal=false;
+ for(const id of ['A3','B2','T0']){
+   const r=proofs.evaluate(s,id,now);
+   assert.equal(r.state,'OBSERVED',id+' '+r.message);
+   assert.equal(r.ok,true,id);
+   assert.match(r.message,/yok|değildir|henüz/);
+ }
+ s.modules[4].observations[0].routes[0].net_pnl=4;
+ assert.equal(proofs.evaluate(s,'B2',now).ok,false,'must not fabricate net PnL');
+ s.modules[2].observations[0].asof_utc='2026-09-01T00:00:00Z';
+ assert.equal(proofs.evaluate(s,'A3',now).ok,false,'stale bars must fail');
+});
