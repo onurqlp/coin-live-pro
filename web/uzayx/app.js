@@ -2,7 +2,21 @@
 /* UzayX Read-Only Terminal v1: no exchange order methods, no generated prices. */
 (() => {
   const $ = id => document.getElementById(id);
-  const DATA = new URL('../data/', location.href);
+  // Pin data to one immutable GitHub commit; Pages content may be stale when data commits use [skip ci].
+  const OWNER_REPO='onurqlp/coin-live-pro';
+  let sourceCommit=null,sourceError=null;
+  async function currentHead() {
+    const r=await fetch('https://api.github.com/repos/'+OWNER_REPO+'/commits/main',{cache:'no-store'});
+    if(!r.ok)throw Error('HEAD_HTTP_'+r.status);
+    const payload=await r.json();if(!/^[a-f0-9]{40}$/.test(payload?.sha||''))throw Error('INVALID_HEAD_SHA');
+    return payload.sha;
+  }
+  function dataUrl(filename) {
+    const root=sourceCommit
+      ? 'https://raw.githubusercontent.com/'+OWNER_REPO+'/'+sourceCommit+'/web/data/'
+      : 'https://raw.githubusercontent.com/'+OWNER_REPO+'/main/web/data/';
+    return root+filename+(sourceCommit?'':'?ts='+Date.now());
+  }
   const FILES = {
     manifest: 'v4-manifest.json', health: 'health.json', radar: 'v4-radar.json',
     paper: 'v4-paper.json', spark: 'v4-spark-paper.json',
@@ -129,6 +143,8 @@
     const n=clear($('system-rows'));const m=db.manifest||{},h=db.health||{},p=db.paper||{};
     [['Ürün kimliği','UzayX / V4 veri motoru + Öğrenme UI v1'],
      ['Kaynak taraması',str(m.scan_id)],
+     ['Kaynak commit',sourceCommit||'Doğrulanamadı; en güncel RAW kullanıldı'],
+     ['Commit doğrulaması',sourceError?'Sınırlı: '+sourceError:'Sabit commit üzerinden okundu'],
      ['Piyasa kaynağı',str(m.provider)],
      ['Tarama tamamlanma (TR)',time(m.finished_at_utc)],
      ['Son sağlık kontrolü (TR)',time(h.updated_at)],
@@ -148,13 +164,17 @@
   }
   async function reload(){
     $('reload').disabled=true;set('connection','Yükleniyor…');$('connection').className='status';faults=[];
-    const entries=[...Object.entries(FILES).map(([key,fn])=>[key,new URL(fn,DATA).href]),['support',MAKINE]];
+    try{sourceCommit=await currentHead();sourceError=null;}catch(e){sourceCommit=null;sourceError=String(e.message||e);faults.push('commit pin');}
+    const entries=[...Object.entries(FILES).map(([key,fn])=>[key,dataUrl(fn)]),['support',MAKINE+'?ts='+Date.now()]];
     const results=await Promise.allSettled(entries.map(([,url])=>getJson(url)));
     const updated={};
     results.forEach((r,i)=>{const key=entries[i][0];if(r.status==='fulfilled')updated[key]=r.value;else{faults.push(key);updated[key]=null;}});
     db=updated;
     const stamp=age(db.manifest?.finished_at_utc);
-    const healthy=db.manifest?.publication_valid===true && db.health?.status==='OK' && stamp!==null && stamp>=0 && stamp<=25;
+    const id=db.manifest?.scan_id;
+    const feeds=[db.radar,db.paper,db.spark,db.review];
+    if(!id || feeds.some(f=>!f || f.scan_id!==id)){faults.push('SCAN_ID_MISMATCH');db.radar=null;}
+    const healthy=db.manifest?.publication_valid===true && db.health?.status==='OK' && !faults.includes('SCAN_ID_MISMATCH') && stamp!==null && stamp>=0 && stamp<=25;
     set('connection',healthy?'Veri güncel':stamp===null?'Kaynak eksik':stamp>25?'Veri gecikmiş':'Durumu kontrol et');
     $('connection').className='status '+(healthy?'ok':'bad');
     renderTop();renderRadar();renderLearn();renderFunds();renderResearch();renderSystem();renderLeverage();
