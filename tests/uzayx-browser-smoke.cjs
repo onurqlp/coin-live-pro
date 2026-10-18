@@ -118,8 +118,10 @@ async function run(){
    assert.equal(proof.length,6);
    assert.ok(proof.every(x=>x.result&&!x.result.includes('Henüz çevrimiçi kontrol yapılmadı')));
    const proofById=Object.fromEntries(proof.map(x=>[x.module,x.result]));
-   assert.match(proofById.A1,/ENGELLİ|kaynağ/i);
-   assert.match(proofById.A2,/ENGELLİ|kaynağ/i);
+   for(const id of ['A1','A2']){
+     assert.match(proofById[id],/ortak kapanış seansı|ENGELLİ|doğrulanamadı|fiyat kaynağı/i,
+       id+' must report verified public price inputs or honestly report a source blocker');
+   }
    for(const id of ['A3','B1','B2','T0']){
      assert.doesNotMatch(proofById[id],/Funding verisi veya saat\/izin kanıtı eksik/i,
        'New evidence verifier must not mistake '+id+' for B1.');
