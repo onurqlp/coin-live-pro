@@ -53,3 +53,13 @@
 - V5 eski preview'dan yeni UzayX marka koduna geçişi ancak canlı görünüm ve veri erişim testiyle; gerçek trade yetkisi açılmadan gerçekleştir.
 
 Kaynak belgeler: https://www.okx.com/docs-v5/en/ ; https://github.com/onurqlp/coin-live-pro ; https://github.com/onurqlp/makine-core ; https://github.com/onurqlp/alti-quant-lab .
+
+
+## 18:04–18:06 UTC ek doğrulama (önceki 17:54 kanıtı korunarak)
+- Sonraki ana `ops-report.json` `2026-10-18T18:04:33Z` anlık görüntüsünde 1.028 deneme bileti, 740 tamamlanmış, 273 açık, 15 gelecek mumu bekleyen bilet vardır. Aynı kohort tabanında tamamen kapanmış realizasyon -14,36160 USDT; tüm biletlerde +3,10889 USDT; açık/diğer biletlerde kısmi gerçekleşme farkı +17,47049 USDT olarak sabittir.
+- Yeni özkaynak **10.011,53809 USDT**; açık değerleme **+8,42920 USDT** (önceki 17:54 snapshot'ında +10,09987 USDT). 10.000 + 3,10889 + 8,42920 = 10.011,53809. Kasa düşüşü açık işaretleme (mark-to-market) değişimidir; gerçekleşmiş zarar olarak sunulamaz.
+- 18:04 sağlık bayrağı `DEGRADED_SCHEDULE_GAP`. Veri taramasının başarılı tamamlanması, cron boşluğunu silmez; kullanıcıya kaynak yaşını göster.
+- Yalnız rapor ve test kodu `main` dalına squash merge `d0f9228a4a80b00634a206dff9139827649f89e6` ile alındı: https://github.com/onurqlp/coin-live-pro/pull/30 .
+- Bağımsız kalite koşusu **SUCCESS**: https://github.com/onurqlp/coin-live-pro/actions/runs/39152613125 .
+- Değişiklik sonrası rapor üretim koşusu **SUCCESS**: https://github.com/onurqlp/coin-live-pro/actions/runs/39152613140 ; log satırı: `Closed-ticket realized PnL: -14.3616 USDT; realized on nonclosed tickets: 17.47049 USDT (verified: True)`.
+- Bu koşu yeni JSON raporunu **workflow artifact** olarak üretir; `web/data/ops-report.json` git ana dosyasını doğrudan güncellemez. Canlı JSON'a yeni alanların taşınması bir sonraki uygun piyasa yayınında doğrulanmalıdır. Bu farkı "site güncellendi" diye gizleme.
