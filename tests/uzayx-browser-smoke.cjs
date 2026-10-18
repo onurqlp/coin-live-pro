@@ -14,6 +14,13 @@ async function run(){
    const page=await browser.newPage();
    await page.setViewport({width,height,deviceScaleFactor:1});
    await page.goto(url+'#overview',{waitUntil:'domcontentloaded',timeout:45000});
+   const openTab=async tab=>{
+    if(name==='mobile'){
+     const dock=['overview','chart','funds','learn'].includes(tab);
+     if(!dock)await page.locator('#mobile-menu-toggle').click();
+     await page.locator(dock?'[data-dock="'+tab+'"]':'#desktop-tabs [data-tab="'+tab+'"]').click();
+    }else await page.locator('#desktop-tabs [data-tab="'+tab+'"]').click();
+   };
    await page.waitForSelector('#mini-price');
    await page.waitForFunction(()=>document.querySelector('#connection')?.textContent!=='Veri kontrol ediliyor',{timeout:25000});
    const home=await page.evaluate(()=>({
@@ -64,7 +71,7 @@ async function run(){
      assert.equal(new URL(page.url()).hash,'#overview','Open position click must stay on homepage');
    }
    await page.screenshot({path:'/tmp/uzayx-'+name+'-home.png',fullPage:true});
-   await page.locator('[data-tab="chart"]').click();
+   await openTab('chart');
    await page.waitForFunction(()=>document.querySelector('#chart')?.classList.contains('active'),{timeout:5000});
    await page.waitForFunction(()=>document.querySelector('#chart-symbol option[value]')!==null,{timeout:28000}).catch(()=>{});
    await page.waitForFunction(()=>{
@@ -84,7 +91,7 @@ async function run(){
    assert.ok(chart.rsiCanvas>0&&chart.macdCanvas>0,'Indicator charts not rendered: '+chart.msg);
    assert.equal(chart.indicatorCount,4);
    await page.screenshot({path:'/tmp/uzayx-'+name+'-chart.png',fullPage:true});
-   await page.locator('[data-tab="funds"]').click();
+   await openTab('funds');
    await page.waitForFunction(()=>document.querySelector('#cash-total')?.textContent!=='—',{timeout:15000});
    const cash=await page.evaluate(()=>({
      title:document.querySelector('#funds-title')?.textContent,
@@ -99,7 +106,7 @@ async function run(){
    await page.locator('#position-rows .position-row').click();
    await page.waitForFunction(()=>document.querySelector('#position-detail .position-stat'),{timeout:5000});
    await page.screenshot({path:'/tmp/uzayx-'+name+'-cash.png',fullPage:true});
-   await page.locator('[data-tab="research"]').click();
+   await openTab('research');
    await page.waitForFunction(()=>document.querySelectorAll('#module-grid .proof-module').length===6,{timeout:12000});
    const modules=await page.evaluate(()=>[...document.querySelectorAll('#module-grid .proof-module')].map(x=>({
      id:x.querySelector('.id')?.textContent,status:x.querySelector('.chip')?.textContent,
@@ -127,14 +134,14 @@ async function run(){
        'New evidence verifier must not mistake '+id+' for B1.');
    }
 
-   await page.locator('[data-tab="learn"]').click();
+   await openTab('learn');
    const demo={schema:'uzayx.lessons.archive.v1',records:[{day_utc:'2026-10-17',cohort_statistics:{'TÜMÜ':{closed:2,positive:1,net_usdt:-1.2}}}]};
    const sample=path.join(os.tmpdir(),'uzayx-smoke-sample-'+name+'.json');
    fs.writeFileSync(sample,JSON.stringify(demo));
    const input=await page.$('#archive-file');
    await input.uploadFile(sample);
    await page.waitForFunction(()=>document.querySelectorAll('#archive-comparison .archive-compare-card').length>0,{timeout:10000});
-   await page.locator('[data-tab="system"]').click();
+   await openTab('system');
    assert.ok(await page.$('#system-rows .system-row'),'Health diagnostics missing');
    console.log('UX_SMOKE_OK',name,JSON.stringify({home,summary,chart,cash,modules,proof}));
    await page.close();
