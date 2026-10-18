@@ -16,7 +16,7 @@ const signal={id:'paper-fixture-1',symbol:'BTCUSDT',side:'LONG',stage:'WATCH',
   price:71000,stop:69000,targets:[73000,75000,77000],reasons:['SYNTHETIC_TEST_ONLY']};
 const fixtureCandidates=[signal,...[1,2,3].map(i=>({...signal,id:'fixture-'+i,symbol:['ETHUSDT','SOLUSDT','ADAUSDT'][i-1],score:60-i}))];
 const historyFixture={schema:'coinlive.v5.history.readonly.v1',sourceVerified:true,sourceStatus:'VERIFIED',commit,
- events:[{id:'h1',symbol:'BTCUSDT',side:'LONG',type:'WATCH_STARTED',prev:null,next:'WATCH',strategy:'TREND_BREAKOUT',timeUtc:'2026-10-18T07:00:00Z',price:71000},
+ events:[...Array.from({length:19},(_,i)=>({id:'f'+i,symbol:'BTCUSDT',side:'LONG',type:'WATCH_STARTED',prev:null,next:'WATCH',strategy:'TREND_BREAKOUT',timeUtc:'2026-10-18T07:00:00Z',price:71000})),{id:'h1',symbol:'BTCUSDT',side:'LONG',type:'WATCH_STARTED',prev:null,next:'WATCH',strategy:'TREND_BREAKOUT',timeUtc:'2026-10-18T07:00:00Z',price:71000},
  {id:'h2',symbol:'ETHUSDT',side:'SHORT',type:'INVALIDATED',prev:'WATCH',next:'ARCHIVED',strategy:'SHORT_BREAKDOWN',timeUtc:'2026-10-18T08:00:00Z',price:2400}]};
 const snapshot=()=>({
  schema:'coinlive.v5.readonly.v1',appVersion:'5.0.0-preview',sourceProductVersion:'4.03',
@@ -126,12 +126,15 @@ try{
   assert.match(await page.locator('#systemInfo').innerText(),/4.03/);
   await page.locator('[data-tab="history"]').click();
   await page.locator('.history-event').first().waitFor({timeout:10000});
-  assert.match(await page.locator('#historyCount').innerText(),/2 olay/);
+  assert.match(await page.locator('#historyCount').innerText(),/21 doğrulanmış olay/);
+  assert.equal(await page.locator('.history-event').count(),15,'history must be grouped into small chunks');
+  await page.locator('#historyMore').click();
+  assert.equal(await page.locator('.history-event').count(),21,'more history must be accessible');
   await page.locator('[data-history="INVALIDATED"]').click();
   assert.equal(await page.locator('.history-event').count(),1);
   assert.match(await page.locator('#historyCards').innerText(),/Geçersiz oldu/);
   await page.locator('[data-history="ALL"]').click();
-  assert.equal(await page.locator('.history-event').count(),2);
+  assert.equal(await page.locator('.history-event').count(),15);
   await page.locator('[data-tab="forward"]').click();
   assert.match(await page.locator('#forwardInfo').innerText(),/INSUFFICIENT_SAMPLE/);
   assert.deepEqual(failures,[],'page errors at '+width);
