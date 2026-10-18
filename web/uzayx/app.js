@@ -24,6 +24,7 @@
   };
   const MAKINE = 'https://raw.githubusercontent.com/onurqlp/makine-core/main/site/data/support.json';
   let db = {}, faults = [], mode = 'ALL', stage = 'ALL', search = '';
+  let lastCheckedAt=null;
   const num = (v, digits=2) => Number.isFinite(Number(v)) && v!==null && v!=='' ? Number(v).toLocaleString('tr-TR',{minimumFractionDigits:digits,maximumFractionDigits:digits}) : '—';
   const usd = (v,d=2) => v===null||v===undefined||!Number.isFinite(Number(v)) ? '—' : num(v,d)+' USDT';
   const str = v => v===null||v===undefined?'—':String(v);
@@ -38,6 +39,7 @@
     document.querySelectorAll('.workspace').forEach(p=>p.classList.toggle('active',p.id===tab));
     if(location.hash!=='#'+tab)history.replaceState(null,'','#'+tab);
     window.scrollTo({top:document.querySelector('.tabs').getBoundingClientRect().top+scrollY-8,behavior:'auto'});
+    window.dispatchEvent(new CustomEvent('uzayx:tab',{detail:{tab}}));
   }
   function row(title,value){const n=el('div','system-row');n.append(el('span','',title),el('b','',value));return n;}
   function readableStage(code) {
@@ -61,26 +63,15 @@
     details.append(summary);
     const targets=Array.isArray(p.targets)?p.targets.slice(0,3).map((v,i)=>'Hedef '+(i+1)+': '+num(v,6)).join(' · '):'Hedef belirtilmemiş';
     details.append(el('p','',targets));
+    details.append(el('p','', 'RSI 4H: '+num(p.metrics?.['4h_rsi'],2)+' · MACD 4H: '+num(p.metrics?.['4h_macd_signed'],3)+' · Hacim: '+num(p.metrics?.['4h_relative_volume'],2)+'x'));
     details.append(el('p','', 'Araştırma puanı: '+num(p.score,0)+' · Bu bir kazanma olasılığı değildir.'));
+    details.append(el('p','', 'Son değerlendirme: '+time(p.last_evaluated_at)+' · '+str(p.review_state)));
     n.append(details);
     const actions=el('div','coin-actions');
-    const symbol=String(p.symbol||'').toUpperCase();
-    if(/^[A-Z0-9]{3,24}$/.test(symbol)){
-      const copy=el('button','secondary tiny-action','Pariteyi kopyala');
-      copy.type='button';
-      copy.addEventListener('click',async()=>{
-        try{
-          if(!navigator.clipboard?.writeText)throw Error('Clipboard unavailable');
-          await navigator.clipboard.writeText(symbol);
-          copy.textContent='Kopyalandı ✓';
-        }catch{copy.textContent='Parite: '+symbol;}
-      });
-      actions.append(copy);
-    }
-    const binance=el('a','binance-link','Binance Futures ↗');
-    binance.href='https://www.binance.com/en/futures/home';binance.target='_blank';binance.rel='noopener noreferrer';
-    binance.title='Binance Futures üzerinde pariteyi ve fiyatı ayrıca kontrol edin; otomatik emir verilmez';
-    actions.append(binance);
+    const graph=el('button','secondary tiny-action','Grafiği aç ↗');
+    graph.type='button';
+    graph.addEventListener('click',()=>document.dispatchEvent(new CustomEvent('uzayx:open-chart',{detail:{candidate:p}})));
+    actions.append(graph);
     n.append(actions);
     return n;
   }
@@ -89,7 +80,7 @@
     const a=clear($('top-candidates')),radar=db.radar||{},manifest=db.manifest||{},review=db.review||{};
     const c=candidates().sort((x,y)=>(Number(y.score)||0)-(Number(x.score)||0));
     if(!c.length)a.append(el('div','empty','Şu an listelenecek parite yok.'));
-    else c.slice(0,4).forEach(x=>a.append(candidateCard(x)));
+    else c.slice(0,3).forEach(x=>a.append(candidateCard(x)));
     set('m-pairs',num(manifest.candidate_counts?.market_pairs,0));
     set('m-watch',num(radar.counts?.watch,0));
     const ready=c.filter(p=>p.paper_entry_state==='ELIGIBLE'||p.paper_entry_state==='ENTRY_ELIGIBLE').length;
@@ -105,6 +96,7 @@
     const valid=manifest.publication_valid===true&&!faults.includes('SCAN_ID_MISMATCH')&&sourceCommit!==null;
     const dataGood=valid&&fresh!==null&&fresh>=0&&fresh<=25&&!!db.radar;
     const healthOk=db.health?.status==='OK';
+    if(!dataGood){a.replaceChildren(el('div','empty','Kaynak güncel veya tutarlı değil; yeni fırsat listesi gösterilmiyor.'));}
     set('overall-status',!dataGood?'VERİ UYARISI':healthOk?'GÜNCEL':'TARAMA UYARISI');
     $('overall-status').className='chip '+(dataGood&&healthOk?'':'amber');
     set('decision',!dataGood?'Önce veriyi kontrol et':ready?'Koşulları kontrol edilecek parite var':'Şu an giriş teyidi yok');
@@ -200,6 +192,8 @@
      ['Piyasa kaynağı',str(m.provider)],
      ['Tarama tamamlanma (TR)',time(m.finished_at_utc)],
      ['Son sağlık kontrolü (TR)',time(h.updated_at)],
+     ['Uygulama kontrol saati (TR)',lastCheckedAt?time(lastCheckedAt):'—'],
+     ['Kaynak kontrol aralığı','1 dakika (yeni kayıt varsa yeniden yükler)'],
      ['Sağlık raporu',str(h.status)],
      ['Veri doğrulaması',num(m.candidate_counts?.verified,0)+' / '+num(m.candidate_counts?.attempted,0)],
      ['Son tetikleyici',str(m.trigger)],
@@ -229,7 +223,9 @@
     const healthy=db.manifest?.publication_valid===true && db.health?.status==='OK' && sourceCommit!==null && !faults.includes('SCAN_ID_MISMATCH') && stamp!==null && stamp>=0 && stamp<=25;
     set('connection',healthy?'Veri güncel':stamp===null?'Kaynak eksik':stamp>25?'Veri gecikmiş':'Kontrol gerekli');
     $('connection').className='status '+(healthy?'ok':'bad');
+    lastCheckedAt=new Date().toISOString();
     renderTop();renderRadar();renderLearn();renderFunds();renderResearch();renderSystem();renderLeverage();
+    window.dispatchEvent(new CustomEvent('uzayx:loaded',{detail:{db,sourceCommit,faults:[...faults]}}));
     $('reload').disabled=false;
   }
   document.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.goto)));
@@ -239,8 +235,25 @@
   $('direction').addEventListener('change',e=>{mode=e.target.value;renderRadar();});
   $('stage').addEventListener('change',e=>{stage=e.target.value;renderRadar();});
   $('leverage').addEventListener('input',renderLeverage);
-  if(['overview','radar','learn','funds','research','system'].includes(location.hash.slice(1)))go(location.hash.slice(1));
+  if(['overview','radar','chart','learn','funds','research','system'].includes(location.hash.slice(1)))go(location.hash.slice(1));
   reload();
-  // Never pretend this is streaming; refresh from verified GitHub sources every 5 minutes.
-  setInterval(()=>{if(!document.hidden&&!$('reload').disabled)reload();},300000);
+  // One-minute source scan check; avoid exhausting GitHub HEAD rate limits.
+  // A changed raw manifest triggers a FULL immutable-commit reload and scan-ID checks.
+  async function minuteCheck(){
+    if(document.hidden||$('reload').disabled)return;
+    try{
+      const latest=await getJson('https://raw.githubusercontent.com/'+OWNER_REPO+'/main/web/data/v4-manifest.json?poll='+Date.now());
+      if(latest.scan_id && latest.scan_id!==db.manifest?.scan_id){await reload();return;}
+      lastCheckedAt=new Date().toISOString();
+      set('m-age',ageLabel(db.manifest?.finished_at_utc));
+      set('radar-age','Veri: '+ageLabel(db.manifest?.finished_at_utc));
+      if((age(db.manifest?.finished_at_utc)??999)>25){
+        set('connection','Veri gecikmiş');$('connection').className='status bad';renderTop();renderSystem();
+      }else{renderSystem();}
+    }catch(err){
+      set('connection','Kontrol hatası');$('connection').className='status bad';
+      faults.push('minute_check');renderTop();renderSystem();
+    }
+  }
+  setInterval(minuteCheck,60000);
 })();
