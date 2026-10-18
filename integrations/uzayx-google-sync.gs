@@ -100,6 +100,36 @@ function syncUzayX() {
         v.realized_total_usdt??'',v.mean_net_per_closed_ticket_usdt??'',closed>0?positive/closed:''];
     });
     uzxSheet_(book,'SONUCLAR').getRange(5,1,7,7).setValues(outcomes);
+    // Append or refresh each known UTC day without erasing older history.
+    // This archive is read-only research evidence, not executed Binance PnL.
+    const archive=uzxSheet_(book,'GUNLUK_ARSIV');
+    const lastArchiveRow=Math.max(4,archive.getLastRow());
+    const savedKeys=lastArchiveRow>4
+      ? archive.getRange(5,1,lastArchiveRow-4,1).getDisplayValues().map(row=>row[0])
+      : [];
+    const keyRows=new Map(savedKeys.map((key,i)=>[key,i+5]).filter(pair=>pair[0]));
+    const histories=(s.spark.daily?.days||[]).slice().sort((a,b)=>a.date_utc.localeCompare(b.date_utc));
+    histories.forEach(item=>{
+      if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(String(item.date_utc||'')))return;
+      const values=[
+        item.date_utc,item.all_sparks||0,item.geldi||0,item.closed||0,
+        item.positive_closures||0,item.negative_closures||0,
+        item.realized_net_usdt??'',item.unrealized_all_usdt??'',
+        item.date_utc===s.spark.daily.today_utc?'GÜN İÇİ KAYIT':'GÜN TAMAMLANDI',
+        s.manifest.finished_at_utc,s.manifest.scan_id,'Sanal',
+        'Kapanan sanal kayıtlar; gerçek Binance PnL değildir'
+      ];
+      let dest=keyRows.get(item.date_utc);
+      if(!dest){
+        dest=lastArchiveRow+keyRows.size-savedKeys.length+1;
+        if(dest<=lastArchiveRow)dest=lastArchiveRow+1;
+        // More than one new day: use updated last row, not a reused destination.
+        dest=Math.max(dest,archive.getLastRow()+1);
+        if(dest>archive.getMaxRows())archive.insertRowsAfter(archive.getMaxRows(),1);
+        keyRows.set(item.date_utc,dest);
+      }
+      archive.getRange(dest,1,1,13).setValues([values]);
+    });
     const system=[
       ['Veri sağlayıcı',s.manifest.provider||'OKX'],
       ['Kaynak zamanı UTC',s.manifest.finished_at_utc],
@@ -123,7 +153,7 @@ function syncUzayX() {
 
 function installUzayXSync() {
   const book=SpreadsheetApp.openById(UZAYX_GOOGLE.workbookId);
-  for(const name of ['DURUM','PARITELER','SONUCLAR','SISTEM'])uzxSheet_(book,name);
+  for(const name of ['DURUM','PARITELER','SONUCLAR','SISTEM','GUNLUK_ARSIV'])uzxSheet_(book,name);
   const result=syncUzayX();
   ScriptApp.getProjectTriggers().filter(t=>t.getHandlerFunction()==='syncUzayX')
     .forEach(t=>ScriptApp.deleteTrigger(t));
