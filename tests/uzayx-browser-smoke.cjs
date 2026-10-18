@@ -34,9 +34,9 @@ async function run(){
    assert.ok(home.scrollWidth<=width+3,'Horizontal page overflow on '+name+': '+home.scrollWidth);
    assert.equal(home.navs,7);
    await page.waitForFunction(()=>document.querySelector('.watch-row')||document.querySelector('.watch-empty'),{timeout:15000});
-   const rows=await page.$('.watch-row');
+   const rows=await page.$$('.watch-row');
    if(rows.length){
-     await rows[0].click();
+     await page.locator('.watch-row').click();
      const inline=await page.evaluate(()=>({
        hash:location.hash,label:document.querySelector('#mini-chart-label')?.textContent,
        detail:document.querySelector('#watch-detail')?.hidden,
