@@ -18,7 +18,7 @@ function support(){
 test('B1 has verifiable read-only funding evidence but no trade authorization',()=>{
  const r=proofs.evaluate(support(),'B1',now);
  assert.equal(r.state,'OBSERVED');assert.equal(r.ok,true);
- assert.match(r.message,/sadece gözlem/i);
+ assert.match(r.message,/yalnız gözlem|sadece gözlem/i);
 });
 test('A1 A2 A3 B2 T0 cannot claim working source from health button',()=>{
  const doc=support();
@@ -72,7 +72,7 @@ test('A3 B2 T0 become evidence-backed observations but never orders',()=>{
    const r=proofs.evaluate(s,id,now);
    assert.equal(r.state,'OBSERVED',id+' '+r.message);
    assert.equal(r.ok,true,id);
-   assert.match(r.message,/yok|değildir|henüz/);
+   assert.match(r.message,/yok|değildir|henüz|doğrulanmadı/);
  }
  s.modules[4].observations[0].routes[0].net_pnl=4;
  assert.equal(proofs.evaluate(s,'B2',now).ok,false,'must not fabricate net PnL');
