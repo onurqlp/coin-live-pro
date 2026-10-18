@@ -30,6 +30,7 @@ fs.writeFileSync(path.join(out,'uzayx-atlas-v4-complete.json'),JSON.stringify(da
 const q=x=>{
  // Formula-looking text is quoted and prefixed to prevent CSV spreadsheet formula execution.
  if(x===null||x===undefined)return '';
+ if(typeof x==='number'||typeof x==='boolean')return String(x);
  let v=typeof x==='string'?x:String(x);
  if(/^[=+@\-]/.test(v))v="'"+v;
  return /[",\r\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;
