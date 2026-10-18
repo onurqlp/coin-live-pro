@@ -51,3 +51,5 @@ jobs:
           ./node_modules/.bin/playwright install chromium --with-deps
       - name: V5 browser smoke on phone tablet and desktop
         run: node apps/coinlive-vercel/tests/browser-smoke.mjs
+      - name: V5 real pinned source API integration (no market orders)
+        run: node apps/coinlive-vercel/tests/live-api-smoke.mjs
