@@ -1,0 +1,59 @@
+name: UzayX — Published Mobile/Desktop Smoke
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'web/uzayx/**'
+      - 'tests/uzayx-browser-smoke.cjs'
+      - '.github/workflows/uzayx-site-smoke.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Wait for public UzayX build, not just repository commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT="https://onurqlp.github.io/coin-live-pro/uzayx/"
+          ready=0
+          for i in $(seq 1 36); do
+            if curl -fsSL --max-time 15 "$ROOT?check=$(date +%s%N)" -o /tmp/uzayx-site.html; then
+              if grep -q 'id="chart-price"' /tmp/uzayx-site.html && grep -q 'src="./archive.js"' /tmp/uzayx-site.html && grep -q 'id="mini-price"' /tmp/uzayx-site.html; then ready=1;break;fi
+            fi
+            sleep 7
+          done
+          test "$ready" = 1
+          test "$(grep -o 'https://www.binance.com/en/futures/home' /tmp/uzayx-site.html | wc -l)" = 1
+          for file in charts.js archive.js finish.css; do
+            curl -fsSL --max-time 15 "$ROOT$file?check=$(date +%s%N)" -o "/tmp/uzayx-$file"
+            test -s "/tmp/uzayx-$file"
+          done
+          echo "PUBLIC_ASSETS_OK"
+      - name: Install minimal browser automation
+        shell: bash
+        run: |
+          npm install --prefix /tmp/uzayx-smoke --no-save --silent puppeteer-core@24.26.1
+      - name: Functional smoke at 390px and 1440px
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v chromium || true)"
+          test -n "$CHROME"
+          export CHROME
+          NODE_PATH=/tmp/uzayx-smoke/node_modules node tests/uzayx-browser-smoke.cjs
+      - name: Save test screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: uzayx-responsive-smoke-${{ github.run_id }}
+          path: /tmp/uzayx-*.png
+          if-no-files-found: ignore
+          retention-days: 7
