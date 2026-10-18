@@ -1,5 +1,5 @@
 const $=id=>document.getElementById(id);
-let state=null, stage='ALL', side='ALL', search='', expanded=false, days=7, selected=null, chartFrame='1H', lastChart=null, chartTicket=0, historyTicket=0, historyData=null, historyFilter='ALL';
+let state=null, stage='ALL', side='ALL', search='', expanded=false, days=7, selected=null, chartFrame='1H', lastChart=null, chartTicket=0, historyTicket=0, historyData=null, historyFilter='ALL', historyVisible=15;
 const num=x=>typeof x==='number'&&Number.isFinite(x)?x.toLocaleString('tr-TR',{maximumFractionDigits:3}):'Bilinmiyor';
 const el=(tag,cls,txt)=>{const x=document.createElement(tag);if(cls)x.className=cls;if(txt!==undefined)x.textContent=String(txt);return x;};
 const clear=x=>x.replaceChildren();
@@ -189,9 +189,11 @@ function renderHistory(){
  const events=historyData.events.filter(x=>historyFilter==='ALL'||
    (historyFilter==='INVALIDATED'?x.type==='INVALIDATED':
     /MOTION|SPOTLIGHT|CONFIRMED|GELDI/.test(x.type)));
- $('historyCount').textContent=`${events.length} olay · ${historyData.sourceStatus==='STALE_HISTORY'?'Eski kaynak':'Kaynak doğrulandı'}`;
+ $('historyCount').textContent=`${events.length} doğrulanmış olay · ${historyData.sourceStatus==='STALE_HISTORY'?'Eski kayıt':'Kaynak doğrulandı'}`;
+ $('historyMore').hidden=events.length<=historyVisible;
+ $('historyMore').textContent=`Diğer ${Math.min(15,events.length-historyVisible)} olayı göster ↓`;
  if(!events.length){container.append(el('div','empty','Bu filtreye uygun kayıt yok'));return;}
- for(const x of events.slice(0,60)){
+ for(const x of events.slice(0,historyVisible)){
   const card=el('div','history-event'),top=el('div','history-headline');
   top.append(el('strong','',x.symbol+' · '+(x.side||'—')),el('span','history-type '+(x.type==='INVALIDATED'?'invalid':/MOTION|SPOTLIGHT/.test(x.type)?'progress':''),historyLabels[x.type]||x.type.replaceAll('_',' ')));
   card.append(top,el('p','',`Aşama: ${stages[x.prev]||x.prev||'—'} → ${stages[x.next]||x.next||'—'}`),
@@ -229,8 +231,9 @@ $('quickOpen').addEventListener('click',()=>section('chart'));
 for(const b of document.querySelectorAll('.back-radar'))b.addEventListener('click',()=>section('radar'));
 window.addEventListener('resize',()=>{if(lastChart)renderCandles(lastChart);});
 for(const b of document.querySelectorAll('.window'))b.addEventListener('click',()=>{days=Number(b.dataset.days);document.querySelectorAll('.window').forEach(x=>x.classList.toggle('selected',x===b));renderForward();});
-for(const b of document.querySelectorAll('.hist-filter'))b.addEventListener('click',()=>{historyFilter=b.dataset.history;document.querySelectorAll('.hist-filter').forEach(x=>x.classList.toggle('selected',x===b));renderHistory();});
-$('historyReload').addEventListener('click',()=>{historyData=null;loadHistory();});
+for(const b of document.querySelectorAll('.hist-filter'))b.addEventListener('click',()=>{historyFilter=b.dataset.history;historyVisible=15;document.querySelectorAll('.hist-filter').forEach(x=>x.classList.toggle('selected',x===b));renderHistory();});
+$('historyReload').addEventListener('click',()=>{historyData=null;historyVisible=15;loadHistory();});
+$('historyMore').addEventListener('click',()=>{historyVisible+=15;renderHistory();});
 $('reload').addEventListener('click',reload);
 if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
 fetch('/api/overlay',{cache:'no-store'}).then(r=>r.json()).then(x=>{const box=$('overlayInfo');if(x.state==='STALE'){box.textContent='MAKİNE · ESKİ ARAŞTIRMA ('+num(x.evidence?.ageMinutes)+' dk) · Son güncelleme '+(x.evidence?.generatedAtUtc||'—')+' · Yeni sinyale uygulanmaz.';}else if(x.state==='READ_ONLY_RESEARCH'){box.textContent='MAKİNE · Salt-okunur araştırma · '+num(x.evidence?.ageMinutes)+' dk · Ana kasa ve stratejilere müdahale yok.';}else{box.textContent='MAKİNE erişilemedi ('+(x.error||'KAYNAK_YOK')+') · Ana veri etkilenmez.';}if(state&&x.evidence?.basedOnCoinliveScanId!==state.source.scanId){box.textContent+=' · Kaynak scan_id farklı; çapraz teyit olarak kullanılmaz.';}}).catch(()=>{$('overlayInfo').textContent='MAKİNE erişilemedi · Ana veri etkilenmez.';});
