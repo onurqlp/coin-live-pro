@@ -222,7 +222,7 @@
     const miniCanvas=$('mini-price');if(miniCanvas&&miniRows.length<2){const cx=miniCanvas.getContext('2d');cx.clearRect(0,0,miniCanvas.width,miniCanvas.height);}
     text('chart-heading',chosen+' · '+tf);
     text('chart-message',state+' · OKX kapanmış mumları, işlem tavsiyesi değil');
-    text('mini-chart-state',state+(c?' · Senaryo kaydı: '+date(c.last_evaluated_at):' · Senaryo seviyesi yok'));
+    if(miniRows.length<2)text('mini-chart-state',chosen+' için kayıtlı kapanmış mum grafiği yok; STOP/TP sadece sanal kayıttan gösterilir.');
     text('chart-last-candle',rows.length?'Son mum: '+date(new Date(rows.at(-1)[0]).toISOString())+' · '+rows.length+' kayıt':'Bu parite / periyotta mum bulunamadı');
     const badges=$('chart-indicators');if(badges){
       badges.replaceChildren();
@@ -238,7 +238,7 @@
     levelTiles($('chart-levels'),levels,'Seviyeler OKX kaynaklı kaydedilmiş araştırma senaryosudur. Binance fiyatı farklı olabilir.');
     levelTiles($('mini-levels'),levels.slice(0,5),null);
     if(miniRows.length>=2)priceChart($('mini-price'),miniRows,levels,true);
-    if(rows.length<2){const canvas=$('chart-price');if(canvas)canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);paintPosition();return;}
+    if(rows.length<2){const canvas=$('chart-price');if(canvas)canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);text('chart-message',chosen+' için doğrulanmış mum bulunamadı. Başka parite seçin.');paintPosition();return;}
     priceChart($('chart-price'),rows,levels,false);
     const osc=computeIndicators(rows);
     oscillator($('chart-rsi'),osc.rsi,'rsi');
@@ -281,12 +281,27 @@
     if(loadedSha===sha){paint();return;}
     ensure();
   }
+  function paintDetailed(){
+    if(!pack)return;
+    const available=Object.keys(pack.candles_by_symbol||{});
+    const requested=chosen;
+    if(!available.includes(chosen)||normalizeCandles(pack.candles_by_symbol?.[chosen]?.[tf]).length<2){
+      const fallback=available.includes('BTCUSDT')?'BTCUSDT':available[0]||null;
+      if(!fallback){
+        text('chart-message','Doğrulanmış kapanmış mum paketi boş.');
+        return;
+      }
+      chosen=fallback;selectedOverride=null;updateSelector();
+      paint();
+      text('chart-message',requested+' için mum verisi yok · mevcut pakette '+fallback+' gösteriliyor.');
+    }else paint();
+  }
   function open(candidate){
     const requested=typeof candidate==='string'?candidate:candidate?.symbol||chosen;
     selectedOverride=typeof candidate==='object'?candidate:null;
     chosen=requested;
     const tab=doc?.querySelector('[data-tab="chart"]');tab?.click();
-    ensure().then(()=>{if(pack?.candles_by_symbol?.[requested]){chosen=requested;$('chart-symbol').value=chosen;paint();}else{text('chart-message','İstenen parite için doğrulanmış mum paketi yok. Listeden başka parite seçin.');}});
+    ensure().then(ok=>{if(ok)paintDetailed();});
   }
   if(doc){
     root.addEventListener('uzayx:loaded',onLoaded);
@@ -295,7 +310,7 @@
       selectedTicket=e.detail?.ticket||null;
       ensure().then(ok=>{if(ok)paintPosition();});
     });
-    root.addEventListener('uzayx:tab',e=>{if(e.detail?.tab==='chart'){ensure().then(ok=>{if(ok)paint();});}});
+    root.addEventListener('uzayx:tab',e=>{if(e.detail?.tab==='chart'){ensure().then(ok=>{if(ok)root.requestAnimationFrame(()=>paintDetailed());});}});
     root.addEventListener('resize',()=>{if(pack)paint();});
     doc.addEventListener('visibilitychange',()=>{if(!doc.hidden&&pack)paint();});
     doc.addEventListener('uzayx:open-chart',e=>open(e.detail?.candidate||e.detail?.symbol));
