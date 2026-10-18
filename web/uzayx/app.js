@@ -73,6 +73,17 @@
     const r=db.review||{},c=r.cohorts||{},all=c['TÜMÜ'];
     set('learn-net',all?usd(all.realized_total_usdt):'—');
     set('learn-rate',all?.closed?num(all.positive/all.closed*100,1)+'%':'—');
+    const lessonBox=clear($('lessons'));
+    const lessons=window.UzayXLessonEngine?.analyze(db.review,db.spark);
+    if(!lessons?.hypotheses?.length)lessonBox.append(el('div','','Yeterli incelenebilir geçmiş yok. Yeni kapanışlar bekleniyor.'));
+    else lessons.hypotheses.slice(0,5).forEach(h=>{
+      const item=el('div');
+      item.append(el('b','',h.id.replaceAll('_',' ')+' · '+num(h.closed,0)+' kapanış · '+usd(h.mean,4)+' / işlem'));
+      item.append(el('small','',h.originalState==='NEGATIVE_OBSERVED'
+        ? 'Özgün kuralda negatif gözlem. Ters strateji ve işlem yapmama alternatifleri bağımsız test gerektiriyor.'
+        : 'Özgün kuralda kârlılık kanıtı yok; yeni dönem verisinde yeniden karşılaştırılacak.'));
+      lessonBox.append(item);
+    });
     const keys=['TÜMÜ','GELDI_OTOMATIK_GIRIS','LONG','SHORT','AŞAMA_1','AŞAMA_2','AŞAMA_3','RSI_4H_50_70','RSI_4H_30_50','BB_4H_SIKIŞMA'];
     const grid=clear($('cohort-table'));
     if(!all){grid.append(el('p','muted','Kohort raporu okunamadı. Öğrenme sonucu gösterilmiyor.'));return;}
