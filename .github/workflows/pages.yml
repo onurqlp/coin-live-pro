@@ -1,4 +1,4 @@
-name: COIN.LIVE PRO — Publish Site
+name: UzayX — Publish Site
 on:
   push:
     branches: [main]
