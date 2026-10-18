@@ -34,7 +34,7 @@ export async function loadHistory({ commit, fetcher = fetch, now = Date.now() } 
       next:clean(x.next_stage,50),strategy:clean(x.strategy_id,75),
       timeUtc:x.event_time_utc,price:typeof x.price_at_transition==='number'&&Number.isFinite(x.price_at_transition)?x.price_at_transition:null,
       reasons:Array.isArray(x.reason_codes)?x.reason_codes.slice(0,4).map(s=>clean(s,70)):[]}))
-   .sort((a,b)=>Date.parse(b.timeUtc)-Date.parse(a.timeUtc)).slice(0,100);
+   .sort((a,b)=>Date.parse(b.timeUtc)-Date.parse(a.timeUtc)).slice(0,250);
  return {schema:'coinlive.v5.history.readonly.v1',repo:REPO,commit,scanId:manifest.scan_id,
    sourceStatus:(now-stamp)>20*60000?'STALE_HISTORY':'VERIFIED',sourceVerified:true,
    sha256:proof.sha256,archivedTotal:index.archived_total??null,
