@@ -137,11 +137,37 @@
    target.append(el('p','archive-caveat','Bunlar iki farklı tarihte tutulmuş kümülatif sanal kayıtların farkıdır; günlük kazanç, bağımsız strateji testi veya gerçek para değildir.'));
    status(items.length+' kayıt kullanılabilir. Dosyalar yalnız tarayıcıda okunur; sunucuya gönderilmez.');
  }
+
+ async function fetchOldEvents(){
+   const box=$('history-events');if(!box)return;
+   const commit=source?.sourceCommit;
+   if(!/^[a-f0-9]{40}$/.test(commit||'')){box.replaceChildren(el('p','muted','Önce doğrulanmış veri kaynağı gerekli.'));return;}
+   box.replaceChildren(el('p','muted','Geçmiş kayıtlar salt-okunur açılıyor…'));
+   const url='https://raw.githubusercontent.com/onurqlp/coin-live-pro/'+commit+'/web/data/v4-history-index.json';
+   try{
+     const response=await fetch(url,{cache:'no-store'});
+     if(!response.ok)throw Error('Arşiv HTTP '+response.status);
+     const doc=await response.json();
+     if(!Array.isArray(doc.events)||doc.scan_id!==source.db.manifest?.scan_id)
+       throw Error('Eski olay arşivi doğrulanmadı.');
+     box.replaceChildren();
+     const info=el('p','muted tiny',doc.events.length+' arşiv olayı · eski kayıtlar işlem sinyali değildir.');
+     box.append(info);
+     doc.events.slice(0,80).forEach(e=>{
+       const line=el('div','archive-event');
+       line.append(el('strong','',String(e.symbol||'—')+' '+String(e.side||'')),
+         el('span','',String(e.type||'OLAY')+' · '+stamp(e.event_time_utc)),
+         el('small','',String(e.data_quality||'')));
+       box.append(line);
+     });
+   }catch(err){box.replaceChildren(el('p','muted','Eski kayıtlar alınamadı: '+String(err.message||err)));}
+ }
  if(root.document){
    root.addEventListener('uzayx:loaded',e=>{source=e.detail;render();});
    root.document.addEventListener('DOMContentLoaded',()=>{
      $('archive-select')?.addEventListener('change',e=>{selected=Number(e.target.value);render();});
      $('archive-check')?.addEventListener('click',render);
+     $('history-load')?.addEventListener('click',fetchOldEvents);
      $('archive-file')?.addEventListener('change',async e=>{
        const file=e.target.files?.[0];if(!file)return;
        status('Dosya yerel olarak inceleniyor.');
