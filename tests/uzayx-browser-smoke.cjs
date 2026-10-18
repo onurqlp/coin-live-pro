@@ -109,7 +109,7 @@ async function run(){
    assert.deepEqual(modules.map(x=>x.id),['A1','A2','A3','B1','B2','T0']);
    assert.ok(modules.every(x=>x.explanation?.length>15&&x.btn==='Kaynağı denetle'));
    await page.locator('#module-check-all').click();
-   await page.waitForFunction(()=>document.querySelector('#module-verified-at')?.textContent.includes('kontrol edildi')||
+   await page.waitForFunction(()=>document.querySelector('#module-verified-at')?.textContent.includes('denetlendi')||
      document.querySelector('#module-verified-at')?.textContent.includes('doğrulanamadı'),{timeout:25000});
    const proof=await page.evaluate(()=>[...document.querySelectorAll('.proof-module')].map(x=>({
      module:x.querySelector('.id')?.textContent,
@@ -117,6 +117,13 @@ async function run(){
    })));
    assert.equal(proof.length,6);
    assert.ok(proof.every(x=>x.result&&!x.result.includes('Henüz çevrimiçi kontrol yapılmadı')));
+   const proofById=Object.fromEntries(proof.map(x=>[x.module,x.result]));
+   assert.match(proofById.A1,/ENGELLİ|kaynağ/i);
+   assert.match(proofById.A2,/ENGELLİ|kaynağ/i);
+   for(const id of ['A3','B1','B2','T0']){
+     assert.doesNotMatch(proofById[id],/Funding verisi veya saat\/izin kanıtı eksik/i,
+       'New evidence verifier must not mistake '+id+' for B1.');
+   }
 
    await page.locator('[data-tab="learn"]').click();
    const demo={schema:'uzayx.lessons.archive.v1',records:[{day_utc:'2026-10-17',cohort_statistics:{'TÜMÜ':{closed:2,positive:1,net_usdt:-1.2}}}]};
