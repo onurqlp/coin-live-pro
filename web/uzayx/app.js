@@ -40,39 +40,87 @@
     window.scrollTo({top:document.querySelector('.tabs').getBoundingClientRect().top+scrollY-8,behavior:'auto'});
   }
   function row(title,value){const n=el('div','system-row');n.append(el('span','',title),el('b','',value));return n;}
+  function readableStage(code) {
+    return ({WATCH:'İzle',MOTION:'Hareket gözlemi',SPOTLIGHT:'Öne çıkan',ARCHIVED:'Geçmiş'})[code] || 'İzleniyor';
+  }
+  const strategyLabels={TREND_BREAKOUT:'Trend kırılması',VOLUME_EXPANSION:'Hacim artışı',BREAKOUT_RETEST:'Kırılım sonrası test',REVERSAL_SETUP:'Yön değişimi',VOLATILITY_SQUEEZE:'Sıkışma',OI_FUNDING_PRESSURE:'Vadeli piyasa baskısı',SHORT_BREAKDOWN:'Düşüş kırılması'};
   function candidateCard(p) {
     const n=el('article','coin-card'), head=el('div','coin-title');
-    head.append(el('strong','',str(p.symbol)),el('span','side '+(p.side==='SHORT'?'short':''),str(p.side)),el('span','stage-pill',str(p.lifecycle_stage)));
+    const isEligible=p.paper_entry_state==='ELIGIBLE'||p.paper_entry_state==='ENTRY_ELIGIBLE';
+    const badge=el('span','readiness '+(isEligible?'readiness-ready':'readiness-wait'),isEligible?'Araştırma koşulları oluştu':'Giriş teyidi yok');
+    head.append(el('strong','',str(p.symbol)),el('span','side '+(p.side==='SHORT'?'short':''),str(p.side)),badge);
+    n.append(head);
+    const status=el('p','coin-reason',readableStage(p.lifecycle_stage)+' · '+str(strategyLabels[p.strategy_id]||'Fiyat hareketi')+' · '+(p.confirmation_state==='WAIT_4H_CLOSE'?'4 saatlik kapanış bekleniyor':'Teyit bekleniyor'));
+    n.append(status);
     const meta=el('div','coin-main');
-    [['Skor (olasılık değil)',num(p.score,0)],['Risk puanı',num(p.risk_score,0)],['Fiyat',num(p.price,6)],['Stop (senaryo)',num(p.stop,6)]].forEach(([a,b])=>{let cell=el('div');cell.append(el('small','',a),el('b','',b));meta.append(cell);});
-    n.append(head,meta);
-    n.append(el('p','',str(p.strategy_id)+' · '+str(p.confirmation_state)+' · '+str(p.review_state)));
-    if(Array.isArray(p.targets)&&p.targets.length)n.append(el('p','', 'Hedef senaryoları: '+p.targets.slice(0,3).map(v=>num(v,6)).join(' / ')));
+    [['Piyasa fiyatı (OKX)',num(p.price,6)],['Stop seviyesi (senaryo)',num(p.stop,6)]].forEach(([a,b])=>{
+      let cell=el('div');cell.append(el('small','',a),el('b','',b));meta.append(cell);
+    });
+    n.append(meta);
+    const details=el('details','coin-more');const summary=el('summary','','Hedefler ve ayrıntılar');
+    details.append(summary);
+    const targets=Array.isArray(p.targets)?p.targets.slice(0,3).map((v,i)=>'Hedef '+(i+1)+': '+num(v,6)).join(' · '):'Hedef belirtilmemiş';
+    details.append(el('p','',targets));
+    details.append(el('p','', 'Araştırma puanı: '+num(p.score,0)+' · Bu bir kazanma olasılığı değildir.'));
+    n.append(details);
+    const actions=el('div','coin-actions');
+    const symbol=String(p.symbol||'').toUpperCase();
+    if(/^[A-Z0-9]{3,24}$/.test(symbol)){
+      const copy=el('button','secondary tiny-action','Pariteyi kopyala');
+      copy.type='button';
+      copy.addEventListener('click',async()=>{
+        try{
+          if(!navigator.clipboard?.writeText)throw Error('Clipboard unavailable');
+          await navigator.clipboard.writeText(symbol);
+          copy.textContent='Kopyalandı ✓';
+        }catch{copy.textContent='Parite: '+symbol;}
+      });
+      actions.append(copy);
+    }
+    const binance=el('a','binance-link','Binance Futures ↗');
+    binance.href='https://www.binance.com/en/futures/home';binance.target='_blank';binance.rel='noopener noreferrer';
+    binance.title='Binance Futures üzerinde pariteyi ve fiyatı ayrıca kontrol edin; otomatik emir verilmez';
+    actions.append(binance);
+    n.append(actions);
     return n;
   }
   const candidates=()=>[].concat(db.radar?.spotlight||[],db.radar?.motion||[],db.radar?.watch||[]);
   function renderTop() {
     const a=clear($('top-candidates')),radar=db.radar||{},manifest=db.manifest||{},review=db.review||{};
     const c=candidates().sort((x,y)=>(Number(y.score)||0)-(Number(x.score)||0));
-    if(!c.length)a.append(el('div','empty','Doğrulanmış izleme adayı yok. Sinyal üretilmiyor.'));
+    if(!c.length)a.append(el('div','empty','Şu an listelenecek parite yok.'));
     else c.slice(0,4).forEach(x=>a.append(candidateCard(x)));
     set('m-pairs',num(manifest.candidate_counts?.market_pairs,0));
     set('m-watch',num(radar.counts?.watch,0));
-    set('m-closed',num(review.cohorts?.['TÜMÜ']?.closed,0));
+    const ready=c.filter(p=>p.paper_entry_state==='ELIGIBLE'||p.paper_entry_state==='ENTRY_ELIGIBLE').length;
+    set('m-ready',num(ready,0));
     set('m-age',ageLabel(manifest.finished_at_utc));
     set('snapshot-time','Son tarama: '+time(manifest.finished_at_utc));
-    set('radar-age','Kaynak yaşı: '+ageLabel(manifest.finished_at_utc));
-    const s=clear($('stage-grid'));
-    [['Göz önünde',radar.counts?.spotlight],['Hareket',radar.counts?.motion],['İzle',radar.counts?.watch]].forEach(([name,qty])=>{const x=el('div');x.append(el('small','',name),el('b','',num(qty,0)));s.append(x);});
-    const fresh=age(manifest.finished_at_utc),valid=manifest.publication_valid===true && db.health?.status==='OK';
-    const good=valid && fresh!==null && fresh>=0 && fresh<=25;
-    set('overall-status',good?'GÜNCEL':fresh===null?'BELİRSİZ':'VERİYİ KONTROL ET');
-    $('overall-status').className='chip'+(good?'':' bad');
-    const spot=Number(radar.counts?.spotlight||0),motion=Number(radar.counts?.motion||0);
-    set('decision', !good?'Veri kaynağı teyit edilmeli':spot||motion?'İzleme koşulları güçleniyor':'Teyit edilmiş yeni aşama yok');
-    set('decision-detail',!good?'Eski veya eksik veri canlı fırsat olarak sunulmaz.':spot||motion?'Henüz işlem teyidi anlamına gelmez; aday bazlı koşullara bak.':'Radar gözlem yapıyor. Sırf işlem yapmak için pozisyon açılmaz.');
+    set('radar-age','Veri: '+ageLabel(manifest.finished_at_utc));
+    const area=clear($('stage-grid'));
+    [['Gözlem',radar.counts?.spotlight],['Hareket',radar.counts?.motion],['Takip',radar.counts?.watch]].forEach(([name,qty])=>{
+      const x=el('div');x.append(el('small','',name),el('b','',num(qty,0)));area.append(x);
+    });
+    const fresh=age(manifest.finished_at_utc);
+    const valid=manifest.publication_valid===true&&!faults.includes('SCAN_ID_MISMATCH')&&sourceCommit!==null;
+    const dataGood=valid&&fresh!==null&&fresh>=0&&fresh<=25&&!!db.radar;
+    const healthOk=db.health?.status==='OK';
+    set('overall-status',!dataGood?'VERİ UYARISI':healthOk?'GÜNCEL':'TARAMA UYARISI');
+    $('overall-status').className='chip '+(dataGood&&healthOk?'':'amber');
+    set('decision',!dataGood?'Önce veriyi kontrol et':ready?'Koşulları kontrol edilecek parite var':'Şu an giriş teyidi yok');
+    set('decision-detail',!dataGood
+      ?'Veri eksik, zaman aşımına uğramış veya farklı taramalardan geliyor. Bu ekrana bakarak işlem açmayın.'
+      :ready?'Bu bir işlem emri değildir. Binance sözleşmesini, anlık fiyatı ve riski kendiniz doğrulayın.'
+      :healthOk?'Takip listesi mevcut ama giriş koşullarını sağlayan parite yok. Şimdilik izlemeye devam edin.'
+      :'Takip listesi mevcut; ancak otomatik tarama takviminde aksama algılandı. Emir öncesinde yeni tarama teyidi bekleyin.');
     const c0=review.cohorts?.['TÜMÜ'];
-    if(c0){set('today-learn',usd(c0.mean_net_per_closed_ticket_usdt,4));set('learn-desc',num(c0.closed,0)+' kapanan deneyin işlem başına ortalama kohort neti. '+'Bu sayı kârlılık garantisi değildir.');}
+    if(c0){
+      set('today-learn',usd(c0.realized_total_usdt));
+      set('learn-desc',num(c0.closed,0)+' kapanan sanal denemenin toplam kohort sonucu. Ana kasa bakiyesi değildir.');
+    }else{
+      set('today-learn','—');
+      set('learn-desc','Kapanan işlem raporu henüz doğrulanmadı.');
+    }
   }
   function renderRadar() {
     const list=clear($('radar-list'));let all=candidates();
@@ -89,8 +137,8 @@
     set('learn-rate',all?.closed?num(all.positive/all.closed*100,1)+'%':'—');
     const records=db.diary?.records;
     set('learn-trend',Array.isArray(records)&&records.length
-      ? 'Günlük öğrenme arşivi: '+records.length+' ayrı UTC günü · son kayıt: '+str(records.at(-1)?.day_utc)+' · ters yön hâlâ ayrı replay gerektiriyor.'
-      : 'Günlük öğrenme arşivi başlatıldı. İlk doğrulanmış günlük değerlendirme henüz eklenmedi.');
+      ? 'Günlük arşiv: '+records.length+' ayrı UTC günü · son kayıt: '+str(records.at(-1)?.day_utc)+' · yöntemler arka planda karşılaştırılıyor.'
+      : 'Günlük kayıt arşivi hazır; yeni rapor bekleniyor.');
     const lessonBox=clear($('lessons'));
     const lessons=window.UzayXLessonEngine?.analyze(db.review,db.spark);
     if(!lessons?.hypotheses?.length)lessonBox.append(el('div','','Yeterli incelenebilir geçmiş yok. Yeni kapanışlar bekleniyor.'));
@@ -109,7 +157,7 @@
     header.append(el('b','','Grup'),el('b','','Kapanan'),el('b','','Pozitif pay'),el('b','value','Net PnL'));
     grid.append(header);
     keys.forEach(k=>{const x=c[k];if(!x)return;const n=el('div','cohort');
-      const title=el('div','name',k.replaceAll('_',' '));title.append(el('small','','Ters yön: bağımsız test bekliyor'));
+      const title=el('div','name',k.replaceAll('_',' '));title.append(el('small','','Ek inceleme sürüyor'));
       const amount=el('span','value',num(x.closed,0));
       const rate=el('div','rate');const r=x.closed?100*(x.positive||0)/x.closed:0;
       rate.append(el('span','',x.closed?num(r,1)+'%':'—'));
@@ -145,7 +193,7 @@
   }
   function renderSystem(){
     const n=clear($('system-rows'));const m=db.manifest||{},h=db.health||{},p=db.paper||{};
-    [['Ürün kimliği','UzayX / V4 veri motoru + Öğrenme UI v1'],
+    [['Ürün kimliği','UzayX · Piyasa Terminali'],
      ['Kaynak taraması',str(m.scan_id)],
      ['Kaynak commit',sourceCommit||'Doğrulanamadı; en güncel RAW kullanıldı'],
      ['Commit doğrulaması',sourceError?'Sınırlı: '+sourceError:'Sabit commit üzerinden okundu'],
@@ -156,8 +204,8 @@
      ['Veri doğrulaması',num(m.candidate_counts?.verified,0)+' / '+num(m.candidate_counts?.attempted,0)],
      ['Son tetikleyici',str(m.trigger)],
      ['Zamanlama kanıtı',num(h.observed_real_scheduled_runs,0)+' gözlenen scheduled run'],
-     ['Strict sanal fonlama',str(p.funding_state)],
-     ['Öğrenme model sürümü',str(db.review?.model_version)],
+     ['Sanal kasa fonlama',str(p.funding_state)],
+     ['Araştırma sürümü',str(db.review?.model_version)],
      ['Araştırma modülü',str(db.support?.state||'ULAŞILAMIYOR')],
      ['Gerçek emir',m.no_real_orders===true?'KAPALI':'DOĞRULANAMADI'],
      ['Başarısız kaynak',faults.length?faults.join(', '):'Yok']].forEach(([a,b])=>n.append(row(a,b)));
@@ -178,8 +226,8 @@
     const id=db.manifest?.scan_id;
     const feeds=[db.radar,db.paper,db.spark,db.review];
     if(!id || feeds.some(f=>!f || f.scan_id!==id)){faults.push('SCAN_ID_MISMATCH');db.radar=null;}
-    const healthy=db.manifest?.publication_valid===true && db.health?.status==='OK' && !faults.includes('SCAN_ID_MISMATCH') && stamp!==null && stamp>=0 && stamp<=25;
-    set('connection',healthy?'Veri güncel':stamp===null?'Kaynak eksik':stamp>25?'Veri gecikmiş':'Durumu kontrol et');
+    const healthy=db.manifest?.publication_valid===true && db.health?.status==='OK' && sourceCommit!==null && !faults.includes('SCAN_ID_MISMATCH') && stamp!==null && stamp>=0 && stamp<=25;
+    set('connection',healthy?'Veri güncel':stamp===null?'Kaynak eksik':stamp>25?'Veri gecikmiş':'Kontrol gerekli');
     $('connection').className='status '+(healthy?'ok':'bad');
     renderTop();renderRadar();renderLearn();renderFunds();renderResearch();renderSystem();renderLeverage();
     $('reload').disabled=false;
@@ -193,4 +241,6 @@
   $('leverage').addEventListener('input',renderLeverage);
   if(['overview','radar','learn','funds','research','system'].includes(location.hash.slice(1)))go(location.hash.slice(1));
   reload();
+  // Never pretend this is streaming; refresh from verified GitHub sources every 5 minutes.
+  setInterval(()=>{if(!document.hidden&&!$('reload').disabled)reload();},300000);
 })();
