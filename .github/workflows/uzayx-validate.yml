@@ -1,0 +1,40 @@
+name: UzayX — UI and Learning Tests
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'web/uzayx/**'
+      - 'tests/uzayx-learning.test.cjs'
+      - '.github/workflows/uzayx-validate.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Browser-source syntax
+        run: |
+          node --check web/uzayx/app.js
+          node --check web/uzayx/learning.js
+      - name: Adaptive learning invariants
+        run: node --test tests/uzayx-learning.test.cjs
+      - name: Static integration contract
+        run: |
+          node - <<'NODE'
+          const fs=require('node:fs'), assert=require('node:assert/strict');
+          const page=fs.readFileSync('web/uzayx/index.html','utf8');
+          const js=fs.readFileSync('web/uzayx/app.js','utf8');
+          assert.match(page,/<title>UzayX/);
+          assert.match(page,/id="learn"/);
+          assert.match(page,/src="\.\/learning\.js"/);
+          assert.match(js,/sourceCommit=await currentHead/);
+          assert.match(js,/SCAN_ID_MISMATCH/);
+          assert.doesNotMatch(js,/placeOrder|createOrder|apiSecret/i);
+          console.log('UzayX UI/learning integration OK');
+          NODE
