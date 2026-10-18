@@ -22,7 +22,7 @@
     paper: 'v4-paper.json', spark: 'v4-spark-paper.json',
     review: 'v4-spark-review.json', ops: 'ops-report.json'
   };
-  const MAKINE = 'https://onurqlp.github.io/makine-core/data/support.json';
+  const MAKINE = 'https://raw.githubusercontent.com/onurqlp/makine-core/main/site/data/support.json';
   let db = {}, faults = [], mode = 'ALL', stage = 'ALL', search = '';
   const num = (v, digits=2) => Number.isFinite(Number(v)) && v!==null && v!=='' ? Number(v).toLocaleString('tr-TR',{minimumFractionDigits:digits,maximumFractionDigits:digits}) : '—';
   const usd = (v,d=2) => v===null||v===undefined||!Number.isFinite(Number(v)) ? '—' : num(v,d)+' USDT';
