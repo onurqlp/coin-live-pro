@@ -26,7 +26,7 @@ jobs:
           ready=0
           for i in $(seq 1 36); do
             if curl -fsSL --max-time 15 "$ROOT?check=$(date +%s%N)" -o /tmp/uzayx-site.html; then
-              if grep -q 'id="chart-price"' /tmp/uzayx-site.html && grep -q 'src="./archive.js"' /tmp/uzayx-site.html && grep -q 'id="mini-price"' /tmp/uzayx-site.html && grep -q 'id="home-open-count"' /tmp/uzayx-site.html && grep -q 'id="module-check-all"' /tmp/uzayx-site.html && grep -q 'src="./support-proof.js"' /tmp/uzayx-site.html; then ready=1;break;fi
+              if grep -q 'id="chart-price"' /tmp/uzayx-site.html && grep -q 'src="./archive.js"' /tmp/uzayx-site.html && grep -q 'id="mini-price"' /tmp/uzayx-site.html && grep -q 'id="home-open-count"' /tmp/uzayx-site.html && grep -q 'id="module-check-all"' /tmp/uzayx-site.html && grep -q 'src="./support-proof.js"' /tmp/uzayx-site.html && curl -fsSL --max-time 15 "$ROOT/charts.js?proof=$(date +%s%N)" -o /tmp/live-uzayx-charts.js && cmp -s web/uzayx/charts.js /tmp/live-uzayx-charts.js; then ready=1;break;fi
             fi
             sleep 7
           done
