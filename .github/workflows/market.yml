@@ -206,6 +206,8 @@ jobs:
           else
             echo "::warning::Supplementary report failed; core market publication continues"
           fi
+      - name: Refresh UzayX Google summary from this verified scan
+        run: python3 scripts/uzayx_google_export.py
       - name: Publish only validated data
         run: |
           set -euo pipefail
@@ -217,6 +219,7 @@ jobs:
           git add web/data/v4-oi.json web/data/v4-radar.json web/data/v4-paper.json
           git add web/data/v4-history-index.json web/data/v4-shadow.json
           git add web/data/v4-lab.json web/data/v4-forward.json web/data/v4-manifest.json
+          git add web/data/uzayx-guncel.csv
           git add web/data/v4-watch-archive.json web/data/v4-context.json web/data/v4-early.json web/data/v4-spark-paper.json web/data/v4-spark-review.json
           git add web/data/swing-radar.json web/data/swing-history.json web/data/swing-outcomes.json
           git add archive/pilot-ledger.json archive/scan-health.json archive/swing-sparks-ledger.json archive/swing-active-ledger.json archive/swing-outcomes-ledger.json
