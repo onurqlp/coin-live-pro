@@ -79,3 +79,24 @@ test('A3 B2 T0 become evidence-backed observations but never orders',()=>{
  s.modules[2].observations[0].asof_utc='2026-09-01T00:00:00Z';
  assert.equal(proofs.evaluate(s,'A3',now).ok,false,'stale bars must fail');
 });
+
+
+test('A1/A2 actual public market input is observed but never marked trade ready',()=>{
+ const s=support();
+ for(const [i,id,pair] of [[0,'A1',['KO','PEP']],[1,'A2',['IVV','VOO']]]){
+   const changes=Object.fromEntries(pair.map((p,j)=>[p,j===0?6.4:1.3]));
+   s.modules[i]={id,state:'OBSERVING',signal:false,executable:false,
+     observations:[{status:'INPUTS_ONLY',source:'NASDAQ_PUBLIC_HISTORY',
+       asof_utc:'2026-10-16T00:00:00Z',symbols:pair,aligned_sessions:508,
+       return_20d_percent:changes,redistribution_rights_verified:false,
+       borrow_verified:false,actionable:false}]};
+   const ok=proofs.evaluate(s,id,now);
+   assert.equal(ok.state,'OBSERVED',id+' '+ok.message);
+   assert.match(ok.message,/lisans/i);
+   s.modules[i].observations[0].redistribution_rights_verified=true;
+   assert.equal(proofs.evaluate(s,id,now).ok,false,'Cannot fabricate redistribution permission');
+   s.modules[i].observations[0].redistribution_rights_verified=false;
+   s.modules[i].observations[0].asof_utc='2026-09-20T00:00:00Z';
+   assert.equal(proofs.evaluate(s,id,now).ok,false,'Stale EOD must fail');
+ }
+});
