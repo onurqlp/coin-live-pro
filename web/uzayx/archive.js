@@ -32,6 +32,10 @@
    if(raw.cohorts&&typeof raw.cohorts==='object'){
      return [{kind:'cohorts',name:label,at:raw.generated_at_utc||raw.updated_at||'',scan:raw.source_scan_id||raw.scan_id||'',cohorts:fromCohort(raw.cohorts)}];
    }
+   if(Array.isArray(raw.source_repositories)&&raw.source_repositories.some(x=>x?.name==='onurqlp/coin-live-pro')){
+     const coin=raw.source_repositories.find(x=>x?.name==='onurqlp/coin-live-pro');
+     return [{kind:'handoff',name:label,at:raw.captured_date||'',scan:coin.observed_sha||'',health:null,product:raw.project_codename||'COIN.LIVE devir'}];
+   }
    if(raw.repos?.coinlive){
      return [{kind:'handoff',name:label,at:raw.package_created_at_date||'',scan:raw.repos.coinlive.observed_sha||'',
        health:raw.repos.coinlive.health_status,product:raw.repos.coinlive.production_version}];
@@ -66,7 +70,7 @@
        fl=dv.getUint16(at+28,true),ex=dv.getUint16(at+30,true),comment=dv.getUint16(at+32,true),
        pos=dv.getUint32(at+42,true),filename=new TextDecoder().decode(u8.subarray(at+46,at+46+fl));
      at+=46+fl+ex+comment;
-     if(!/(ops-report|uzayx-lessons-history|v4-spark-review|03_CANLI_DURUM_2026-10-18)\.json$/i.test(filename)||plain>2500000)continue;
+     if(!/(ops-report|uzayx-lessons-history|v4-spark-review|03_CANLI_DURUM_2026-10-18|DEPO_LINKLERI_VE_SABIT_SHA)\.json$/i.test(filename)||plain>2500000)continue;
      if(pos+30>buf.byteLength||dv.getUint32(pos,true)!==0x04034b50)continue;
      const start=pos+30+dv.getUint16(pos+26,true)+dv.getUint16(pos+28,true),end=start+size;
      if(end>buf.byteLength)continue;
