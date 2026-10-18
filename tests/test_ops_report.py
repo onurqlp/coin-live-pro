@@ -30,5 +30,43 @@ class OpsReportTest(unittest.TestCase):
             self.assertIn("Insufficient", markdown(out))
 
 
+    def test_separates_closed_and_nonclosed_realized_and_checks_scan(self):
+        with tempfile.TemporaryDirectory() as rootname:
+            root = Path(rootname)
+            target = root / "web/data"
+            target.mkdir(parents=True)
+            data = {
+                "v4-manifest": {"scan_id": "scan-a", "publication_valid": True},
+                "health": {"updated_at": "2026-10-18T17:00:00+00:00"},
+                "v4-spark-paper": {"scan_id": "scan-a", "summary": {
+                    "counts": {"CLOSED": 3, "OPEN": 2},
+                    "realized_net_usdt": 4.0,
+                    "unrealized_net_usdt": 2.0,
+                    "virtual_equity_usdt": 10006.0}},
+                "v4-spark-review": {"scan_id": "scan-a", "cohorts": {"TÜMÜ": {
+                    "closed": 3, "positive": 2, "negative": 1,
+                    "realized_total_usdt": 1.5}}},
+                "v4-paper": {"starting_balance_usdt": 10000, "equity_usdt": 10000},
+                "v4-lab": {"periods": []},
+            }
+            for key, val in data.items():
+                (target / (key + ".json")).write_text(json.dumps(val))
+            at = dt.datetime(2026, 10, 18, 17, 5, tzinfo=dt.timezone.utc)
+            report = build_report(root, at)
+            exp = report["experimental_spark"]
+            self.assertTrue(exp["realized_reconciliation_verified"])
+            self.assertEqual(exp["realized_net_usdt"], 4.0)
+            self.assertEqual(exp["fully_closed_ticket_realized_net_usdt"], 1.5)
+            self.assertEqual(exp["nonclosed_ticket_realized_net_usdt"], 2.5)
+            self.assertEqual(report["strict_v4_account"]["equity_usdt"], 10000)
+            self.assertIn("nonclosed tickets: 2.5", markdown(report))
+
+            data["v4-spark-review"]["scan_id"] = "other-scan"
+            (target / "v4-spark-review.json").write_text(json.dumps(data["v4-spark-review"]))
+            broken = build_report(root, at)["experimental_spark"]
+            self.assertFalse(broken["realized_reconciliation_verified"])
+            self.assertIsNone(broken["nonclosed_ticket_realized_net_usdt"])
+
+
 if __name__ == "__main__":
     unittest.main()
