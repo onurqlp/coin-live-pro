@@ -20,7 +20,7 @@
   const FILES = {
     manifest: 'v4-manifest.json', health: 'health.json', radar: 'v4-radar.json',
     paper: 'v4-paper.json', spark: 'v4-spark-paper.json',
-    review: 'v4-spark-review.json', ops: 'ops-report.json'
+    review: 'v4-spark-review.json', ops: 'ops-report.json', diary: 'uzayx-lessons-history.json'
   };
   const MAKINE = 'https://raw.githubusercontent.com/onurqlp/makine-core/main/site/data/support.json';
   let db = {}, faults = [], mode = 'ALL', stage = 'ALL', search = '';
@@ -87,6 +87,10 @@
     const r=db.review||{},c=r.cohorts||{},all=c['TÜMÜ'];
     set('learn-net',all?usd(all.realized_total_usdt):'—');
     set('learn-rate',all?.closed?num(all.positive/all.closed*100,1)+'%':'—');
+    const records=db.diary?.records;
+    set('learn-trend',Array.isArray(records)&&records.length
+      ? 'Günlük öğrenme arşivi: '+records.length+' ayrı UTC günü · son kayıt: '+str(records.at(-1)?.day_utc)+' · ters yön hâlâ ayrı replay gerektiriyor.'
+      : 'Günlük öğrenme arşivi başlatıldı. İlk doğrulanmış günlük değerlendirme henüz eklenmedi.');
     const lessonBox=clear($('lessons'));
     const lessons=window.UzayXLessonEngine?.analyze(db.review,db.spark);
     if(!lessons?.hypotheses?.length)lessonBox.append(el('div','','Yeterli incelenebilir geçmiş yok. Yeni kapanışlar bekleniyor.'));
