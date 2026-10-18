@@ -92,8 +92,8 @@
     const lever=Math.max(1,Math.min(20,Number($('atlas-leverage')?.value)||10));
     const move=Math.max(0,Math.min(50,Number($('atlas-move')?.value)||0));
     const mode=$('atlas-fee-mode')?.value||'TT';
-    const entryPct=mode==='MM'?.02:mode==='MT'?.02:.05;
-    const exitPct=mode==='MM'?.02:.05;
+    const entryPct=mode==='TT'?0.05:0.02;
+    const exitPct=mode==='MM'?0.02:0.05;
     const frictionPct=Math.max(0,Math.min(5,Number($('atlas-friction')?.value)||0));
     const notional=stake*lever;
     const fee=notional*(entryPct+exitPct)/100;
