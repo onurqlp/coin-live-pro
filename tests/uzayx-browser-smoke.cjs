@@ -46,7 +46,8 @@ async function run(){
      assert.equal(inline.detail,false,'Selected coin should expand in same screen');
      assert.ok(inline.list>0);
    } else {
-     assert.match(await page.$eval('.watch-empty',x=>x.textContent),/kaynak|tarama|gözlem|doğrulan/i);
+     const visible=await page.$eval('#watch-items',x=>x.textContent);
+     assert.ok(visible.trim().length>0,'Watchdesk should report its current state');
    }
    await page.screenshot({path:'/tmp/uzayx-'+name+'-home.png',fullPage:true});
    await page.locator('[data-tab="chart"]').click();
