@@ -1,0 +1,21 @@
+{
+  "name": "UzayX — Piyasa ve Araştırma",
+  "short_name": "UzayX",
+  "description": "Kripto piyasaları ve tarihsel fırsat araştırması. Gerçek emir içermez.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#09111b",
+  "background_color": "#09111b",
+  "lang": "tr",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
