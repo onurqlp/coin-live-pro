@@ -146,7 +146,7 @@
          docs.forEach(d=>{try{records.push(...normalizeSnapshot(d.data,d.name));}catch{}});
          if(!records.length)throw Error('ZIP içinde karşılaştırılabilir JSON arşivi bulunamadı.');
          imported=imported.concat(records).slice(-120);
-         selected=listSnapshots().length-1;render();
+         selected=listSnapshots().indexOf(imported.at(-1));render();
        }catch(err){status(String(err.message||err),true);}
        finally{e.target.value='';}
      });
