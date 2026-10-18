@@ -8,7 +8,7 @@ function support(){
   const ids=['A1','A2','A3','B1','B2','T0'];
   const modules=ids.map(id=>({
     id,name:id,blocker:'Source not verified',state:id==='B1'?'OBSERVING':'BLOCKED_SOURCE',
-    executable:false,strategy_state:id==='B1'?'WATCH_ONLY':'NOT_CONNECTED',
+    executable:false,signal:false,strategy_state:id==='B1'?'WATCH_ONLY':'NOT_CONNECTED',
     observations:id==='B1'?[{symbol:'BTCUSDT',venue:'OKX',last_realized_rate_fraction_per_event:0.00003,
       last_realized_time_utc:'2026-10-18T16:00:00Z',interval_hours:8,executable:false}]:[]
   }));
