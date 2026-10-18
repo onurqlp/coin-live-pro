@@ -385,6 +385,7 @@ def advance(prior,early,mtf_doc,now_ms,candles):
         'open_positions':[{
             'event_id':t['event_id'],'symbol':t['symbol'],'side':t['side'],
             'status':t['status'],'signal_at_utc':t.get('signal_at_utc'),
+            'signal_price':t.get('signal_price'), 'entry_class':t.get('entry_class'),
             'filled_at_utc':t.get('filled_at_utc'),
             'fill_price':t.get('fill_price'),'mark_price':t.get('mark_price'),
             'stop':t.get('stop'),'tp1':t.get('tp1'),
