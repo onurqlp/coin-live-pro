@@ -104,6 +104,16 @@ async function run(){
    assert.equal(modules.length,6);
    assert.deepEqual(modules.map(x=>x.id),['A1','A2','A3','B1','B2','T0']);
    assert.ok(modules.every(x=>x.explanation?.length>15&&x.btn==='Kaynağı denetle'));
+   await page.locator('#module-check-all').click();
+   await page.waitForFunction(()=>document.querySelector('#module-verified-at')?.textContent.includes('kontrol edildi')||
+     document.querySelector('#module-verified-at')?.textContent.includes('doğrulanamadı'),{timeout:25000});
+   const proof=await page.evaluate(()=>[...document.querySelectorAll('.proof-module')].map(x=>({
+     module:x.querySelector('.id')?.textContent,
+     result:x.querySelector('.proof-result')?.textContent
+   })));
+   assert.equal(proof.length,6);
+   assert.ok(proof.every(x=>x.result&&!x.result.includes('Henüz çevrimiçi kontrol yapılmadı')));
+
    await page.locator('[data-tab="learn"]').click();
    const demo={schema:'uzayx.lessons.archive.v1',records:[{day_utc:'2026-10-17',cohort_statistics:{'TÜMÜ':{closed:2,positive:1,net_usdt:-1.2}}}]};
    const sample=path.join(os.tmpdir(),'uzayx-smoke-sample-'+name+'.json');
@@ -113,7 +123,7 @@ async function run(){
    await page.waitForFunction(()=>document.querySelectorAll('#archive-comparison .archive-compare-card').length>0,{timeout:10000});
    await page.locator('[data-tab="system"]').click();
    assert.ok(await page.$('#system-rows .system-row'),'Health diagnostics missing');
-   console.log('UX_SMOKE_OK',name,JSON.stringify({home,summary,chart,cash,modules}));
+   console.log('UX_SMOKE_OK',name,JSON.stringify({home,summary,chart,cash,modules,proof}));
    await page.close();
   }
  }finally{await browser.close();}
