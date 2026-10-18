@@ -1,1 +1,13 @@
-{"name":"coinlive-v5-preview","version":"5.0.0-preview","private":true,"type":"module","scripts":{"test":"node --test tests/*.test.mjs","lint":"node --check lib/snapshot.mjs && node --check public/app.js && node --check api/snapshot.js && node --check api/overlay.js && node --check lib/chart.mjs && node --check api/chart.js"},"engines":{"node":">=20"}}
+{
+  "name": "coinlive-v5-preview",
+  "version": "5.0.0-preview",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "lint": "node --check lib/snapshot.mjs && node --check public/app.js && node --check api/snapshot.js && node --check api/overlay.js && node --check lib/chart.mjs && node --check api/chart.js && node --check lib/overlay.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
