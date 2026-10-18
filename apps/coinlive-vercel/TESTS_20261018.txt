@@ -24,3 +24,10 @@ OBSERVED DATA WARNING — 3D and 7D forward sample counts zero across strategies
 - FAILURE: gitSource deployment dpl_2okikUhdPmQfhLKveYtV9wv2dESB state ERROR code git_info_fail. RECOVERED by inline files deployment.
 - BLOCKED: hosted HTTP /api/snapshot, chart and overlay response due to 403 on Vercel protection bypass read. Build/runtime logs similarly 403. Reconnect/authorize Vercel project team to lift testing blocker; do not disable SSO without approval.
 - Not claimed: live API response time, PWA installability on Android, actual Vercel browser E2E tests, push delivery, production adoption, zero regressions.
+
+2026-10-18 FINAL CONNECTED VERCEL AUTHENTICATED CHECK
+- Authorized Vercel user/project access RESTORED. Protected staging dpl_3pG8MzfXrDbzBNqFVmgdRGJAnmWi ready, hosted HTML 200, snapshot 200, chart 1H 200 with 60 closed BTC bars, chart 4H 200 with 60 closed XPLUSDT bars and two archive markers, overlay 200 but STALE.
+- Source manifest scan 33881f0fc9508309d6db048b finished 2026-10-18 08:24:53.222 UTC, 23/23 OKX pairs, source hashes verified. WATCH research candidates 28, paper eligible 0 (unconfirmed, not filled trades).
+- Validated tampered SHA 409, invalid symbol 400, missing chart SHA 400. Runtime logs accessible; Node 24 deprecation warning DEP0169, no evidence of application HTTP 5xx in tested routes.
+- Strict portfolio is 10000 USDT equity; separate experimental equity 9994.59234. Cohort net -17.52563 USDT cannot be conflated with experiment accounting realized -8.51272 USDT.
+- Full source-backed evidence and remaining Android device / real background push limits documented in V5_RELEASE_GATE_20261018.md; prior BLOCKED statements preserved as historical observations only.
