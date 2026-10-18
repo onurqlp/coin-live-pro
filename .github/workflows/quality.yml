@@ -33,6 +33,9 @@ jobs:
       - run: node --check web/uzayx/app.js
       - run: node --check web/uzayx/charts.js
       - run: node --check web/uzayx/archive.js
+      - run: node --check web/uzayx/watch.js
+      - run: node --check web/uzayx/portfolio.js
+      - run: node --test tests/uzayx-watchdesk.test.cjs
       - run: node --test tests/uzayx-chart-archive.test.cjs
       - run: node --check web/v4-ui.js
       - run: node --check web/watch-archive-ui.js

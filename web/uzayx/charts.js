@@ -44,9 +44,10 @@
     const side=candidate.side==='LONG'?'LONG':candidate.side==='SHORT'?'SHORT':null;
     if(!side)return [];
     const result=[{key:'ref',label:'Gözlem fiyatı',value:candidate.price,color:'#96b6ca'}];
-    const threshold=side==='SHORT'?frame?.breakout_low_prev8:frame?.breakout_high_prev8;
-    if(frame?.quality==='CLOSED_CONFIRMED'&&validNum(threshold))
-      result.push({key:'threshold',label:'Kırılım eşiği',value:threshold,color:'#b1a3ff'});
+    const early=candidate.kind==='SPARK' && validNum(candidate.hourly_level);
+    const threshold=early?candidate.hourly_level:(side==='SHORT'?frame?.breakout_low_prev8:frame?.breakout_high_prev8);
+    if((early||frame?.quality==='CLOSED_CONFIRMED')&&validNum(threshold))
+      result.push({key:'threshold',label:early?'1H eşik':'4H eşik',value:threshold,color:'#b1a3ff'});
     if(validNum(candidate.stop))result.push({key:'stop',label:'STOP',value:candidate.stop,color:'#fa8698'});
     (Array.isArray(candidate.targets)?candidate.targets.slice(0,3):[]).forEach((v,i)=>{
       if(validNum(v))result.push({key:'tp'+(i+1),label:'TP'+(i+1),value:v,color:'#66dfba'});
@@ -65,7 +66,7 @@
   const fmt=(v,d=3)=>isNum(v)?v.toLocaleString('tr-TR',{maximumFractionDigits:d}):'—';
   const date=s=>{const x=new Date(s||'');return Number.isFinite(+x)?x.toLocaleString('tr-TR',{timeZone:'Europe/Istanbul',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'—';};
   const doc=root.document;
-  let source=null,pack=null,mtf=null,loadedSha=null,loading=null,chosen=null,tf='1H';
+  let source=null,pack=null,mtf=null,loadedSha=null,loading=null,chosen=null,tf='1H',miniTf='1H',selectedOverride=null,selectedTicket=null;
   const $=id=>doc?.getElementById(id);
   const text=(id,v)=>{if($(id))$(id).textContent=v;};
   function node(tag,cl,label){const x=doc.createElement(tag);if(cl)x.className=cl;if(label!==undefined)x.textContent=label;return x;}
@@ -74,6 +75,7 @@
     return [].concat(r.spotlight||[],r.motion||[],r.watch||[],r.recheck||[]);
   }
   function findCandidate(symbol){
+    if(selectedOverride?.symbol===symbol)return selectedOverride;
     return allCandidates().filter(p=>p.symbol===symbol).sort((a,b)=>Date.parse(b.last_evaluated_at||0)-Date.parse(a.last_evaluated_at||0))[0]||null;
   }
   function chartStateMessage(){
@@ -207,6 +209,7 @@
     if(!pack||!mtf||!chosen)return;
     const a=pack.candles_by_symbol?.[chosen];
     const rows=normalizeCandles(a?.[tf]);
+    const miniRows=normalizeCandles(a?.[miniTf]);
     const c=findCandidate(chosen);
     const indicators=mtf.candidates?.find(x=>x.symbol===chosen&&(!c||x.side===c.side))||
       mtf.candidates?.find(x=>x.symbol===chosen);
@@ -214,7 +217,9 @@
     const breakout=indicators?.frames?.['4H'];
     const levels=deriveLevels(c,breakout);
     const state=chartStateMessage();
-    text('mini-chart-label',chosen+' · '+tf+' · '+(c?.side||'PİYASA'));
+    text('mini-chart-label',chosen+' · '+miniTf+' · '+(c?.side||'PİYASA'));
+    text('mini-chart-state',chartStateMessage()+' · '+(miniRows.length?'Son kapanmış mum '+date(new Date(miniRows.at(-1)[0]).toISOString()):'Bu paritenin mumları henüz pakette yok'));
+    const miniCanvas=$('mini-price');if(miniCanvas&&miniRows.length<2){const cx=miniCanvas.getContext('2d');cx.clearRect(0,0,miniCanvas.width,miniCanvas.height);}
     text('chart-heading',chosen+' · '+tf);
     text('chart-message',state+' · OKX kapanmış mumları, işlem tavsiyesi değil');
     text('mini-chart-state',state+(c?' · Senaryo kaydı: '+date(c.last_evaluated_at):' · Senaryo seviyesi yok'));
@@ -229,42 +234,82 @@
     }
     text('scenario-title',c?(c.side==='SHORT'?'SHORT gözlemi':'LONG gözlemi')+' · '+(c.paper_entry_state==='ELIGIBLE'?'Koşullu inceleme':'Giriş teyidi yok'):'Bu pariteye ait güncel radar senaryosu yok');
     text('scenario-detail',c?'Kaydedilen: '+date(c.last_evaluated_at)+' · '+(c.confirmation_state||'TEYİT BEKLENİYOR')+
-      ' · Grafikteki eşik 4H kapanmış mum yapısıdır; emir tetikleyicisi değildir.':'Seçilen parite için yalnız geçmiş kapanmış mumlar gösteriliyor.');
+      ' · Grafikteki eşik '+(c.kind==='SPARK'?'1H erken gözlem':'4H kapanmış mum yapısı')+' olup emir tetikleyicisi değildir.':'Seçilen parite için yalnız geçmiş kapanmış mumlar gösteriliyor.');
     levelTiles($('chart-levels'),levels,'Seviyeler OKX kaynaklı kaydedilmiş araştırma senaryosudur. Binance fiyatı farklı olabilir.');
     levelTiles($('mini-levels'),levels.slice(0,5),null);
-    if(rows.length<2)return;
-    priceChart($('mini-price'),rows,levels,true);
+    if(miniRows.length>=2)priceChart($('mini-price'),miniRows,levels,true);
+    if(rows.length<2){const canvas=$('chart-price');if(canvas)canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);paintPosition();return;}
     priceChart($('chart-price'),rows,levels,false);
     const osc=computeIndicators(rows);
     oscillator($('chart-rsi'),osc.rsi,'rsi');
     oscillator($('chart-macd'),osc.hist,'macd');
     text('chart-indicator-note','RSI(14) ve MACD(12/26/9) görsel eğrileri kapanmış mumlardan hesaplanır; üstteki 1H/4H sayıları doğrulanmış MTF kaynağıdır.');
+    paintPosition();
+  }
+  function paintPosition(){
+    if(!selectedTicket)return;
+    const ticket=selectedTicket,canvas=$('position-chart');
+    if(!canvas||!pack)return;
+    const rows=normalizeCandles(pack.candles_by_symbol?.[ticket.symbol]?.['1H']);
+    if(rows.length<2){
+      canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);
+      text('position-chart-state','Bu pozisyonun kaydedilmiş 1H mum grafiği yok. Giriş ve PnL bilgisi yukarıda korunuyor.');
+      return;
+    }
+    const levels=[];
+    if(validNum(ticket.fill_price))levels.push({key:'ref',label:'Sanal giriş',value:ticket.fill_price,color:'#d0dbed'});
+    if(validNum(ticket.mark_price))levels.push({key:'threshold',label:'Mark',value:ticket.mark_price,color:'#b0a5ff'});
+    if(validNum(ticket.stop))levels.push({key:'stop',label:'STOP',value:ticket.stop,color:'#fa8698'});
+    [ticket.tp1,ticket.tp2,ticket.tp3].forEach((v,i)=>{if(validNum(v))levels.push({key:'tp'+(i+1),label:'TP'+(i+1),value:v,color:'#66dfba'});});
+    priceChart(canvas,rows,levels,true);
+    text('position-chart-state',ticket.symbol+' · 1H kapanmış OKX mumları · '+chartStateMessage()+' · sanal giriş fiyatı ayrı işaretlendi');
+  }
+  function inlineSelect(candidate){
+    if(!candidate?.symbol)return;
+    selectedOverride=candidate;chosen=candidate.symbol;
+    ensure().then(ok=>{
+      if(!ok)return;
+      paint();
+      const option=$('chart-symbol');
+      if(option&&pack?.candles_by_symbol?.[chosen])option.value=chosen;
+    });
   }
   function onLoaded(ev){
     source=ev.detail;const sha=source?.sourceCommit;
-    if(sha!==loadedSha){pack=null;mtf=null;loadedSha=null;}
+    if(sha!==loadedSha){pack=null;mtf=null;loadedSha=null;selectedTicket=null;}
     if(!sha||!source?.db?.radar){text('mini-chart-state','Kaynak doğrulanmadı; grafik gizli');return;}
     if(loadedSha===sha){paint();return;}
     ensure();
   }
   function open(candidate){
     const requested=typeof candidate==='string'?candidate:candidate?.symbol||chosen;
+    selectedOverride=typeof candidate==='object'?candidate:null;
     chosen=requested;
     const tab=doc?.querySelector('[data-tab="chart"]');tab?.click();
     ensure().then(()=>{if(pack?.candles_by_symbol?.[requested]){chosen=requested;$('chart-symbol').value=chosen;paint();}else{text('chart-message','İstenen parite için doğrulanmış mum paketi yok. Listeden başka parite seçin.');}});
   }
   if(doc){
     root.addEventListener('uzayx:loaded',onLoaded);
+    root.addEventListener('uzayx:select-coin',e=>inlineSelect(e.detail?.candidate));
+    root.addEventListener('uzayx:position-selected',e=>{
+      selectedTicket=e.detail?.ticket||null;
+      ensure().then(ok=>{if(ok)paintPosition();});
+    });
     root.addEventListener('uzayx:tab',e=>{if(e.detail?.tab==='chart'){ensure().then(ok=>{if(ok)paint();});}});
     root.addEventListener('resize',()=>{if(pack)paint();});
     doc.addEventListener('visibilitychange',()=>{if(!doc.hidden&&pack)paint();});
     doc.addEventListener('uzayx:open-chart',e=>open(e.detail?.candidate||e.detail?.symbol));
     doc.addEventListener('DOMContentLoaded',()=>{
-      $('chart-symbol')?.addEventListener('change',e=>{chosen=e.target.value;paint();});
+      $('chart-symbol')?.addEventListener('change',e=>{chosen=e.target.value;selectedOverride=null;paint();});
+      doc.querySelectorAll('[data-mini-tf]').forEach(b=>b.addEventListener('click',()=>{
+        miniTf=b.dataset.miniTf;
+        doc.querySelectorAll('[data-mini-tf]').forEach(x=>x.classList.toggle('selected',x===b));
+        paint();
+      }));
       doc.querySelectorAll('[data-chart-tf]').forEach(b=>b.addEventListener('click',()=>{
         tf=b.dataset.chartTf;doc.querySelectorAll('[data-chart-tf]').forEach(x=>x.classList.toggle('selected',x===b));paint();
       }));
     });
   }
-  return {normalizeCandles,computeIndicators,deriveLevels,sourceAligned,open};
+  return {normalizeCandles,computeIndicators,deriveLevels,sourceAligned,open,inlineSelect};
 });

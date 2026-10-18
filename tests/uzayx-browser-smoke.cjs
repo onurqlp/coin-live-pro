@@ -30,9 +30,24 @@ async function run(){
    assert.match(home.title,/UzayX/);
    assert.equal(home.futures,1,'Futures must appear once');
    assert.equal(home.mainBlocks,3,'Home must be compact');
-   assert.equal(home.hero,'Piyasa özeti');
+   assert.equal(home.hero,'Piyasada ne oluyor?');
    assert.ok(home.scrollWidth<=width+3,'Horizontal page overflow on '+name+': '+home.scrollWidth);
    assert.equal(home.navs,7);
+   await page.waitForFunction(()=>document.querySelector('.watch-row')||document.querySelector('.watch-empty'),{timeout:15000});
+   const rows=await page.$('.watch-row');
+   if(rows.length){
+     await rows[0].click();
+     const inline=await page.evaluate(()=>({
+       hash:location.hash,label:document.querySelector('#mini-chart-label')?.textContent,
+       detail:document.querySelector('#watch-detail')?.hidden,
+       list:document.querySelectorAll('.watch-row').length
+     }));
+     assert.equal(inline.hash,'#overview','Selecting coin must not navigate away');
+     assert.equal(inline.detail,false,'Selected coin should expand in same screen');
+     assert.ok(inline.list>0);
+   } else {
+     assert.match(await page.$eval('.watch-empty',x=>x.textContent),/kaynak|tarama|gözlem|doğrulan/i);
+   }
    await page.screenshot({path:'/tmp/uzayx-'+name+'-home.png',fullPage:true});
    await page.locator('[data-tab="chart"]').click();
    await page.waitForFunction(()=>document.querySelector('#chart')?.classList.contains('active'),{timeout:5000});
@@ -50,6 +65,21 @@ async function run(){
    assert.ok(chart.rsiCanvas>0&&chart.macdCanvas>0,'Indicator charts not rendered: '+chart.msg);
    assert.equal(chart.indicatorCount,4);
    await page.screenshot({path:'/tmp/uzayx-'+name+'-chart.png',fullPage:true});
+   await page.locator('[data-tab="funds"]').click();
+   await page.waitForFunction(()=>document.querySelector('#cash-total')?.textContent!=='—',{timeout:15000});
+   const cash=await page.evaluate(()=>({
+     title:document.querySelector('#funds-title')?.textContent,
+     total:document.querySelector('#cash-total')?.textContent,
+     waiting:document.querySelector('#cash-waiting')?.textContent,
+     rows:document.querySelectorAll('#position-rows .position-row').length,
+     main:document.querySelector('#cash-main')?.textContent,
+     status:document.querySelector('#cash-status')?.textContent
+   }));
+   assert.match(cash.title,/Kasa|kasa/);
+   assert.ok(cash.rows>0,'Cash must show sampled positions');
+   await page.locator('#position-rows .position-row').click();
+   await page.waitForFunction(()=>document.querySelector('#position-detail .position-stat'),{timeout:5000});
+   await page.screenshot({path:'/tmp/uzayx-'+name+'-cash.png',fullPage:true});
    await page.locator('[data-tab="learn"]').click();
    const demo={schema:'uzayx.lessons.archive.v1',records:[{day_utc:'2026-10-17',cohort_statistics:{'TÜMÜ':{closed:2,positive:1,net_usdt:-1.2}}}]};
    const sample=path.join(os.tmpdir(),'uzayx-smoke-sample-'+name+'.json');
@@ -59,7 +89,7 @@ async function run(){
    await page.waitForFunction(()=>document.querySelectorAll('#archive-comparison .archive-compare-card').length>0,{timeout:10000});
    await page.locator('[data-tab="system"]').click();
    assert.ok(await page.$('#system-rows .system-row'),'Health diagnostics missing');
-   console.log('UX_SMOKE_OK',name,JSON.stringify({home,chart}));
+   console.log('UX_SMOKE_OK',name,JSON.stringify({home,chart,cash}));
    await page.close();
   }
  }finally{await browser.close();}
