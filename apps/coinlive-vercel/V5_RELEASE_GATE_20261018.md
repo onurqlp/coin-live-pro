@@ -22,14 +22,25 @@
 - Underlying Spark cohort observed in preceding audit: 649 tickets, 465 closed, 162 positive, 303 negative, **-16.74531 USDT** paper-cohort realized; NOT the strict account profit, not an actual investment return.
 - 7/14/30/90 day research is sample-insufficient; no verified 3D/7D outcomes.
 
-## Still blocked / unverified
-1. **Vercel protected hosted HTTP**: deployment-protection/connection checks returned **403** for the requested staging scope `onurqlp-7179`; runtime log and hosted `/api/snapshot`, `/api/chart`, `/api/overlay` round-trip/latency and cross-device actual Android installation remain **UNVERIFIED**. Vercel `READY` means build, not successful hosted HTTP.
-2. **Actual push notifications**: backend VAPID/subscription storage and delivery are **not connected**. App does not claim to deliver background pushes.
-3. **MAKINE refresh**: deliberately manual and independently governed; its old handoff is safely marked stale and never used as a fresh signal.
-4. No production promotion or removal of SSO; require user's explicit production approval.
+## Hosted production-like preview verification — 2026-10-18 08:25 UTC (11:25 Türkiye)
+**SSO access restored through the connected Vercel team; no protection was disabled.** Verified against immutable staging deployment `dpl_3pG8MzfXrDbzBNqFVmgdRGJAnmWi`.
+- Live protected HTML `GET /` = HTTP **200**; page title identifies **V5.0 Preview**.
+- Hosted `GET /api/snapshot` = HTTP **200** with source product version **4.03**, source integrity `VERIFIED`, source manifest verified, mandatory dataset payload SHA verified. A latest check at **08:24:53.222 UTC** pinned scan `33881f0fc9508309d6db048b`, **23/23** OKX pairs. **28 WATCH/research candidates, 0 paper-eligible**; no confirmed trade entries.
+- Hosted `GET /api/chart?symbol=BTCUSDT&tf=1H&commit=<current-pinned-sha>` = HTTP **200**, **60** immutable-source verified closed bars. **4H XPLUSDT** = HTTP **200**, **60** verified closed bars, **2** archive markers. Source matches snapshot.
+- Hosted chart wrong-but-well-formed SHA = HTTP **409** `SCAN_REFRESH_REQUIRED`; invalid symbol = HTTP **400** `BAD_CHART_PARAMETERS`; commit omitted = HTTP **400** `INVALID_COMMIT`. No fraudulent chart fallback.
+- Hosted `GET /api/overlay` = HTTP **200**, `STALE`, read-only, empty recommendations, cannot mutate strategy or ledger; MAKINE manual source is not fresh market confirmation.
+- Hosted `GET /manifest.webmanifest`, `/sw.js`, `/icon-192.png`, `/style.css` = HTTP **200**; `icon-512.png` and `app.js` are present in the ready Vercel deployment file tree and validated in Chromium CI, but the authenticated fetch gateway refused to return their bodies (gateway restriction, **not** a proven HTTP failure).
+- API `cache-control: no-store`, CSP self-only, strict transport/security headers and SSO confirmed.
+- Runtime logs became accessible: observed one **Node 24 DEP0169 url.parse deprecation warning** on `/api/chart` (runtime-level warning, not evidence of an application 5xx). No claim of an exhaustive zero-error period.
+- Snapshot strict paper account remains **10,000 USDT, strict realized 0**, experiment equity observed **9,994.59234 USDT**, experiment accounting realized **-8.51272 USDT**. Spark review cohort `674 tickets / 470 closed / 163 positive / 307 negative / -17.52563 USDT` is a separate cohort metric. **No real orders and no ledger writes**.
+- All V5 tests passed in GitHub Actions run `39110032410`: 23 Node contract tests, responsive synthetic Chromium, offline PWA, live external source test in Actions. Hosted authenticated GET tests above are additional independent evidence, **not** full Android-on-device testing or a full hosted browser E2E sweep.
 
-## To finish protected hosted tests
-User must authorize the correct Vercel connected scope `onurqlp-7179` for the `coinlive-v5-preview` project. Do not disable deployment protection or request access tokens in chat. Then run GET checks against the *exact* staging URL using `vercel curl` or connected Vercel authenticated fetch, inspect actual API responses/logs, verify Android installation on-device, and only then consider approval for any production cutover.
+## Remaining nonblocking scope / release gates
+1. Android physical-device **installation prompt and notification permission** have not been manually tested; Chromium synthetic fixtures exercised PWA shell, offline cache and safe no-signal fallback.
+2. Real background push **delivery** is not wired to a VAPID/subscription store; no claim of push alerts.
+3. MAKINE CORE independently published research is old, correctly labeled `STALE` and ignored for actionable candidates.
+4. GitHub market workflow reports `DEGRADED_SCHEDULE_GAP`; observed recent market executions were successful `workflow_dispatch`, which does **not** prove a guaranteed unattended five-minute cadence.
+5. Production promotion needs **explicit user approval**. Do not merge draft PR #29 or change original GitHub Pages, product 4.03, engines, strategies, ledgers or original 10,000 USDT account.
 
 ## Rollback
 If staging has a runtime defect, stop using `dpl_3pG8MzfXrDbzBNqFVmgdRGJAnmWi` and return to `dpl_s6TTQ5qcMXPTVtXcpqqTdQmMppP9` **only within the independent preview project**. Never alter the GitHub Pages domain, original release.json, Python motors, or historical cash/ledger records.
