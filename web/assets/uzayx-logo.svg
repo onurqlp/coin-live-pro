@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 172" role="img" aria-labelledby="title desc">
+<title id="title">UZAYX</title><desc id="desc">Geometrik UZAYX yazısı, turkuaz X ve altındaki dört kollu yıldız</desc>
+<g fill="none" stroke="#F4F2EB" stroke-width="11" stroke-linecap="square" stroke-linejoin="miter">
+<path d="M28 23V76C28 99 44 111 68 111C92 111 108 99 108 76V23"/>
+<path d="M150 26H236L150 108H236"/>
+<path d="M264 108L307 25L350 108"/>
+<path d="M374 26L416 69L458 26M416 69V108"/>
+</g>
+<defs><linearGradient id="turquoise" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#045A66"/><stop offset=".58" stop-color="#078C99"/><stop offset="1" stop-color="#20BAC2"/></linearGradient></defs>
+<g fill="none" stroke="url(#turquoise)" stroke-width="11" stroke-linecap="square"><path d="M490 26L579 108M579 26L490 108"/></g>
+<path d="M137 145H286M334 145H484" fill="none" stroke="#F4F2EB" stroke-width="1.5" opacity=".84"/>
+<path d="M310 129C312.2 139 316 142.8 326 145C316 147.2 312.2 151 310 161C307.8 151 304 147.2 294 145C304 142.8 307.8 139 310 129Z" fill="#0BA4AF"/>
+</svg>
