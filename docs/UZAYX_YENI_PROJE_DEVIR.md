@@ -58,3 +58,12 @@
 - Yeni Google Sheets dosyası oluşturulmuş ve okunarak doğrulanmıştır.
 - Google otomatik Apps Script tetikleyicisi bu oturumda yetkilendirilip çalıştırılmamıştır.
 - Gerçek Binance emir otomasyonu hiçbir zaman etkinleştirilmemiştir.
+
+## 8. Google yeni dosya için hazır canlı senkron kurulum kaynağı
+- **Apps Script kaynak:** `integrations/uzayx-google-sync.gs`
+  https://github.com/onurqlp/coin-live-pro/blob/main/integrations/uzayx-google-sync.gs
+- **Hedef:** `1Il41PLFFpJtXXDwfRx4F7cgXboCNBRON-0jvgLnsUMo`, sekmeler `DURUM`, `PARITELER`, `SONUCLAR`, `SISTEM`; eski Google çalışma kitabına hiçbir şey yazmaz.
+- Kaynaklar `main` için aynı SHA'ya sabitlenir; `scan_id` uyuşmazlığında eski doğru değerleri korumak için hatayla durur.
+- Tek insan işi: yeni Google Sheet'te **Uzantılar → Apps Script**, kodu ekle, **`installUzayXSync`** çalıştır ve Google izinlerini ver. Mevcut bağlı Google Drive API'si Apps Script proje kodunu veya zamanlayıcı tetikleyicilerini kuramadığı için bu yetki adımı bu görüşmede otomatik yapılamadı.
+- Kurulumdan önce yeni kitabın verisi yalnız **18 Ekim 2026 14:54:40 UTC** anlık görüntüsüdür. Kurulumdan sonra `syncUzayX` zaman tabanlı 10 dakikalık yenileme için yapılandırılır; ilk gerçek senkronu ve tetikleyici sonucu yine doğrula.
+- Ekran teknik profesyonelliği arka planda tutar; ziyaretçi için ilk soru "giriş teyidi var mı?"dır. `NOT_ELIGIBLE` kayıtları açık emir sinyali gibi sunma.
