@@ -20,3 +20,9 @@ Vercel project coinlive-v5-preview was created independently; a protected stagin
 12. Same-origin Vercel JSON API no longer sends misleading CORS null-origin header.
 
 13. Added api/chart.js, lib/chart.mjs and five chart contract tests; README/package/vercel/serverless settings updated. Remote HTTP still blocked by SSO and restricted access; do not claim confirmed serverless response.
+
+14. 2026-10-18 V5.0 continued: MAKINE CORE handoff now fetched read-only from one immutable onurqlp/makine-core commit. Hardcoded allowlist, safety contract, SHA-256 of raw handoff, source stamp, 45min TTL. STALE research produces zero recommendations and zero signals; no COIN.LIVE policy/cash mutation.
+15. Updated /api/overlay, new lib/overlay.mjs and five new tests. UI now labels MAKINE age, stale state and differing scan provenance.
+16. Updated npm lint script for new module. Feature branch only; no changes to source main, Python, GitHub Pages release 4.03 or ledgers.
+17. New isolated Vercel staging deploy dpl_HJ5ta3j8eSRe8PWSUvyBaQJk3hnB reached READY at https://coinlive-v5-preview-p3zhjlh5d-onurqlp-7179.vercel.app/ . File deployment used after gitSource deployment dpl_2okikUhdPmQfhLKveYtV9wv2dESB failed git_info_fail. Vercel deployment tree confirms /api/snapshot, /api/chart and /api/overlay lambda outputs.
+18. Vercel HTTP authentication bypass and runtime logs remain restricted 403; endpoint latency/real browser validation is BLOCKED, not PASSED. No production promotion.
