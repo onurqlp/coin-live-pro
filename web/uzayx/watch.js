@@ -59,7 +59,13 @@
    const discoveries=new Set();
    for(const e of early.candidates||[]){
      if(!within(e.source_observed_at_utc,now)||!e.event_id||discoveries.has(e.event_id))continue;
-     discoveries.add(e.event_id);groups.SPARK.push(normalizeSpark(e,tickets.get(e.event_id)));
+     discoveries.add(e.event_id);
+     const snap=normalizeSpark(e,tickets.get(e.event_id));
+     // Visual grouping only: early research tiers never become confirmed radar entries.
+     // Strongest early tier appears under movement, middle under watch, raw sparks under sparks.
+     const lane=e.research_tier==='ISIK_GUCLENIYOR'?'MOTION':
+       e.research_tier==='ERKEN_SINYAL'?'WATCH':'SPARK';
+     groups[lane].push(snap);
    }
    for(const k of Object.keys(groups))groups[k].sort((a,b)=>(b.score||0)-(a.score||0)||a.symbol.localeCompare(b.symbol));
    return {valid:true,groups,reason:null};
