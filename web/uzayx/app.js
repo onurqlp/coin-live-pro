@@ -259,6 +259,8 @@
       set('radar-age','Veri: '+ageLabel(db.manifest?.finished_at_utc));
       if((age(db.manifest?.finished_at_utc)??999)>25){
         set('connection','Veri gecikmiş');$('connection').className='status bad';renderTop();renderSystem();
+        // Retract formerly fresh observations from visible watchdesk as soon as they expire.
+        window.dispatchEvent(new CustomEvent('uzayx:loaded',{detail:{db,sourceCommit,faults:[...faults]}}));
       }else{renderSystem();}
     }catch(err){
       set('connection','Kontrol hatası');$('connection').className='status bad';
