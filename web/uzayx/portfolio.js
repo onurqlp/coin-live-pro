@@ -98,8 +98,10 @@
    if(!$('cash-status'))return;
    const valid=summary.proven&&doc.scan_id===source?.db?.manifest?.scan_id &&
      paper.scan_id===doc.scan_id&&source?.sourceCommit&&source?.db?.manifest?.publication_valid===true;
-   $('cash-status').textContent=valid?'Sanal motor · ileriye dönük kayıt':'Kayıt doğrulama uyarısı';
-   $('cash-status').className='chip '+(valid?'':'amber');
+   const sourceAge=Date.now()-Date.parse(source?.db?.manifest?.finished_at_utc||'');
+   const fresh=Number.isFinite(sourceAge)&&sourceAge>=-120000&&sourceAge<=25*60000;
+   $('cash-status').textContent=!valid?'Kayıt doğrulama uyarısı':fresh?'Sanal motor · güncel kayıt':'Sanal kayıt · veri gecikmiş';
+   $('cash-status').className='chip '+(valid&&fresh?'':'amber');
    $('cash-equity').textContent=money(summary.balance);
    $('cash-realized').textContent=money(summary.realized);
    $('cash-floating').textContent=money(summary.unrealized);
