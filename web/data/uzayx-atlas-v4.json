@@ -1,0 +1,844 @@
+{
+  "schema": "uzayx.atlas.v4.web.v1",
+  "version": "4.1.0",
+  "asof_date": "2026-10-19",
+  "source": "UZAYX_YANARDAG_ATLAS_V4.xlsx",
+  "source_sha256": "c5538743a2550bede523fa5ffd04aed833eff45865b55fa7947e46870d77d821",
+  "source_contract": "ARTICLE_EVENT_WINDOWS and YEARLY_SCREEN_CANDIDATES; not OHLCV backtest",
+  "counts": {
+    "event_phases": 31,
+    "annual_candidates": 50,
+    "patterns": 12,
+    "findings": 10,
+    "sources": 36,
+    "chart_points": 11
+  },
+  "ohlcv_verified": false,
+  "signal_backtested": false,
+  "live_orders_allowed": false,
+  "notes": [
+    "Olay tarihleri kaynak makalelerin olay pencereleridir; kesin işlem anları değildir.",
+    "Yıllık getiri adayları 1–10 günlük füze veya futures işlem fırsatı sayılmaz.",
+    "Manipülasyon şüphesi kesin isnat değildir; tüm olaylar gözlem/arşiv amaçlıdır.",
+    "Kullanım: araştırma, sorgulama, örnek benzerliği; ileriye dönük kâr veya gerçekleşen getiri değildir."
+  ],
+  "events": [
+    {
+      "id": "ATLAS_0001",
+      "symbol": "LUNA/UST",
+      "start": "2022-05-07",
+      "end": "2022-05-16",
+      "classification": "PEG_FAILURE",
+      "direction": "DOWN",
+      "headline": "UST ayrışması ve LUNA çöküşü",
+      "source_url": "https://www.sciencedirect.com/science/article/abs/pii/S0304405X26001303",
+      "data_status": "ARTICLE_CONFIRMED",
+      "window_basis": "ARTICLE_EVENT_WINDOW_OR_SOURCE_NOTE",
+      "futures_at_time": "UNKNOWN",
+      "ohlcv_verified": false,
+      "backtested": false
+    },
+    {
+      "id": "ATLAS_0002",
+      "symbol": "FTT",
+      "start": "2022-11-06",
+      "end": "2022-11-13",
+      "classification": "CEX_FAILURE",
+      "direction": "DOWN",
+      "headline": "FTX likidite krizi",
+      "source_url": "https://www.euronews.com/next/2022/11/10/fintech-crypto-ftx-binance-collapse",
+      "data_status": "ARTICLE_CONFIRMED",
+      "window_basis": "ARTICLE_EVENT_WINDOW_OR_SOURCE_NOTE",
+      "futures_at_time": "UNKNOWN",
+      "ohlcv_verified": false,
+      "backtested": false
+    },
+    {
+      "id": "ATLAS_0003",
+      "symbol": "PEPE",
+      "start": "2023-04-14",
+      "end": "2023-05-05",
+      "classification": "LAUNCH_CONTINUATION",
+      "direction": "UP",
+      "headline": "PEPE lansmanı, ilk büyük ralli ve Binance etkisi",
+      "source_url": "https://cointelegraph.com/news/pepe-memecoin-hits-1-billion-market-cap-fueled-by-binance-listing",
+      "data_status": "ARTICLE_CONFIRMED",
+      "window_basis": "ARTICLE_EVENT_WINDOW_OR_SOURCE_NOTE",
+      "futures_at_time": "UNKNOWN",
+      "ohlcv_verified": false,
+      "backtested": false
+    },
+    {
+      "id": "ATLAS_0004",
+      "symbol": "PEPE",
+      "start": "2023-05-05",
+      "end": "2023-06-30",
+      "classification": "POST_LISTING_RETRACE",
+      "direction": "DOWN",
+      "headline": "PEPE listeleme sonrası düzeltme",
+      "source_url": "https://cointelegraph.com/news/pepe-memecoin-hits-1-billion-market-cap-fueled-by-binance-listing",
+      "data_status": "ARTICLE_CONFIRMED",
+      "window_basis": "ARTICLE_EVENT_WINDOW_OR_SOURCE_NOTE",
+      "futures_at_time": "UNKNOWN",
+      "ohlcv_verified": false,
+      "backtested": false
+    },
+    {
+      "id": "ATLAS_0005",
+      "symbol": "BONK",
+      "start": "2023-10-31",
+      "end": "2023-12-18",
+      "classification": "RALLY_LISTING_CORRECTION",
+      "direction": "MIXED",
+      "headline": "BONK kademeli yükseliş ve Coinbase listesi",
+      "source_url": "https://blockworks.com/news/bonk-pump-on-coinbase-listing",
+      "data_status": "ARTICLE_CONFIRMED",
+      "window_basis": "ARTICLE_EVENT_WINDOW_OR_SOURCE_NOTE",
+      "futures_at_time": "UNKNOWN",
+      "ohlcv_verified": false,
+      "backtested": false
+    },
+    {
+      "id": "ATLAS_0006",
+      "symbol": "TRB",
+      "start": "2023-12-25",
+      "end": "2023-12-31",
+      "classification": "SQUEEZE_THEN_CRASH",
+      "direction": "MIXED",
+      "headline": "TRB yıl sonu parabolik sıkışma",
+      "source_url": "https://www.tradingview.com/news/newsbtc%3A600d5e1b4094b%3A0-tellor-trb-leaves-market-in-shock-with-75-price-crash-here-s-what-happened/",
+      "data_status": "ARTICLE_CONFIRMED",
+      "window_basis": "ARTICLE_EVENT_WINDOW_OR_SOURCE_NOTE",
+      "futures_at_time": "UNKNOWN",
+      "ohlcv_verified": false,
+      "backtested": false
+    },
+    {
+      "id": "ATLAS_0007",
+      "symbol": "BALD",
+      "start": "2023-07-29",
+      "end": "2023-07-31",
+      "classification": "LIQUIDITY_REMOVAL",
+      "direction": "DOWN",
+      "headline": "BALD havuz likiditesi geri çekildi",
+      "source_url": "https://www.theblock.co/news/ecosystems/2023-07-31-bald-memecoin-developer-liquidity-pull-242225",
+      "data_status": "ARTICLE_CONFIRMED",
+      "window_basis": "ARTICLE_EVENT_WINDOW_OR_SOURCE_NOTE",
+      "futures_at_time": "UNKNOWN",
+      "ohlcv_verified": false,
+      "backtested": false
+    },
+    {
+      "id": "ATLAS_0008",
+      "symbol": "WIF",
+      "start": "2024-03-05",
+      "end": "2024-03-05",
+      "classification": "SPOT_LISTING",
+      "direction": "UP",
+      "headline": "WIF Binance spot listesi",
+      "source_url": "https://www.binance.com/en/support/announcement/detail/90ad67fe5be7483ea058191bfde677e4",
+      "data_status": "ARTICLE_CONFIRMED",
+      "window_basis": "ARTICLE_EVENT_WINDOW_OR_SOURCE_NOTE",
+      "futures_at_time": "UNKNOWN",
+      "ohlcv_verified": false,
+      "backtested": false
+    },
+    {
+      "id": "ATLAS_0009",
+      "symbol": "BOME",
+      "start": "2024-03-16",
+      "end": "2024-03-17",
+      "classification": "SPOT_LISTING",
+      "direction": "UP",
+      "headline": "BOME Binance spot listesi",
+      "source_url": "https://www.binance.com/az-AZ/support/announcement/detail/bca0f355cf004367b90d7e48fee3470c",
+      "data_status": "ARTICLE_CONFIRMED",
+      "window_basis": "ARTICLE_EVENT_WINDOW_OR_SOURCE_NOTE",
+      "futures_at_time": "UNKNOWN",
+      "ohlcv_verified": false,
+      "backtested": false
+    },
+    {
+      "id": "ATLAS_0010",
+      "symbol": "SLERF",
+      "start": "2024-03-18",
+      "end": "2024-03-18",
+      "classification": "TOKEN_SUPPLY_INCIDENT",
+      "direction": "MIXED",
+      "headline": "SLERF ön satış fonları yanlışlıkla yakıldı",
+      "source_url": "https://www.theblock.co/news/ecosystems/2024-03-18-solana-memecoin-slerf-burn-283025",
+      "data_status": "ARTICLE_CONFIRMED",
+      "window_basis": "ARTICLE_EVENT_WINDOW_OR_SOURCE_NOTE",
+      "futures_at_time": "UNKNOWN",
+      "ohlcv_verified": false,
+      "backtested": false
+    },
+    {
+      "id": "ATLAS_0011",
+      "symbol": "POPCAT",
+      "start": "2024-07-15",
+      "end": "2024-07-22",
+      "classification": "SECTOR_ROTATION",
+      "direction": "UP",
+      "headline": "POPCAT 1 milyar dolar piyasa değeri",
+      "source_url": "https://www.coindesk.com/markets/2024/07/22/popcat-crosses-1b-mog-rallies-as-solana-ethereum-beta-bets-gain-favor",
+      "data_status": "ARTICLE_CONFIRMED",
+      "window_basis": "ARTICLE_EVENT_WINDOW_OR_SOURCE_NOTE",
+      "futures_at_time": "UNKNOWN",
+      "ohlcv_verified": false,
+      "backtested": false
+    },
+    {
+      "id": "ATLAS_0012",
+      "symbol": "MOG",
+      "start": "2024-07-15",
+      "end": "2024-07-22",
+      "classification": "SECTOR_ROTATION",
+      "direction": "UP",
+      "headline": "MOG ve POPCAT tematik yükseliş",
+      "source_url": "https://www.coindesk.com/markets/2024/07/22/popcat-crosses-1b-mog-rallies-as-solana-ethereum-beta-bets-gain-favor",
+      "data_status": "ARTICLE_CONFIRMED",
+      "window_basis": "ARTICLE_EVENT_WINDOW_OR_SOURCE_NOTE",
+      "futures_at_time": "UNKNOWN",
+      "ohlcv_verified": false,
+      "backtested": false
+    },
+    {
+      "id": "ATLAS_0013",
+      "symbol": "NEIRO",
+      "start": "2024-09-16",
+      "end": "2024-09-17",
+      "classification": "SPOT_LISTING_SQUEEZE",
+      "direction": "UP",
+      "headline": "NEIRO isim/kontrat karmaşası ve +700%",
+      "source_url": "https://www.coindesk.com/markets/2024/09/16/first-neiro-on-ethereum-related-to-dogecoin-rockets-700-on-binance-spot-listing",
+      "data_status": "ARTICLE_CONFIRMED",
+      "window_basis": "ARTICLE_EVENT_WINDOW_OR_SOURCE_NOTE",
+      "futures_at_time": "UNKNOWN",
+      "ohlcv_verified": false,
+      "backtested": false
+    },
+    {
+      "id": "ATLAS_0014",
+      "symbol": "GOAT",
+      "start": "2024-10-11",
+      "end": "2024-10-24",
+      "classification": "NARRATIVE_CONTINUATION",
+      "direction": "UP",
+      "headline": "GOAT AI anlatısıyla büyüdü",
+      "source_url": "https://www.coindesk.com/markets/2024/10/24/as-sentient-memecoins-become-latest-crypto-fad-goat-surges-to-800m-and-an-ai-rambles",
+      "data_status": "ARTICLE_CONFIRMED",
+      "window_basis": "ARTICLE_EVENT_WINDOW_OR_SOURCE_NOTE",
+      "futures_at_time": "UNKNOWN",
+      "ohlcv_verified": false,
+      "backtested": false
+    },
+    {
+      "id": "ATLAS_0015",
+      "symbol": "RUSSELL",
+      "start": "2024-10-23",
+      "end": "2024-10-24",
+      "classification": "BOT_MENTION_SPIKE",
+      "direction": "MIXED",
+      "headline": "RUSSELL sosyal-bot sözünden kaynaklı kısa spike",
+      "source_url": "https://www.coindesk.com/markets/2024/10/24/as-sentient-memecoins-become-latest-crypto-fad-goat-surges-to-800m-and-an-ai-rambles",
+      "data_status": "ARTICLE_CONFIRMED",
+      "window_basis": "ARTICLE_EVENT_WINDOW_OR_SOURCE_NOTE",
+      "futures_at_time": "UNKNOWN",
+      "ohlcv_verified": false,
+      "backtested": false
+    },
+    {
+      "id": "ATLAS_0016",
+      "symbol": "ACT",
+      "start": "2024-11-11",
+      "end": "2024-11-12",
+      "classification": "EXCHANGE_LISTING_SPIKE",
+      "direction": "UP",
+      "headline": "ACT Binance listing spekülasyonu",
+      "source_url": "https://www.binance.com/en/square/post/16149290880353",
+      "data_status": "SECONDARY_NEEDS_PRICE_VERIFICATION",
+      "window_basis": "ARTICLE_EVENT_WINDOW_OR_SOURCE_NOTE",
+      "futures_at_time": "UNKNOWN",
+      "ohlcv_verified": false,
+      "backtested": false
+    },
+    {
+      "id": "ATLAS_0017",
+      "symbol": "PNUT",
+      "start": "2024-11-11",
+      "end": "2024-11-12",
+      "classification": "EXCHANGE_LISTING_SYMPATHY",
+      "direction": "UP",
+      "headline": "PNUT listelenme / eş hareket",
+      "source_url": "https://www.binance.com/en/square/post/16090001423602",
+      "data_status": "SECONDARY_NEEDS_PRICE_VERIFICATION",
+      "window_basis": "ARTICLE_EVENT_WINDOW_OR_SOURCE_NOTE",
+      "futures_at_time": "UNKNOWN",
+      "ohlcv_verified": false,
+      "backtested": false
+    },
+    {
+      "id": "ATLAS_0018",
+      "symbol": "TRUMP",
+      "start": "2025-01-17",
+      "end": "2025-01-19",
+      "classification": "LAUNCH_SPIKE",
+      "direction": "UP",
+      "headline": "TRUMP 48 saatte market cap zirvesi",
+      "source_url": "https://www.reuters.com/markets/currencies/trumps-meme-coin-made-nearly-100-million-trading-fees-small-traders-lost-money-2025-02-03/",
+      "data_status": "ARTICLE_CONFIRMED",
+      "window_basis": "ARTICLE_EVENT_WINDOW_OR_SOURCE_NOTE",
+      "futures_at_time": "UNKNOWN",
+      "ohlcv_verified": false,
+      "backtested": false
+    },
+    {
+      "id": "ATLAS_0019",
+      "symbol": "TRUMP",
+      "start": "2025-01-19",
+      "end": "2025-01-30",
+      "classification": "POST_PEAK_RETRACE",
+      "direction": "DOWN",
+      "headline": "TRUMP zirveden iki-üçte düşüş",
+      "source_url": "https://www.reuters.com/markets/currencies/trumps-meme-coin-made-nearly-100-million-trading-fees-small-traders-lost-money-2025-02-03/",
+      "data_status": "ARTICLE_CONFIRMED",
+      "window_basis": "ARTICLE_EVENT_WINDOW_OR_SOURCE_NOTE",
+      "futures_at_time": "UNKNOWN",
+      "ohlcv_verified": false,
+      "backtested": false
+    },
+    {
+      "id": "ATLAS_0020",
+      "symbol": "MELANIA",
+      "start": "2025-01-19",
+      "end": "2025-01-31",
+      "classification": "RAPID_POST_LAUNCH_FALL",
+      "direction": "DOWN",
+      "headline": "MELANIA lansman sonrası sert geri dönüş",
+      "source_url": "https://www.coingecko.com/research/publications/bobbys-crypto-aggregate-2025-01",
+      "data_status": "ARTICLE_CONFIRMED",
+      "window_basis": "ARTICLE_EVENT_WINDOW_OR_SOURCE_NOTE",
+      "futures_at_time": "UNKNOWN",
+      "ohlcv_verified": false,
+      "backtested": false
+    },
+    {
+      "id": "ATLAS_0021",
+      "symbol": "LIBRA",
+      "start": "2025-02-14",
+      "end": "2025-02-20",
+      "classification": "INSIDER_RELATED_LIQUIDITY_EXIT",
+      "direction": "DOWN",
+      "headline": "LIBRA cüzdan bağlantılı fon çekimi",
+      "source_url": "https://www.reuters.com/world/americas/crypto-worth-99-million-withdrawn-milei-backed-libra-token-researchers-say-2025-02-20/",
+      "data_status": "ARTICLE_CONFIRMED",
+      "window_basis": "ARTICLE_EVENT_WINDOW_OR_SOURCE_NOTE",
+      "futures_at_time": "UNKNOWN",
+      "ohlcv_verified": false,
+      "backtested": false
+    },
+    {
+      "id": "ATLAS_0022",
+      "symbol": "TST",
+      "start": "2025-02-09",
+      "end": "2025-02-10",
+      "classification": "TEST_TOKEN_NARRATIVE",
+      "direction": "UP",
+      "headline": "TST viral test token ve futures kontrat listelemesi",
+      "source_url": "https://www.binance.com/en/square/post/20073406378449",
+      "data_status": "ARTICLE_CONFIRMED",
+      "window_basis": "ARTICLE_EVENT_WINDOW_OR_SOURCE_NOTE",
+      "futures_at_time": "UNKNOWN",
+      "ohlcv_verified": false,
+      "backtested": false
+    },
+    {
+      "id": "ATLAS_0023",
+      "symbol": "JELLYJELLY",
+      "start": "2025-03-26",
+      "end": "2025-03-26",
+      "classification": "SUSPECTED_CROSS_MARKET_MANIPULATION",
+      "direction": "MIXED",
+      "headline": "JELLY spot-perp fiyat sıkışması",
+      "source_url": "https://www.kaiko.com/resources/defi-faces-new-test-as-low-liquidity-token-gets-manipulated",
+      "data_status": "ARTICLE_CONFIRMED",
+      "window_basis": "ARTICLE_EVENT_WINDOW_OR_SOURCE_NOTE",
+      "futures_at_time": "UNKNOWN",
+      "ohlcv_verified": false,
+      "backtested": false
+    },
+    {
+      "id": "ATLAS_0024",
+      "symbol": "OM",
+      "start": "2025-04-13",
+      "end": "2025-04-13",
+      "classification": "FLASH_COLLAPSE",
+      "direction": "DOWN",
+      "headline": "OM 90 dakikada büyük çöküş",
+      "source_url": "https://www.theblock.co/news/markets/2025-04-13-layer-1-mantras-token-falls-90-in-sudden-crash-community-lead-denies-rug-pull-accusations-350665",
+      "data_status": "ARTICLE_CONFIRMED",
+      "window_basis": "ARTICLE_EVENT_WINDOW_OR_SOURCE_NOTE",
+      "futures_at_time": "UNKNOWN",
+      "ohlcv_verified": false,
+      "backtested": false
+    },
+    {
+      "id": "ATLAS_0025",
+      "symbol": "MOODENG",
+      "start": "2025-05-05",
+      "end": "2025-05-12",
+      "classification": "SECOND_WAVE_7D",
+      "direction": "UP",
+      "headline": "MOODENG 7 günlük +612.3% geri dönüş",
+      "source_url": "https://beincrypto.com/moo-deng-meme-coin-boom/",
+      "data_status": "ARTICLE_CONFIRMED",
+      "window_basis": "ARTICLE_EVENT_WINDOW_OR_SOURCE_NOTE",
+      "futures_at_time": "UNKNOWN",
+      "ohlcv_verified": false,
+      "backtested": false
+    },
+    {
+      "id": "ATLAS_0026",
+      "symbol": "MOODENG",
+      "start": "2025-05-22",
+      "end": "2025-05-22",
+      "classification": "SECOND_LISTING_PUSH",
+      "direction": "UP",
+      "headline": "MOODENG Robinhood listelemesi sonrası tekrar yükseliş",
+      "source_url": "https://beincrypto.com/robinhood-lists-moodeng-mew-meme-coins/",
+      "data_status": "ARTICLE_CONFIRMED",
+      "window_basis": "ARTICLE_EVENT_WINDOW_OR_SOURCE_NOTE",
+      "futures_at_time": "UNKNOWN",
+      "ohlcv_verified": false,
+      "backtested": false
+    },
+    {
+      "id": "ATLAS_0027",
+      "symbol": "MEW",
+      "start": "2025-05-22",
+      "end": "2025-05-22",
+      "classification": "SYMPATHY_LISTING",
+      "direction": "UP",
+      "headline": "MEW Robinhood listelemesinde yükseliş",
+      "source_url": "https://beincrypto.com/robinhood-lists-moodeng-mew-meme-coins/",
+      "data_status": "ARTICLE_CONFIRMED",
+      "window_basis": "ARTICLE_EVENT_WINDOW_OR_SOURCE_NOTE",
+      "futures_at_time": "UNKNOWN",
+      "ohlcv_verified": false,
+      "backtested": false
+    },
+    {
+      "id": "ATLAS_0028",
+      "symbol": "MYX",
+      "start": "2025-09-08",
+      "end": "2025-09-11",
+      "classification": "FUTURES_SHORT_SQUEEZE",
+      "direction": "MIXED",
+      "headline": "MYX short squeeze ve sonradan düzeltme",
+      "source_url": "https://www.coindesk.com/business/2025/09/09/more-than-usd40m-liquidated-as-market-makers-suffer-shattering-myx-short-squeeze",
+      "data_status": "ARTICLE_CONFIRMED",
+      "window_basis": "ARTICLE_EVENT_WINDOW_OR_SOURCE_NOTE",
+      "futures_at_time": "UNKNOWN",
+      "ohlcv_verified": false,
+      "backtested": false
+    },
+    {
+      "id": "ATLAS_0029",
+      "symbol": "ZEC",
+      "start": "2025-10-03",
+      "end": "2025-10-10",
+      "classification": "7D_SECTOR_ROTATION",
+      "direction": "UP",
+      "headline": "ZEC mahremiyet temalı 7 günlük yükseliş",
+      "source_url": "https://www.coindesk.com/markets/2025/10/10/privacy-tokens-zcash-dash-railgun-rip-higher-as-market-rotates-back-to-2018-narratives",
+      "data_status": "ARTICLE_CONFIRMED",
+      "window_basis": "ARTICLE_EVENT_WINDOW_OR_SOURCE_NOTE",
+      "futures_at_time": "UNKNOWN",
+      "ohlcv_verified": false,
+      "backtested": false
+    },
+    {
+      "id": "ATLAS_0030",
+      "symbol": "RAIL",
+      "start": "2025-10-03",
+      "end": "2025-10-10",
+      "classification": "7D_SECTOR_ROTATION",
+      "direction": "UP",
+      "headline": "RAIL benzer mahremiyet temalı sıçrama",
+      "source_url": "https://www.coindesk.com/markets/2025/10/10/privacy-tokens-zcash-dash-railgun-rip-higher-as-market-rotates-back-to-2018-narratives",
+      "data_status": "ARTICLE_CONFIRMED",
+      "window_basis": "ARTICLE_EVENT_WINDOW_OR_SOURCE_NOTE",
+      "futures_at_time": "UNKNOWN",
+      "ohlcv_verified": false,
+      "backtested": false
+    },
+    {
+      "id": "ATLAS_0031",
+      "symbol": "ZEC",
+      "start": "2025-11-01",
+      "end": "2025-11-07",
+      "classification": "TREND_CONTINUATION",
+      "direction": "UP",
+      "headline": "ZEC çok haftalık devam, $600",
+      "source_url": "https://www.coindesk.com/markets/2025/11/07/zcash-breaks-into-top-20-crypto-list-hits-usd600-for-first-time-since-2018/",
+      "data_status": "ARTICLE_CONFIRMED",
+      "window_basis": "ARTICLE_EVENT_WINDOW_OR_SOURCE_NOTE",
+      "futures_at_time": "UNKNOWN",
+      "ohlcv_verified": false,
+      "backtested": false
+    }
+  ],
+  "candidates": [
+    {
+      "year": 2023,
+      "rank": 1,
+      "symbol": "BONK",
+      "reported_annual_return_pct": 7302.9
+    },
+    {
+      "year": 2023,
+      "rank": 2,
+      "symbol": "INJ",
+      "reported_annual_return_pct": 2976.4
+    },
+    {
+      "year": 2023,
+      "rank": 3,
+      "symbol": "CORGIAI",
+      "reported_annual_return_pct": 1959.7
+    },
+    {
+      "year": 2023,
+      "rank": 4,
+      "symbol": "KAS",
+      "reported_annual_return_pct": 1865.6
+    },
+    {
+      "year": 2023,
+      "rank": 5,
+      "symbol": "RNDR",
+      "reported_annual_return_pct": 1139
+    },
+    {
+      "year": 2023,
+      "rank": 6,
+      "symbol": "SOL",
+      "reported_annual_return_pct": 973.9
+    },
+    {
+      "year": 2023,
+      "rank": 7,
+      "symbol": "CFX",
+      "reported_annual_return_pct": 773.6
+    },
+    {
+      "year": 2023,
+      "rank": 8,
+      "symbol": "WEMIX",
+      "reported_annual_return_pct": 758.7
+    },
+    {
+      "year": 2023,
+      "rank": 9,
+      "symbol": "FET",
+      "reported_annual_return_pct": 697.9
+    },
+    {
+      "year": 2023,
+      "rank": 10,
+      "symbol": "STX",
+      "reported_annual_return_pct": 632.8
+    },
+    {
+      "year": 2024,
+      "rank": 1,
+      "symbol": "VIRTUAL",
+      "reported_annual_return_pct": 23079.2
+    },
+    {
+      "year": 2024,
+      "rank": 2,
+      "symbol": "BRETT",
+      "reported_annual_return_pct": 14784.5
+    },
+    {
+      "year": 2024,
+      "rank": 3,
+      "symbol": "POPCAT",
+      "reported_annual_return_pct": 10458.9
+    },
+    {
+      "year": 2024,
+      "rank": 4,
+      "symbol": "OM",
+      "reported_annual_return_pct": 6418.3
+    },
+    {
+      "year": 2024,
+      "rank": 5,
+      "symbol": "MOG",
+      "reported_annual_return_pct": 6051
+    },
+    {
+      "year": 2024,
+      "rank": 6,
+      "symbol": "AERO",
+      "reported_annual_return_pct": 3139.4
+    },
+    {
+      "year": 2024,
+      "rank": 7,
+      "symbol": "TURBO",
+      "reported_annual_return_pct": 3036
+    },
+    {
+      "year": 2024,
+      "rank": 8,
+      "symbol": "FARTCOIN",
+      "reported_annual_return_pct": 2890.5
+    },
+    {
+      "year": 2024,
+      "rank": 9,
+      "symbol": "AI16Z",
+      "reported_annual_return_pct": 1409.9
+    },
+    {
+      "year": 2024,
+      "rank": 10,
+      "symbol": "PEPE",
+      "reported_annual_return_pct": 1400.6
+    },
+    {
+      "year": 2024,
+      "rank": 11,
+      "symbol": "WIF",
+      "reported_annual_return_pct": 1254.7
+    },
+    {
+      "year": 2024,
+      "rank": 12,
+      "symbol": "PNUT",
+      "reported_annual_return_pct": 1060.4
+    },
+    {
+      "year": 2024,
+      "rank": 13,
+      "symbol": "BGB",
+      "reported_annual_return_pct": 748.3
+    },
+    {
+      "year": 2024,
+      "rank": 14,
+      "symbol": "ONDO",
+      "reported_annual_return_pct": 682.8
+    },
+    {
+      "year": 2024,
+      "rank": 15,
+      "symbol": "AIOZ",
+      "reported_annual_return_pct": 585.3
+    },
+    {
+      "year": 2024,
+      "rank": 16,
+      "symbol": "JASMY",
+      "reported_annual_return_pct": 502.7
+    },
+    {
+      "year": 2024,
+      "rank": 17,
+      "symbol": "SUI",
+      "reported_annual_return_pct": 493.5
+    },
+    {
+      "year": 2024,
+      "rank": 18,
+      "symbol": "FLOKI",
+      "reported_annual_return_pct": 420.2
+    },
+    {
+      "year": 2024,
+      "rank": 19,
+      "symbol": "HYPE",
+      "reported_annual_return_pct": 357.9
+    },
+    {
+      "year": 2024,
+      "rank": 20,
+      "symbol": "PENDLE",
+      "reported_annual_return_pct": 352.2
+    },
+    {
+      "year": 2025,
+      "rank": 1,
+      "symbol": "MYX",
+      "reported_annual_return_pct": 3358.15
+    },
+    {
+      "year": 2025,
+      "rank": 2,
+      "symbol": "ZEC",
+      "reported_annual_return_pct": 573.72
+    },
+    {
+      "year": 2025,
+      "rank": 3,
+      "symbol": "RAIN",
+      "reported_annual_return_pct": 184.83
+    },
+    {
+      "year": 2025,
+      "rank": 4,
+      "symbol": "ZBCN",
+      "reported_annual_return_pct": 164.08
+    },
+    {
+      "year": 2025,
+      "rank": 5,
+      "symbol": "ZORA",
+      "reported_annual_return_pct": 138.13
+    },
+    {
+      "year": 2025,
+      "rank": 6,
+      "symbol": "XMR",
+      "reported_annual_return_pct": 115.96
+    },
+    {
+      "year": 2025,
+      "rank": 7,
+      "symbol": "OKB",
+      "reported_annual_return_pct": 115.21
+    },
+    {
+      "year": 2025,
+      "rank": 8,
+      "symbol": "ALCH",
+      "reported_annual_return_pct": 89.21
+    },
+    {
+      "year": 2025,
+      "rank": 9,
+      "symbol": "SYRUP",
+      "reported_annual_return_pct": 75.19
+    },
+    {
+      "year": 2025,
+      "rank": 10,
+      "symbol": "NIGHT",
+      "reported_annual_return_pct": 58.39
+    },
+    {
+      "year": 2025,
+      "rank": 11,
+      "symbol": "MERL",
+      "reported_annual_return_pct": 39.65
+    },
+    {
+      "year": 2025,
+      "rank": 12,
+      "symbol": "BCH",
+      "reported_annual_return_pct": 25.78
+    },
+    {
+      "year": 2025,
+      "rank": 13,
+      "symbol": "BNB",
+      "reported_annual_return_pct": 20.13
+    },
+    {
+      "year": 2025,
+      "rank": 14,
+      "symbol": "BDX",
+      "reported_annual_return_pct": 17.11
+    },
+    {
+      "year": 2025,
+      "rank": 15,
+      "symbol": "TRX",
+      "reported_annual_return_pct": 9.78
+    },
+    {
+      "year": 2025,
+      "rank": 16,
+      "symbol": "DCR",
+      "reported_annual_return_pct": 7.45
+    },
+    {
+      "year": 2025,
+      "rank": 17,
+      "symbol": "OHM",
+      "reported_annual_return_pct": 7.16
+    },
+    {
+      "year": 2025,
+      "rank": 18,
+      "symbol": "JLP",
+      "reported_annual_return_pct": 6.83
+    },
+    {
+      "year": 2025,
+      "rank": 19,
+      "symbol": "JST",
+      "reported_annual_return_pct": 1.77
+    },
+    {
+      "year": 2025,
+      "rank": 20,
+      "symbol": "HYPE",
+      "reported_annual_return_pct": 1.42
+    }
+  ],
+  "patterns": [
+    {
+      "id": "P01",
+      "label": "MULTIDAY_ACCUMULATION"
+    },
+    {
+      "id": "P02",
+      "label": "EARLY_SHORT_SQUEEZE"
+    },
+    {
+      "id": "P03",
+      "label": "SECOND_WAVE"
+    },
+    {
+      "id": "P04",
+      "label": "RUG_LIQUIDITY_REMOVAL"
+    },
+    {
+      "id": "P05",
+      "label": "LISTING_NEWS_SPIKE"
+    },
+    {
+      "id": "P06",
+      "label": "SOCIAL_PREPOSITIONING"
+    },
+    {
+      "id": "P07",
+      "label": "INSIDER_LIQUIDITY"
+    },
+    {
+      "id": "P08",
+      "label": "LOW_FLOAT_SQUEEZE"
+    },
+    {
+      "id": "P09",
+      "label": "SECTOR_CONTAGION"
+    },
+    {
+      "id": "P10",
+      "label": "NEWS_BAIT_AND_EXIT"
+    },
+    {
+      "id": "P11",
+      "label": "FALSE_WASH_SIGNAL"
+    },
+    {
+      "id": "P12",
+      "label": "NO_FUTURES"
+    }
+  ]
+}

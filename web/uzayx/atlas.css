@@ -1,0 +1,63 @@
+/* UzayX Atlas V4.1: research-first layout, sources visible and no trade affordances. */
+.atlas-main{margin:12px 0 20px;padding:20px}
+.atlas-heading{display:flex;justify-content:space-between;gap:16px;align-items:start}
+.atlas-heading h3{margin:0 0 7px;font-size:clamp(20px,2.5vw,27px);letter-spacing:-.04em}
+.atlas-heading .eyebrow{margin-bottom:5px}
+.atlas-tag{display:inline-flex;vertical-align:middle;background:#233a49;border:1px solid #426172;color:#c0dcdf;padding:4px 7px;border-radius:6px;font-size:9px;letter-spacing:.07em;margin-left:4px}
+.atlas-export{flex:0 0 auto;align-self:center;font-size:11px;border:1px solid #45695f;text-decoration:none;border-radius:9px;padding:11px 14px;color:#a9ebd1;min-height:42px}
+.atlas-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:16px 0 7px}
+.atlas-kpi{display:flex;flex-direction:column;gap:2px;background:#102a35;border:1px solid #2e5360;border-radius:10px;padding:12px 14px}
+.atlas-kpi strong{font-size:25px;font-weight:850;letter-spacing:-.05em;font-variant-numeric:tabular-nums;color:#dff7f1}
+.atlas-kpi span{font-size:11px;color:#b7cbd1}
+.atlas-status{font-size:10px;color:#8cb9af;margin:0 0 13px}
+.atlas-toolbar{display:flex;gap:8px;align-items:center;margin:12px 0}
+.atlas-toolbar input,.atlas-toolbar select,.atlas-cost-grid input,.atlas-cost-grid select{min-width:0;min-height:42px;background:#0b1c2b;color:#eaf4f8;border:1px solid #3c5968;border-radius:9px;padding:10px 11px;font-size:12px}
+.atlas-toolbar input{flex:1;width:100%}.atlas-toolbar select{max-width:210px}
+.atlas-section-heading{display:flex;gap:9px;align-items:baseline;justify-content:space-between;margin:15px 0 8px}
+.atlas-section-heading h4{margin:0;font-size:15px}.atlas-section-heading span{font-size:10px}
+.atlas-events{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;max-height:650px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.atlas-event{min-width:0;border:1px solid #2a4855;background:linear-gradient(135deg,#122b37,#0e202f);border-radius:12px;padding:13px 14px;display:grid;gap:7px;align-content:start}
+.atlas-event-top{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.atlas-event-top b{font-size:13px;letter-spacing:.01em;color:#edf8fc}
+.atlas-event-top small{margin-left:auto;font-size:9px;color:#9eb7c3}
+.atlas-flag{font-size:9px;letter-spacing:.04em;font-weight:800;border-radius:5px;padding:3px 5px;color:#edc590;background:#49331f}
+.atlas-flag.up{background:#1e473d;color:#a8e9d0}.atlas-flag.down{background:#452935;color:#f0afba}
+.atlas-event-head{font-size:12px;line-height:1.4;overflow-wrap:anywhere}
+.atlas-event p{margin:0;line-height:1.4}
+.atlas-muted{font-size:10px;color:#9eb6c3;overflow-wrap:anywhere}
+.atlas-event-meta{display:flex;justify-content:space-between;align-items:center;gap:7px;font-size:10px;color:#b0c4cc}
+.atlas-source{color:#92e6cc;flex:0 0 auto;white-space:nowrap;text-decoration:none;border-bottom:1px solid #3e8171}
+.atlas-disclosure{border:1px solid #304a57;border-radius:10px;margin-top:11px;padding:0 13px;background:#102330}
+.atlas-disclosure>summary{min-height:49px;display:flex;align-items:center;cursor:pointer;font-weight:750;font-size:12px;color:#d6ebed;padding:10px 0}
+.atlas-disclosure[open]>summary{border-bottom:1px solid #2c4956;margin-bottom:12px}
+.atlas-candidates{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;max-height:380px;overflow-y:auto}
+.atlas-gainer{display:flex;align-items:center;gap:8px;padding:9px 10px;background:#102b37;border-radius:7px;min-width:0}
+.atlas-gainer b{color:#e1f8ee;font-size:12px}.atlas-gainer small{color:#95bac1;font-size:10px;margin-left:auto}
+.atlas-gainer strong{color:#9debd0;font-size:11px;font-variant-numeric:tabular-nums}
+.atlas-engine-grid,.atlas-module-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0 14px}
+.atlas-engine,.atlas-module{border:1px solid #314b58;border-radius:9px;background:#102b38;padding:12px}
+.atlas-engine-name{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.atlas-engine-name span{font-size:9px;color:#e6b977;text-align:right}
+.atlas-engine p,.atlas-module p{font-size:11px;color:#b6cbd3;margin:7px 0}
+.atlas-engine small,.atlas-module small{font-size:10px;color:#83bcae}
+.atlas-module strong{font-size:12px}
+.atlas-cost-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.atlas-cost-grid label{display:grid;gap:4px;font-size:10px;color:#afc6d1}
+.atlas-calc-result{margin:12px 0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.atlas-calc-row{display:grid;gap:4px;border:1px solid #31505e;background:#0c2430;padding:12px;border-radius:9px}
+.atlas-calc-row span{font-size:10px;color:#a3bdc9}.atlas-calc-row b{font-size:15px;font-variant-numeric:tabular-nums}
+.atlas-caveat{margin:13px 0 0;line-height:1.6}
+@media(min-width:1200px){.atlas-events{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:660px){
+ .atlas-main{padding:13px}
+ .atlas-heading{flex-wrap:wrap;gap:6px}
+ .atlas-export{padding:7px 10px;min-height:35px}
+ .atlas-kpis{gap:5px}.atlas-kpi{padding:9px 7px}.atlas-kpi strong{font-size:21px}.atlas-kpi span{font-size:9px}
+ .atlas-toolbar{flex-wrap:wrap}.atlas-toolbar input{flex-basis:100%}.atlas-toolbar select{max-width:none;flex:1}
+ .atlas-events,.atlas-engine-grid,.atlas-module-grid{grid-template-columns:1fr}
+ .atlas-events{max-height:560px}
+ .atlas-event{padding:12px}
+ .atlas-candidates{grid-template-columns:1fr;max-height:300px}
+ .atlas-cost-grid{gap:7px}.atlas-cost-grid label{font-size:10px}.atlas-calc-result{grid-template-columns:1fr 1fr}
+ .atlas-calc-row b{font-size:12px}
+}

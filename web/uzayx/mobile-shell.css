@@ -1,0 +1,55 @@
+/* Responsive app shell while retaining a full desktop research terminal. */
+.mobile-dock{display:none}
+@media(min-width:1160px){
+ .layout{max-width:1320px;padding:0 24px}
+ .topbar{min-height:82px}
+ .tabs{position:sticky;top:0;z-index:20;background:#10202ef2;backdrop-filter:blur(14px);box-shadow:0 6px 26px #07111d66}
+ #overview .overview-flow{grid-template-columns:minmax(0,.95fr) minmax(0,1.25fr)}
+ .panel{border-radius:14px}
+}
+@media(max-width:760px){
+ :root{color-scheme:dark}
+ html{scroll-padding-bottom:100px}
+ body{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+ .layout{min-width:0}
+ .topbar{padding-top:max(4px,env(safe-area-inset-top,0px))}
+ .tabs{display:none!important}
+ body.mobile-menu-open .tabs{
+   display:grid!important;position:fixed;left:12px;right:12px;width:auto;bottom:calc(78px + env(safe-area-inset-bottom,0px));top:auto;
+   grid-template-columns:repeat(2,minmax(0,1fr));max-height:min(520px,65vh);
+   overflow-y:auto;overscroll-behavior:contain;z-index:85;margin:0;padding:11px;gap:6px;
+   background:#102431;border:1px solid #4a6b70;box-shadow:0 0 0 100vmax #04111acd,0 20px 55px #010914c9;
+   border-radius:17px;backdrop-filter:blur(16px)
+ }
+ body.mobile-menu-open .tabs .tab{min-width:0;white-space:normal;text-align:center;min-height:52px;font-size:12px}
+ .mobile-dock{
+   position:fixed;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;align-items:stretch;
+   bottom:0;left:0;right:0;z-index:90;
+   min-height:calc(62px + env(safe-area-inset-bottom,0px));
+   padding:7px 9px calc(7px + env(safe-area-inset-bottom,0px));
+   border-top:1px solid #36565b;background:#0b1b29f5;backdrop-filter:blur(18px);
+   box-shadow:0 -8px 26px #040d17a8
+ }
+ .dock-item{
+   min-width:0;min-height:48px;border:0;background:transparent;border-radius:12px;color:#9bb7c8;
+   display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1px;padding:3px 2px;
+ }
+ .dock-item>span{font-size:23px;line-height:1.1;font-weight:550}
+ .dock-item>small{font-size:10px;font-weight:750;white-space:nowrap}
+ .dock-item.active{background:#234a41;color:#baf6df}
+ .dock-item:active{background:#29584d}
+ .workspace{scroll-margin-top:16px}
+ footer{padding-bottom:14px}
+ .quick-note{border-radius:10px}
+ .topbar,.header-actions{min-width:0}
+ .header-actions{max-width:53%}
+ .status{max-width:100px}
+ .home-positions{scroll-margin-bottom:80px}
+ .watch-row,.position-row{min-height:49px}
+}
+@media(max-width:340px){
+ .dock-item>small{font-size:9px}
+ .brand img{max-width:130px!important}
+ .header-actions .futures-top{padding:7px 5px;font-size:10px}
+}
+@media(prefers-reduced-motion:reduce){.mobile-dock,.tabs{transition:none}}
