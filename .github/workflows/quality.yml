@@ -44,3 +44,10 @@ jobs:
         run: npm --prefix apps/coinlive-vercel test
       - name: V5 preview syntax lint
         run: npm --prefix apps/coinlive-vercel run lint
+      - name: Install Chromium smoke test dependencies (preview only)
+        run: |
+          npm --prefix apps/coinlive-vercel install --no-save --ignore-scripts playwright@1.56.0
+          cd apps/coinlive-vercel
+          ./node_modules/.bin/playwright install chromium --with-deps
+      - name: V5 browser smoke on phone tablet and desktop
+        run: node apps/coinlive-vercel/tests/browser-smoke.mjs
