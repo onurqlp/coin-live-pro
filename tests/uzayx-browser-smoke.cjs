@@ -54,7 +54,8 @@ async function run(){
    const demo={schema:'uzayx.lessons.archive.v1',records:[{day_utc:'2026-10-17',cohort_statistics:{'TÜMÜ':{closed:2,positive:1,net_usdt:-1.2}}}]};
    const sample=path.join(os.tmpdir(),'uzayx-smoke-sample-'+name+'.json');
    fs.writeFileSync(sample,JSON.stringify(demo));
-   await page.locator('#archive-file').uploadFile(sample);
+   const input=await page.$('#archive-file');
+   await input.uploadFile(sample);
    await page.waitForFunction(()=>document.querySelectorAll('#archive-comparison .archive-compare-card').length>0,{timeout:10000});
    await page.locator('[data-tab="system"]').click();
    assert.ok(await page.$('#system-rows .system-row'),'Health diagnostics missing');
