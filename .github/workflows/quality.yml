@@ -30,6 +30,10 @@ jobs:
       - run: node --check web/chart-guidance.js
       - run: node tests/chart-guidance.test.mjs
       - run: node --check web/app.js
+      - run: node --check web/uzayx/app.js
+      - run: node --check web/uzayx/charts.js
+      - run: node --check web/uzayx/archive.js
+      - run: node --test tests/uzayx-chart-archive.test.cjs
       - run: node --check web/v4-ui.js
       - run: node --check web/watch-archive-ui.js
       - run: node --check web/legacy-reset.js
