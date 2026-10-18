@@ -1,5 +1,8 @@
 # COIN.LIVE PRO 5.0 — isolated preview
 
+> **Latest verified status (2026-10-18 11:25 Türkiye)**: Connected Vercel authorization succeeded. Exact protected V5 staging deployment `dpl_3pG8MzfXrDbzBNqFVmgdRGJAnmWi` serves HTTP 200 HTML, snapshot, source-pinned 1H and 4H charts, and MAKINE overlay. Invalid commit is rejected 409; invalid chart parameter 400. Strict V4 4.03 production and GitHub Pages untouched. Full audit: [V5_RELEASE_GATE_20261018.md](./V5_RELEASE_GATE_20261018.md). Earlier 403/"unverified" text below is preserved as historical process notes, **not** the current access status. On-device Android install and actual background push delivery are not claimed.
+
+
 Source of truth: `onurqlp/coin-live-pro` production branch, **read only**. The production product release remains `4.03`; the independent UI is `5.0.0-preview`.
 
 ## Architecture
