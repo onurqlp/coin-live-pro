@@ -54,7 +54,7 @@
      const ao=a.observations.length,bo=b.observations.length;
      if(ao!==bo)return bo-ao;
      // Research preview: prefer pre-existing observed models; others remain provisional.
-     if(a.source!==b.source)return a.source==='legacy'?-1:1;
+     if(a.source!==b.source)return a.source==='proposal'?-1:1;
      return a.id.localeCompare(b.id);
    };
    const ranked=items.slice().sort(compare);
