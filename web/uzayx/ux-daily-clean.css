@@ -23,3 +23,19 @@
  #turan .panel-heading h3{font-size:17px}
  #turan .turan-family-tools{gap:6px}
 }
+/* Subtle common-screen readability improvements: preserve information and functionality. */
+html,body{overflow-x:clip}
+.workspace .sectionhead h2{letter-spacing:-.02em}
+.workspace .sectionhead{align-items:center}
+.workspace .panel-heading{gap:10px}
+.workspace .panel-heading h3{line-height:1.3}
+#desktop-tabs .tab{min-height:42px;white-space:nowrap}
+.topbar .header-actions{gap:8px}
+button,select{touch-action:manipulation}
+@media(max-width:750px){
+ .workspace .sectionhead{margin-bottom:10px!important}
+ .workspace .sectionhead h2{font-size:clamp(20px,5vw,25px)!important}
+ .workspace .panel-heading h3{font-size:17px}
+ .workspace .cash-kpis{gap:8px}
+ .topbar .header-actions button{min-height:38px}
+}
