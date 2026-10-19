@@ -201,8 +201,10 @@ def maybe_fill(log,o,bars,spec,policy,now_ms,volume):
         reject(log,o,'MIN_LOT_OR_MARGIN_BLOCKED',now_ms);return
     qty=sizing['base_qty'];notional=qty*fill
     # Minimum new paper entry: reject undersized lots instead of increasing risk or leverage.
-    if notional<30.0-1e-9:
-        reject(log,o,'BELOW_30_USDT_MIN_NOTIONAL',now_ms);return
+    # Minimum 30 USDT actual modelled margin; never increase lot size or risk to meet it.
+    minimum_notional=max(30.0,float(policy.get('minimum_margin_usdt',30.0))*leverage)
+    if notional<minimum_notional-1e-9:
+        reject(log,o,'BELOW_30_USDT_MARGIN_MINIMUM',now_ms);return
     paid=notional*fee
     eq_after_fee=eq-paid
     if eq_after_fee-margin_used(log)-notional/leverage<0:

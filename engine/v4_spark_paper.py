@@ -19,7 +19,10 @@ ARCH=ROOT/'archive'/'v4-spark-paper-ledger.json'
 VERSION='4.0.3-spark-paper-a1'
 BAR=300000
 DAY=86400000
-NOTIONAL=30.0  # Future tickets only. Existing 10-USDT ticket references remain unchanged.
+MIN_MARGIN_USDT=30.0
+BASE_LEVERAGE=10
+MAX_LEVERAGE=30
+NOTIONAL=MIN_MARGIN_USDT*BASE_LEVERAGE  # baseline 300 USDT nominal / 30 USDT margin
 START_CASH=10000.0
 FEE=0.0006
 SLIPPAGE=0.0003
@@ -27,6 +30,32 @@ MAX_HOLD=24*3600000
 TIER_STAGE={'KIVILCIM':1,'ERKEN_SINYAL':2,'ISIK_GUCLENIYOR':3}
 def stamp(ms):return dt.datetime.fromtimestamp(ms/1000,dt.timezone.utc).isoformat()
 def valid(x):return isinstance(x,(float,int)) and not isinstance(x,bool) and math.isfinite(x) and x>0
+def choose_leverage(candidate, source):
+    """Conservative qualitative confirmation tiers, NOT calibrated success odds."""
+    rank=candidate.get('research_rank')
+    rank=float(rank) if isinstance(rank,(int,float)) and not isinstance(rank,bool) and math.isfinite(rank) else 0
+    h=(source.get('frames') or {}).get('4H') or {}
+    d=(source.get('frames') or {}).get('1D') or {}
+    adx=h.get('adx_14'); vol=h.get('volume_ratio_20')
+    adx=adx if valid(adx) else 0
+    vol=vol if valid(vol) else 0
+    stage=candidate.get('paper_stage_number',TIER_STAGE.get(candidate.get('research_tier'),1))
+    stage=stage if isinstance(stage,int) and not isinstance(stage,bool) else 1
+    side=candidate.get('side')
+    hist=((h.get('macd_12_26_9') or {}).get('hist_pct'))
+    aligned= isinstance(hist,(float,int)) and math.isfinite(hist) and (
+        (side=='LONG' and hist>0) or (side=='SHORT' and hist<0))
+    daily=d.get('trend')
+    # None/missing evidence always stays at 10x. These are research heuristics.
+    leverage=10
+    if rank>=65 and adx>=22 and vol>=1.0:leverage=15
+    if rank>=80 and stage>=2 and adx>=28 and vol>=1.2 and aligned:leverage=20
+    if rank>=90 and stage>=3 and adx>=34 and vol>=1.5 and aligned and (
+        (side=='LONG' and daily in ('UP','BULLISH','UPTREND')) or
+        (side=='SHORT' and daily in ('DOWN','BEARISH','DOWNTREND'))):
+        leverage=30
+    return min(MAX_LEVERAGE,max(BASE_LEVERAGE,leverage))
+
 def feature_snap(c):
     f=c.get('frames',{})
     features={}
@@ -165,7 +194,8 @@ def advance(prior,early,mtf_doc,now_ms,candles):
     frames={(x.get('symbol'),x.get('side')):x for x in mtf_doc.get('candidates',[])}
     # This engine observes only *new* discoveries after its initial deployment,
     # not earlier research events retroactively reclassified as paper fills.
-    since=int(old.get('last_run_ms',now_ms))-90000
+    since=max(int(old.get('last_run_ms',now_ms))-90000,
+              int(old.get('epoch_cutoff_ms') or 0))
     for x in early.get('candidates',[]):
         k=x.get('event_id');first=v4_early.epoch(x.get('first_seen_at_utc'))
         if (not k or k in index or x.get('paper_eligible') is not False or
@@ -197,7 +227,9 @@ def advance(prior,early,mtf_doc,now_ms,candles):
            'tp2':price+sign*2*gap if ok else None,
            'tp3':price+sign*3*gap if ok else None,
            'atr_pct_used':atr if ok else None,
-           'reference_notional_usdt':NOTIONAL,
+           'reference_notional_usdt':MIN_MARGIN_USDT*choose_leverage(x,src),
+           'initial_margin_usdt':MIN_MARGIN_USDT,
+           'leverage':choose_leverage(x,src),
            'entry_at_ms':now_ms,'price_source':'FUTURE_CLOSED_5M_OPEN_ESTIMATED',
            'fill_price':None,'total_qty':0.0,'remaining_qty':0.0,
            'realized_net_usdt':0.0,'unrealized_net_usdt':0.0,
@@ -235,6 +267,9 @@ def advance(prior,early,mtf_doc,now_ms,candles):
         original=x.get('event_id')
         if not original or old.get('last_scan_id')==early.get('scan_id'):
             continue
+        # A pre-reset candidate cannot become a new cash event by later promotion.
+        if (v4_early.epoch(x.get('first_seen_at_utc')) or 0)<int(old.get('epoch_cutoff_ms') or 0):
+            continue
         key='GELDI:'+original
         if key in index:continue
         src=frames.get((x['symbol'],x['side'])) or {}
@@ -259,7 +294,10 @@ def advance(prior,early,mtf_doc,now_ms,candles):
             'tp1':price+sign*gap if ok else None,
             'tp2':price+sign*2*gap if ok else None,
             'tp3':price+sign*3*gap if ok else None,
-            'atr_pct_used':atr if ok else None,'reference_notional_usdt':NOTIONAL,
+            'atr_pct_used':atr if ok else None,
+            'reference_notional_usdt':MIN_MARGIN_USDT*choose_leverage(x,src),
+            'initial_margin_usdt':MIN_MARGIN_USDT,
+            'leverage':choose_leverage(x,src),
             'entry_at_ms':now_ms,'price_source':'FUTURE_CLOSED_5M_OPEN_ESTIMATED',
             'fill_price':None,'total_qty':0.0,'remaining_qty':0.0,
             'realized_net_usdt':0.0,'unrealized_net_usdt':0.0,
@@ -314,7 +352,13 @@ def advance(prior,early,mtf_doc,now_ms,candles):
             if not valid(ticket_notional):
                 t['status']='CAPACITY_BLOCKED';t['valuation_status']='INVALID_NOTIONAL';continue
             exposure=sum(v.get('remaining_notional_usdt',0) for v in index.values() if v['status']=='OPEN')
-            if exposure+ticket_notional>START_CASH:
+            reserved=sum(float(v.get('initial_margin_usdt') or 0)*
+              (float(v.get('remaining_qty') or 0)/float(v.get('total_qty') or 1))
+              for v in index.values() if v['status']=='OPEN')
+            required_margin=float(t.get('initial_margin_usdt') or
+                ticket_notional/float(t.get('leverage') or BASE_LEVERAGE))
+            if (not valid(required_margin) or reserved+required_margin>START_CASH*.5 or
+                exposure+ticket_notional>START_CASH*3):
                 t['status']='CAPACITY_BLOCKED';t['valuation_status']='VIRTUAL_CAPITAL_FULL';continue
             sign=1 if t['side']=='LONG' else -1
             filled=nextbar['o']*(1+sign*SLIPPAGE)
@@ -380,7 +424,12 @@ def advance(prior,early,mtf_doc,now_ms,candles):
         'all_events_count':len(tickets),'archive_is_persistent':True,
         'no_real_orders':True,'combined_with_strict_paper_cash':False,
         'starting_balance_usdt':START_CASH,'reference_ticket_notional_usdt':NOTIONAL,
-        'minimum_new_ticket_notional_usdt':30.0,
+        'minimum_new_ticket_notional_usdt':MIN_MARGIN_USDT*BASE_LEVERAGE,
+        'minimum_new_margin_usdt':MIN_MARGIN_USDT,
+        'leverage_min':BASE_LEVERAGE,'leverage_max':MAX_LEVERAGE,
+        'leverage_policy':'CONSERVATIVE_OBSERVATION_TIERS_NOT_SUCCESS_PROBABILITIES',
+        'epoch_id':doc.get('epoch_id'),
+        'epoch_started_at_utc':doc.get('cutover_at_utc'),
         'notional_policy_applies_to':'NEW_INTENTS_ONLY',
         'virtual_account_is_estimated':True,'no_backfilled_outcomes':True,
         'fee_per_side_assumption':FEE,'slippage_per_side_assumption':SLIPPAGE,
@@ -401,6 +450,8 @@ def advance(prior,early,mtf_doc,now_ms,candles):
             'realized_net_usdt':t.get('realized_net_usdt'),
             'unrealized_net_usdt':t.get('unrealized_net_usdt'),
             'reference_notional_usdt':t.get('reference_notional_usdt'),
+            'initial_margin_usdt':t.get('initial_margin_usdt'),
+            'leverage':t.get('leverage'),
             'remaining_notional_usdt':t.get('remaining_notional_usdt'),
             'fees_estimated_usdt':t.get('fees_estimated_usdt'),
             'entry_fee_usdt':t.get('entry_fee_usdt'),

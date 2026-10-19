@@ -121,8 +121,10 @@
    $('cash-latest-close').textContent=lastClose?lastClose.symbol+' · '+lastClose.side:'Son örnekte yok';
    $('cash-latest-close-time').textContent=lastClose?
      stamp(lastClose.closed_at_utc)+' · net '+paperPnl(lastClose.realized_net_usdt):'Kapanmış kayıtlar son bilet örneğinden okunur';
-   $('cash-size-policy').textContent=money(doc?.minimum_new_ticket_notional_usdt??doc?.reference_ticket_notional_usdt);
-   $('cash-size-note').textContent='Yeni sanal niyetler · eski 10 USDT kayıtlarına dokunulmaz';
+   const margin=doc?.minimum_new_margin_usdt;
+   $('cash-size-policy').textContent=typeof margin==='number'?money(margin)+' teminat':'—';
+   $('cash-size-note').textContent='10–30x · min. '+money(doc?.minimum_new_ticket_notional_usdt)+
+     ' nominal · eski dönem sadece arşivde';
  }
  function renderDaily(doc){
    const canvas=$('cash-performance');if(!canvas)return;
@@ -169,6 +171,8 @@
      moneyCell('STOP',fmt(t.stop,7)),
      moneyCell('TP1 / TP2 / TP3',[t.tp1,t.tp2,t.tp3].map(v=>fmt(v,7)).join(' / ')),
      moneyCell('Başlangıç nominali',money(size)),
+     moneyCell('Kaldıraç',typeof t.leverage==='number'?fmt(t.leverage,0)+'x':'—'),
+     moneyCell('Sanal başlangıç teminatı',money(t.initial_margin_usdt)),
      moneyCell('Kalan pozisyon nominali',money(t.remaining_notional_usdt)),
      moneyCell('Kayıtlı birim miktar',fmt(t.remaining_qty,8)),
      moneyCell('Gerçekleşen net sanal kâr/zarar',money(t.realized_net_usdt)),
@@ -190,7 +194,7 @@
    });else ledger.append(node('p','muted tiny','Henüz kayıtlı sanal çıkış yok.'));
    info.append(ledger);
    info.append(node('p','muted tiny',
-     'Kaynak: ileride kapanmış OKX 5 dakikalık mumundan tahmini dolum. Komisyon varsayımı ve kayma modele dahildir; fonlama, gerçek emir fiyatı ve tasfiye dahil değildir. '+ 
+     'Kaynak: ileride kapanmış OKX 5 dakikalık mumundan tahmini dolum. 10–30x sanal kaldıraç seviyesi ölçülmüş kazanma ihtimali değildir. Komisyon ve kayma varsayımsaldır; fonlama, gerçek emir fiyatı ve tasfiye dahil değildir. '+ 
      (numeric(size)&&size<30?'Bu işlem 30 USDT kuralından önceki tarihsel kayıttır.':'')+
      ' Gerçek emir verilmez.'));
    root.dispatchEvent(new CustomEvent('uzayx:position-selected',{detail:{ticket:t}}));
@@ -246,7 +250,9 @@
    $('cash-waiting').textContent=fmt(summary.waiting,0);
    $('cash-closed').textContent=fmt(summary.closed,0);
    $('cash-total').textContent=fmt(summary.total,0);
-   $('cash-coverage').textContent=summary.represented+' son bilet gösteriliyor / toplam '+summary.total+
+   $('cash-coverage').textContent=(doc.epoch_id?
+      'Yeni dönem '+stamp(doc.epoch_started_at_utc)+' · önceki kasanın tüm işlemleri ayrı arşive taşındı. ':'')+
+      summary.represented+' son bilet gösteriliyor / toplam '+summary.total+
       '. Kaydedilen her yeni kıvılcım sanal niyet olarak izlenir; dolum sonraki kapanmış mumdan doğrulanır.';
    $('cash-asof').textContent='Kayıt: '+stamp(doc.updated_at)+' · '+(valid?'Kaynak uyumlu':'Kontrol gerekli');
    $('cash-main').textContent=money(paper.equity_usdt);

@@ -37,6 +37,8 @@ jobs:
         run: echo "TRIGGER=${{ github.event_name }} UTC=$(date -u +%FT%TZ)"
       - name: Freeze previous published paper and watch counters
         run: python3 scripts/uzayx_week_guard.py baseline
+      - name: One-time audited paper cash epoch cutover, keeping full prior books
+        run: python3 scripts/uzayx_epoch_cutover.py
       - name: Read-only OKX crypto market quote universe (legacy 15m signals OFF)
         run: python3 engine/collector.py
       - name: Read-only RSS/social context (never trading confirmation)
@@ -226,6 +228,7 @@ jobs:
           git add web/data/uzayx-guncel.csv
           git add web/data/v4-watch-archive.json web/data/v4-context.json web/data/v4-early.json web/data/v4-spark-paper.json web/data/v4-spark-review.json
           git add web/data/swing-radar.json web/data/swing-history.json web/data/swing-outcomes.json
+          git add archive/epochs
           git add archive/pilot-ledger.json archive/scan-health.json archive/swing-sparks-ledger.json archive/swing-active-ledger.json archive/swing-outcomes-ledger.json
           git add archive/v3-paper-legacy-snapshot.json archive/v4-lifecycle-ledger.json archive/v4-paper-ledger.json archive/v4-shadow-ledger.json archive/v4-forward-ledger.json archive/v4-oi-timeseries.json archive/v4-anomaly-study.json archive/v4-watch-ledger.json archive/v4-context-ledger.json archive/v4-early-ledger.json archive/v4-spark-paper-ledger.json
           if git diff --cached --quiet; then exit 0; fi

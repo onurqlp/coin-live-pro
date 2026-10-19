@@ -1,0 +1,10 @@
+{
+  "schema": "uzayx.paper.epoch.v1",
+  "epoch_id": "uzayx-20261019-fresh-30-margin-10x",
+  "minimum_margin_usdt": 30,
+  "leverage_min": 10,
+  "leverage_max": 30,
+  "archive_prior_cashbooks": true,
+  "new_signals_only": true,
+  "real_orders": false
+}
