@@ -46,6 +46,53 @@
  let source=null,filter='OPEN',query='',selectedId=null,focused=null,homeSearch='',homeExpanded=false,positionLimit=80;
  const HOME_PREVIEW=12;
  const paperPnl=v=>typeof v==='number'&&Number.isFinite(v)?signed(v)+' USDT':'—';
+ const clock=s=>{const t=Date.parse(s||'');return Number.isFinite(t)?
+   new Date(t).toLocaleTimeString('tr-TR',{timeZone:'Europe/Istanbul',hour:'2-digit',minute:'2-digit'}):'—';};
+ /**
+  * Homepage fields are historical virtual observations, never order signals.
+  * Do not display a sum as "current" unless the full open ledger is verified.
+  */
+ function homePulseSummary(doc,manifest,commit,paper,health,now=Date.now()){
+   const full=completeOpenPositions(doc);
+   const candidates=[...(Array.isArray(doc?.recent_tickets)?doc.recent_tickets:[]),...full.rows];
+   const unique=new Map();
+   for(const t of candidates){
+     if(!t?.event_id||t.is_real_trade===true||!Number.isFinite(Date.parse(t.filled_at_utc||'')))continue;
+     unique.set(t.event_id,t);
+   }
+   const latest=[...unique.values()].sort((a,b)=>
+     Date.parse(b.filled_at_utc)-Date.parse(a.filled_at_utc))[0]||null;
+   const stampMs=Date.parse(manifest?.finished_at_utc||'');
+   const sourceValid=Boolean(/^[a-f0-9]{40}$/.test(commit||'')&&
+     manifest?.publication_valid===true&&manifest?.no_real_orders===true&&
+     doc?.no_real_orders===true&&doc?.scan_id&&
+     doc.scan_id===manifest.scan_id&&paper?.scan_id===manifest.scan_id);
+   const fresh=Number.isFinite(stampMs)&&Number.isFinite(now)&&now>=stampMs-120000&&now-stampMs<=25*60000;
+   const complete=Boolean(full.complete&&sourceValid&&
+     doc.summary?.counts?.OPEN===full.rows.length);
+   const floating=complete&&numeric(doc.summary?.unrealized_net_usdt)?
+     doc.summary.unrealized_net_usdt:null;
+   const state=!sourceValid?'Kaynak doğrulanamadı':!fresh?'Gecikmiş kayıt':
+     health?.status==='OK'?'Son doğrulanmış tarama':'Tarama zamanlaması uyarısı';
+   return {latest,floating,complete,count:complete?full.rows.length:null,
+     sourceValid,fresh,state};
+ }
+ function renderHomePulse(){
+   const entry=$('home-pulse-entry'),pnl=$('home-pulse-pnl');
+   if(!entry||!pnl)return;
+   const doc=source?.db?.spark||{};
+   const p=homePulseSummary(doc,source?.db?.manifest,source?.sourceCommit,
+     source?.db?.paper,source?.db?.health);
+   entry.textContent=p.latest?p.latest.symbol+' · '+p.latest.side:'Henüz sanal giriş kaydı yok';
+   $('home-pulse-entry-note').textContent=p.latest?
+     stamp(p.latest.filled_at_utc)+' · '+money(p.latest.reference_notional_usdt)+' nominal'+
+     (p.sourceValid&&p.fresh?'':' · geçmiş kayıt'):'Yeni sanal dolum bekleniyor';
+   pnl.textContent=numeric(p.floating)?paperPnl(p.floating):'—';
+   pnl.className='pulse-pnl '+(numeric(p.floating)?p.floating<0?'negative':'positive':'muted');
+   $('home-pulse-pnl-note').textContent=(p.count===null?'Tam açık kayıt doğrulanamadı':p.count+' açık · net tahmini')+
+     ' · '+p.state;
+ }
+
  function completeOpenPositions(doc){
    const total=doc?.summary?.counts?.OPEN;
    const a=doc?.open_positions;
@@ -82,7 +129,8 @@
    rows.forEach(t=>{
      const btn=node('button','home-open-row');btn.type='button';
      const n=node('span','home-position-symbol');
-     n.append(node('b','',String(t.symbol||'—')),node('small','',String(t.side||'')));
+     n.append(node('b','',String(t.symbol||'—')),node('small','',
+       String(t.side||'')+' · '+clock(t.filled_at_utc)));
      const raw=(typeof t.unrealized_net_usdt==='number'&&Number.isFinite(t.unrealized_net_usdt)?t.unrealized_net_usdt:null);
      const pnl=node('span','home-position-pnl '+(raw===null?'muted':raw<0?'negative':'positive'),paperPnl(raw));
      btn.append(n,node('span','home-position-fill',fmt(t.fill_price,5)),pnl,node('span','home-position-caret','›'));
@@ -257,7 +305,7 @@
    $('cash-asof').textContent='Kayıt: '+stamp(doc.updated_at)+' · '+(valid?'Kaynak uyumlu':'Kontrol gerekli');
    $('cash-main').textContent=money(paper.equity_usdt);
    $('cash-main-open').textContent=fmt(paper.open_positions?.length||0,0)+' ana pozisyon';
-   renderDaily(doc);renderRecent(doc);renderRows();renderHome();
+   renderDaily(doc);renderRecent(doc);renderRows();renderHome();renderHomePulse();
  }
  if(root.document){
    root.addEventListener('uzayx:loaded',e=>{source=e.detail;render();});
@@ -275,5 +323,5 @@
      $('cash-audit')?.addEventListener('click',()=>root.document.querySelector('[data-tab="system"]')?.click());
    });
  }
- return {reconcile,positions,completeOpenPositions,paperPnl};
+ return {reconcile,positions,completeOpenPositions,paperPnl,homePulseSummary};
 });
