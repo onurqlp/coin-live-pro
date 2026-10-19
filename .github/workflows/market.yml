@@ -1,4 +1,5 @@
 name: COIN.LIVE PRO — 4H/Daily Swing & Forward Archive
+# Deployment refresh for UZAYX kasa, V4 archive and TURAN naming; no trading rule changes.
 on:
   workflow_dispatch:
   # GitHub scheduler is best-effort. An event=schedule run must be observed;
