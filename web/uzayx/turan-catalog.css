@@ -1,1 +1,38 @@
-#turan-catalog{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.turan-summary,#turan-catalog>p{grid-column:1/-1}.turan-summary{font-weight:750;margin:8px 0}.turan-candidate{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px;border:1px solid #344e5c;border-radius:9px;background:#122a36}.turan-candidate span{font-size:12px}.turan-candidate small{font-size:10px;color:#94b7b3;white-space:nowrap}.cash-secondary{display:none!important}@media(max-width:650px){#turan-catalog{grid-template-columns:1fr}}
+/* TURAN expandable strategy research. One responsive interface for web and installed app. */
+#turan-catalog{display:block;margin-top:12px}
+.turan-tools{display:flex;align-items:stretch;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.turan-tools input,.turan-tools select,.turan-tools button{background:#112c3c;border:1px solid #345467;border-radius:10px;color:#e7f5fb;padding:10px 12px;font:inherit;font-size:12px;min-height:40px}
+.turan-tools .turan-search{flex:2 1 180px;min-width:135px}
+.turan-tools .turan-filter{flex:1 1 126px}
+.turan-tools .turan-toggle,.turan-tools .turan-reload{cursor:pointer;flex:0 1 auto}
+.turan-tools :focus-visible,.turan-candidate summary:focus-visible{outline:2px solid #88d5cb;outline-offset:2px}
+.turan-counts{font-size:13px;font-weight:750;color:#f2f8ff;margin:12px 0 3px}
+.turan-context,.turan-note{font-size:12px;color:#a7bbcd;line-height:1.55;margin:5px 0 12px}
+.turan-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-items:start}
+.turan-candidate{display:block!important;min-width:0;padding:0!important;border:1px solid #345264;border-radius:12px;background:#112938;overflow:hidden}
+.turan-candidate[open]{grid-column:span 2;border-color:#5a7c8c}
+.turan-candidate-head{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:13px;cursor:pointer;list-style:none}
+.turan-candidate-head::-webkit-details-marker{display:none}
+.turan-candidate-head::after{content:'⌄';color:#aec4d1;font-size:15px;margin-left:2px}
+.turan-candidate[open] .turan-candidate-head::after{content:'⌃'}
+.turan-candidate-title{display:flex;flex-direction:column;min-width:0;gap:4px;flex:1}
+.turan-candidate-title strong{font-size:14px;font-weight:800;color:#f0f7fc}
+.turan-candidate-title small{font-size:12px;color:#a8bcca}
+.turan-chip{font-size:10px;border:1px solid #416173;border-radius:999px;padding:5px 7px;white-space:nowrap;color:#c5dce6}
+.turan-chip-sleep{color:#a7b1be;border-color:#435464}
+.turan-chip-watch{color:#d0c2a0;border-color:#665b48}
+.turan-chip-blend{color:#a0d4e7;border-color:#416880}
+.turan-chip-source{color:#a5ddc6;border-color:#3d746c}
+.turan-detail{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;background:#0a2030;border-top:1px solid #345264;padding:9px 14px}
+.turan-detail-row{display:flex;flex-direction:column;align-items:start;gap:4px;padding:10px 0;border-bottom:1px solid #274353;min-width:0}
+.turan-detail-row span{font-size:11px;color:#91afc0}
+.turan-detail-row strong{font-size:12px;line-height:1.45;font-weight:600;color:#e6f3f9;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.turan-empty{grid-column:1/-1;color:#aebfcf;padding:14px}
+.cash-secondary{display:none!important}
+@media(max-width:730px){
+ .turan-list{grid-template-columns:1fr}
+ .turan-candidate[open]{grid-column:span 1}
+ .turan-detail{grid-template-columns:1fr;padding:8px 12px}
+ .turan-candidate-head{padding:12px 10px}
+ .turan-tools .turan-toggle,.turan-tools .turan-reload{flex:1 1 125px}
+}
