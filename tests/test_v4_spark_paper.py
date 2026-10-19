@@ -32,6 +32,8 @@ class TestSparkPaper(unittest.TestCase):
         self.assertEqual(ledger['tickets'][0]['features_at_birth']['1H']['rsi'],48)
         self.assertTrue(pub['no_real_orders'])
         self.assertEqual(pub['starting_balance_usdt'],10000)
+        self.assertEqual(pub['reference_ticket_notional_usdt'],30)
+        self.assertEqual(ledger['tickets'][0]['reference_notional_usdt'],30)
     def test_forward_fills_then_stop_net_negative(self):
         e,m=docs();ledger,_=paper.advance({},e,m,NOW,{})
         first=((NOW//paper.BAR)+1)*paper.BAR
@@ -40,6 +42,9 @@ class TestSparkPaper(unittest.TestCase):
         t=ledger['tickets'][0]
         self.assertEqual(t['status'],'OPEN')
         self.assertGreater(t['fill_price'],100)
+        self.assertEqual(t['reference_notional_usdt'],30)
+        self.assertAlmostEqual(t['total_qty']*t['fill_price'],30)
+        self.assertAlmostEqual(t['entry_fee_usdt'],30*paper.FEE)
         self.assertTrue(isinstance(pub['summary']['virtual_equity_usdt'],float))
         stop=bar(first+paper.BAR,100.,100.2,98.8,99.7)
         ledger,pub=paper.advance(ledger,{**e,'scan_id':'case-3','candidates':[]},m,first+2*paper.BAR+5000,{'BTCUSDT':[entry,stop]})
@@ -202,6 +207,19 @@ class TestSparkPaper(unittest.TestCase):
         self.assertEqual(old['realized_net_usdt'],0)
         self.assertEqual(p['opposite_cancelled_total'],1)
         self.assertEqual(p['summary']['counts']['OPPOSITE_CANCELLED'],1)
+    def test_legacy_pending_ticket_keeps_original_10_usdt_when_filled(self):
+        e,m=docs();ledger,_=paper.advance({},e,m,NOW,{})
+        legacy=ledger['tickets'][0]
+        legacy['reference_notional_usdt']=10.0
+        first=((NOW//paper.BAR)+1)*paper.BAR
+        entry=bar(first,100.,100.5,99.9,100.2)
+        ledger,pub=paper.advance(ledger,{**e,'scan_id':'legacy-next','candidates':[]},m,first+paper.BAR+5000,{'BTCUSDT':[entry]})
+        t=ledger['tickets'][0]
+        self.assertEqual(t['status'],'OPEN')
+        self.assertAlmostEqual(t['total_qty']*t['fill_price'],10)
+        self.assertAlmostEqual(t['entry_fee_usdt'],10*paper.FEE)
+        self.assertEqual(pub['reference_ticket_notional_usdt'],30)
+
     def test_corrupted_mixed_snapshot_fails(self):
         e,m=docs();m['fetched_at']='2001-01-01T00:00:00Z'
         with self.assertRaisesRegex(RuntimeError,'mixed'):
