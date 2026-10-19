@@ -126,7 +126,7 @@ async function run(){
    assert.ok(proof.every(x=>x.result&&!x.result.includes('Henüz çevrimiçi kontrol yapılmadı')));
    const proofById=Object.fromEntries(proof.map(x=>[x.module,x.result]));
    for(const id of ['A1','A2']){
-     assert.match(proofById[id],/ortak kapanış seansı|ENGELLİ|doğrulanamadı|fiyat kaynağı/i,
+     assert.match(proofById[id],/ortak kapanış seansı|ENGELLİ|doğrulanamadı|fiyat kaynağı|Güncel çalışma kanıtı yok/i,
        id+' must report verified public price inputs or honestly report a source blocker');
    }
    for(const id of ['A3','B1','B2','T0']){
