@@ -35,6 +35,8 @@ jobs:
           python-version: '3.11'
       - name: Timestamp 5-minute best-effort scan
         run: echo "TRIGGER=${{ github.event_name }} UTC=$(date -u +%FT%TZ)"
+      - name: Freeze previous published paper and watch counters
+        run: python3 scripts/uzayx_week_guard.py baseline
       - name: Read-only OKX crypto market quote universe (legacy 15m signals OFF)
         run: python3 engine/collector.py
       - name: Read-only RSS/social context (never trading confirmation)
@@ -199,6 +201,8 @@ jobs:
                   assert all(rows[i][0]<rows[i+1][0] for i in range(len(rows)-1))
           print('Verified chart-only closed-candle pack:',len(valid),'symbols')
           PY
+      - name: Refuse ledger/history regression or mismatched scans
+        run: python3 scripts/uzayx_week_guard.py verify
       - name: Produce independent forward-evidence ops report (non-blocking)
         run: |
           if python3 scripts/quant_report.py; then
