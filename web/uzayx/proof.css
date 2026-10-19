@@ -58,3 +58,18 @@
  .home-positions-toolbar .faint{font-size:9px}
  .proof-module{padding:12px}
 }
+
+/* Four signals that matter without adding another home panel. */
+.home-glance{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin:4px 0 7px}
+.home-glance>div{min-width:0;background:#102737;border:1px solid #2a4859;border-radius:9px;padding:10px}
+.home-glance small{display:block;font-size:10px;color:#9fbecd;margin-bottom:5px}
+.home-glance strong{display:block;font-size:clamp(11px,1.35vw,14px);font-weight:800;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.home-glance span{display:block;font-size:10px;color:#abc3d0;line-height:1.35;margin-top:5px;overflow-wrap:anywhere}
+.home-glance strong.negative{color:#ff9eab}
+.home-glance strong.positive{color:#81e6bb}
+#home-glance-source{font-size:10px;margin:0 0 10px;color:#a8beca}
+@media(max-width:760px){
+ .home-glance{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+ .home-glance>div{padding:9px}
+ .home-glance strong{font-size:12px}
+}
