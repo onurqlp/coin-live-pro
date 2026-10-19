@@ -86,6 +86,8 @@
    ['LONG','SHORT','BEKLE','NO_TRADE'].forEach(side=>{const b=create('button','turan-direction-btn',side);b.type='button';b.dataset.side=side;b.setAttribute('aria-pressed',side==='BEKLE'?'true':'false');b.addEventListener('click',()=>selectSide(side));buttons.append(b)});
    chooser.append(buttons,out);content.append(chooser);selectSide('BEKLE');
    field('Maliyet ve risk', 'Her testte komisyon, spread, kayma, fonlama, kaldıraç ve tasfiye riski zorunludur. Geçmiş mumdan kusursuz dolum varsayılmaz.');
+   field('Bu aile için sanal teminat / nominal işlem tutarı', '— / — · doğrulanmış işlem eşleşmesi bulunmuyor.');
+   field('Bu aile için gerçekleşen kazanç / kayıp', '— / — · henüz test edilmedi, rakam uydurulmuyor.');
    field('Kanıt ve sonuç durumu', 'AR-GE / doğrulanmadı · bağımsız backtest, ileri test ve net PnL yok. Uyuyor ya da kazanıyor olarak etiketlenmez.');
    field('İlerletme kararı', 'Kaynak doğrula → geçmiş/ileri dönemleri ayır → LONG/SHORT/BEKLE/NO_TRADE karşılaştır → OOS doğrula → ancak sonra ilerlet/uyut/ele.');
    card.append(content);
