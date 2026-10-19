@@ -65,6 +65,7 @@ async function run(){
    }));
    assert.ok(Number(summary.open.replaceAll('.',''))>=0,'Open position count is not numeric');
    assert.ok(summary.rows<=12,'Homepage preview must keep open positions compact');
+   assert.match(summary.note,new RegExp('gösterilen '+summary.rows+'(?:\\D|$)'),'Homepage note must report visible paper positions accurately');
    const allButton=await page.$('#home-open-more');
    if(Number(summary.open.replaceAll('.',''))>12){
      assert.ok(allButton,'All-positions expansion control is missing');

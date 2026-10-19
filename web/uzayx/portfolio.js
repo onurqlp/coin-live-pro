@@ -66,8 +66,9 @@
    $('home-open-time').textContent='Kayıt '+stamp(doc.updated_at)+' · '+(valid&&fresh?'Güncel':valid?'Gecikmiş':'Doğrulanamadı');
    const opposite=Number.isInteger(doc.opposite_pending_count)?doc.opposite_pending_count:0;
    $('home-open-note').textContent=(full.complete?
-     'Bütün '+all.length+' açık sanal bilet listelendi.':
-     'Kısmi liste: '+all.length+' son kayıttaki açık bilet. Tam liste sonraki motor taramasıyla yayınlanır.')+
+     'Toplam '+all.length+' açık sanal bilet doğrulandı':
+     'Kısmi kayıt: '+all.length+' açık bilet; tamamı henüz doğrulanamadı')+
+     ' · gösterilen '+rows.length+(homeSearch?' (arama sonucu)':'')+
      (opposite?' · Karşı sinyal kapanışı için doğrulanmış 5 dk mum bekleyen: '+opposite:'')+
      ' · Gerçek emir yok.';
    box.replaceChildren();
