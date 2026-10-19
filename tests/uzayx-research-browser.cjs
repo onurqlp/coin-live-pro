@@ -21,8 +21,9 @@ async function main(){
   for(const width of [390,1440]){
    const page=await browser.newPage();await page.setViewport({width,height:900,deviceScaleFactor:1});
    const errors=[];page.on('pageerror',e=>errors.push(e.message));
-   let offline=false,headRequests=0;
+   let offline=false,headRequests=0,manualCloseReport=null;
    if(fixture){
+    await page.evaluateOnNewDocument(()=>window.addEventListener('uzayx:loaded',event=>{window.__lastVerifiedState=event.detail;}));
     const snapshot=JSON.parse(fs.readFileSync(path.join(root,'web/data/v4-manifest.json')));
     const offset=Date.parse(snapshot.finished_at_utc)+60000-Date.now();
     await page.evaluateOnNewDocument(offset=>{window.__clockOffset=offset;const real=Date.now.bind(Date);Date.now=()=>real()+window.__clockOffset;},offset);
@@ -31,6 +32,7 @@ async function main(){
      const u=new URL(request.url());
      if(u.host==='api.github.com'){headRequests++;return request.respond({status:200,headers:{'access-control-allow-origin':'*'},contentType:'application/json',body:JSON.stringify({sha:'a'.repeat(40)})});}
      if(u.host==='raw.githubusercontent.com'){
+      if(manualCloseReport&&u.pathname.endsWith('/uzayx-cash-close.json'))return request.respond({status:200,headers:{'access-control-allow-origin':'*'},contentType:'application/json',body:JSON.stringify(manualCloseReport)});
       if(offline&&u.pathname.endsWith('/v4-manifest.json'))return request.abort('internetdisconnected');
       const match=u.pathname.match(/^\/onurqlp\/coin-live-pro\/[^/]+\/(.+)$/);
       const file=match&&path.join(root,match[1]);
@@ -56,6 +58,10 @@ async function main(){
    assert.equal(lab.selected,'true');assert.equal(lab.overflow,false);assert.match(lab.blocked,/Sektör kaynağı bekleniyor/);
    await page.screenshot({path:'/tmp/uzayx-research-'+width+'.png',fullPage:false});
    await open('funds');assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false);
+   const closeControl=await page.$eval('#cash-close-all',n=>({text:n.textContent,url:n.href,target:n.target,width:n.getBoundingClientRect().width}));
+   assert.match(closeControl.text,/Tüm işlemleri kapat/);
+   assert.equal(closeControl.url,'https://github.com/onurqlp/coin-live-pro/actions/workflows/uzayx-close-all.yml');
+   assert.equal(closeControl.target,'_blank');assert.ok(closeControl.width>100);
    await page.locator('#risk-desk-body .rd-disclosure').click();
    assert.ok(await page.$('#risk-desk-body .rd-attribution'));
    if(fixture&&width===390){
@@ -70,6 +76,23 @@ async function main(){
     await page.evaluate(()=>{window.__clockOffset-=26*60000;window.dispatchEvent(new Event('online'));});
     await page.waitForFunction(()=>document.querySelector('#connection').textContent==='Veri güncel'&&document.querySelector('#risk-desk-body .rd-grid'),{timeout:10000});
     assert.equal(headRequests,before,'Unchanged scan unnecessarily re-fetched HEAD');
+   }
+   if(fixture){
+    await page.evaluate(()=>document.querySelector('#cash-close-all').addEventListener('click',event=>event.preventDefault(),{once:true}));
+    await page.locator('#cash-close-all').click();
+    assert.match(await page.$eval('#cash-close-message',n=>n.textContent),/Run workflow/);
+    assert.doesNotMatch(await page.$eval('#cash-close-message',n=>n.textContent),/pozisyon kapatıldı/,'Opening authorization must not fabricate a close');
+    const pending=await page.evaluate(()=>JSON.parse(sessionStorage.getItem('uzayx.pendingPaperClose.v1')));
+    manualCloseReport={request_id:'uzayx-manual-123456',closed_at_utc:new Date(pending.at+1000).toISOString(),
+      real_orders:false,all_active_positions_closed:true,positions:[{book:'spark',net_closed_usdt:-3}],cancelled:[],spark_equity_after_usdt:9997};
+    await page.evaluate(()=>{
+     const state=window.__lastVerifiedState;
+     window.dispatchEvent(new CustomEvent('uzayx:loaded',{detail:{...state,sourceCommit:'b'.repeat(40),
+      db:{...state.db,spark:{...state.db.spark,close_request_id:'uzayx-manual-123456'}}}}));
+    });
+    await page.waitForFunction(()=>document.querySelector('#cash-close-message').textContent.includes('1 sanal pozisyon kapatıldı'),{timeout:8000});
+    assert.equal(await page.evaluate(()=>sessionStorage.getItem('uzayx.pendingPaperClose.v1')),null);
+    assert.match(await page.$eval('#cash-close-message',n=>n.textContent),/9.997,00 USDT/);
    }
    assert.deepEqual(errors,[],'Uncaught browser errors');
    console.log(JSON.stringify({width,families:scan.families,overflow:false,recovery:fixture&&width===390?'verified':'not exercised',errors}));

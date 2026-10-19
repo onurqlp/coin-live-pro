@@ -32,6 +32,7 @@ jobs:
       - run: node --check web/app.js
       - run: node --check web/uzayx/app.js
       - run: node --test tests/uzayx-research-desk.test.cjs
+      - run: node --check web/uzayx/cash-close.js && node --test tests/uzayx-cash-close.test.cjs
       - run: node --check web/uzayx/charts.js
       - run: node --check web/uzayx/archive.js
       - run: node --check web/uzayx/watch.js

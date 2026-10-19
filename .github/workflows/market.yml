@@ -16,7 +16,20 @@ name: COIN.LIVE PRO — 4H/Daily Swing & Forward Archive
 # Refresh Pages: unified installed app and website; standalone verified candle charts.
 # Deployment refresh for UZAYX kasa, V4 archive and TURAN naming; no trading rule changes.
 on:
+  workflow_call:
+    inputs:
+      close_all:
+        description: Close all active virtual positions once, preserve PnL and publish
+        type: boolean
+        required: false
+        default: false
   workflow_dispatch:
+    inputs:
+      close_all:
+        description: Tüm açık sanal işlemleri güncel fiyatla kapat
+        type: boolean
+        required: false
+        default: false
   # GitHub scheduler is best-effort. An event=schedule run must be observed;
   # code pushes and workflow_dispatch alone DO NOT prove unattended refresh.
   schedule:
@@ -58,6 +71,8 @@ jobs:
       - name: Read-only OKX crypto market quote universe (legacy 15m signals OFF)
         run: python3 engine/collector.py
       - name: Audit and close all prior virtual positions at current executable-side quotes
+        env:
+          UZAYX_CLOSE_REQUEST_ID: ${{ inputs.close_all && format('uzayx-manual-{0}', github.run_id) || '' }}
         run: python3 engine/uzayx_cash_close.py
       - name: Read-only RSS/social context (never trading confirmation)
         run: |

@@ -8,6 +8,7 @@ import copy
 import datetime as dt
 import hashlib
 import json
+import os
 import pathlib
 import sys
 
@@ -107,11 +108,20 @@ def complete_quotes(books,market,now):
     return out
 
 
-def main():
-    config=json.loads((ROOT/'config/uzayx-strategy-policy.json').read_text())
-    request=config['close_request_id']
+def request_id(config,environ=None):
+    environ=os.environ if environ is None else environ
+    override=environ.get('UZAYX_CLOSE_REQUEST_ID','')
+    if override and (not override.startswith('uzayx-manual-') or not override[13:].isdigit()):
+        raise ValueError('INVALID_MANUAL_CLOSE_REQUEST')
+    request=override or config['close_request_id']
     if not request.startswith('uzayx-') or any(c not in 'abcdefghijklmnopqrstuvwxyz0123456789-' for c in request):
         raise ValueError('INVALID_CLOSE_REQUEST')
+    return request
+
+
+def main():
+    config=json.loads((ROOT/'config/uzayx-strategy-policy.json').read_text())
+    request=request_id(config)
     folder=ROOT/'archive/closings'/request
     checkpoint=folder/'completion.json'
     if checkpoint.exists():

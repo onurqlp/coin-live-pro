@@ -1,0 +1,4 @@
+.cash-actions .cash-close-action{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;color:var(--red);border-color:#804d5b;background:#3a2834;gap:6px}
+.cash-actions .cash-close-action:hover{background:#51303b}
+#cash-close-message{max-width:840px;overflow-wrap:anywhere;min-height:1.6em}
+@media(max-width:540px){.cash-actions .cash-close-action{width:100%}}
