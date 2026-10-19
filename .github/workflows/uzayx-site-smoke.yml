@@ -5,6 +5,7 @@ on:
     paths:
       - 'web/uzayx/**'
       - 'tests/uzayx-browser-smoke.cjs'
+      - 'tests/uzayx-research-browser.cjs'
       - '.github/workflows/uzayx-site-smoke.yml'
   workflow_dispatch:
 permissions:
@@ -25,8 +26,8 @@ jobs:
           ROOT="https://onurqlp.github.io/coin-live-pro/uzayx/"
           ready=0
           for i in $(seq 1 36); do
-            if curl -fsSL --max-time 15 "$ROOT?check=$(date +%s%N)" -o /tmp/uzayx-site.html; then
-              if grep -q 'id="chart-price"' /tmp/uzayx-site.html && grep -q 'src="./archive.js"' /tmp/uzayx-site.html && grep -q 'id="mini-price"' /tmp/uzayx-site.html && grep -q 'id="home-open-count"' /tmp/uzayx-site.html && grep -q 'id="module-check-all"' /tmp/uzayx-site.html && grep -q 'src="./support-proof.js"' /tmp/uzayx-site.html && cmp -s web/uzayx/index.html /tmp/uzayx-site.html && curl -fsSL --max-time 15 "$ROOT/portfolio.js?proof=$(date +%s%N)" -o /tmp/live-uzayx-portfolio.js && cmp -s web/uzayx/portfolio.js /tmp/live-uzayx-portfolio.js && curl -fsSL --max-time 15 "$ROOT/charts.js?proof=$(date +%s%N)" -o /tmp/live-uzayx-charts.js && cmp -s web/uzayx/charts.js /tmp/live-uzayx-charts.js && curl -fsSL --max-time 15 "$ROOT/support-proof.js?proof=$(date +%s%N)" -o /tmp/live-uzayx-support-proof.js && cmp -s web/uzayx/support-proof.js /tmp/live-uzayx-support-proof.js; then ready=1;break;fi
+            if curl -fsSL --max-time 15 "${ROOT}site.html?check=$(date +%s%N)" -o /tmp/uzayx-site.html; then
+              if grep -q 'id="chart-price"' /tmp/uzayx-site.html && grep -q 'src="./archive.js"' /tmp/uzayx-site.html && grep -q 'id="mini-price"' /tmp/uzayx-site.html && grep -q 'id="home-open-count"' /tmp/uzayx-site.html && grep -q 'id="module-check-all"' /tmp/uzayx-site.html && grep -q 'src="./support-proof.js"' /tmp/uzayx-site.html && cmp -s web/uzayx/site.html /tmp/uzayx-site.html && curl -fsSL --max-time 15 "$ROOT/portfolio.js?proof=$(date +%s%N)" -o /tmp/live-uzayx-portfolio.js && cmp -s web/uzayx/portfolio.js /tmp/live-uzayx-portfolio.js && curl -fsSL --max-time 15 "$ROOT/charts.js?proof=$(date +%s%N)" -o /tmp/live-uzayx-charts.js && cmp -s web/uzayx/charts.js /tmp/live-uzayx-charts.js && curl -fsSL --max-time 15 "$ROOT/support-proof.js?proof=$(date +%s%N)" -o /tmp/live-uzayx-support-proof.js && cmp -s web/uzayx/support-proof.js /tmp/live-uzayx-support-proof.js; then ready=1;break;fi
             fi
             sleep 7
           done
@@ -48,7 +49,7 @@ jobs:
           CHROME="$(command -v google-chrome || command -v chromium || true)"
           test -n "$CHROME"
           export CHROME
-          NODE_PATH=/tmp/uzayx-smoke/node_modules node tests/uzayx-browser-smoke.cjs
+          NODE_PATH=/tmp/uzayx-smoke/node_modules node tests/uzayx-research-browser.cjs
       - name: Save test screenshots
         if: always()
         uses: actions/upload-artifact@v4

@@ -36,7 +36,7 @@ jobs:
         run: |
           node - <<'NODE'
           const fs=require('node:fs'), assert=require('node:assert/strict');
-          const page=fs.readFileSync('web/uzayx/index.html','utf8');
+          const page=fs.readFileSync('web/uzayx/site.html','utf8');
           const js=fs.readFileSync('web/uzayx/app.js','utf8');
           assert.match(page,/<title>UzayX/);
           assert.match(page,/id="learn"/);

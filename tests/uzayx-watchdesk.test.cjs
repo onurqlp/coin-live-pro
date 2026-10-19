@@ -56,7 +56,7 @@ test('paper summary audit distinguishes 1058 ledger tickets from recent limited 
  assert.notEqual(portfolio.paperPnl(0),'—');
 });
 test('logo asset, compact watch monitor and separate cash charts are present',()=>{
- const html=fs.readFileSync('web/uzayx/index.html','utf8');
+ const html=fs.readFileSync('web/uzayx/site.html','utf8');
  const js=fs.readFileSync('web/uzayx/app.js','utf8');
  assert.match(html,/<img src="\.\.\/assets\/uzayx-logo.svg" alt="UZAYX"/);
  for(const id of ['watch-items','watch-detail','watch-search','mini-price','position-rows','position-detail',

@@ -221,6 +221,8 @@ jobs:
           PY
       - name: Refuse ledger/history regression or mismatched scans
         run: python3 scripts/uzayx_week_guard.py verify
+      - name: Record isolated prospective TURAN research and complete cash attribution
+        run: python3 engine/uzayx_research.py
       - name: Produce independent forward-evidence ops report (non-blocking)
         run: |
           if python3 scripts/quant_report.py; then
@@ -241,6 +243,7 @@ jobs:
           git add web/data/v4-oi.json web/data/v4-radar.json web/data/v4-paper.json
           git add web/data/v4-history-index.json web/data/v4-shadow.json
           git add web/data/v4-lab.json web/data/v4-forward.json web/data/v4-manifest.json
+          git add web/data/uzayx-research.json archive/uzayx-research-ledger.json
           git add web/data/uzayx-guncel.csv
           git add web/data/v4-watch-archive.json web/data/v4-context.json web/data/v4-early.json web/data/v4-spark-paper.json web/data/v4-spark-review.json
           git add web/data/swing-radar.json web/data/swing-history.json web/data/swing-outcomes.json

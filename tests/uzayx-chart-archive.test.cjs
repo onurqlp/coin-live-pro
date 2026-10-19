@@ -50,7 +50,7 @@ test('handoff ZIP historical metadata does not invent PnL',()=>{
 });
 test('homepage contract: Futures only in header, full chart in a secondary workspace',()=>{
  const fs=require('node:fs');
- const page=fs.readFileSync('web/uzayx/index.html','utf8');
+ const page=fs.readFileSync('web/uzayx/site.html','utf8');
  const app=fs.readFileSync('web/uzayx/app.js','utf8');
  assert.equal((page.match(/binance\.com\/en\/futures\/home/g)||[]).length,1);
  for(const id of ['overview','chart','chart-price','chart-rsi','chart-macd','archive-file','archive-comparison','mini-price','chart-levels','mini-levels']){

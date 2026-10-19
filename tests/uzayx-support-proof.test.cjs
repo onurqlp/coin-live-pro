@@ -44,7 +44,7 @@ test('full open list preserves exact open count; partial list clearly degraded',
  assert.equal(portfolio.completeOpenPositions(corrupted).complete,false);
 });
 test('home open tickets, module verification controls, logo invariants',()=>{
- const page=fs.readFileSync('web/uzayx/index.html','utf8');
+ const page=fs.readFileSync('web/uzayx/site.html','utf8');
  for(const id of ['home-open-count','home-open-list','home-position-search','module-check-all','module-verified-at'])
    assert.ok(page.includes('id="'+id+'"'),'missing '+id);
  assert.match(page,/src="\.\/support-proof\.js"/);

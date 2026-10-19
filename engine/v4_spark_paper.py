@@ -21,7 +21,7 @@ BAR=300000
 DAY=86400000
 MIN_MARGIN_USDT=30.0
 BASE_LEVERAGE=10
-MAX_LEVERAGE=30
+MAX_LEVERAGE=20
 NOTIONAL=MIN_MARGIN_USDT*BASE_LEVERAGE  # baseline 300 USDT nominal / 30 USDT margin
 START_CASH=10000.0
 FEE=0.0006
@@ -50,11 +50,21 @@ def choose_leverage(candidate, source):
     leverage=10
     if rank>=65 and adx>=22 and vol>=1.0:leverage=15
     if rank>=80 and stage>=2 and adx>=28 and vol>=1.2 and aligned:leverage=20
-    if rank>=90 and stage>=3 and adx>=34 and vol>=1.5 and aligned and (
-        (side=='LONG' and daily in ('UP','BULLISH','UPTREND')) or
-        (side=='SHORT' and daily in ('DOWN','BEARISH','DOWNTREND'))):
-        leverage=30
     return min(MAX_LEVERAGE,max(BASE_LEVERAGE,leverage))
+
+RISK_POLICY='prospective-stop-budget-v1-20261020'
+def identity(early,event,kind,now_ms):
+    """Exact native rule at birth; never infer a TURAN ID for old tickets."""
+    import hashlib,json
+    config={'source_model':early.get('model_version'),'paper_model':VERSION,
+            'kind':kind,'fee':FEE,'slippage':SLIPPAGE,'max_hold':MAX_HOLD,
+            'min_margin':MIN_MARGIN_USDT,'max_leverage':MAX_LEVERAGE,
+            'risk_policy':RISK_POLICY}
+    return {'strategy_id':'SPARK_'+kind,'strategy_version':VERSION,
+            'strategy_config_hash':hashlib.sha256(json.dumps(config,sort_keys=True).encode()).hexdigest(),
+            'parent_event_id':event.get('event_id'),'source_scan_id':early.get('scan_id'),
+            'decision_at_utc':stamp(now_ms),'risk_policy_version':RISK_POLICY,
+            'attribution_kind':'EXACT_NATIVE_RULE','turan_strategy_id':None}
 
 def feature_snap(c):
     f=c.get('frames',{})
@@ -237,6 +247,7 @@ def advance(prior,early,mtf_doc,now_ms,candles):
            'is_real_trade':False,'estimated_only':True,'exits':[],
            'last_processed_ms':None,'valuation_status':'WAITING',
            'no_backfilled_fill':True}
+        ticket.update(identity(early,x,x['research_tier'],now_ms))
         index[k]=ticket
     # Existing same-hour research hypotheses may strengthen/weaken. Keep a
     # time-stamped stage transition, but preserve immutable birth stage for
@@ -306,6 +317,7 @@ def advance(prior,early,mtf_doc,now_ms,candles):
             'last_processed_ms':None,
             'valuation_status':'WAITING_FUTURE_OHLC' if ok else 'ATR_LEVEL_UNAVAILABLE',
             'no_backfilled_fill':True}
+        entry.update(identity(early,x,'GELDI',now_ms))
         index[key]=entry
         newly_confirmed_opposite.append(entry)
     # Independent, confirmed opposite GELDI intentions supersede an older paper
@@ -365,6 +377,13 @@ def advance(prior,early,mtf_doc,now_ms,candles):
             if sign*(filled-t['stop'])<=0:
                 t['status']='INVALID_LEVEL';t['valuation_status']='STOP_BEFORE_ESTIMATED_FILL';continue
             qty=ticket_notional/filled
+            # Prospective policy only. Older pending tickets retain their birth policy.
+            stop_exit=t['stop']*(1-sign*SLIPPAGE)
+            stop_cost=qty*abs(filled-stop_exit)+ticket_notional*FEE+qty*stop_exit*FEE
+            if t.get('risk_policy_version')==RISK_POLICY and stop_cost>=required_margin:
+                t['status']='CAPACITY_BLOCKED'
+                t['valuation_status']='STOP_COST_EXCEEDS_INITIAL_MARGIN'
+                continue
             t.update(status='OPEN',fill_price=filled,filled_at_utc=stamp(start+BAR),
                 fill_at_ms=start,entry_open_reference=nextbar['o'],
                 total_qty=qty,remaining_qty=qty,remaining_notional_usdt=ticket_notional,
@@ -428,6 +447,8 @@ def advance(prior,early,mtf_doc,now_ms,candles):
         'minimum_new_margin_usdt':MIN_MARGIN_USDT,
         'leverage_min':BASE_LEVERAGE,'leverage_max':MAX_LEVERAGE,
         'leverage_policy':'CONSERVATIVE_OBSERVATION_TIERS_NOT_SUCCESS_PROBABILITIES',
+        'new_intent_risk_policy':RISK_POLICY,
+        'funding_model':'UNMODELED','liquidation_model':'UNVERIFIED',
         'epoch_id':doc.get('epoch_id'),
         'epoch_started_at_utc':doc.get('cutover_at_utc'),
         'notional_policy_applies_to':'NEW_INTENTS_ONLY',
@@ -440,6 +461,8 @@ def advance(prior,early,mtf_doc,now_ms,candles):
         'opposite_cancelled_total':sum(t['status']=='OPPOSITE_CANCELLED' for t in tickets),
         'open_positions':[{
             'event_id':t['event_id'],'symbol':t['symbol'],'side':t['side'],
+            'strategy_id':t.get('strategy_id'),'strategy_version':t.get('strategy_version'),
+            'parent_event_id':t.get('parent_event_id'),'risk_policy_version':t.get('risk_policy_version'),
             'status':t['status'],'signal_at_utc':t.get('signal_at_utc'),
             'signal_price':t.get('signal_price'), 'entry_class':t.get('entry_class'),
             'filled_at_utc':t.get('filled_at_utc'),

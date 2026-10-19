@@ -6,9 +6,8 @@
   const OWNER_REPO='onurqlp/coin-live-pro';
   let sourceCommit=null,sourceError=null;
   async function currentHead() {
-    const r=await fetch('https://api.github.com/repos/'+OWNER_REPO+'/commits/main',{cache:'no-store'});
-    if(!r.ok)throw Error('HEAD_HTTP_'+r.status);
-    const payload=await r.json();if(!/^[a-f0-9]{40}$/.test(payload?.sha||''))throw Error('INVALID_HEAD_SHA');
+    const payload=await getJson('https://api.github.com/repos/'+OWNER_REPO+'/commits/main');
+    if(!/^[a-f0-9]{40}$/.test(payload?.sha||''))throw Error('INVALID_HEAD_SHA');
     return payload.sha;
   }
   function dataUrl(filename) {
@@ -20,11 +19,12 @@
   const FILES = {
     manifest: 'v4-manifest.json', health: 'health.json', radar: 'v4-radar.json',
     paper: 'v4-paper.json', spark: 'v4-spark-paper.json', early: 'v4-early.json',
-    review: 'v4-spark-review.json', ops: 'ops-report.json', diary: 'uzayx-lessons-history.json'
+    review: 'v4-spark-review.json', ops: 'ops-report.json', diary: 'uzayx-lessons-history.json',
+    research: 'uzayx-research.json'
   };
   const MAKINE = 'https://raw.githubusercontent.com/onurqlp/makine-core/main/site/data/support.json';
   let db = {}, faults = [], mode = 'ALL', stage = 'ALL', search = '';
-  let lastCheckedAt=null;
+  let lastCheckedAt=null,publishedValidity=null;
   const num = (v, digits=2) => Number.isFinite(Number(v)) && v!==null && v!=='' ? Number(v).toLocaleString('tr-TR',{minimumFractionDigits:digits,maximumFractionDigits:digits}) : '—';
   const usd = (v,d=2) => v===null||v===undefined||!Number.isFinite(Number(v)) ? '—' : num(v,d)+' USDT';
   const str = v => v===null||v===undefined?'—':String(v);
@@ -101,7 +101,7 @@
     });
     const fresh=age(manifest.finished_at_utc);
     const valid=manifest.publication_valid===true&&!faults.includes('SCAN_ID_MISMATCH')&&sourceCommit!==null;
-    const dataGood=valid&&fresh!==null&&fresh>=0&&fresh<=25&&!!db.radar;
+    const dataGood=valid&&currentGroups().valid;
     const healthOk=db.health?.status==='OK';
     if(!dataGood){a.replaceChildren(el('div','empty','Kaynak güncel veya tutarlı değil; yeni fırsat listesi gösterilmiyor.'));}
     set('overall-status',!dataGood?'VERİ UYARISI':healthOk?'GÜNCEL':'TARAMA UYARISI');
@@ -217,8 +217,24 @@
     const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),12000);
     try{const r=await fetch(path,{cache:'no-store',signal:controller.signal});if(!r.ok)throw Error('HTTP '+r.status);return await r.json();}finally{clearTimeout(timer);}
   }
+  function renderConnection(){
+    const stamp=age(db.manifest?.finished_at_utc);
+    const healthy=currentGroups().valid&&db.health?.status==='OK'&&!faults.includes('SCAN_ID_MISMATCH');
+    const failed=faults.includes('minute_check');
+    set('connection',failed?'Bağlantı kontrol edilemedi':healthy?'Veri güncel':stamp===null?'Kaynak eksik':stamp>25?'Veri gecikmiş':'Kontrol gerekli');
+    $('connection').className='status '+(healthy&&!failed?'ok':'bad');
+  }
+  function redrawMarket(){
+    renderConnection();renderTop();renderRadar();renderSystem();
+    const valid=currentGroups().valid;
+    const event=publishedValidity!==valid?'uzayx:loaded':'uzayx:source-check';
+    publishedValidity=valid;
+    window.dispatchEvent(new CustomEvent(event,{detail:{db,sourceCommit,faults:[...faults]}}));
+  }
   async function reload(){
+    if($('reload').disabled)return;
     $('reload').disabled=true;set('connection','Yükleniyor…');$('connection').className='status';faults=[];
+    try{
     try{sourceCommit=await currentHead();sourceError=null;}catch(e){sourceCommit=null;sourceError=String(e.message||e);faults.push('commit pin');}
     const entries=[...Object.entries(FILES).map(([key,fn])=>[key,dataUrl(fn)]),['support',MAKINE+'?ts='+Date.now()]];
     const results=await Promise.allSettled(entries.map(([,url])=>getJson(url)));
@@ -229,13 +245,12 @@
     const id=db.manifest?.scan_id;
     const feeds=[db.radar,db.paper,db.spark,db.review,db.early];
     if(!id || feeds.some(f=>!f || f.scan_id!==id)){faults.push('SCAN_ID_MISMATCH');db.radar=null;}
-    const healthy=db.manifest?.publication_valid===true && db.health?.status==='OK' && sourceCommit!==null && !faults.includes('SCAN_ID_MISMATCH') && stamp!==null && stamp>=0 && stamp<=25;
-    set('connection',healthy?'Veri güncel':stamp===null?'Kaynak eksik':stamp>25?'Veri gecikmiş':'Kontrol gerekli');
-    $('connection').className='status '+(healthy?'ok':'bad');
+    renderConnection();
     lastCheckedAt=new Date().toISOString();
     renderTop();renderRadar();renderLearn();renderFunds();renderResearch();renderSystem();renderLeverage();
+    publishedValidity=currentGroups().valid;
     window.dispatchEvent(new CustomEvent('uzayx:loaded',{detail:{db,sourceCommit,faults:[...faults]}}));
-    $('reload').disabled=false;
+    }finally{$('reload').disabled=false;}
   }
   document.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.goto)));
   document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>go(b.dataset.tab)));
@@ -250,23 +265,24 @@
   reload();
   // One-minute source scan check; avoid exhausting GitHub HEAD rate limits.
   // A changed raw manifest triggers a FULL immutable-commit reload and scan-ID checks.
+  let checking=false;
   async function minuteCheck(){
-    if(document.hidden||$('reload').disabled)return;
+    if(document.hidden||$('reload').disabled||checking)return;
+    checking=true;
+    if(!currentGroups().valid)redrawMarket();
     try{
       const latest=await getJson('https://raw.githubusercontent.com/'+OWNER_REPO+'/main/web/data/v4-manifest.json?poll='+Date.now());
-      if(latest.scan_id && latest.scan_id!==db.manifest?.scan_id){await reload();return;}
+      if(!sourceCommit||!db.radar||(latest.scan_id && latest.scan_id!==db.manifest?.scan_id)){await reload();return;}
       lastCheckedAt=new Date().toISOString();
-      set('m-age',ageLabel(db.manifest?.finished_at_utc));
-      set('radar-age','Veri: '+ageLabel(db.manifest?.finished_at_utc));
-      if((age(db.manifest?.finished_at_utc)??999)>25){
-        set('connection','Veri gecikmiş');$('connection').className='status bad';renderTop();renderSystem();
-        // Retract formerly fresh observations from visible watchdesk as soon as they expire.
-        window.dispatchEvent(new CustomEvent('uzayx:loaded',{detail:{db,sourceCommit,faults:[...faults]}}));
-      }else{renderSystem();}
+      faults=faults.filter(x=>x!=='minute_check');
+      redrawMarket();
     }catch(err){
-      set('connection','Kontrol hatası');$('connection').className='status bad';
-      faults.push('minute_check');renderTop();renderSystem();
-    }
+      if(!faults.includes('minute_check'))faults.push('minute_check');
+      redrawMarket();
+    }finally{checking=false;}
   }
   setInterval(minuteCheck,60000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)minuteCheck();});
+  window.addEventListener('online',minuteCheck);
+  window.addEventListener('pageshow',minuteCheck);
 })();
