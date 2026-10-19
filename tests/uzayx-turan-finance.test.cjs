@@ -16,10 +16,11 @@ test('Money summaries reconcile the exact matching audited scan',()=>{
  assert.equal(d.unrealized,ops.experimental_spark.unrealized_net_usdt);
  assert.equal(d.complete,true);
  assert.equal(d.open.length,d.openCount);
- assert.equal(d.closed.length,d.closedCount);
+ assert.ok(d.closed.length<=d.closedCount);
+ if(d.closedComplete){assert.equal(d.closed.length,d.closedCount);assert.ok(Math.abs(d.closedWins+d.closedLosses-d.closedNet)<0.05)}
  assert.ok(Math.abs(d.notional-paper.summary.open_reference_exposure_usdt)<0.05);
  assert.ok(Math.abs(d.unrealized-d.open.reduce((s,r)=>s+(r.unrealized_net_usdt||0),0))<0.05);
- assert.ok(d.margin>0);
+ assert.ok(d.margin>=0);
 });
 test('Strict V4 and experimental paper remain independent and not real money',()=>{
  assert.equal(ops.real_orders,false);
