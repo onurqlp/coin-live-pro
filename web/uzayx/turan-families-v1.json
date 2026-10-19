@@ -1,0 +1,1457 @@
+{
+  "schema": "uzayx.turan.research_family_catalog.v1",
+  "source_title": "UZAYX / TURAN — 200 BAGIMSIZ STRATEJI AILESI AR-GE KATALOGU",
+  "source_date": "2026-10-19",
+  "source_kind": "USER_SUPPLIED_RESEARCH_PROPOSALS",
+  "verification": "UNVALIDATED_HYPOTHESES",
+  "not_real_trades": true,
+  "not_automatic_execution": true,
+  "not_profit_claim": true,
+  "naming_note": "Türk mitolojisi, destan, tarih ve kültüründen esinlenen özgün AR-GE adları; tarihsel yerleşik strateji adı oldukları iddia edilmez.",
+  "identity_note": "T001–T200 öneri kodlarıdır; mevcut TURAN 30 ailesinin canlı kimlikleriyle eşlenmez.",
+  "protocol": "Her aile LONG/SHORT/BEKLE/NO_TRADE için bağımsız sınanır; komisyon, spread, kayma, fonlama, tasfiye ve kaynak denetimi, ayrılmış OOS testi zorunludur. Ters hipotez yeni test gerektirir.",
+  "family_count": 200,
+  "category_count": 20,
+  "category_sizes": {
+    "FIYAT ANOMALILERI": 10,
+    "HACIM VE IŞLEM AKIŞI": 10,
+    "EMIR DEFTERI VE LIKIDITE": 10,
+    "TREND DEVAMI VE IVME": 10,
+    "VOLATILITE VE SIKIŞMA": 10,
+    "ZIRVE DIP VE DÖNÜŞ": 10,
+    "TASFIYE VE SQUEEZE": 10,
+    "OI FUNDING VE POZISYONLANMA": 10,
+    "VADELI VE SPOT PIYASA AYRIŞMALARI": 10,
+    "BTC VE PIYASA REJIMI": 10,
+    "COINLER ARASI ILIŞKILER": 10,
+    "HABER OLAY VE SOSYAL TETIKLEYICILER": 10,
+    "ONCHAIN VE BÜYÜK CÜZDAN AKIŞI": 10,
+    "ZAMAN VE SEANS ETKILERI": 10,
+    "İSTATISTIK VE ANOMALI MODELLEME": 10,
+    "SAHTE SINYALLER VE KARŞI TEZLER": 10,
+    "EMIR UYGULAMA VE POZISYON ÇIKIŞLARI": 10,
+    "STRATEJI FÜZYONU VE META SINYALLER": 10,
+    "GEÇMIŞ ÖĞRENME VE KAÇAN FIRSATLAR": 10,
+    "PORTFÖY KAPASITE VE ADAPTASYON": 10
+  },
+  "families": [
+    {
+      "id": "T001",
+      "name": "Bozkurt İzi",
+      "mechanism": "Normal volatiliteye göre sıra dışı fiyat sapması",
+      "category": "FIYAT ANOMALILERI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T002",
+      "name": "Alp Er Tunga Eşiği",
+      "mechanism": "Sık sınanan seviyede fiyat kabulü",
+      "category": "FIYAT ANOMALILERI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T003",
+      "name": "Göktürk Kırılması",
+      "mechanism": "Rejim dışı ilk fiyat kopuşu",
+      "category": "FIYAT ANOMALILERI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T004",
+      "name": "Kayı Merdiveni",
+      "mechanism": "Yüksek diplerle kademeli ilerleme",
+      "category": "FIYAT ANOMALILERI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T005",
+      "name": "Oğuz Kıvılcımı",
+      "mechanism": "Sakin bantta biriken mikro momentum",
+      "category": "FIYAT ANOMALILERI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T006",
+      "name": "Ergenekon Çıkışı",
+      "mechanism": "Uzun dar banttan geniş aralığa geçiş",
+      "category": "FIYAT ANOMALILERI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T007",
+      "name": "Tengri Şoku",
+      "mechanism": "Getiri dağılımının aşırı kuyruğunda hareket",
+      "category": "FIYAT ANOMALILERI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T008",
+      "name": "Kutlu Fitil",
+      "mechanism": "Uzun fitillerin yönlü reddi",
+      "category": "FIYAT ANOMALILERI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T009",
+      "name": "Orhun Hafızası",
+      "mechanism": "Tarihsel tepki bölgelerinin tekrar sınanması",
+      "category": "FIYAT ANOMALILERI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T010",
+      "name": "Turan Gecikmesi",
+      "mechanism": "Erken anormalliği izleyen gecikmiş fiyat tepkisi",
+      "category": "FIYAT ANOMALILERI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T011",
+      "name": "Umay Hacmi",
+      "mechanism": "Fiyatla teyit edilen bağıl hacim patlaması",
+      "category": "HACIM VE IŞLEM AKIŞI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T012",
+      "name": "Demirci Nefesi",
+      "mechanism": "Yüksek agresif emirle fiyatın sabit kalması",
+      "category": "HACIM VE IŞLEM AKIŞI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T013",
+      "name": "Korkut Deltası",
+      "mechanism": "Kümülatif delta ve fiyat ayrışması",
+      "category": "HACIM VE IŞLEM AKIŞI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T014",
+      "name": "Börü Baskısı",
+      "mechanism": "Sürekli agresif alım akışı",
+      "category": "HACIM VE IŞLEM AKIŞI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T015",
+      "name": "Erlik Baskısı",
+      "mechanism": "Sürekli agresif satış akışı",
+      "category": "HACIM VE IŞLEM AKIŞI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T016",
+      "name": "Ak Ana Kümesi",
+      "mechanism": "Büyük işlemlerin zamansal kümelenmesi",
+      "category": "HACIM VE IŞLEM AKIŞI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T017",
+      "name": "Yıldıray Devri",
+      "mechanism": "Bir dalgadan sonraki hacim el değiştirmesi",
+      "category": "HACIM VE IŞLEM AKIŞI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T018",
+      "name": "Kızıl Elma Hızı",
+      "mechanism": "Saniye başı işlem yoğunluğunun sıçraması",
+      "category": "HACIM VE IŞLEM AKIŞI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T019",
+      "name": "Tarkan Buzdağı",
+      "mechanism": "Tekrarlanan parçalı büyük emir yürütümü",
+      "category": "HACIM VE IŞLEM AKIŞI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T020",
+      "name": "Uluğ Hacimsizliği",
+      "mechanism": "Kırılmada katılım eksikliği",
+      "category": "HACIM VE IŞLEM AKIŞI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T021",
+      "name": "Kartal Mıknatısı",
+      "mechanism": "Yoğun limit likiditesine fiyat yaklaşması",
+      "category": "EMIR DEFTERI VE LIKIDITE",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T022",
+      "name": "Kalkan Duvarı",
+      "mechanism": "Gerçek fiyat duvarının tüketilmesi",
+      "category": "EMIR DEFTERI VE LIKIDITE",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T023",
+      "name": "Tulpar Kaçağı",
+      "mechanism": "Büyük emirlerin eşleşmeden çekilmesi",
+      "category": "EMIR DEFTERI VE LIKIDITE",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T024",
+      "name": "Akıncı Boşluğu",
+      "mechanism": "Çok seviyeli derinlik kaybı",
+      "category": "EMIR DEFTERI VE LIKIDITE",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T025",
+      "name": "Yada Spreadi",
+      "mechanism": "Normalin dışına çıkan bid-ask farkı",
+      "category": "EMIR DEFTERI VE LIKIDITE",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T026",
+      "name": "Ay Ata Dönüşü",
+      "mechanism": "Çekilmiş derinliğin geri dolması",
+      "category": "EMIR DEFTERI VE LIKIDITE",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T027",
+      "name": "Yel Ana İnceliği",
+      "mechanism": "Düşük derinliğe göre fiyat etki oranı",
+      "category": "EMIR DEFTERI VE LIKIDITE",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T028",
+      "name": "Kürşad Yenilemesi",
+      "mechanism": "Sürekli yenilenen limit emirlerin tespiti",
+      "category": "EMIR DEFTERI VE LIKIDITE",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T029",
+      "name": "Bozkır Vakumu",
+      "mechanism": "Ardışık seviyelerde likidite yokluğu",
+      "category": "EMIR DEFTERI VE LIKIDITE",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T030",
+      "name": "Bumin Dengesi",
+      "mechanism": "Tahta alış/satış yoğunluğu asimetrisi",
+      "category": "EMIR DEFTERI VE LIKIDITE",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T031",
+      "name": "Alparslan İlk Adım",
+      "mechanism": "Yataydan yönlü trende geçiş",
+      "category": "TREND DEVAMI VE IVME",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T032",
+      "name": "Bilge Kağan Onayı",
+      "mechanism": "Kırılma ardından kabul ve retest",
+      "category": "TREND DEVAMI VE IVME",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T033",
+      "name": "Mete İkinci Akın",
+      "mechanism": "İlk dürtü sonrası yeni trend dalgası",
+      "category": "TREND DEVAMI VE IVME",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T034",
+      "name": "Kür Şad Hızlanması",
+      "mechanism": "Momentumun ikinci türeviyle ivmelenmesi",
+      "category": "TREND DEVAMI VE IVME",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T035",
+      "name": "Yıldırım Soluğu",
+      "mechanism": "Pozitif fiyat ama düşen ivme",
+      "category": "TREND DEVAMI VE IVME",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T036",
+      "name": "Sungur Dönüşü",
+      "mechanism": "Trend içinde normalleşme geri çekilmesi",
+      "category": "TREND DEVAMI VE IVME",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T037",
+      "name": "Gökalp Bayrağı",
+      "mechanism": "Trend içi dar bayrak sonrası devam",
+      "category": "TREND DEVAMI VE IVME",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T038",
+      "name": "Börü Mirası",
+      "mechanism": "Kısa trendin daha uzun ölçeğe taşınması",
+      "category": "TREND DEVAMI VE IVME",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T039",
+      "name": "Aybars Uyumlanması",
+      "mechanism": "Birden fazla zaman ölçeğinde yön onayı",
+      "category": "TREND DEVAMI VE IVME",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T040",
+      "name": "Atilla Kırılganlığı",
+      "mechanism": "Trend iç yapısının zayıflaması",
+      "category": "TREND DEVAMI VE IVME",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T041",
+      "name": "Ergenekon Yayı",
+      "mechanism": "Düşük gerçekleşmiş volatilite sonrası açılım",
+      "category": "VOLATILITE VE SIKIŞMA",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T042",
+      "name": "Gök Gürültüsü",
+      "mechanism": "ATR şokları",
+      "category": "VOLATILITE VE SIKIŞMA",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T043",
+      "name": "Ayaz Kümesi",
+      "mechanism": "Oynaklığın ardışık kümelenmesi",
+      "category": "VOLATILITE VE SIKIŞMA",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T044",
+      "name": "Kıl Çadırı",
+      "mechanism": "İç içe fiyat daralmaları",
+      "category": "VOLATILITE VE SIKIŞMA",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T045",
+      "name": "Dede Korkut Geçidi",
+      "mechanism": "Düşükten yüksek volatilite rejimine geçiş",
+      "category": "VOLATILITE VE SIKIŞMA",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T046",
+      "name": "Ak Sakal Sönümü",
+      "mechanism": "Şok sonrasında volatilite normalleşmesi",
+      "category": "VOLATILITE VE SIKIŞMA",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T047",
+      "name": "Kara Han Kuyruğu",
+      "mechanism": "Aşırı uç getiri yoğunluğu",
+      "category": "VOLATILITE VE SIKIŞMA",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T048",
+      "name": "Alaca Alanı",
+      "mechanism": "Gün içi aralığın sıra dışı açılması",
+      "category": "VOLATILITE VE SIKIŞMA",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T049",
+      "name": "Kök Tengri Asimetrisi",
+      "mechanism": "Aşağı ve yukarı oynaklığın asimetrisi",
+      "category": "VOLATILITE VE SIKIŞMA",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T050",
+      "name": "Tamga Sıkışması",
+      "mechanism": "Birden çok ölçekte eşzamanlı daralma",
+      "category": "VOLATILITE VE SIKIŞMA",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T051",
+      "name": "Erlik Zirvesi",
+      "mechanism": "Yüksek fiyata rağmen zayıflayan talep",
+      "category": "ZIRVE DIP VE DÖNÜŞ",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T052",
+      "name": "Umay Dibi",
+      "mechanism": "Yüksek satışa rağmen fiyatın düşmemesi",
+      "category": "ZIRVE DIP VE DÖNÜŞ",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T053",
+      "name": "Alkarısı Tuzağı",
+      "mechanism": "Yeni zirvenin hızla reddi",
+      "category": "ZIRVE DIP VE DÖNÜŞ",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T054",
+      "name": "Ak Ana Tuzağı",
+      "mechanism": "Yeni dibin hızla geri alınması",
+      "category": "ZIRVE DIP VE DÖNÜŞ",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T055",
+      "name": "Tulpar Son Nefes",
+      "mechanism": "Parabolik eğimden kırılmaya geçiş",
+      "category": "ZIRVE DIP VE DÖNÜŞ",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T056",
+      "name": "Demir Dağ Dağıtımı",
+      "mechanism": "Yüksek hacimde yatay fiyat ve artan arz",
+      "category": "ZIRVE DIP VE DÖNÜŞ",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T057",
+      "name": "Kara Gün Teslimiyeti",
+      "mechanism": "Kapitülasyon sonrası satıcı tükenişi",
+      "category": "ZIRVE DIP VE DÖNÜŞ",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T058",
+      "name": "Altay V Dönüşü",
+      "mechanism": "Keskin düşüşten hızlı toparlanma",
+      "category": "ZIRVE DIP VE DÖNÜŞ",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T059",
+      "name": "Orhun Yay Dönüşü",
+      "mechanism": "Kademeli yön değiştirme",
+      "category": "ZIRVE DIP VE DÖNÜŞ",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T060",
+      "name": "Simurg Kırık Kanat",
+      "mechanism": "Devam sinyalinin kısa sürede iptali",
+      "category": "ZIRVE DIP VE DÖNÜŞ",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T061",
+      "name": "Börü Short Sıkışması",
+      "mechanism": "Short tasfiyeleriyle yükseliş ivmesi",
+      "category": "TASFIYE VE SQUEEZE",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T062",
+      "name": "Kara Alp Long Sıkışması",
+      "mechanism": "Long tasfiyeleriyle düşüş ivmesi",
+      "category": "TASFIYE VE SQUEEZE",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T063",
+      "name": "Çifte Tamga",
+      "mechanism": "İki yönde ardışık stop temizliği",
+      "category": "TASFIYE VE SQUEEZE",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T064",
+      "name": "Kurt Kapanı",
+      "mechanism": "Stop kümelerinde fiyatın hızlı ters dönmesi",
+      "category": "TASFIYE VE SQUEEZE",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T065",
+      "name": "Yelbörü Zinciri",
+      "mechanism": "Tasfiye akışının art arda ivmelenmesi",
+      "category": "TASFIYE VE SQUEEZE",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T066",
+      "name": "Demir Ağ Sönümü",
+      "mechanism": "Tasfiye fırtınası sonrasında akış tükenmesi",
+      "category": "TASFIYE VE SQUEEZE",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T067",
+      "name": "Akıncı Fitili",
+      "mechanism": "Tasfiye spike fitili sonrası geri dönüş",
+      "category": "TASFIYE VE SQUEEZE",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T068",
+      "name": "Umay Savunması",
+      "mechanism": "Likidasyon baskısına rağmen seviye korunması",
+      "category": "TASFIYE VE SQUEEZE",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T069",
+      "name": "Erlik Takibi",
+      "mechanism": "Tasfiye sonrası düşüşün sürdürülebilirliği",
+      "category": "TASFIYE VE SQUEEZE",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T070",
+      "name": "Tengri Sıçraması",
+      "mechanism": "Tasfiye nedeniyle tek yönde geçici fiyat aşırılığı",
+      "category": "TASFIYE VE SQUEEZE",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T071",
+      "name": "Kök OI Yükselişi",
+      "mechanism": "Fiyat ve açık pozisyonun beraber büyümesi",
+      "category": "OI FUNDING VE POZISYONLANMA",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T072",
+      "name": "Kara OI Ayrışması",
+      "mechanism": "Fiyat artarken açık pozisyon azalması",
+      "category": "OI FUNDING VE POZISYONLANMA",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T073",
+      "name": "Mavi OI Birikimi",
+      "mechanism": "Fiyat yatayken türev pozisyon büyümesi",
+      "category": "OI FUNDING VE POZISYONLANMA",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T074",
+      "name": "Kızıl Funding",
+      "mechanism": "Aşırı pozitif fonlama rejimi",
+      "category": "OI FUNDING VE POZISYONLANMA",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T075",
+      "name": "Ak Funding",
+      "mechanism": "Aşırı negatif fonlama rejimi",
+      "category": "OI FUNDING VE POZISYONLANMA",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T076",
+      "name": "Bumin Basis",
+      "mechanism": "Funding ile piyasa eğilimi ayrışması",
+      "category": "OI FUNDING VE POZISYONLANMA",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T077",
+      "name": "İlteriş Kapanışı",
+      "mechanism": "OI daralmasıyla yönlü pozisyon kapama",
+      "category": "OI FUNDING VE POZISYONLANMA",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T078",
+      "name": "Kut Dengesizliği",
+      "mechanism": "Long short tarafının yoğunlaşması",
+      "category": "OI FUNDING VE POZISYONLANMA",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T079",
+      "name": "Tarkan Yeniden Açılışı",
+      "mechanism": "Tasfiye sonrasında OI hızlı yenilenmesi",
+      "category": "OI FUNDING VE POZISYONLANMA",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T080",
+      "name": "Ay Han Dönemeç",
+      "mechanism": "Fonlama zamanı çevresindeki fiyat davranışı",
+      "category": "OI FUNDING VE POZISYONLANMA",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T081",
+      "name": "Turan Baz Farkı",
+      "mechanism": "Spot ve perpetual fiyatı arasındaki sapma",
+      "category": "VADELI VE SPOT PIYASA AYRIŞMALARI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T082",
+      "name": "Akdeniz Taşıma",
+      "mechanism": "Vadeli eğri ve taşıma maliyeti ayrışması",
+      "category": "VADELI VE SPOT PIYASA AYRIŞMALARI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T083",
+      "name": "Ordu Spot Liderliği",
+      "mechanism": "Spot hareketin futures fiyatını önden izlemesi",
+      "category": "VADELI VE SPOT PIYASA AYRIŞMALARI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T084",
+      "name": "Börü Perp Liderliği",
+      "mechanism": "Perpetual işlemlerin spotu önden sürüklemesi",
+      "category": "VADELI VE SPOT PIYASA AYRIŞMALARI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T085",
+      "name": "Atabey Basis Dönüşü",
+      "mechanism": "Vadeli bazın ortalamaya dönüşü",
+      "category": "VADELI VE SPOT PIYASA AYRIŞMALARI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T086",
+      "name": "Oğuz Vade Eğrisi",
+      "mechanism": "Vade yapısının ani şekil değiştirmesi",
+      "category": "VADELI VE SPOT PIYASA AYRIŞMALARI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T087",
+      "name": "Demir Teminat",
+      "mechanism": "Teminat türleriyle oynaklık ilişkisinin değişmesi",
+      "category": "VADELI VE SPOT PIYASA AYRIŞMALARI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T088",
+      "name": "Kıpçak Uyuşmazlığı",
+      "mechanism": "Vadeli borsalar arasında işlem yapılabilir fiyat farkı",
+      "category": "VADELI VE SPOT PIYASA AYRIŞMALARI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T089",
+      "name": "Uluğ Finansman Eşiği",
+      "mechanism": "Fonlama ve komisyon sonrası teorik fırsat sınırı",
+      "category": "VADELI VE SPOT PIYASA AYRIŞMALARI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T090",
+      "name": "Kutalmış Açık Pozisyon",
+      "mechanism": "Vadeli likidite ve pozisyon büyümesi uyumsuzluğu",
+      "category": "VADELI VE SPOT PIYASA AYRIŞMALARI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T091",
+      "name": "Gökbörü Hakimiyeti",
+      "mechanism": "BTC dominansı değişirken altcoin tepkisi",
+      "category": "BTC VE PIYASA REJIMI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T092",
+      "name": "Ay Ata Çarpanı",
+      "mechanism": "BTC hareketine göre dinamik beta",
+      "category": "BTC VE PIYASA REJIMI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T093",
+      "name": "Ergenekon Ayrışması",
+      "mechanism": "BTC yatayken altcoin anomalisi",
+      "category": "BTC VE PIYASA REJIMI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T094",
+      "name": "Tengri Rüzgarı",
+      "mechanism": "BTC ani şokunun gecikmeli altcoin etkisi",
+      "category": "BTC VE PIYASA REJIMI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T095",
+      "name": "Bilge Rejim",
+      "mechanism": "Trend ve yatay piyasa koşulunu ayırma",
+      "category": "BTC VE PIYASA REJIMI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T096",
+      "name": "Uluğ Risk İştağı",
+      "mechanism": "Geniş piyasa risk alma/riskten kaçınma değişimi",
+      "category": "BTC VE PIYASA REJIMI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T097",
+      "name": "Kara Korelasyon",
+      "mechanism": "BTC korelasyonunun aniden kopması",
+      "category": "BTC VE PIYASA REJIMI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T098",
+      "name": "Kızıl Makas",
+      "mechanism": "BTC yükselirken altcoin zayıflığı",
+      "category": "BTC VE PIYASA REJIMI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T099",
+      "name": "Akın Dalga",
+      "mechanism": "BTC düşüş sonrası altcoin toparlanma sırası",
+      "category": "BTC VE PIYASA REJIMI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T100",
+      "name": "Oğuz Eşik",
+      "mechanism": "BTC volatilitesi aşılınca altcoin strateji askısı",
+      "category": "BTC VE PIYASA REJIMI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T101",
+      "name": "Börü Öncüsü",
+      "mechanism": "Bir coin hareketinin benzer grubu önden uyarması",
+      "category": "COINLER ARASI ILIŞKILER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T102",
+      "name": "Kayı Gecikeni",
+      "mechanism": "Sektör grubuna gecikmeli katılım",
+      "category": "COINLER ARASI ILIŞKILER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T103",
+      "name": "Alp Sektör Dalgası",
+      "mechanism": "Sektör geneline yayılan ortak hareket",
+      "category": "COINLER ARASI ILIŞKILER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T104",
+      "name": "Otağ Eşleşmesi",
+      "mechanism": "Yüksek korelasyonlu çiftte geçici kopma",
+      "category": "COINLER ARASI ILIŞKILER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T105",
+      "name": "Orhun Yayılımı",
+      "mechanism": "Haber etkisinin ilişkili tokenlara gecikmeli dağılması",
+      "category": "COINLER ARASI ILIŞKILER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T106",
+      "name": "Tamga Rotasyonu",
+      "mechanism": "Bir temadan diğer temaya hacim devri",
+      "category": "COINLER ARASI ILIŞKILER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T107",
+      "name": "Aybars Bağımsızlık",
+      "mechanism": "Piyasa düşerken tek coinde göreli güç",
+      "category": "COINLER ARASI ILIŞKILER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T108",
+      "name": "Kara Ayrışma",
+      "mechanism": "Pozitif piyasa içinde anormal zayıflık",
+      "category": "COINLER ARASI ILIŞKILER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T109",
+      "name": "Simurg Sepeti",
+      "mechanism": "Sektör sepeti ile tek coin anormalliği",
+      "category": "COINLER ARASI ILIŞKILER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T110",
+      "name": "Turan Zincir Etkisi",
+      "mechanism": "Ekosistem tokenlarında ardışık fiyat tepkisi",
+      "category": "COINLER ARASI ILIŞKILER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T111",
+      "name": "Dede Korkut Haber",
+      "mechanism": "Doğrulanmış haberin ilk fiyat tepkisi",
+      "category": "HABER OLAY VE SOSYAL TETIKLEYICILER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T112",
+      "name": "Kızıl Elma Listeleme",
+      "mechanism": "Borsa listeleme ilanı etkisi",
+      "category": "HABER OLAY VE SOSYAL TETIKLEYICILER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T113",
+      "name": "Kara Bayrak Delist",
+      "mechanism": "Delist duyurusunun likidite etkisi",
+      "category": "HABER OLAY VE SOSYAL TETIKLEYICILER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T114",
+      "name": "Ay Ana Kilit Açımı",
+      "mechanism": "Token unlock takviminin fiyatla ilişkisi",
+      "category": "HABER OLAY VE SOSYAL TETIKLEYICILER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T115",
+      "name": "Altın Tamga Oylama",
+      "mechanism": "Governance sonucu sonrası fiyat keşfi",
+      "category": "HABER OLAY VE SOSYAL TETIKLEYICILER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T116",
+      "name": "Gökçe Söylenti",
+      "mechanism": "Doğrulanmamış söylenti ve fiyat ayrışması",
+      "category": "HABER OLAY VE SOSYAL TETIKLEYICILER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T117",
+      "name": "Börü Sosyal Sıçrama",
+      "mechanism": "Sosyal ilgi artışının hacimle teyidi",
+      "category": "HABER OLAY VE SOSYAL TETIKLEYICILER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T118",
+      "name": "Korkut Düzeltmesi",
+      "mechanism": "İlk haber tepkisinin tersine dönüşü",
+      "category": "HABER OLAY VE SOSYAL TETIKLEYICILER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T119",
+      "name": "Kut Anlatısı",
+      "mechanism": "Narrative değişiminin çoklu token etkisi",
+      "category": "HABER OLAY VE SOSYAL TETIKLEYICILER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T120",
+      "name": "Ak Söz Sahte Haber",
+      "mechanism": "Yalanlanan bilginin piyasa geri dönüşü",
+      "category": "HABER OLAY VE SOSYAL TETIKLEYICILER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T121",
+      "name": "Altay Borsa Girişi",
+      "mechanism": "Borsalara büyük token transferi",
+      "category": "ONCHAIN VE BÜYÜK CÜZDAN AKIŞI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T122",
+      "name": "Akın Borsa Çıkışı",
+      "mechanism": "Borsalardan net büyük transfer",
+      "category": "ONCHAIN VE BÜYÜK CÜZDAN AKIŞI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T123",
+      "name": "Demir Balina",
+      "mechanism": "Büyük cüzdan bakiyesindeki rejim değişimi",
+      "category": "ONCHAIN VE BÜYÜK CÜZDAN AKIŞI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T124",
+      "name": "Umay Yeni Cüzdan",
+      "mechanism": "Yeni aktif cüzdanlarda anormal artış",
+      "category": "ONCHAIN VE BÜYÜK CÜZDAN AKIŞI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T125",
+      "name": "Orhun Zincir Hızı",
+      "mechanism": "Zincir üstü transfer yoğunluğu sıçraması",
+      "category": "ONCHAIN VE BÜYÜK CÜZDAN AKIŞI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T126",
+      "name": "Bumin Kasa",
+      "mechanism": "Borsa rezervleri ile fiyat ayrışması",
+      "category": "ONCHAIN VE BÜYÜK CÜZDAN AKIŞI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T127",
+      "name": "Kara Köprü",
+      "mechanism": "Köprü işlemlerinde olağan dışı hareket",
+      "category": "ONCHAIN VE BÜYÜK CÜZDAN AKIŞI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T128",
+      "name": "Tamga Hazinesi",
+      "mechanism": "Proje hazinesi cüzdanlarının hareketleri",
+      "category": "ONCHAIN VE BÜYÜK CÜZDAN AKIŞI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T129",
+      "name": "Kayı Dağıtımı",
+      "mechanism": "Büyük sahibin çok sayıda adrese dağıtımı",
+      "category": "ONCHAIN VE BÜYÜK CÜZDAN AKIŞI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T130",
+      "name": "Gök Balina Gecikmesi",
+      "mechanism": "Büyük transfer sonrası gecikmeli piyasa tepkisi",
+      "category": "ONCHAIN VE BÜYÜK CÜZDAN AKIŞI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T131",
+      "name": "Şafak Nöbeti",
+      "mechanism": "Asya açılışı etrafında likidite değişimi",
+      "category": "ZAMAN VE SEANS ETKILERI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T132",
+      "name": "Öğle Toyu",
+      "mechanism": "Avrupa seansı hacim devri",
+      "category": "ZAMAN VE SEANS ETKILERI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T133",
+      "name": "Günbatımı Akını",
+      "mechanism": "ABD seansı fiyat keşfi",
+      "category": "ZAMAN VE SEANS ETKILERI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T134",
+      "name": "Kutlu Devir",
+      "mechanism": "Seans geçişinde spread ve yön değişimi",
+      "category": "ZAMAN VE SEANS ETKILERI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T135",
+      "name": "Ay Tutulması",
+      "mechanism": "Hafta sonu düşük derinlik anomalisi",
+      "category": "ZAMAN VE SEANS ETKILERI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T136",
+      "name": "Bozkır Pazartesisi",
+      "mechanism": "Hafta açılışı gap benzeri fiyat davranışı",
+      "category": "ZAMAN VE SEANS ETKILERI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T137",
+      "name": "Korkut Takvimi",
+      "mechanism": "Ekonomik veri açıklaması öncesi-sonrası risk",
+      "category": "ZAMAN VE SEANS ETKILERI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T138",
+      "name": "Yılkı Dönemi",
+      "mechanism": "Ay sonu türev pozisyon ayarlamaları",
+      "category": "ZAMAN VE SEANS ETKILERI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T139",
+      "name": "Kızıl Saat",
+      "mechanism": "Fonlama hesap saatlerinde mikro fiyat hareketi",
+      "category": "ZAMAN VE SEANS ETKILERI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T140",
+      "name": "Turan Nöbeti",
+      "mechanism": "Piyasa aktivitesinin mevsimsel gün içi döngüsü",
+      "category": "ZAMAN VE SEANS ETKILERI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T141",
+      "name": "Bilge Z-Skoru",
+      "mechanism": "Getiri sapmasının standartlaştırılması",
+      "category": "İSTATISTIK VE ANOMALI MODELLEME",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T142",
+      "name": "Uluğ Kuantil",
+      "mechanism": "Aşırı yüzdelik getiri rejimi",
+      "category": "İSTATISTIK VE ANOMALI MODELLEME",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T143",
+      "name": "Orhun CUSUM",
+      "mechanism": "Kümülatif değişim noktasını erken bulma",
+      "category": "İSTATISTIK VE ANOMALI MODELLEME",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T144",
+      "name": "Göktürk HMM",
+      "mechanism": "Gizli piyasa rejimleri arasında geçiş",
+      "category": "İSTATISTIK VE ANOMALI MODELLEME",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T145",
+      "name": "Kutadgu Artık",
+      "mechanism": "Faktör modeli artık getirisi",
+      "category": "İSTATISTIK VE ANOMALI MODELLEME",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T146",
+      "name": "Ak Sakal Entropi",
+      "mechanism": "Fiyat hareketi düzensizliğinin değişmesi",
+      "category": "İSTATISTIK VE ANOMALI MODELLEME",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T147",
+      "name": "Yada Fraktal",
+      "mechanism": "Piyasa ölçekleme davranışının kayması",
+      "category": "İSTATISTIK VE ANOMALI MODELLEME",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T148",
+      "name": "Simurg Nedensellik",
+      "mechanism": "Öncü göstergeyle gecikmeli ilişki sınaması",
+      "category": "İSTATISTIK VE ANOMALI MODELLEME",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T149",
+      "name": "Kök Uç Değer",
+      "mechanism": "Extreme value theory ile kuyruk eşiği",
+      "category": "İSTATISTIK VE ANOMALI MODELLEME",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T150",
+      "name": "Erkin Kalıcılık",
+      "mechanism": "Anomali sonrası etkinin yaşam süresi",
+      "category": "İSTATISTIK VE ANOMALI MODELLEME",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T151",
+      "name": "Alkarısı Aynası",
+      "mechanism": "Başarısız long sinyalinde ters yön testi",
+      "category": "SAHTE SINYALLER VE KARŞI TEZLER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T152",
+      "name": "Erlik Aynası",
+      "mechanism": "Başarısız short sinyalinde ters yön testi",
+      "category": "SAHTE SINYALLER VE KARŞI TEZLER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T153",
+      "name": "Kara Damga Yanıltma",
+      "mechanism": "Sık yanlış pozitif veren hacim sinyali",
+      "category": "SAHTE SINYALLER VE KARŞI TEZLER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T154",
+      "name": "Bozkurt Sahte Kırılma",
+      "mechanism": "Breakout sonrası bant içine dönüş",
+      "category": "SAHTE SINYALLER VE KARŞI TEZLER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T155",
+      "name": "Umay Sahte Dönüş",
+      "mechanism": "Reversal sinyalinden sonra trendin sürmesi",
+      "category": "SAHTE SINYALLER VE KARŞI TEZLER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T156",
+      "name": "Tulpar İkili Tuzak",
+      "mechanism": "Çift yönlü yanlış kırılma",
+      "category": "SAHTE SINYALLER VE KARŞI TEZLER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T157",
+      "name": "Korkut Gürültü Filtresi",
+      "mechanism": "İşlem sayısı artışı ama gerçek hacim yokluğu",
+      "category": "SAHTE SINYALLER VE KARŞI TEZLER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T158",
+      "name": "Kalkan Boş Sinyal",
+      "mechanism": "Likidite yetersizken doğru tahminin işlem dışı kalması",
+      "category": "SAHTE SINYALLER VE KARŞI TEZLER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T159",
+      "name": "Simurg Çelişki",
+      "mechanism": "Bağımsız stratejilerin zıt tahmin vermesi",
+      "category": "SAHTE SINYALLER VE KARŞI TEZLER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T160",
+      "name": "Ayna Kayması",
+      "mechanism": "Ters strateji performansının rejime göre değişmesi",
+      "category": "SAHTE SINYALLER VE KARŞI TEZLER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T161",
+      "name": "Tarkan Kademesi",
+      "mechanism": "Parçalı girişin dolum ve kayma etkisi",
+      "category": "EMIR UYGULAMA VE POZISYON ÇIKIŞLARI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T162",
+      "name": "Akıncı Bekleyişi",
+      "mechanism": "Limit emirle bekleme ve kaçırma maliyeti",
+      "category": "EMIR UYGULAMA VE POZISYON ÇIKIŞLARI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T163",
+      "name": "Kalkan Zaman Kesiti",
+      "mechanism": "Belirli süre ilerlemeyen pozisyonun kapanması",
+      "category": "EMIR UYGULAMA VE POZISYON ÇIKIŞLARI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T164",
+      "name": "Tulpar Kâr Kilidi",
+      "mechanism": "İvmeye bağlı izleyen stop",
+      "category": "EMIR UYGULAMA VE POZISYON ÇIKIŞLARI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T165",
+      "name": "Umay Bölüşümü",
+      "mechanism": "Kademeli kâr almanın beklenti üzerindeki etkisi",
+      "category": "EMIR UYGULAMA VE POZISYON ÇIKIŞLARI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T166",
+      "name": "Börü Koruması",
+      "mechanism": "Volatiliteye göre stop mesafesi",
+      "category": "EMIR UYGULAMA VE POZISYON ÇIKIŞLARI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T167",
+      "name": "Ay Han Tekrar Giriş",
+      "mechanism": "Stop sonrası yeniden giriş için koşul",
+      "category": "EMIR UYGULAMA VE POZISYON ÇIKIŞLARI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T168",
+      "name": "Kara Er Risk Kesmesi",
+      "mechanism": "Likidite rejimi bozulunca pozisyon azaltma",
+      "category": "EMIR UYGULAMA VE POZISYON ÇIKIŞLARI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T169",
+      "name": "Ergenekon Karşılaştırması",
+      "mechanism": "Aynı sinyalde market-limit uygulanabilirliği",
+      "category": "EMIR UYGULAMA VE POZISYON ÇIKIŞLARI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T170",
+      "name": "Altay Net Eşik",
+      "mechanism": "Komisyon funding spread sonrası minimum getiri gereği",
+      "category": "EMIR UYGULAMA VE POZISYON ÇIKIŞLARI",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T171",
+      "name": "Simurg Üç Tamga",
+      "mechanism": "Bağımsız fiyat hacim OI sinyallerinin eşzamanı",
+      "category": "STRATEJI FÜZYONU VE META SINYALLER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T172",
+      "name": "Dokuz Oğuz Meclisi",
+      "mechanism": "Farklı ailelerin oy çokluğuyla ortak sonuç üretmesi",
+      "category": "STRATEJI FÜZYONU VE META SINYALLER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T173",
+      "name": "Bilge Hakem",
+      "mechanism": "Geçmiş rejime göre model ağırlığı",
+      "category": "STRATEJI FÜZYONU VE META SINYALLER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T174",
+      "name": "Kök Çelişki Çözücü",
+      "mechanism": "Long ve short sinyali çelişkisinde belirsizlik puanı",
+      "category": "STRATEJI FÜZYONU VE META SINYALLER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T175",
+      "name": "Turan Hiyerarşi",
+      "mechanism": "Piyasa rejim filtresi sonrası yerel sinyal",
+      "category": "STRATEJI FÜZYONU VE META SINYALLER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T176",
+      "name": "Alp Er Öncelik",
+      "mechanism": "Çakışan fırsatların net beklentiyle seçimi",
+      "category": "STRATEJI FÜZYONU VE META SINYALLER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T177",
+      "name": "Orhun Güven Ölçeği",
+      "mechanism": "Sinyal güvenilirliğinin kalibrasyonu",
+      "category": "STRATEJI FÜZYONU VE META SINYALLER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T178",
+      "name": "Umay Kapısı",
+      "mechanism": "Emir uygulama koşulundan geçmeyen sinyali eleme",
+      "category": "STRATEJI FÜZYONU VE META SINYALLER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T179",
+      "name": "Bozkurt Yankısı",
+      "mechanism": "Benzer sinyallerin tek aile sayılarak çoğul sayımı engelleme",
+      "category": "STRATEJI FÜZYONU VE META SINYALLER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T180",
+      "name": "Kutlu Konsey",
+      "mechanism": "Farklı veri kaynaklarının ortak fakat bağımsız teyidi",
+      "category": "STRATEJI FÜZYONU VE META SINYALLER",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T181",
+      "name": "Kartal Geri Bakış",
+      "mechanism": "Başarılı hareket öncesi erişilebilir sinyal taraması",
+      "category": "GEÇMIŞ ÖĞRENME VE KAÇAN FIRSATLAR",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T182",
+      "name": "Dede Korkut Arşivi",
+      "mechanism": "Benzer tarihsel olayları olay-zamanıyla eşleme",
+      "category": "GEÇMIŞ ÖĞRENME VE KAÇAN FIRSATLAR",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T183",
+      "name": "Simurg Yeniden Doğuş",
+      "mechanism": "Emekliye ayrılan hipotezin yeni rejimde yeniden testi",
+      "category": "GEÇMIŞ ÖĞRENME VE KAÇAN FIRSATLAR",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T184",
+      "name": "Ayna Dersliği",
+      "mechanism": "Kaybeden işlemin ters yönünü ileri test etme",
+      "category": "GEÇMIŞ ÖĞRENME VE KAÇAN FIRSATLAR",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T185",
+      "name": "Kayı Kaçan Emir",
+      "mechanism": "NO_FILL sonrası gerçek fırsat kaybını ölçme",
+      "category": "GEÇMIŞ ÖĞRENME VE KAÇAN FIRSATLAR",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T186",
+      "name": "Erkin Pişmanlık",
+      "mechanism": "Gerçek giriş ile erişilebilir ideal giriş farkı",
+      "category": "GEÇMIŞ ÖĞRENME VE KAÇAN FIRSATLAR",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T187",
+      "name": "Kara Kutlu Ders",
+      "mechanism": "Kazananlarda ortak ama kaybedenlerde bulunmayan özellik",
+      "category": "GEÇMIŞ ÖĞRENME VE KAÇAN FIRSATLAR",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T188",
+      "name": "Orhun Sahte Hafıza",
+      "mechanism": "Sadece kazananları seçme yanlılığını denetleme",
+      "category": "GEÇMIŞ ÖĞRENME VE KAÇAN FIRSATLAR",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T189",
+      "name": "Göktürk Deney",
+      "mechanism": "Parametre değişiminin ayrılmış veride testi",
+      "category": "GEÇMIŞ ÖĞRENME VE KAÇAN FIRSATLAR",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T190",
+      "name": "Turan Soy Ağacı",
+      "mechanism": "Yeni ailenin hangi olay ve hipotezden türediğini izleme",
+      "category": "GEÇMIŞ ÖĞRENME VE KAÇAN FIRSATLAR",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T191",
+      "name": "Kalkan Yoğunlaşma",
+      "mechanism": "İlişkili coinlerde eş yön riskin sınırlanması",
+      "category": "PORTFÖY KAPASITE VE ADAPTASYON",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T192",
+      "name": "Bilge Risk Bütçesi",
+      "mechanism": "Anlık oynaklığa göre toplam maruziyet",
+      "category": "PORTFÖY KAPASITE VE ADAPTASYON",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T193",
+      "name": "Kut Likidite Kapasitesi",
+      "mechanism": "Order book hacmine göre ölçeklenebilir pozisyon",
+      "category": "PORTFÖY KAPASITE VE ADAPTASYON",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T194",
+      "name": "Börü Çakışma",
+      "mechanism": "Tek kaynaktan gelen birden çok benzer sinyali tek risk sayma",
+      "category": "PORTFÖY KAPASITE VE ADAPTASYON",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T195",
+      "name": "Umay Seri Kayıp",
+      "mechanism": "Üst üste zarar sonrası araştırma rejimi değişimi",
+      "category": "PORTFÖY KAPASITE VE ADAPTASYON",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T196",
+      "name": "Tarkan Maliyet Eşiği",
+      "mechanism": "Minimum ekonomik girişin canlı maliyetle değişmesi",
+      "category": "PORTFÖY KAPASITE VE ADAPTASYON",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T197",
+      "name": "Orhun OOS Nöbeti",
+      "mechanism": "İleri dönem performans kaymasının tespiti",
+      "category": "PORTFÖY KAPASITE VE ADAPTASYON",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T198",
+      "name": "Erlik Çöküş Alarmı",
+      "mechanism": "Beklenen risk dağılımının bozulması",
+      "category": "PORTFÖY KAPASITE VE ADAPTASYON",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T199",
+      "name": "Simurg Adaptasyon",
+      "mechanism": "Kazanan ailelerin ağırlığını yalnız ileri doğrulamayla güncelleme",
+      "category": "PORTFÖY KAPASITE VE ADAPTASYON",
+      "status": "AR-GE / dogrulanmadi"
+    },
+    {
+      "id": "T200",
+      "name": "Tengri İşlemsizlik",
+      "mechanism": "Hiçbir avantaj doğrulanmadığında NO_TRADE seçimi",
+      "category": "PORTFÖY KAPASITE VE ADAPTASYON",
+      "status": "AR-GE / dogrulanmadi"
+    }
+  ],
+  "weekly_evaluation_fields": [
+    "Olay ID",
+    "coin",
+    "zaman",
+    "veri kaynağı",
+    "giriş öncesi erişilebilir sinyal",
+    "sinyal zamanı",
+    "LONG/SHORT/NO_TRADE",
+    "dolum",
+    "komisyon",
+    "spread",
+    "kayma",
+    "funding",
+    "kaldıraç ve tasfiye",
+    "OOS sonucu",
+    "ters hipotez",
+    "karar: ilerlet/uyut/ele/tersini test et"
+  ]
+}
