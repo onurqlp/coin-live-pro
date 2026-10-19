@@ -22,7 +22,7 @@
  document.querySelectorAll('#desktop-tabs .tab').forEach(b=>b.addEventListener('click',close));
  document.addEventListener('keydown',e=>{if(e.key==='Escape')close();});
  window.addEventListener('uzayx:tab',e=>active(e.detail?.tab||'overview'));
- if(['overview','chart','funds','learn'].includes(location.hash.slice(1)))active(location.hash.slice(1));
+ if(['overview','radar','chart','funds','learn','turan','research','system'].includes(location.hash.slice(1)))active(location.hash.slice(1));
  if('serviceWorker' in navigator && location.protocol==='https:'){
    window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js',{scope:'./'}).catch(()=>{}),{once:true});
  }
