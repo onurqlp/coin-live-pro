@@ -37,7 +37,9 @@
      .filter(t=>!query||String(t.symbol||'').toUpperCase().includes(query))
      .sort((a,b)=>(Date.parse(b.filled_at_utc||b.signal_at_utc)||0)-(Date.parse(a.filled_at_utc||a.signal_at_utc)||0));
  }
- let source=null,filter='OPEN',query='',selectedId=null,focused=null,homeSearch='';
+ let source=null,filter='OPEN',query='',selectedId=null,focused=null,homeSearch='',homeExpanded=false;
+ const HOME_PREVIEW=12;
+ const paperPnl=v=>typeof v==='number'&&Number.isFinite(v)?signed(v)+' USDT':'—';
  function completeOpenPositions(doc){
    const total=doc?.summary?.counts?.OPEN;
    const a=doc?.open_positions;
@@ -55,8 +57,11 @@
    const age=Date.now()-Date.parse(s.finished_at_utc||'');
    const fresh=Number.isFinite(age)&&age>=-120000&&age<=25*60000;
    const all=full.rows;
-   const rows=all.filter(x=>String(x.symbol||'').includes(homeSearch)).sort((a,b)=>
+   const matches=all.filter(x=>String(x.symbol||'').toUpperCase().includes(homeSearch)).sort((a,b)=>
      (Date.parse(b.filled_at_utc||b.signal_at_utc)||0)-(Date.parse(a.filled_at_utc||a.signal_at_utc)||0));
+   const rows=homeExpanded?matches:matches.slice(0,HOME_PREVIEW);
+   const more=$('home-open-more');
+   if(more){more.hidden=matches.length<=HOME_PREVIEW;more.textContent=homeExpanded?'Listeyi kısalt':'Tüm '+matches.length+' açık pozisyonu göster';}
    $('home-open-count').textContent=Number.isInteger(doc.summary?.counts?.OPEN)?String(doc.summary.counts.OPEN):'—';
    $('home-open-time').textContent='Kayıt '+stamp(doc.updated_at)+' · '+(valid&&fresh?'Güncel':valid?'Gecikmiş':'Doğrulanamadı');
    const opposite=Number.isInteger(doc.opposite_pending_count)?doc.opposite_pending_count:0;
@@ -71,8 +76,8 @@
      const btn=node('button','home-open-row');btn.type='button';
      const n=node('span','home-position-symbol');
      n.append(node('b','',String(t.symbol||'—')),node('small','',String(t.side||'')));
-     const raw=(typeof t.unrealized_net_usdt==='number'?t.unrealized_net_usdt:0);
-     const pnl=node('span','home-position-pnl '+(raw<0?'negative':'positive'),signed(raw)+' USDT');
+     const raw=(typeof t.unrealized_net_usdt==='number'&&Number.isFinite(t.unrealized_net_usdt)?t.unrealized_net_usdt:null);
+     const pnl=node('span','home-position-pnl '+(raw===null?'muted':raw<0?'negative':'positive'),paperPnl(raw));
      btn.append(n,node('span','home-position-fill',fmt(t.fill_price,5)),pnl,node('span','home-position-caret','›'));
      btn.title='Ana sayfada bu paritenin grafiğini incele';
      btn.addEventListener('click',()=>{
@@ -88,7 +93,7 @@
          $('watch-detail-price').textContent=fmt(t.fill_price,5);
          $('watch-detail-stop').textContent=fmt(t.stop,5);
          $('watch-detail-tps').textContent=[t.tp1,t.tp2,t.tp3].map((v,i)=>'TP'+(i+1)+' '+fmt(v,5)).join(' · ');
-         $('watch-detail-paper').textContent='Açık PnL: '+signed(raw)+' USDT · emir gönderilmez';
+         $('watch-detail-paper').textContent='Açık PnL: '+(raw===null?'doğrulanmadı':paperPnl(raw))+' · emir gönderilmez';
        }
      });
      box.append(btn);
@@ -187,10 +192,11 @@
        filter=b.dataset.positionFilter;renderRows();
      }));
      $('position-search')?.addEventListener('input',e=>{query=e.target.value.toUpperCase().trim();renderRows();});
-     $('home-position-search')?.addEventListener('input',e=>{homeSearch=e.target.value.toUpperCase().trim();renderHome();});
+     $('home-position-search')?.addEventListener('input',e=>{homeSearch=e.target.value.toUpperCase().trim();homeExpanded=false;renderHome();});
+     $('home-open-more')?.addEventListener('click',()=>{homeExpanded=!homeExpanded;renderHome();});
      $('cash-reload')?.addEventListener('click',()=>root.document.getElementById('reload')?.click());
      $('cash-audit')?.addEventListener('click',()=>root.document.querySelector('[data-tab="system"]')?.click());
    });
  }
- return {reconcile,positions,completeOpenPositions};
+ return {reconcile,positions,completeOpenPositions,paperPnl};
 });
