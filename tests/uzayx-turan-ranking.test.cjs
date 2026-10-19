@@ -27,8 +27,10 @@ test('Forward 1H direction is already normalized to LONG/SHORT in source: no dou
  if(x){const out=observedHorizon(x);assert.equal(out.move,x.horizons['1H'].close_direction_pct);}
 });
 test('Directly tagged full-ledger virtual returns move families into top 30',()=>{
- const p=cleanPaper();const candidates=p.recent_tickets.filter(x=>x.status==='CLOSED'&&x.is_real_trade===false);
- assert.ok(candidates.length>=2);
+ const base=cleanPaper();
+ const candidates=[{event_id:'synthetic-a',symbol:'ALPHAUSDT',status:'CLOSED',side:'LONG',is_real_trade:false,realized_net_usdt:0,unrealized_net_usdt:0,initial_margin_usdt:30},
+  {event_id:'synthetic-b',symbol:'BETAUSDT',status:'CLOSED',side:'SHORT',is_real_trade:false,realized_net_usdt:0,unrealized_net_usdt:0,initial_margin_usdt:30}];
+ const p={...base,recent_tickets:candidates,summary:{...base.summary,counts:{CLOSED:2,OPEN:0,WAITING_FUTURE_BAR:0}}};
  const pp=p.recent_tickets.map(t=>({...t}));
  let assigned=0;
  for(const t of pp){if(t.event_id===candidates[0].event_id){t.turan_strategy_id='T200';t.realized_net_usdt=-9;assigned++;}
