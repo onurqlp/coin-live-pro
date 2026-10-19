@@ -125,5 +125,13 @@ category.addEventListener('change',()=>{state.group=category.value;render()});
 dataSelect.addEventListener('change',()=>{state.source=dataSelect.value;render()});
 open.addEventListener('click',()=>{state.openAll=!state.openAll;render()});
 clear.addEventListener('click',()=>{state.q='';state.group='ALL';state.source='ALL';state.openAll=false;search.value='';category.value='ALL';dataSelect.value='ALL';render()});
+const catalogButtons=[...document.querySelectorAll('[data-turan-view]')];
+catalogButtons.forEach(btn=>btn.addEventListener('click',()=>{
+ const target=btn.dataset.turanView;
+ const next=document.getElementById('turan-new-view'),old=document.getElementById('turan-old-view');
+ if(!next||!old)return;
+ next.hidden=target!=='new';old.hidden=target!=='old';
+ catalogButtons.forEach(b=>b.setAttribute('aria-pressed',String(b===btn)));
+}));
 load();
 })();
