@@ -59,6 +59,6 @@ class TestEpochCutover(unittest.TestCase):
                 self.assertEqual(fresh['epoch_id'],name)
                 self.assertEqual(fresh['tickets'],[])
                 self.assertEqual(strict['orders'],{})
-                self.assertTrue(cutover.main(now=at))
+                self.assertFalse(cutover.main(now=at))
                 self.assertEqual((base/'archive/epochs'/name/'spark-ledger.json').read_bytes(),
                                  before['spark-ledger'])
