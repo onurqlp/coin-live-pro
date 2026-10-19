@@ -1,0 +1,1517 @@
+{
+  "schema": "turan-research-200-v1",
+  "catalog_date": "2026-10-19",
+  "source_document": "UZAYX_TURAN_200_TURK_MITOLOJISI_STRATEJI_AILESI_ARGE_2026-10-19.txt",
+  "is_a_proposal": true,
+  "all_unverified": true,
+  "not_live_strategies": true,
+  "not_a_backtest": true,
+  "not_executable": true,
+  "no_profit_claims": true,
+  "requires_forward_oos_and_cost_validation": true,
+  "preexisting_30_are_separate": true,
+  "groups": [
+    {
+      "id": "G01",
+      "name": "FIYAT ANOMALILERI",
+      "count": 10
+    },
+    {
+      "id": "G02",
+      "name": "HACIM VE IŞLEM AKIŞI",
+      "count": 10
+    },
+    {
+      "id": "G03",
+      "name": "EMIR DEFTERI VE LIKIDITE",
+      "count": 10
+    },
+    {
+      "id": "G04",
+      "name": "TREND DEVAMI VE IVME",
+      "count": 10
+    },
+    {
+      "id": "G05",
+      "name": "VOLATILITE VE SIKIŞMA",
+      "count": 10
+    },
+    {
+      "id": "G06",
+      "name": "ZIRVE DIP VE DÖNÜŞ",
+      "count": 10
+    },
+    {
+      "id": "G07",
+      "name": "TASFIYE VE SQUEEZE",
+      "count": 10
+    },
+    {
+      "id": "G08",
+      "name": "OI FUNDING VE POZISYONLANMA",
+      "count": 10
+    },
+    {
+      "id": "G09",
+      "name": "VADELI VE SPOT PIYASA AYRIŞMALARI",
+      "count": 10
+    },
+    {
+      "id": "G10",
+      "name": "BTC VE PIYASA REJIMI",
+      "count": 10
+    },
+    {
+      "id": "G11",
+      "name": "COINLER ARASI ILIŞKILER",
+      "count": 10
+    },
+    {
+      "id": "G12",
+      "name": "HABER OLAY VE SOSYAL TETIKLEYICILER",
+      "count": 10
+    },
+    {
+      "id": "G13",
+      "name": "ONCHAIN VE BÜYÜK CÜZDAN AKIŞI",
+      "count": 10
+    },
+    {
+      "id": "G14",
+      "name": "ZAMAN VE SEANS ETKILERI",
+      "count": 10
+    },
+    {
+      "id": "G15",
+      "name": "İSTATISTIK VE ANOMALI MODELLEME",
+      "count": 10
+    },
+    {
+      "id": "G16",
+      "name": "SAHTE SINYALLER VE KARŞI TEZLER",
+      "count": 10
+    },
+    {
+      "id": "G17",
+      "name": "EMIR UYGULAMA VE POZISYON ÇIKIŞLARI",
+      "count": 10
+    },
+    {
+      "id": "G18",
+      "name": "STRATEJI FÜZYONU VE META SINYALLER",
+      "count": 10
+    },
+    {
+      "id": "G19",
+      "name": "GEÇMIŞ ÖĞRENME VE KAÇAN FIRSATLAR",
+      "count": 10
+    },
+    {
+      "id": "G20",
+      "name": "PORTFÖY KAPASITE VE ADAPTASYON",
+      "count": 10
+    }
+  ],
+  "items": [
+    {
+      "id": "T001",
+      "name": "Bozkurt İzi",
+      "hypothesis": "Normal volatiliteye göre sıra dışı fiyat sapması",
+      "family": "FIYAT ANOMALILERI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T002",
+      "name": "Alp Er Tunga Eşiği",
+      "hypothesis": "Sık sınanan seviyede fiyat kabulü",
+      "family": "FIYAT ANOMALILERI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T003",
+      "name": "Göktürk Kırılması",
+      "hypothesis": "Rejim dışı ilk fiyat kopuşu",
+      "family": "FIYAT ANOMALILERI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T004",
+      "name": "Kayı Merdiveni",
+      "hypothesis": "Yüksek diplerle kademeli ilerleme",
+      "family": "FIYAT ANOMALILERI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T005",
+      "name": "Oğuz Kıvılcımı",
+      "hypothesis": "Sakin bantta biriken mikro momentum",
+      "family": "FIYAT ANOMALILERI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T006",
+      "name": "Ergenekon Çıkışı",
+      "hypothesis": "Uzun dar banttan geniş aralığa geçiş",
+      "family": "FIYAT ANOMALILERI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T007",
+      "name": "Tengri Şoku",
+      "hypothesis": "Getiri dağılımının aşırı kuyruğunda hareket",
+      "family": "FIYAT ANOMALILERI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T008",
+      "name": "Kutlu Fitil",
+      "hypothesis": "Uzun fitillerin yönlü reddi",
+      "family": "FIYAT ANOMALILERI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T009",
+      "name": "Orhun Hafızası",
+      "hypothesis": "Tarihsel tepki bölgelerinin tekrar sınanması",
+      "family": "FIYAT ANOMALILERI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T010",
+      "name": "Turan Gecikmesi",
+      "hypothesis": "Erken anormalliği izleyen gecikmiş fiyat tepkisi",
+      "family": "FIYAT ANOMALILERI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T011",
+      "name": "Umay Hacmi",
+      "hypothesis": "Fiyatla teyit edilen bağıl hacim patlaması",
+      "family": "HACIM VE IŞLEM AKIŞI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T012",
+      "name": "Demirci Nefesi",
+      "hypothesis": "Yüksek agresif emirle fiyatın sabit kalması",
+      "family": "HACIM VE IŞLEM AKIŞI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T013",
+      "name": "Korkut Deltası",
+      "hypothesis": "Kümülatif delta ve fiyat ayrışması",
+      "family": "HACIM VE IŞLEM AKIŞI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T014",
+      "name": "Börü Baskısı",
+      "hypothesis": "Sürekli agresif alım akışı",
+      "family": "HACIM VE IŞLEM AKIŞI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T015",
+      "name": "Erlik Baskısı",
+      "hypothesis": "Sürekli agresif satış akışı",
+      "family": "HACIM VE IŞLEM AKIŞI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T016",
+      "name": "Ak Ana Kümesi",
+      "hypothesis": "Büyük işlemlerin zamansal kümelenmesi",
+      "family": "HACIM VE IŞLEM AKIŞI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T017",
+      "name": "Yıldıray Devri",
+      "hypothesis": "Bir dalgadan sonraki hacim el değiştirmesi",
+      "family": "HACIM VE IŞLEM AKIŞI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T018",
+      "name": "Kızıl Elma Hızı",
+      "hypothesis": "Saniye başı işlem yoğunluğunun sıçraması",
+      "family": "HACIM VE IŞLEM AKIŞI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T019",
+      "name": "Tarkan Buzdağı",
+      "hypothesis": "Tekrarlanan parçalı büyük emir yürütümü",
+      "family": "HACIM VE IŞLEM AKIŞI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T020",
+      "name": "Uluğ Hacimsizliği",
+      "hypothesis": "Kırılmada katılım eksikliği",
+      "family": "HACIM VE IŞLEM AKIŞI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T021",
+      "name": "Kartal Mıknatısı",
+      "hypothesis": "Yoğun limit likiditesine fiyat yaklaşması",
+      "family": "EMIR DEFTERI VE LIKIDITE",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T022",
+      "name": "Kalkan Duvarı",
+      "hypothesis": "Gerçek fiyat duvarının tüketilmesi",
+      "family": "EMIR DEFTERI VE LIKIDITE",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T023",
+      "name": "Tulpar Kaçağı",
+      "hypothesis": "Büyük emirlerin eşleşmeden çekilmesi",
+      "family": "EMIR DEFTERI VE LIKIDITE",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T024",
+      "name": "Akıncı Boşluğu",
+      "hypothesis": "Çok seviyeli derinlik kaybı",
+      "family": "EMIR DEFTERI VE LIKIDITE",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T025",
+      "name": "Yada Spreadi",
+      "hypothesis": "Normalin dışına çıkan bid-ask farkı",
+      "family": "EMIR DEFTERI VE LIKIDITE",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T026",
+      "name": "Ay Ata Dönüşü",
+      "hypothesis": "Çekilmiş derinliğin geri dolması",
+      "family": "EMIR DEFTERI VE LIKIDITE",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T027",
+      "name": "Yel Ana İnceliği",
+      "hypothesis": "Düşük derinliğe göre fiyat etki oranı",
+      "family": "EMIR DEFTERI VE LIKIDITE",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T028",
+      "name": "Kürşad Yenilemesi",
+      "hypothesis": "Sürekli yenilenen limit emirlerin tespiti",
+      "family": "EMIR DEFTERI VE LIKIDITE",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T029",
+      "name": "Bozkır Vakumu",
+      "hypothesis": "Ardışık seviyelerde likidite yokluğu",
+      "family": "EMIR DEFTERI VE LIKIDITE",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T030",
+      "name": "Bumin Dengesi",
+      "hypothesis": "Tahta alış/satış yoğunluğu asimetrisi",
+      "family": "EMIR DEFTERI VE LIKIDITE",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T031",
+      "name": "Alparslan İlk Adım",
+      "hypothesis": "Yataydan yönlü trende geçiş",
+      "family": "TREND DEVAMI VE IVME",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T032",
+      "name": "Bilge Kağan Onayı",
+      "hypothesis": "Kırılma ardından kabul ve retest",
+      "family": "TREND DEVAMI VE IVME",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T033",
+      "name": "Mete İkinci Akın",
+      "hypothesis": "İlk dürtü sonrası yeni trend dalgası",
+      "family": "TREND DEVAMI VE IVME",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T034",
+      "name": "Kür Şad Hızlanması",
+      "hypothesis": "Momentumun ikinci türeviyle ivmelenmesi",
+      "family": "TREND DEVAMI VE IVME",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T035",
+      "name": "Yıldırım Soluğu",
+      "hypothesis": "Pozitif fiyat ama düşen ivme",
+      "family": "TREND DEVAMI VE IVME",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T036",
+      "name": "Sungur Dönüşü",
+      "hypothesis": "Trend içinde normalleşme geri çekilmesi",
+      "family": "TREND DEVAMI VE IVME",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T037",
+      "name": "Gökalp Bayrağı",
+      "hypothesis": "Trend içi dar bayrak sonrası devam",
+      "family": "TREND DEVAMI VE IVME",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T038",
+      "name": "Börü Mirası",
+      "hypothesis": "Kısa trendin daha uzun ölçeğe taşınması",
+      "family": "TREND DEVAMI VE IVME",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T039",
+      "name": "Aybars Uyumlanması",
+      "hypothesis": "Birden fazla zaman ölçeğinde yön onayı",
+      "family": "TREND DEVAMI VE IVME",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T040",
+      "name": "Atilla Kırılganlığı",
+      "hypothesis": "Trend iç yapısının zayıflaması",
+      "family": "TREND DEVAMI VE IVME",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T041",
+      "name": "Ergenekon Yayı",
+      "hypothesis": "Düşük gerçekleşmiş volatilite sonrası açılım",
+      "family": "VOLATILITE VE SIKIŞMA",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T042",
+      "name": "Gök Gürültüsü",
+      "hypothesis": "ATR şokları",
+      "family": "VOLATILITE VE SIKIŞMA",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T043",
+      "name": "Ayaz Kümesi",
+      "hypothesis": "Oynaklığın ardışık kümelenmesi",
+      "family": "VOLATILITE VE SIKIŞMA",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T044",
+      "name": "Kıl Çadırı",
+      "hypothesis": "İç içe fiyat daralmaları",
+      "family": "VOLATILITE VE SIKIŞMA",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T045",
+      "name": "Dede Korkut Geçidi",
+      "hypothesis": "Düşükten yüksek volatilite rejimine geçiş",
+      "family": "VOLATILITE VE SIKIŞMA",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T046",
+      "name": "Ak Sakal Sönümü",
+      "hypothesis": "Şok sonrasında volatilite normalleşmesi",
+      "family": "VOLATILITE VE SIKIŞMA",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T047",
+      "name": "Kara Han Kuyruğu",
+      "hypothesis": "Aşırı uç getiri yoğunluğu",
+      "family": "VOLATILITE VE SIKIŞMA",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T048",
+      "name": "Alaca Alanı",
+      "hypothesis": "Gün içi aralığın sıra dışı açılması",
+      "family": "VOLATILITE VE SIKIŞMA",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T049",
+      "name": "Kök Tengri Asimetrisi",
+      "hypothesis": "Aşağı ve yukarı oynaklığın asimetrisi",
+      "family": "VOLATILITE VE SIKIŞMA",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T050",
+      "name": "Tamga Sıkışması",
+      "hypothesis": "Birden çok ölçekte eşzamanlı daralma",
+      "family": "VOLATILITE VE SIKIŞMA",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T051",
+      "name": "Erlik Zirvesi",
+      "hypothesis": "Yüksek fiyata rağmen zayıflayan talep",
+      "family": "ZIRVE DIP VE DÖNÜŞ",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T052",
+      "name": "Umay Dibi",
+      "hypothesis": "Yüksek satışa rağmen fiyatın düşmemesi",
+      "family": "ZIRVE DIP VE DÖNÜŞ",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T053",
+      "name": "Alkarısı Tuzağı",
+      "hypothesis": "Yeni zirvenin hızla reddi",
+      "family": "ZIRVE DIP VE DÖNÜŞ",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T054",
+      "name": "Ak Ana Tuzağı",
+      "hypothesis": "Yeni dibin hızla geri alınması",
+      "family": "ZIRVE DIP VE DÖNÜŞ",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T055",
+      "name": "Tulpar Son Nefes",
+      "hypothesis": "Parabolik eğimden kırılmaya geçiş",
+      "family": "ZIRVE DIP VE DÖNÜŞ",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T056",
+      "name": "Demir Dağ Dağıtımı",
+      "hypothesis": "Yüksek hacimde yatay fiyat ve artan arz",
+      "family": "ZIRVE DIP VE DÖNÜŞ",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T057",
+      "name": "Kara Gün Teslimiyeti",
+      "hypothesis": "Kapitülasyon sonrası satıcı tükenişi",
+      "family": "ZIRVE DIP VE DÖNÜŞ",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T058",
+      "name": "Altay V Dönüşü",
+      "hypothesis": "Keskin düşüşten hızlı toparlanma",
+      "family": "ZIRVE DIP VE DÖNÜŞ",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T059",
+      "name": "Orhun Yay Dönüşü",
+      "hypothesis": "Kademeli yön değiştirme",
+      "family": "ZIRVE DIP VE DÖNÜŞ",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T060",
+      "name": "Simurg Kırık Kanat",
+      "hypothesis": "Devam sinyalinin kısa sürede iptali",
+      "family": "ZIRVE DIP VE DÖNÜŞ",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T061",
+      "name": "Börü Short Sıkışması",
+      "hypothesis": "Short tasfiyeleriyle yükseliş ivmesi",
+      "family": "TASFIYE VE SQUEEZE",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T062",
+      "name": "Kara Alp Long Sıkışması",
+      "hypothesis": "Long tasfiyeleriyle düşüş ivmesi",
+      "family": "TASFIYE VE SQUEEZE",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T063",
+      "name": "Çifte Tamga",
+      "hypothesis": "İki yönde ardışık stop temizliği",
+      "family": "TASFIYE VE SQUEEZE",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T064",
+      "name": "Kurt Kapanı",
+      "hypothesis": "Stop kümelerinde fiyatın hızlı ters dönmesi",
+      "family": "TASFIYE VE SQUEEZE",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T065",
+      "name": "Yelbörü Zinciri",
+      "hypothesis": "Tasfiye akışının art arda ivmelenmesi",
+      "family": "TASFIYE VE SQUEEZE",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T066",
+      "name": "Demir Ağ Sönümü",
+      "hypothesis": "Tasfiye fırtınası sonrasında akış tükenmesi",
+      "family": "TASFIYE VE SQUEEZE",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T067",
+      "name": "Akıncı Fitili",
+      "hypothesis": "Tasfiye spike fitili sonrası geri dönüş",
+      "family": "TASFIYE VE SQUEEZE",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T068",
+      "name": "Umay Savunması",
+      "hypothesis": "Likidasyon baskısına rağmen seviye korunması",
+      "family": "TASFIYE VE SQUEEZE",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T069",
+      "name": "Erlik Takibi",
+      "hypothesis": "Tasfiye sonrası düşüşün sürdürülebilirliği",
+      "family": "TASFIYE VE SQUEEZE",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T070",
+      "name": "Tengri Sıçraması",
+      "hypothesis": "Tasfiye nedeniyle tek yönde geçici fiyat aşırılığı",
+      "family": "TASFIYE VE SQUEEZE",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T071",
+      "name": "Kök OI Yükselişi",
+      "hypothesis": "Fiyat ve açık pozisyonun beraber büyümesi",
+      "family": "OI FUNDING VE POZISYONLANMA",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T072",
+      "name": "Kara OI Ayrışması",
+      "hypothesis": "Fiyat artarken açık pozisyon azalması",
+      "family": "OI FUNDING VE POZISYONLANMA",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T073",
+      "name": "Mavi OI Birikimi",
+      "hypothesis": "Fiyat yatayken türev pozisyon büyümesi",
+      "family": "OI FUNDING VE POZISYONLANMA",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T074",
+      "name": "Kızıl Funding",
+      "hypothesis": "Aşırı pozitif fonlama rejimi",
+      "family": "OI FUNDING VE POZISYONLANMA",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T075",
+      "name": "Ak Funding",
+      "hypothesis": "Aşırı negatif fonlama rejimi",
+      "family": "OI FUNDING VE POZISYONLANMA",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T076",
+      "name": "Bumin Basis",
+      "hypothesis": "Funding ile piyasa eğilimi ayrışması",
+      "family": "OI FUNDING VE POZISYONLANMA",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T077",
+      "name": "İlteriş Kapanışı",
+      "hypothesis": "OI daralmasıyla yönlü pozisyon kapama",
+      "family": "OI FUNDING VE POZISYONLANMA",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T078",
+      "name": "Kut Dengesizliği",
+      "hypothesis": "Long short tarafının yoğunlaşması",
+      "family": "OI FUNDING VE POZISYONLANMA",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T079",
+      "name": "Tarkan Yeniden Açılışı",
+      "hypothesis": "Tasfiye sonrasında OI hızlı yenilenmesi",
+      "family": "OI FUNDING VE POZISYONLANMA",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T080",
+      "name": "Ay Han Dönemeç",
+      "hypothesis": "Fonlama zamanı çevresindeki fiyat davranışı",
+      "family": "OI FUNDING VE POZISYONLANMA",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T081",
+      "name": "Turan Baz Farkı",
+      "hypothesis": "Spot ve perpetual fiyatı arasındaki sapma",
+      "family": "VADELI VE SPOT PIYASA AYRIŞMALARI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T082",
+      "name": "Akdeniz Taşıma",
+      "hypothesis": "Vadeli eğri ve taşıma maliyeti ayrışması",
+      "family": "VADELI VE SPOT PIYASA AYRIŞMALARI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T083",
+      "name": "Ordu Spot Liderliği",
+      "hypothesis": "Spot hareketin futures fiyatını önden izlemesi",
+      "family": "VADELI VE SPOT PIYASA AYRIŞMALARI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T084",
+      "name": "Börü Perp Liderliği",
+      "hypothesis": "Perpetual işlemlerin spotu önden sürüklemesi",
+      "family": "VADELI VE SPOT PIYASA AYRIŞMALARI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T085",
+      "name": "Atabey Basis Dönüşü",
+      "hypothesis": "Vadeli bazın ortalamaya dönüşü",
+      "family": "VADELI VE SPOT PIYASA AYRIŞMALARI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T086",
+      "name": "Oğuz Vade Eğrisi",
+      "hypothesis": "Vade yapısının ani şekil değiştirmesi",
+      "family": "VADELI VE SPOT PIYASA AYRIŞMALARI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T087",
+      "name": "Demir Teminat",
+      "hypothesis": "Teminat türleriyle oynaklık ilişkisinin değişmesi",
+      "family": "VADELI VE SPOT PIYASA AYRIŞMALARI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T088",
+      "name": "Kıpçak Uyuşmazlığı",
+      "hypothesis": "Vadeli borsalar arasında işlem yapılabilir fiyat farkı",
+      "family": "VADELI VE SPOT PIYASA AYRIŞMALARI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T089",
+      "name": "Uluğ Finansman Eşiği",
+      "hypothesis": "Fonlama ve komisyon sonrası teorik fırsat sınırı",
+      "family": "VADELI VE SPOT PIYASA AYRIŞMALARI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T090",
+      "name": "Kutalmış Açık Pozisyon",
+      "hypothesis": "Vadeli likidite ve pozisyon büyümesi uyumsuzluğu",
+      "family": "VADELI VE SPOT PIYASA AYRIŞMALARI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T091",
+      "name": "Gökbörü Hakimiyeti",
+      "hypothesis": "BTC dominansı değişirken altcoin tepkisi",
+      "family": "BTC VE PIYASA REJIMI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T092",
+      "name": "Ay Ata Çarpanı",
+      "hypothesis": "BTC hareketine göre dinamik beta",
+      "family": "BTC VE PIYASA REJIMI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T093",
+      "name": "Ergenekon Ayrışması",
+      "hypothesis": "BTC yatayken altcoin anomalisi",
+      "family": "BTC VE PIYASA REJIMI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T094",
+      "name": "Tengri Rüzgarı",
+      "hypothesis": "BTC ani şokunun gecikmeli altcoin etkisi",
+      "family": "BTC VE PIYASA REJIMI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T095",
+      "name": "Bilge Rejim",
+      "hypothesis": "Trend ve yatay piyasa koşulunu ayırma",
+      "family": "BTC VE PIYASA REJIMI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T096",
+      "name": "Uluğ Risk İştağı",
+      "hypothesis": "Geniş piyasa risk alma/riskten kaçınma değişimi",
+      "family": "BTC VE PIYASA REJIMI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T097",
+      "name": "Kara Korelasyon",
+      "hypothesis": "BTC korelasyonunun aniden kopması",
+      "family": "BTC VE PIYASA REJIMI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T098",
+      "name": "Kızıl Makas",
+      "hypothesis": "BTC yükselirken altcoin zayıflığı",
+      "family": "BTC VE PIYASA REJIMI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T099",
+      "name": "Akın Dalga",
+      "hypothesis": "BTC düşüş sonrası altcoin toparlanma sırası",
+      "family": "BTC VE PIYASA REJIMI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T100",
+      "name": "Oğuz Eşik",
+      "hypothesis": "BTC volatilitesi aşılınca altcoin strateji askısı",
+      "family": "BTC VE PIYASA REJIMI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T101",
+      "name": "Börü Öncüsü",
+      "hypothesis": "Bir coin hareketinin benzer grubu önden uyarması",
+      "family": "COINLER ARASI ILIŞKILER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T102",
+      "name": "Kayı Gecikeni",
+      "hypothesis": "Sektör grubuna gecikmeli katılım",
+      "family": "COINLER ARASI ILIŞKILER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T103",
+      "name": "Alp Sektör Dalgası",
+      "hypothesis": "Sektör geneline yayılan ortak hareket",
+      "family": "COINLER ARASI ILIŞKILER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T104",
+      "name": "Otağ Eşleşmesi",
+      "hypothesis": "Yüksek korelasyonlu çiftte geçici kopma",
+      "family": "COINLER ARASI ILIŞKILER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T105",
+      "name": "Orhun Yayılımı",
+      "hypothesis": "Haber etkisinin ilişkili tokenlara gecikmeli dağılması",
+      "family": "COINLER ARASI ILIŞKILER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T106",
+      "name": "Tamga Rotasyonu",
+      "hypothesis": "Bir temadan diğer temaya hacim devri",
+      "family": "COINLER ARASI ILIŞKILER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T107",
+      "name": "Aybars Bağımsızlık",
+      "hypothesis": "Piyasa düşerken tek coinde göreli güç",
+      "family": "COINLER ARASI ILIŞKILER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T108",
+      "name": "Kara Ayrışma",
+      "hypothesis": "Pozitif piyasa içinde anormal zayıflık",
+      "family": "COINLER ARASI ILIŞKILER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T109",
+      "name": "Simurg Sepeti",
+      "hypothesis": "Sektör sepeti ile tek coin anormalliği",
+      "family": "COINLER ARASI ILIŞKILER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T110",
+      "name": "Turan Zincir Etkisi",
+      "hypothesis": "Ekosistem tokenlarında ardışık fiyat tepkisi",
+      "family": "COINLER ARASI ILIŞKILER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T111",
+      "name": "Dede Korkut Haber",
+      "hypothesis": "Doğrulanmış haberin ilk fiyat tepkisi",
+      "family": "HABER OLAY VE SOSYAL TETIKLEYICILER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T112",
+      "name": "Kızıl Elma Listeleme",
+      "hypothesis": "Borsa listeleme ilanı etkisi",
+      "family": "HABER OLAY VE SOSYAL TETIKLEYICILER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T113",
+      "name": "Kara Bayrak Delist",
+      "hypothesis": "Delist duyurusunun likidite etkisi",
+      "family": "HABER OLAY VE SOSYAL TETIKLEYICILER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T114",
+      "name": "Ay Ana Kilit Açımı",
+      "hypothesis": "Token unlock takviminin fiyatla ilişkisi",
+      "family": "HABER OLAY VE SOSYAL TETIKLEYICILER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T115",
+      "name": "Altın Tamga Oylama",
+      "hypothesis": "Governance sonucu sonrası fiyat keşfi",
+      "family": "HABER OLAY VE SOSYAL TETIKLEYICILER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T116",
+      "name": "Gökçe Söylenti",
+      "hypothesis": "Doğrulanmamış söylenti ve fiyat ayrışması",
+      "family": "HABER OLAY VE SOSYAL TETIKLEYICILER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T117",
+      "name": "Börü Sosyal Sıçrama",
+      "hypothesis": "Sosyal ilgi artışının hacimle teyidi",
+      "family": "HABER OLAY VE SOSYAL TETIKLEYICILER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T118",
+      "name": "Korkut Düzeltmesi",
+      "hypothesis": "İlk haber tepkisinin tersine dönüşü",
+      "family": "HABER OLAY VE SOSYAL TETIKLEYICILER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T119",
+      "name": "Kut Anlatısı",
+      "hypothesis": "Narrative değişiminin çoklu token etkisi",
+      "family": "HABER OLAY VE SOSYAL TETIKLEYICILER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T120",
+      "name": "Ak Söz Sahte Haber",
+      "hypothesis": "Yalanlanan bilginin piyasa geri dönüşü",
+      "family": "HABER OLAY VE SOSYAL TETIKLEYICILER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T121",
+      "name": "Altay Borsa Girişi",
+      "hypothesis": "Borsalara büyük token transferi",
+      "family": "ONCHAIN VE BÜYÜK CÜZDAN AKIŞI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T122",
+      "name": "Akın Borsa Çıkışı",
+      "hypothesis": "Borsalardan net büyük transfer",
+      "family": "ONCHAIN VE BÜYÜK CÜZDAN AKIŞI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T123",
+      "name": "Demir Balina",
+      "hypothesis": "Büyük cüzdan bakiyesindeki rejim değişimi",
+      "family": "ONCHAIN VE BÜYÜK CÜZDAN AKIŞI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T124",
+      "name": "Umay Yeni Cüzdan",
+      "hypothesis": "Yeni aktif cüzdanlarda anormal artış",
+      "family": "ONCHAIN VE BÜYÜK CÜZDAN AKIŞI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T125",
+      "name": "Orhun Zincir Hızı",
+      "hypothesis": "Zincir üstü transfer yoğunluğu sıçraması",
+      "family": "ONCHAIN VE BÜYÜK CÜZDAN AKIŞI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T126",
+      "name": "Bumin Kasa",
+      "hypothesis": "Borsa rezervleri ile fiyat ayrışması",
+      "family": "ONCHAIN VE BÜYÜK CÜZDAN AKIŞI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T127",
+      "name": "Kara Köprü",
+      "hypothesis": "Köprü işlemlerinde olağan dışı hareket",
+      "family": "ONCHAIN VE BÜYÜK CÜZDAN AKIŞI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T128",
+      "name": "Tamga Hazinesi",
+      "hypothesis": "Proje hazinesi cüzdanlarının hareketleri",
+      "family": "ONCHAIN VE BÜYÜK CÜZDAN AKIŞI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T129",
+      "name": "Kayı Dağıtımı",
+      "hypothesis": "Büyük sahibin çok sayıda adrese dağıtımı",
+      "family": "ONCHAIN VE BÜYÜK CÜZDAN AKIŞI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T130",
+      "name": "Gök Balina Gecikmesi",
+      "hypothesis": "Büyük transfer sonrası gecikmeli piyasa tepkisi",
+      "family": "ONCHAIN VE BÜYÜK CÜZDAN AKIŞI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T131",
+      "name": "Şafak Nöbeti",
+      "hypothesis": "Asya açılışı etrafında likidite değişimi",
+      "family": "ZAMAN VE SEANS ETKILERI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T132",
+      "name": "Öğle Toyu",
+      "hypothesis": "Avrupa seansı hacim devri",
+      "family": "ZAMAN VE SEANS ETKILERI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T133",
+      "name": "Günbatımı Akını",
+      "hypothesis": "ABD seansı fiyat keşfi",
+      "family": "ZAMAN VE SEANS ETKILERI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T134",
+      "name": "Kutlu Devir",
+      "hypothesis": "Seans geçişinde spread ve yön değişimi",
+      "family": "ZAMAN VE SEANS ETKILERI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T135",
+      "name": "Ay Tutulması",
+      "hypothesis": "Hafta sonu düşük derinlik anomalisi",
+      "family": "ZAMAN VE SEANS ETKILERI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T136",
+      "name": "Bozkır Pazartesisi",
+      "hypothesis": "Hafta açılışı gap benzeri fiyat davranışı",
+      "family": "ZAMAN VE SEANS ETKILERI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T137",
+      "name": "Korkut Takvimi",
+      "hypothesis": "Ekonomik veri açıklaması öncesi-sonrası risk",
+      "family": "ZAMAN VE SEANS ETKILERI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T138",
+      "name": "Yılkı Dönemi",
+      "hypothesis": "Ay sonu türev pozisyon ayarlamaları",
+      "family": "ZAMAN VE SEANS ETKILERI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T139",
+      "name": "Kızıl Saat",
+      "hypothesis": "Fonlama hesap saatlerinde mikro fiyat hareketi",
+      "family": "ZAMAN VE SEANS ETKILERI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T140",
+      "name": "Turan Nöbeti",
+      "hypothesis": "Piyasa aktivitesinin mevsimsel gün içi döngüsü",
+      "family": "ZAMAN VE SEANS ETKILERI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T141",
+      "name": "Bilge Z-Skoru",
+      "hypothesis": "Getiri sapmasının standartlaştırılması",
+      "family": "İSTATISTIK VE ANOMALI MODELLEME",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T142",
+      "name": "Uluğ Kuantil",
+      "hypothesis": "Aşırı yüzdelik getiri rejimi",
+      "family": "İSTATISTIK VE ANOMALI MODELLEME",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T143",
+      "name": "Orhun CUSUM",
+      "hypothesis": "Kümülatif değişim noktasını erken bulma",
+      "family": "İSTATISTIK VE ANOMALI MODELLEME",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T144",
+      "name": "Göktürk HMM",
+      "hypothesis": "Gizli piyasa rejimleri arasında geçiş",
+      "family": "İSTATISTIK VE ANOMALI MODELLEME",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T145",
+      "name": "Kutadgu Artık",
+      "hypothesis": "Faktör modeli artık getirisi",
+      "family": "İSTATISTIK VE ANOMALI MODELLEME",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T146",
+      "name": "Ak Sakal Entropi",
+      "hypothesis": "Fiyat hareketi düzensizliğinin değişmesi",
+      "family": "İSTATISTIK VE ANOMALI MODELLEME",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T147",
+      "name": "Yada Fraktal",
+      "hypothesis": "Piyasa ölçekleme davranışının kayması",
+      "family": "İSTATISTIK VE ANOMALI MODELLEME",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T148",
+      "name": "Simurg Nedensellik",
+      "hypothesis": "Öncü göstergeyle gecikmeli ilişki sınaması",
+      "family": "İSTATISTIK VE ANOMALI MODELLEME",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T149",
+      "name": "Kök Uç Değer",
+      "hypothesis": "Extreme value theory ile kuyruk eşiği",
+      "family": "İSTATISTIK VE ANOMALI MODELLEME",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T150",
+      "name": "Erkin Kalıcılık",
+      "hypothesis": "Anomali sonrası etkinin yaşam süresi",
+      "family": "İSTATISTIK VE ANOMALI MODELLEME",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T151",
+      "name": "Alkarısı Aynası",
+      "hypothesis": "Başarısız long sinyalinde ters yön testi",
+      "family": "SAHTE SINYALLER VE KARŞI TEZLER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T152",
+      "name": "Erlik Aynası",
+      "hypothesis": "Başarısız short sinyalinde ters yön testi",
+      "family": "SAHTE SINYALLER VE KARŞI TEZLER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T153",
+      "name": "Kara Damga Yanıltma",
+      "hypothesis": "Sık yanlış pozitif veren hacim sinyali",
+      "family": "SAHTE SINYALLER VE KARŞI TEZLER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T154",
+      "name": "Bozkurt Sahte Kırılma",
+      "hypothesis": "Breakout sonrası bant içine dönüş",
+      "family": "SAHTE SINYALLER VE KARŞI TEZLER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T155",
+      "name": "Umay Sahte Dönüş",
+      "hypothesis": "Reversal sinyalinden sonra trendin sürmesi",
+      "family": "SAHTE SINYALLER VE KARŞI TEZLER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T156",
+      "name": "Tulpar İkili Tuzak",
+      "hypothesis": "Çift yönlü yanlış kırılma",
+      "family": "SAHTE SINYALLER VE KARŞI TEZLER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T157",
+      "name": "Korkut Gürültü Filtresi",
+      "hypothesis": "İşlem sayısı artışı ama gerçek hacim yokluğu",
+      "family": "SAHTE SINYALLER VE KARŞI TEZLER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T158",
+      "name": "Kalkan Boş Sinyal",
+      "hypothesis": "Likidite yetersizken doğru tahminin işlem dışı kalması",
+      "family": "SAHTE SINYALLER VE KARŞI TEZLER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T159",
+      "name": "Simurg Çelişki",
+      "hypothesis": "Bağımsız stratejilerin zıt tahmin vermesi",
+      "family": "SAHTE SINYALLER VE KARŞI TEZLER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T160",
+      "name": "Ayna Kayması",
+      "hypothesis": "Ters strateji performansının rejime göre değişmesi",
+      "family": "SAHTE SINYALLER VE KARŞI TEZLER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T161",
+      "name": "Tarkan Kademesi",
+      "hypothesis": "Parçalı girişin dolum ve kayma etkisi",
+      "family": "EMIR UYGULAMA VE POZISYON ÇIKIŞLARI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T162",
+      "name": "Akıncı Bekleyişi",
+      "hypothesis": "Limit emirle bekleme ve kaçırma maliyeti",
+      "family": "EMIR UYGULAMA VE POZISYON ÇIKIŞLARI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T163",
+      "name": "Kalkan Zaman Kesiti",
+      "hypothesis": "Belirli süre ilerlemeyen pozisyonun kapanması",
+      "family": "EMIR UYGULAMA VE POZISYON ÇIKIŞLARI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T164",
+      "name": "Tulpar Kâr Kilidi",
+      "hypothesis": "İvmeye bağlı izleyen stop",
+      "family": "EMIR UYGULAMA VE POZISYON ÇIKIŞLARI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T165",
+      "name": "Umay Bölüşümü",
+      "hypothesis": "Kademeli kâr almanın beklenti üzerindeki etkisi",
+      "family": "EMIR UYGULAMA VE POZISYON ÇIKIŞLARI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T166",
+      "name": "Börü Koruması",
+      "hypothesis": "Volatiliteye göre stop mesafesi",
+      "family": "EMIR UYGULAMA VE POZISYON ÇIKIŞLARI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T167",
+      "name": "Ay Han Tekrar Giriş",
+      "hypothesis": "Stop sonrası yeniden giriş için koşul",
+      "family": "EMIR UYGULAMA VE POZISYON ÇIKIŞLARI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T168",
+      "name": "Kara Er Risk Kesmesi",
+      "hypothesis": "Likidite rejimi bozulunca pozisyon azaltma",
+      "family": "EMIR UYGULAMA VE POZISYON ÇIKIŞLARI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T169",
+      "name": "Ergenekon Karşılaştırması",
+      "hypothesis": "Aynı sinyalde market-limit uygulanabilirliği",
+      "family": "EMIR UYGULAMA VE POZISYON ÇIKIŞLARI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T170",
+      "name": "Altay Net Eşik",
+      "hypothesis": "Komisyon funding spread sonrası minimum getiri gereği",
+      "family": "EMIR UYGULAMA VE POZISYON ÇIKIŞLARI",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T171",
+      "name": "Simurg Üç Tamga",
+      "hypothesis": "Bağımsız fiyat hacim OI sinyallerinin eşzamanı",
+      "family": "STRATEJI FÜZYONU VE META SINYALLER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T172",
+      "name": "Dokuz Oğuz Meclisi",
+      "hypothesis": "Farklı ailelerin oy çokluğuyla ortak sonuç üretmesi",
+      "family": "STRATEJI FÜZYONU VE META SINYALLER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T173",
+      "name": "Bilge Hakem",
+      "hypothesis": "Geçmiş rejime göre model ağırlığı",
+      "family": "STRATEJI FÜZYONU VE META SINYALLER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T174",
+      "name": "Kök Çelişki Çözücü",
+      "hypothesis": "Long ve short sinyali çelişkisinde belirsizlik puanı",
+      "family": "STRATEJI FÜZYONU VE META SINYALLER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T175",
+      "name": "Turan Hiyerarşi",
+      "hypothesis": "Piyasa rejim filtresi sonrası yerel sinyal",
+      "family": "STRATEJI FÜZYONU VE META SINYALLER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T176",
+      "name": "Alp Er Öncelik",
+      "hypothesis": "Çakışan fırsatların net beklentiyle seçimi",
+      "family": "STRATEJI FÜZYONU VE META SINYALLER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T177",
+      "name": "Orhun Güven Ölçeği",
+      "hypothesis": "Sinyal güvenilirliğinin kalibrasyonu",
+      "family": "STRATEJI FÜZYONU VE META SINYALLER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T178",
+      "name": "Umay Kapısı",
+      "hypothesis": "Emir uygulama koşulundan geçmeyen sinyali eleme",
+      "family": "STRATEJI FÜZYONU VE META SINYALLER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T179",
+      "name": "Bozkurt Yankısı",
+      "hypothesis": "Benzer sinyallerin tek aile sayılarak çoğul sayımı engelleme",
+      "family": "STRATEJI FÜZYONU VE META SINYALLER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T180",
+      "name": "Kutlu Konsey",
+      "hypothesis": "Farklı veri kaynaklarının ortak fakat bağımsız teyidi",
+      "family": "STRATEJI FÜZYONU VE META SINYALLER",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T181",
+      "name": "Kartal Geri Bakış",
+      "hypothesis": "Başarılı hareket öncesi erişilebilir sinyal taraması",
+      "family": "GEÇMIŞ ÖĞRENME VE KAÇAN FIRSATLAR",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T182",
+      "name": "Dede Korkut Arşivi",
+      "hypothesis": "Benzer tarihsel olayları olay-zamanıyla eşleme",
+      "family": "GEÇMIŞ ÖĞRENME VE KAÇAN FIRSATLAR",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T183",
+      "name": "Simurg Yeniden Doğuş",
+      "hypothesis": "Emekliye ayrılan hipotezin yeni rejimde yeniden testi",
+      "family": "GEÇMIŞ ÖĞRENME VE KAÇAN FIRSATLAR",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T184",
+      "name": "Ayna Dersliği",
+      "hypothesis": "Kaybeden işlemin ters yönünü ileri test etme",
+      "family": "GEÇMIŞ ÖĞRENME VE KAÇAN FIRSATLAR",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T185",
+      "name": "Kayı Kaçan Emir",
+      "hypothesis": "NO_FILL sonrası gerçek fırsat kaybını ölçme",
+      "family": "GEÇMIŞ ÖĞRENME VE KAÇAN FIRSATLAR",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T186",
+      "name": "Erkin Pişmanlık",
+      "hypothesis": "Gerçek giriş ile erişilebilir ideal giriş farkı",
+      "family": "GEÇMIŞ ÖĞRENME VE KAÇAN FIRSATLAR",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T187",
+      "name": "Kara Kutlu Ders",
+      "hypothesis": "Kazananlarda ortak ama kaybedenlerde bulunmayan özellik",
+      "family": "GEÇMIŞ ÖĞRENME VE KAÇAN FIRSATLAR",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T188",
+      "name": "Orhun Sahte Hafıza",
+      "hypothesis": "Sadece kazananları seçme yanlılığını denetleme",
+      "family": "GEÇMIŞ ÖĞRENME VE KAÇAN FIRSATLAR",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T189",
+      "name": "Göktürk Deney",
+      "hypothesis": "Parametre değişiminin ayrılmış veride testi",
+      "family": "GEÇMIŞ ÖĞRENME VE KAÇAN FIRSATLAR",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T190",
+      "name": "Turan Soy Ağacı",
+      "hypothesis": "Yeni ailenin hangi olay ve hipotezden türediğini izleme",
+      "family": "GEÇMIŞ ÖĞRENME VE KAÇAN FIRSATLAR",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T191",
+      "name": "Kalkan Yoğunlaşma",
+      "hypothesis": "İlişkili coinlerde eş yön riskin sınırlanması",
+      "family": "PORTFÖY KAPASITE VE ADAPTASYON",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T192",
+      "name": "Bilge Risk Bütçesi",
+      "hypothesis": "Anlık oynaklığa göre toplam maruziyet",
+      "family": "PORTFÖY KAPASITE VE ADAPTASYON",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T193",
+      "name": "Kut Likidite Kapasitesi",
+      "hypothesis": "Order book hacmine göre ölçeklenebilir pozisyon",
+      "family": "PORTFÖY KAPASITE VE ADAPTASYON",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T194",
+      "name": "Börü Çakışma",
+      "hypothesis": "Tek kaynaktan gelen birden çok benzer sinyali tek risk sayma",
+      "family": "PORTFÖY KAPASITE VE ADAPTASYON",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T195",
+      "name": "Umay Seri Kayıp",
+      "hypothesis": "Üst üste zarar sonrası araştırma rejimi değişimi",
+      "family": "PORTFÖY KAPASITE VE ADAPTASYON",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T196",
+      "name": "Tarkan Maliyet Eşiği",
+      "hypothesis": "Minimum ekonomik girişin canlı maliyetle değişmesi",
+      "family": "PORTFÖY KAPASITE VE ADAPTASYON",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T197",
+      "name": "Orhun OOS Nöbeti",
+      "hypothesis": "İleri dönem performans kaymasının tespiti",
+      "family": "PORTFÖY KAPASITE VE ADAPTASYON",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T198",
+      "name": "Erlik Çöküş Alarmı",
+      "hypothesis": "Beklenen risk dağılımının bozulması",
+      "family": "PORTFÖY KAPASITE VE ADAPTASYON",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T199",
+      "name": "Simurg Adaptasyon",
+      "hypothesis": "Kazanan ailelerin ağırlığını yalnız ileri doğrulamayla güncelleme",
+      "family": "PORTFÖY KAPASITE VE ADAPTASYON",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    },
+    {
+      "id": "T200",
+      "name": "Tengri İşlemsizlik",
+      "hypothesis": "Hiçbir avantaj doğrulanmadığında NO_TRADE seçimi",
+      "family": "PORTFÖY KAPASITE VE ADAPTASYON",
+      "status": "HYPOTHESIS_UNVERIFIED"
+    }
+  ]
+}
