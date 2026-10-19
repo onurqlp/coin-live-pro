@@ -80,6 +80,20 @@ async function run(){
      await firstOpen.click();
      assert.equal(new URL(page.url()).hash,'#overview','Open position click must stay on homepage');
    }
+   const homePulse=await page.evaluate(()=>({
+     count:document.querySelectorAll('#overview .home-pulse .pulse-item').length,
+     latest:document.querySelector('#home-pulse-entry')?.textContent,
+     entryNote:document.querySelector('#home-pulse-entry-note')?.textContent,
+     floating:document.querySelector('#home-pulse-pnl')?.textContent,
+     floatingNote:document.querySelector('#home-pulse-pnl-note')?.textContent,
+     width:document.documentElement.scrollWidth
+   }));
+   assert.equal(homePulse.count,2,'Homepage must keep just two essential status shortcuts');
+   assert.ok(homePulse.latest&&homePulse.entryNote&&homePulse.floatingNote);
+   assert.ok(homePulse.width<=width+3,'Pulse must not cause horizontal scrolling');
+   await page.locator('.home-pulse .pulse-item:first-child').click();
+   assert.equal(new URL(page.url()).hash,'#funds','Last entry shortcut must open Cash');
+   await openTab('overview');
    await page.screenshot({path:'/tmp/uzayx-'+name+'-home.png',fullPage:true});
    await openTab('chart');
    await page.waitForFunction(()=>document.querySelector('#chart')?.classList.contains('active'),{timeout:5000});
