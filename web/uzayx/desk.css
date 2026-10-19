@@ -116,3 +116,28 @@
  .archive-event{grid-template-columns:1fr 1.6fr}
  .archive-event small{display:none}
 }
+
+/* Detailed paper ledger: keep the homepage compact and give the cash page room. */
+.cash-recent{margin:12px 0}
+.cash-recent-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.cash-recent-grid>div{min-width:0;background:#102a3b;border:1px solid #2d485a;border-radius:10px;padding:12px}
+.cash-recent-grid small,.cash-recent-grid span{display:block;font-size:11px;color:#adc5d0;overflow-wrap:anywhere}
+.cash-recent-grid strong{display:block;font-size:15px;margin:5px 0 3px;overflow-wrap:anywhere}
+.position-more{width:100%;min-height:42px;margin-top:9px}
+.position-more[hidden]{display:none}
+.position-row{grid-template-columns:minmax(92px,1fr) minmax(130px,1.3fr) minmax(90px,.95fr);min-height:57px}
+.position-entry{line-height:1.4}
+.position-exits{border-top:1px solid #304a56;margin-top:14px;padding-top:12px}
+.position-exits h4{font-size:13px;margin:0 0 8px}
+.position-exit-row{padding:9px 10px;background:#102a39;border-radius:8px;font-size:11px;line-height:1.5}
+@media(max-width:760px){
+ .cash-recent-grid{grid-template-columns:1fr}
+ .cash-recent-grid>div{padding:11px}
+ .position-row{grid-template-columns:minmax(82px,1fr) minmax(105px,1.1fr) minmax(84px,.95fr);gap:6px}
+ .cash-workspace{grid-template-columns:minmax(0,1fr)}
+}
+@media(max-width:390px){
+ .position-row{grid-template-columns:minmax(75px,.95fr) minmax(98px,1.2fr) minmax(68px,.8fr);gap:4px;font-size:10px}
+ .position-entry{font-size:9px}
+ .position-pnl{font-size:10px;overflow-wrap:anywhere}
+}
