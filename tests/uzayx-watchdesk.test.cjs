@@ -55,6 +55,40 @@ test('paper summary audit distinguishes 1058 ledger tickets from recent limited 
  assert.equal(portfolio.paperPnl(NaN),'—');
  assert.notEqual(portfolio.paperPnl(0),'—');
 });
+test('homepage summary shows latest virtual fill and verified floating PnL without inventing values',()=>{
+ const ms=Date.parse('2026-10-19T15:30:00Z');
+ const doc={no_real_orders:true,scan_id:'pulse-scan',
+   summary:{counts:{OPEN:2},unrealized_net_usdt:-1.25},
+   open_positions_complete:true,
+   open_positions:[
+     {event_id:'a',status:'OPEN',is_real_trade:false,symbol:'BTCUSDT',
+      side:'LONG',filled_at_utc:'2026-10-19T15:15:00Z',reference_notional_usdt:30},
+     {event_id:'b',status:'OPEN',is_real_trade:false,symbol:'ETHUSDT',
+      side:'SHORT',filled_at_utc:'2026-10-19T15:20:00Z',reference_notional_usdt:300}
+   ],
+   recent_tickets:[{event_id:'c',status:'CLOSED',is_real_trade:false,
+     symbol:'SOLUSDT',side:'LONG',filled_at_utc:'2026-10-19T15:25:00Z'}]};
+ const manifest={scan_id:'pulse-scan',publication_valid:true,no_real_orders:true,
+   finished_at_utc:'2026-10-19T15:28:00Z'};
+ const valid=portfolio.homePulseSummary(doc,manifest,'a'.repeat(40),
+   {scan_id:'pulse-scan'},{status:'OK'},ms);
+ assert.equal(valid.latest.symbol,'SOLUSDT');
+ assert.equal(valid.count,2);
+ assert.equal(valid.floating,-1.25);
+ assert.equal(valid.state,'Son doğrulanmış tarama');
+ const older=portfolio.homePulseSummary(doc,manifest,'a'.repeat(40),
+   {scan_id:'pulse-scan'},{status:'OK'},ms+30*60000);
+ assert.equal(older.fresh,false);
+ assert.equal(older.state,'Gecikmiş kayıt');
+ const mismatched=portfolio.homePulseSummary(doc,manifest,'a'.repeat(40),
+   {scan_id:'other'},{status:'OK'},ms);
+ assert.equal(mismatched.floating,null);
+ assert.equal(mismatched.count,null);
+ const partial=portfolio.homePulseSummary({...doc,open_positions_complete:false},
+   manifest,'a'.repeat(40),{scan_id:'pulse-scan'},{status:'OK'},ms);
+ assert.equal(partial.floating,null);
+ assert.equal(partial.count,null);
+});
 test('logo asset, compact watch monitor and separate cash charts are present',()=>{
  const html=fs.readFileSync('web/uzayx/index.html','utf8');
  const js=fs.readFileSync('web/uzayx/app.js','utf8');
