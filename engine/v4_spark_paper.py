@@ -19,7 +19,7 @@ ARCH=ROOT/'archive'/'v4-spark-paper-ledger.json'
 VERSION='4.0.3-spark-paper-a1'
 BAR=300000
 DAY=86400000
-NOTIONAL=10.0
+NOTIONAL=30.0  # Future tickets only. Existing 10-USDT ticket references remain unchanged.
 START_CASH=10000.0
 FEE=0.0006
 SLIPPAGE=0.0003
@@ -157,6 +157,7 @@ def advance(prior,early,mtf_doc,now_ms,candles):
     # price/status. 4.03 is a schema upgrade, not a new/backfilled experiment.
     old=dict(prior) if prior.get('model_version') in (VERSION,'4.0.2-spark-paper-a1') else initial(now_ms)
     old['model_version']=VERSION
+    old['ticket_notional_usdt']=NOTIONAL
     if old['last_scan_id']==early.get('scan_id'):
         # Idempotent replay; no second fill, fee, or duplicate event.
         pass
@@ -308,18 +309,22 @@ def advance(prior,early,mtf_doc,now_ms,candles):
                 t['status']='DATA_GAP';t['valuation_status']='FIRST_5M_MISSING_OR_INVALID';continue
             if abs(nextbar['o']/t['signal_price']-1)>.04:
                 t['status']='DATA_GAP';t['valuation_status']='FILL_PRICE_GAP_TOO_LARGE';continue
+            # Ticket-specific size protects the historical 10 USDT ledger and pending intents.
+            ticket_notional=t.get('reference_notional_usdt',10.0)
+            if not valid(ticket_notional):
+                t['status']='CAPACITY_BLOCKED';t['valuation_status']='INVALID_NOTIONAL';continue
             exposure=sum(v.get('remaining_notional_usdt',0) for v in index.values() if v['status']=='OPEN')
-            if exposure+NOTIONAL>START_CASH:
+            if exposure+ticket_notional>START_CASH:
                 t['status']='CAPACITY_BLOCKED';t['valuation_status']='VIRTUAL_CAPITAL_FULL';continue
             sign=1 if t['side']=='LONG' else -1
             filled=nextbar['o']*(1+sign*SLIPPAGE)
             if sign*(filled-t['stop'])<=0:
                 t['status']='INVALID_LEVEL';t['valuation_status']='STOP_BEFORE_ESTIMATED_FILL';continue
-            qty=NOTIONAL/filled
+            qty=ticket_notional/filled
             t.update(status='OPEN',fill_price=filled,filled_at_utc=stamp(start+BAR),
                 fill_at_ms=start,entry_open_reference=nextbar['o'],
-                total_qty=qty,remaining_qty=qty,remaining_notional_usdt=NOTIONAL,
-                entry_fee_usdt=NOTIONAL*FEE,fees_estimated_usdt=NOTIONAL*FEE,
+                total_qty=qty,remaining_qty=qty,remaining_notional_usdt=ticket_notional,
+                entry_fee_usdt=ticket_notional*FEE,fees_estimated_usdt=ticket_notional*FEE,
                 last_processed_ms=start-BAR,valuation_status='VERIFIED_FUTURE_5M',
                 mark_price=filled)
         if t['status']!='OPEN':continue
@@ -375,6 +380,8 @@ def advance(prior,early,mtf_doc,now_ms,candles):
         'all_events_count':len(tickets),'archive_is_persistent':True,
         'no_real_orders':True,'combined_with_strict_paper_cash':False,
         'starting_balance_usdt':START_CASH,'reference_ticket_notional_usdt':NOTIONAL,
+        'minimum_new_ticket_notional_usdt':30.0,
+        'notional_policy_applies_to':'NEW_INTENTS_ONLY',
         'virtual_account_is_estimated':True,'no_backfilled_outcomes':True,
         'fee_per_side_assumption':FEE,'slippage_per_side_assumption':SLIPPAGE,
         'max_hold_hours':24,
@@ -394,6 +401,9 @@ def advance(prior,early,mtf_doc,now_ms,candles):
             'realized_net_usdt':t.get('realized_net_usdt'),
             'unrealized_net_usdt':t.get('unrealized_net_usdt'),
             'reference_notional_usdt':t.get('reference_notional_usdt'),
+            'remaining_notional_usdt':t.get('remaining_notional_usdt'),
+            'fees_estimated_usdt':t.get('fees_estimated_usdt'),
+            'entry_fee_usdt':t.get('entry_fee_usdt'),
             'valuation_status':t.get('valuation_status'),
             'opposition_requested_at_utc':t.get('opposition_requested_at_utc'),
         } for t in tickets if t['status']=='OPEN'],
