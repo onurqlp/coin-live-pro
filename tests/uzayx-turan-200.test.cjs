@@ -30,7 +30,9 @@ test('Research browsing and independent directions never imply confirmed trade r
  assert.match(scenarioText('LONG',source.families[0]),/giriş önerisi değildir/);
 });
 test('TURAN 30/200 modes, independent ATLAS and shared live mobile HTML',()=>{
- for(const x of ['id="turan-current-group"','id="turan-research-group"','id="turan-families-root"','id="turan-catalog"','id="volcano-atlas"','data-turan-mode="current"','data-turan-mode="research"','src="./turan-families.js?v=1"','href="./turan-families.css?v=1"'])assert.ok(page.includes(x),x);
+ for(const x of ['id="turan-current-group"','id="turan-research-group"','id="turan-families-root"','id="turan-catalog"','id="volcano-atlas"','data-turan-mode="current"','data-turan-mode="research"'])assert.ok(page.includes(x),x);
+ assert.match(page,/src="\.\/turan-families\.js(?:\?v=[^"]+)?"/);
+ assert.match(page,/href="\.\/turan-families\.css(?:\?v=[^"]+)?"/);
  assert.match(app,/<iframe[^>]*src="\.\/site\.html"/);
  assert.match(app,/location\.reload/);
 });
