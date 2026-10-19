@@ -42,7 +42,7 @@
  }
  function observationRow(x){
   const row=$('div','trank-obs-row');
-  row.append($('div','trank-event-meta',(x.symbol||'—')+' · '+x.side+' · '+clock(x.observedAt)));
+  row.append($('div','trank-event-meta',(x.symbol||'—')+' · '+x.side+' · '+clock(x.observedAt)+' → '+clock(x.measuredAt)));
   row.append($('span','trank-event-result '+(x.positive?'positive':x.negative?'negative':''),fmt(x.directionalPct,'%')+' · '+(x.positive?'yöne uydu':x.negative?'ters gitti':'nötr')));
   return row;
  }
