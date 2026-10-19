@@ -339,6 +339,11 @@ def advance(previous,lifecycle,market,now_ms,bars_by_symbol,specs,policy):
       'recent_events':log['events'][-100:],'equity_curve':log['equity_curve'][-300:],
       'no_real_orders':True,'paper_market_only':True,'liquidation_model':'UNVERIFIED',
       'legacy_v3_balance_included':False,
+      'epoch_id':log.get('epoch_id'),
+      'epoch_started_at_utc':log.get('cutover_at_utc'),
+      'minimum_margin_usdt':policy['paper'].get('minimum_margin_usdt',30.0),
+      'leverage_min':policy['paper'].get('leverage',10),
+      'leverage_max':policy['paper'].get('maximum_leverage',30),
       'note':'Virtual fills use NEXT closed 5m candle open, conservative stops. Funding unknown; PnL excludes funding and precise liquidation costs.'}
     return log,public
 
