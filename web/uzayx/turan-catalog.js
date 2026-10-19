@@ -28,6 +28,8 @@
    const n=Date.parse(report.generated_at_utc||'');
    const fresh=Number.isFinite(n)&&Date.now()-n<30*60*1000&&Date.now()-n>-120000;
    field(body,'Kaynak tarihi',today(report.generated_at_utc)+(fresh?' · güncel':' · gecikmiş / doğrulanmadı'));
+   field(body,'Bu stratejiye ayrıldığı doğrulanan sanal teminat','— · ayrı işlem eşleşmesi bulunmuyor');
+   field(body,'Bu stratejinin net kazancı / kaybı','— / — · kanıtlanmış strateji PnL kaydı yok');
    if(item.model){
      const data=report.windows?.['7']?.strategies?.[item.model];
      if(!data){field(body,'Model eşleşmesi','Bu taramada kanıt yok');return;}
@@ -45,7 +47,7 @@
    if(item.cohort&&report.cohorts?.[item.cohort]){
      const c=report.cohorts[item.cohort];
      field(body,'İlişkili eski işlem grubu',item.cohort+' · '+fmt(c.closed)+' kapanış · '+fmt(c.positive)+' olumlu / '+fmt(c.negative)+' olumsuz');
-     field(body,'Grup sonucu (strateji sonucu değil)',fmt(c.realized_total_usdt)+' USDT · başka gruplarla çakışır');
+     field(body,'İlişkili grubun kapanmış sanal sonucu (strateji PnL değil)',fmt(c.realized_total_usdt)+' USDT · ortak işlemler nedeniyle başka gruplarla çakışır');
    }
  }
  function render(){
