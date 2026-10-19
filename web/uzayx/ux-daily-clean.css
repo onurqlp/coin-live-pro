@@ -1,0 +1,25 @@
+/* Daily-use polish: fewer simultaneous controls, clear information hierarchy, no data hidden from archive. */
+#turan .sectionhead{margin-bottom:8px!important}
+#turan .sectionhead h2{letter-spacing:-.025em}
+#turan .sectionhead p{font-size:12px;line-height:1.5;max-width:610px}
+#turan .turan-mode-bar{margin:12px 0;position:relative}
+#turan .turan-mode-bar button{flex:0 1 auto}
+#turan .panel{margin-bottom:12px}
+#turan .panel-heading{align-items:start;gap:12px}
+#turan .panel-heading h3{margin:0}
+#turan .turan-tools{align-items:center}
+#turan .turan-list details summary,#turan .turan-family-list details summary{min-height:45px}
+#turan .turan-list details[open],#turan .turan-family-list details[open]{box-shadow:0 2px 12px rgba(0,0,0,.12)}
+#turan .turan-note,#turan .turan-family-provenance{max-width:800px;line-height:1.6}
+#turan .turan-family-protocol{margin-top:12px}
+#turan #turan-research-group[hidden],#turan #turan-current-group[hidden]{display:none!important}
+@media(min-width:1000px){#turan .sectionhead{padding-right:18px}#turan .turan-tools{gap:8px}}
+@media(max-width:680px){
+ #turan .sectionhead{margin-bottom:5px!important}
+ #turan .sectionhead h2{font-size:23px!important}
+ #turan .turan-mode-bar{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:9px 0 12px}
+ #turan .turan-mode-bar button{width:100%;padding:10px 7px;font-size:12px}
+ #turan .panel-heading{display:flex;flex-wrap:wrap}
+ #turan .panel-heading h3{font-size:17px}
+ #turan .turan-family-tools{gap:6px}
+}
