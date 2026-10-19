@@ -48,7 +48,7 @@ class TestV4Paper(unittest.TestCase):
     log,_=paper.advance(log,{'events':[]},MARKET,T+600000+2000,
         {'BTCUSDT':[candle(T+paper.BAR)]},{'BTCUSDT':SPEC},low_risk)
     self.assertEqual(log['orders']['A']['status'],'NO_FILL')
-    self.assertEqual(log['orders']['A']['rejection_reason'],'BELOW_30_USDT_MIN_NOTIONAL')
+    self.assertEqual(log['orders']['A']['no_fill_reason'],'BELOW_30_USDT_MIN_NOTIONAL')
 
  def test_first_closed_future_bar_required(self):
     log=self.initial()
