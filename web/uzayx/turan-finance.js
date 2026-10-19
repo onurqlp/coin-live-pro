@@ -116,7 +116,10 @@
   search.addEventListener('input',()=>{limit=8;renderList()});
   more.addEventListener('click',()=>{limit+=20;renderList()});
   refresh.addEventListener('click',load);
-  doc.addEventListener('visibilitychange',()=>{if(!doc.hidden)load()});
+  doc.addEventListener('visibilitychange',()=>{if(!doc.hidden&&doc.getElementById('turan')?.classList.contains('active'))load()});
+  doc.defaultView?.addEventListener('uzayx:tab',e=>{if(e.detail?.tab==='turan')load()});
+  // Refresh only while the TURAN view is being used. Never change trade records.
+  setInterval(()=>{if(!doc.hidden&&doc.getElementById('turan')?.classList.contains('active'))load()},120000);
   load();
  }
  return {summarize,mount};
