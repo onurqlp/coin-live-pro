@@ -1,1 +1,22 @@
-'use strict';(()=>{const el=document.getElementById('turan-results');if(!el)return;const fmt=n=>Number(n).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2});const names={LONG:'Bozkurt · Yükseliş',SHORT:'Erlik · Düşüş',AŞAMA_1:'Umay · İlk izleme',AŞAMA_2:'Tulpar · Hızlanma',AŞAMA_3:'Alkarısı · Kırılım',BB_4H_SIKIŞMA:'Tulpar · Sıkışma'};const render=async()=>{try{const response=await fetch('../data/ops-report.json?ts='+Date.now(),{cache:'no-store'});if(!response.ok)throw Error('HTTP '+response.status);const j=await response.json();const co=j.cohorts||{};el.replaceChildren();const arr=Object.entries(names).filter(([k])=>co[k]).map(([k,n])=>({n,k,v:co[k]}));if(!arr.length){el.textContent='Strateji karşılaştırması için veri henüz yok.';return;}for(const {n,v} of arr){const item=document.createElement('div');item.className='turan-row';const name=document.createElement('div');const title=document.createElement('strong');title.textContent=n;const detail=document.createElement('small');detail.textContent=(v.closed||0)+' kapanan · '+(v.positive||0)+' kazanan · '+(v.negative||0)+' kaybeden';name.append(title,detail);const result=document.createElement('span');const pnl=Number(v.realized_total_usdt||0);result.className=pnl>=0?'turan-positive':'turan-negative';result.textContent=(pnl>0?'+':'')+fmt(pnl)+' USDT';item.append(name,result);el.append(item)}const foot=document.createElement('p');foot.className='muted tiny';foot.textContent='Gruplar çakışabilir; toplamları kasa değildir. Yeterli bağımsız örneklem olmadan kazanan strateji ilan edilmez. Rapor: '+(j.generated_at_utc||'bilinmiyor');el.append(foot)}catch(e){el.textContent='TURAN raporu okunamadı; sonuç uydurulmuyor.'}};render();document.addEventListener('visibilitychange',()=>{if(!document.hidden)render()});})();
+'use strict';(()=>{
+ const el=document.getElementById('turan-results');if(!el)return;
+ const span=(tag,cl,txt)=>{const n=document.createElement(tag);if(cl)n.className=cl;n.textContent=String(txt);return n};
+ const fmt=n=>Number.isFinite(Number(n))?Number(n).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}):'—';
+ async function render(){
+  try{
+   const r=await fetch('../data/ops-report.json?ts='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error('HTTP '+r.status);
+   const j=await r.json();const c=j.cohorts?.['TÜMÜ'];if(!c)throw Error('Eksik örneklem');
+   const min=Number(j.min_closed_for_comparison)||30;
+   const data=[
+    ['İncelenen eski sanal kapanış',Number(c.closed)||0],
+    ['Olumlu / olumsuz kapanış',(Number(c.positive)||0)+' / '+(Number(c.negative)||0)],
+    ['Örneklem eşiği',min+' kapanış (ilk kontrol)'],
+    ['Sonuç niteliği',c.evidence_sufficient_for_comparison?'İlk karşılaştırma yapılabilir, bağımsız doğrulama gerekir':'Yetersiz örneklem']
+   ];
+   el.replaceChildren();for(const [k,v] of data){const item=span('div','turan-row','');item.append(span('div','',k),span('strong','',v));el.append(item)}
+   const note=span('p','muted tiny','Bunlar 30 TURAN stratejisinin sonuçları değil, mevcut deneysel hesabın önceki işlem grubudur. Gruplar çakışabilir ve ters işlem getirisi ispatlanmış değildir. Son rapor: '+(j.generated_at_utc||'bilinmiyor'));
+   el.append(note);
+  }catch(e){el.textContent='Öğrenme özeti doğrulanamıyor. Önceki sonuçlar yeni strateji başarısı gibi gösterilmiyor.';}
+ }
+ render();document.addEventListener('visibilitychange',()=>{if(!document.hidden)render()});
+})();
