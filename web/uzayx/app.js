@@ -246,7 +246,7 @@
   $('direction').addEventListener('change',e=>{mode=e.target.value;renderRadar();});
   $('stage').addEventListener('change',e=>{stage=e.target.value;renderRadar();});
   $('leverage').addEventListener('input',renderLeverage);
-  if(['overview','radar','chart','learn','funds','research','system'].includes(location.hash.slice(1)))go(location.hash.slice(1));
+  if(['overview','radar','chart','learn','funds','turan','research','system'].includes(location.hash.slice(1)))go(location.hash.slice(1));
   reload();
   // One-minute source scan check; avoid exhausting GitHub HEAD rate limits.
   // A changed raw manifest triggers a FULL immutable-commit reload and scan-ID checks.
