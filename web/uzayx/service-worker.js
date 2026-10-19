@@ -1,5 +1,5 @@
 /* Offline shell cache; NEVER cache exchange quotes, pinned GitHub research or live feeds. */
-const NAME='uzayx-shell-v4-1-20261019';
+const NAME='uzayx-shell-v4-2-20261019';
 const SHELL=['./','./index.html','./styles.css','./finish.css','./desk.css','./proof.css','./atlas.css','./mobile-shell.css','./atlas.js','./mobile-shell.js','./icon.svg'];
 self.addEventListener('install',event=>{
  event.waitUntil(caches.open(NAME).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting()).catch(()=>self.skipWaiting()));

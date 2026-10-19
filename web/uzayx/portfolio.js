@@ -45,6 +45,55 @@
  }
  let source=null,filter='OPEN',query='',selectedId=null,focused=null,homeSearch='',homeExpanded=false,positionLimit=80;
  const HOME_PREVIEW=12;
+ // Single immutable-snapshot summary. Do not display stale/mismatched figures as live returns.
+ function homeGlance(doc,manifest,paper,commit,now=Date.now()){
+   const valid=Boolean(/^[0-9a-f]{40}$/.test(commit||'')&&
+     manifest?.publication_valid===true&&manifest?.no_real_orders===true&&
+     doc?.no_real_orders===true&&doc?.combined_with_strict_paper_cash===false&&
+     doc?.no_backfilled_outcomes===true&&doc?.scan_id===manifest?.scan_id&&
+     paper?.scan_id===manifest?.scan_id);
+   const age=now-Date.parse(manifest?.finished_at_utc||'');
+   const fresh=Number.isFinite(age)&&age>=-120000&&age<=25*60000;
+   if(!valid)return {valid:false,fresh:false,last:null,floating:null,todayNet:null,todayClosed:null,margin:null,notional:null,leverageMin:null,leverageMax:null};
+   const items=[...(Array.isArray(doc.recent_tickets)?doc.recent_tickets:[]),
+     ...(Array.isArray(doc.open_positions)?doc.open_positions:[])]
+     .filter(t=>t?.is_real_trade!==true&&Number.isFinite(Date.parse(t.filled_at_utc||'')))
+     .sort((a,b)=>Date.parse(b.filled_at_utc)-Date.parse(a.filled_at_utc));
+   const today=new Date(now).toISOString().slice(0,10);
+   const daily=doc.daily?.today?.date_utc===today?doc.daily.today:null;
+   return {valid:true,fresh,last:items[0]||null,
+     floating:numeric(doc.summary?.unrealized_net_usdt)?doc.summary.unrealized_net_usdt:null,
+     todayNet:numeric(daily?.realized_net_usdt)?daily.realized_net_usdt:null,
+     todayClosed:Number.isInteger(daily?.closed)?daily.closed:null,
+     margin:numeric(doc.minimum_new_margin_usdt)?doc.minimum_new_margin_usdt:null,
+     notional:numeric(doc.minimum_new_ticket_notional_usdt)?doc.minimum_new_ticket_notional_usdt:null,
+     leverageMin:numeric(doc.leverage_min)?doc.leverage_min:null,
+     leverageMax:numeric(doc.leverage_max)?doc.leverage_max:null};
+ }
+ function renderHomeGlance(doc,manifest,paper,commit){
+   const state=homeGlance(doc,manifest,paper,commit);
+   const set=(id,value)=>{const item=$(id);if(item)item.textContent=value;};
+   const signedMoney=v=>numeric(v)?paperPnl(v):'—';
+   const color=(id,v)=>{const item=$(id);if(item)item.className=numeric(v)?v<0?'negative':'positive':'muted';};
+   set('home-latest-symbol',state.valid&&state.last?state.last.symbol+' · '+state.last.side:'—');
+   set('home-latest-time',state.valid&&state.last?
+     stamp(state.last.filled_at_utc)+' · '+money(state.last.reference_notional_usdt)+' nominal':
+     'Doğrulanmış giriş bekleniyor');
+   set('home-floating',state.valid?signedMoney(state.floating):'—');
+   set('home-today-net',state.valid?signedMoney(state.todayNet):'—');
+   set('home-today-closed',state.valid&&state.todayClosed!==null?
+     state.todayClosed+' kapanan sanal pozisyon · UTC':'Bugünkü kapanış verisi yok');
+   set('home-entry-budget',state.valid&&state.margin!==null?money(state.margin)+' teminat':'—');
+   set('home-entry-setup',state.valid&&state.notional!==null?
+     'En az '+money(state.notional)+' nominal'+
+       (state.leverageMin!==null&&state.leverageMax!==null?' · '+state.leverageMin+'–'+state.leverageMax+'x':''):
+     'Yeni kayıt büyüklüğü doğrulanamadı');
+   set('home-glance-source',!state.valid?'Kaynak eşleşmedi · değerler gizlendi. Yeni kayıt bekleniyor.':
+     state.fresh?'Doğrulanmış tarama · '+stamp(doc.updated_at)+' · tahmini sanal sonuçlar.':
+       'Gecikmiş son kayıt · '+stamp(doc.updated_at)+' · canlı piyasa sonucu değildir.');
+   color('home-floating',state.valid?state.floating:null);
+   color('home-today-net',state.valid?state.todayNet:null);
+ }
  const paperPnl=v=>typeof v==='number'&&Number.isFinite(v)?signed(v)+' USDT':'—';
  function completeOpenPositions(doc){
    const total=doc?.summary?.counts?.OPEN;
@@ -62,6 +111,7 @@
      doc.scan_id===s.scan_id&&source?.db?.paper?.scan_id===s.scan_id&&doc.no_real_orders===true;
    const age=Date.now()-Date.parse(s.finished_at_utc||'');
    const fresh=Number.isFinite(age)&&age>=-120000&&age<=25*60000;
+   renderHomeGlance(doc,s,source?.db?.paper,source?.sourceCommit);
    const all=full.rows;
    const matches=all.filter(x=>String(x.symbol||'').toUpperCase().includes(homeSearch)).sort((a,b)=>
      (Date.parse(b.filled_at_utc||b.signal_at_utc)||0)-(Date.parse(a.filled_at_utc||a.signal_at_utc)||0));
@@ -275,5 +325,5 @@
      $('cash-audit')?.addEventListener('click',()=>root.document.querySelector('[data-tab="system"]')?.click());
    });
  }
- return {reconcile,positions,completeOpenPositions,paperPnl};
+ return {reconcile,positions,completeOpenPositions,paperPnl,homeGlance};
 });

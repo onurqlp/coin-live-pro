@@ -69,3 +69,26 @@ test('logo asset, compact watch monitor and separate cash charts are present',()
  assert.match(js,/early: 'v4-early.json'/);
  assert.doesNotMatch(js,/createOrder|placeOrder|apiSecret/i);
 });
+
+test('home glance uses one verified snapshot and distinguishes fresh from stale',()=>{
+ const now=Date.parse('2026-10-19T16:00:00Z'),sha='a'.repeat(40);
+ const manifest={scan_id:'scan',finished_at_utc:'2026-10-19T15:55:00Z',publication_valid:true,no_real_orders:true};
+ const paper={scan_id:'scan'};
+ const doc={scan_id:'scan',updated_at:'2026-10-19T15:55:00Z',no_real_orders:true,
+   combined_with_strict_paper_cash:false,no_backfilled_outcomes:true,
+   summary:{unrealized_net_usdt:-2.5},
+   recent_tickets:[{event_id:'last',symbol:'SOLUSDT',side:'LONG',filled_at_utc:'2026-10-19T15:49:00Z',reference_notional_usdt:300,is_real_trade:false}],
+   open_positions:[],minimum_new_margin_usdt:30,minimum_new_ticket_notional_usdt:300,
+   leverage_min:10,leverage_max:30,
+   daily:{today:{date_utc:'2026-10-19',closed:3,realized_net_usdt:4.2}}
+ };
+ const valid=portfolio.homeGlance(doc,manifest,paper,sha,now);
+ assert.equal(valid.valid,true);assert.equal(valid.fresh,true);
+ assert.equal(valid.last.symbol,'SOLUSDT');assert.equal(valid.floating,-2.5);
+ assert.equal(valid.todayClosed,3);assert.equal(valid.todayNet,4.2);
+ assert.equal(valid.margin,30);assert.equal(valid.notional,300);
+ assert.equal(portfolio.homeGlance(doc,manifest,paper,sha,now+3600000).fresh,false);
+ assert.equal(portfolio.homeGlance(doc,manifest,{scan_id:'wrong'},sha,now).valid,false);
+ assert.equal(portfolio.homeGlance(doc,manifest,paper,null,now).last,null);
+ assert.equal(portfolio.homeGlance({...doc,daily:{today:{date_utc:'2026-10-18',closed:9,realized_net_usdt:100}}},manifest,paper,sha,now).todayNet,null);
+});

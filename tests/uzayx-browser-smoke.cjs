@@ -65,6 +65,18 @@ async function run(){
    }));
    assert.ok(Number(summary.open.replaceAll('.',''))>=0,'Open position count is not numeric');
    assert.ok(summary.rows<=12,'Homepage preview must keep open positions compact');
+   const pulse=await page.evaluate(()=>({
+     latest:document.querySelector('#home-latest-symbol')?.textContent,
+     latestTime:document.querySelector('#home-latest-time')?.textContent,
+     openNet:document.querySelector('#home-floating')?.textContent,
+     daily:document.querySelector('#home-today-net')?.textContent,
+     margin:document.querySelector('#home-entry-budget')?.textContent,
+     provenance:document.querySelector('#home-glance-source')?.textContent,
+     tiles:document.querySelectorAll('#overview .home-glance > div').length
+   }));
+   assert.equal(pulse.tiles,4,'The compact homepage should have four quick facts');
+   assert.ok(pulse.provenance&&pulse.latest&&pulse.openNet&&pulse.daily&&pulse.margin,
+     'Every quick fact must have a defined status, even if source is not verified');
    assert.match(summary.note,new RegExp('gösterilen '+summary.rows+'(?:\\D|$)'),'Homepage note must report visible paper positions accurately');
    const allButton=await page.$('#home-open-more');
    if(Number(summary.open.replaceAll('.',''))>12){
