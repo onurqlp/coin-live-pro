@@ -1,0 +1,252 @@
+UZAYX / TURAN — 200 BAGIMSIZ STRATEJI AILESI AR-GE KATALOGU
+Tarih: 2026-10-19
+DURUM: HIPOTEZ / AR-GE. Kod, repo, canli sistem degisikligi YOK.
+Adlandirma: Turk mitolojisi, destan, tarih ve kulturundan ESINLENEN ozgun aile isimleri. Bunlar tarihsel olarak yerlesik strateji adlari degildir.
+NOT: Mevcut TURAN 30 ailesinin tam resmi envanteri dogrulanmadigindan bu kodlar ONERI KODLARIDIR; canli sistem kimlikleriyle eslestirilmemistir.
+Her aile farkli varsayim ve mekanizma tasir; alt strateji, parametre ve zaman dilimi aile sayilmaz.
+Her aile icin LONG/SHORT/BEKLE/NO_TRADE ayri incelenecektir. Fonlama, komisyon, spread, kayma, tasfiye riski ve veri erisimi sonraki testlerde zorunludur.
+Her haftalik elemede geriye donuk ve ileri test veri ayrimi korunur. Ters yon hipotezi yeni test ister.
+
+=== FIYAT ANOMALILERI ===
+T001 | Bozkurt İzi | Normal volatiliteye göre sıra dışı fiyat sapması | Durum: AR-GE / dogrulanmadi
+T002 | Alp Er Tunga Eşiği | Sık sınanan seviyede fiyat kabulü | Durum: AR-GE / dogrulanmadi
+T003 | Göktürk Kırılması | Rejim dışı ilk fiyat kopuşu | Durum: AR-GE / dogrulanmadi
+T004 | Kayı Merdiveni | Yüksek diplerle kademeli ilerleme | Durum: AR-GE / dogrulanmadi
+T005 | Oğuz Kıvılcımı | Sakin bantta biriken mikro momentum | Durum: AR-GE / dogrulanmadi
+T006 | Ergenekon Çıkışı | Uzun dar banttan geniş aralığa geçiş | Durum: AR-GE / dogrulanmadi
+T007 | Tengri Şoku | Getiri dağılımının aşırı kuyruğunda hareket | Durum: AR-GE / dogrulanmadi
+T008 | Kutlu Fitil | Uzun fitillerin yönlü reddi | Durum: AR-GE / dogrulanmadi
+T009 | Orhun Hafızası | Tarihsel tepki bölgelerinin tekrar sınanması | Durum: AR-GE / dogrulanmadi
+T010 | Turan Gecikmesi | Erken anormalliği izleyen gecikmiş fiyat tepkisi | Durum: AR-GE / dogrulanmadi
+
+=== HACIM VE IŞLEM AKIŞI ===
+T011 | Umay Hacmi | Fiyatla teyit edilen bağıl hacim patlaması | Durum: AR-GE / dogrulanmadi
+T012 | Demirci Nefesi | Yüksek agresif emirle fiyatın sabit kalması | Durum: AR-GE / dogrulanmadi
+T013 | Korkut Deltası | Kümülatif delta ve fiyat ayrışması | Durum: AR-GE / dogrulanmadi
+T014 | Börü Baskısı | Sürekli agresif alım akışı | Durum: AR-GE / dogrulanmadi
+T015 | Erlik Baskısı | Sürekli agresif satış akışı | Durum: AR-GE / dogrulanmadi
+T016 | Ak Ana Kümesi | Büyük işlemlerin zamansal kümelenmesi | Durum: AR-GE / dogrulanmadi
+T017 | Yıldıray Devri | Bir dalgadan sonraki hacim el değiştirmesi | Durum: AR-GE / dogrulanmadi
+T018 | Kızıl Elma Hızı | Saniye başı işlem yoğunluğunun sıçraması | Durum: AR-GE / dogrulanmadi
+T019 | Tarkan Buzdağı | Tekrarlanan parçalı büyük emir yürütümü | Durum: AR-GE / dogrulanmadi
+T020 | Uluğ Hacimsizliği | Kırılmada katılım eksikliği | Durum: AR-GE / dogrulanmadi
+
+=== EMIR DEFTERI VE LIKIDITE ===
+T021 | Kartal Mıknatısı | Yoğun limit likiditesine fiyat yaklaşması | Durum: AR-GE / dogrulanmadi
+T022 | Kalkan Duvarı | Gerçek fiyat duvarının tüketilmesi | Durum: AR-GE / dogrulanmadi
+T023 | Tulpar Kaçağı | Büyük emirlerin eşleşmeden çekilmesi | Durum: AR-GE / dogrulanmadi
+T024 | Akıncı Boşluğu | Çok seviyeli derinlik kaybı | Durum: AR-GE / dogrulanmadi
+T025 | Yada Spreadi | Normalin dışına çıkan bid-ask farkı | Durum: AR-GE / dogrulanmadi
+T026 | Ay Ata Dönüşü | Çekilmiş derinliğin geri dolması | Durum: AR-GE / dogrulanmadi
+T027 | Yel Ana İnceliği | Düşük derinliğe göre fiyat etki oranı | Durum: AR-GE / dogrulanmadi
+T028 | Kürşad Yenilemesi | Sürekli yenilenen limit emirlerin tespiti | Durum: AR-GE / dogrulanmadi
+T029 | Bozkır Vakumu | Ardışık seviyelerde likidite yokluğu | Durum: AR-GE / dogrulanmadi
+T030 | Bumin Dengesi | Tahta alış/satış yoğunluğu asimetrisi | Durum: AR-GE / dogrulanmadi
+
+=== TREND DEVAMI VE IVME ===
+T031 | Alparslan İlk Adım | Yataydan yönlü trende geçiş | Durum: AR-GE / dogrulanmadi
+T032 | Bilge Kağan Onayı | Kırılma ardından kabul ve retest | Durum: AR-GE / dogrulanmadi
+T033 | Mete İkinci Akın | İlk dürtü sonrası yeni trend dalgası | Durum: AR-GE / dogrulanmadi
+T034 | Kür Şad Hızlanması | Momentumun ikinci türeviyle ivmelenmesi | Durum: AR-GE / dogrulanmadi
+T035 | Yıldırım Soluğu | Pozitif fiyat ama düşen ivme | Durum: AR-GE / dogrulanmadi
+T036 | Sungur Dönüşü | Trend içinde normalleşme geri çekilmesi | Durum: AR-GE / dogrulanmadi
+T037 | Gökalp Bayrağı | Trend içi dar bayrak sonrası devam | Durum: AR-GE / dogrulanmadi
+T038 | Börü Mirası | Kısa trendin daha uzun ölçeğe taşınması | Durum: AR-GE / dogrulanmadi
+T039 | Aybars Uyumlanması | Birden fazla zaman ölçeğinde yön onayı | Durum: AR-GE / dogrulanmadi
+T040 | Atilla Kırılganlığı | Trend iç yapısının zayıflaması | Durum: AR-GE / dogrulanmadi
+
+=== VOLATILITE VE SIKIŞMA ===
+T041 | Ergenekon Yayı | Düşük gerçekleşmiş volatilite sonrası açılım | Durum: AR-GE / dogrulanmadi
+T042 | Gök Gürültüsü | ATR şokları | Durum: AR-GE / dogrulanmadi
+T043 | Ayaz Kümesi | Oynaklığın ardışık kümelenmesi | Durum: AR-GE / dogrulanmadi
+T044 | Kıl Çadırı | İç içe fiyat daralmaları | Durum: AR-GE / dogrulanmadi
+T045 | Dede Korkut Geçidi | Düşükten yüksek volatilite rejimine geçiş | Durum: AR-GE / dogrulanmadi
+T046 | Ak Sakal Sönümü | Şok sonrasında volatilite normalleşmesi | Durum: AR-GE / dogrulanmadi
+T047 | Kara Han Kuyruğu | Aşırı uç getiri yoğunluğu | Durum: AR-GE / dogrulanmadi
+T048 | Alaca Alanı | Gün içi aralığın sıra dışı açılması | Durum: AR-GE / dogrulanmadi
+T049 | Kök Tengri Asimetrisi | Aşağı ve yukarı oynaklığın asimetrisi | Durum: AR-GE / dogrulanmadi
+T050 | Tamga Sıkışması | Birden çok ölçekte eşzamanlı daralma | Durum: AR-GE / dogrulanmadi
+
+=== ZIRVE DIP VE DÖNÜŞ ===
+T051 | Erlik Zirvesi | Yüksek fiyata rağmen zayıflayan talep | Durum: AR-GE / dogrulanmadi
+T052 | Umay Dibi | Yüksek satışa rağmen fiyatın düşmemesi | Durum: AR-GE / dogrulanmadi
+T053 | Alkarısı Tuzağı | Yeni zirvenin hızla reddi | Durum: AR-GE / dogrulanmadi
+T054 | Ak Ana Tuzağı | Yeni dibin hızla geri alınması | Durum: AR-GE / dogrulanmadi
+T055 | Tulpar Son Nefes | Parabolik eğimden kırılmaya geçiş | Durum: AR-GE / dogrulanmadi
+T056 | Demir Dağ Dağıtımı | Yüksek hacimde yatay fiyat ve artan arz | Durum: AR-GE / dogrulanmadi
+T057 | Kara Gün Teslimiyeti | Kapitülasyon sonrası satıcı tükenişi | Durum: AR-GE / dogrulanmadi
+T058 | Altay V Dönüşü | Keskin düşüşten hızlı toparlanma | Durum: AR-GE / dogrulanmadi
+T059 | Orhun Yay Dönüşü | Kademeli yön değiştirme | Durum: AR-GE / dogrulanmadi
+T060 | Simurg Kırık Kanat | Devam sinyalinin kısa sürede iptali | Durum: AR-GE / dogrulanmadi
+
+=== TASFIYE VE SQUEEZE ===
+T061 | Börü Short Sıkışması | Short tasfiyeleriyle yükseliş ivmesi | Durum: AR-GE / dogrulanmadi
+T062 | Kara Alp Long Sıkışması | Long tasfiyeleriyle düşüş ivmesi | Durum: AR-GE / dogrulanmadi
+T063 | Çifte Tamga | İki yönde ardışık stop temizliği | Durum: AR-GE / dogrulanmadi
+T064 | Kurt Kapanı | Stop kümelerinde fiyatın hızlı ters dönmesi | Durum: AR-GE / dogrulanmadi
+T065 | Yelbörü Zinciri | Tasfiye akışının art arda ivmelenmesi | Durum: AR-GE / dogrulanmadi
+T066 | Demir Ağ Sönümü | Tasfiye fırtınası sonrasında akış tükenmesi | Durum: AR-GE / dogrulanmadi
+T067 | Akıncı Fitili | Tasfiye spike fitili sonrası geri dönüş | Durum: AR-GE / dogrulanmadi
+T068 | Umay Savunması | Likidasyon baskısına rağmen seviye korunması | Durum: AR-GE / dogrulanmadi
+T069 | Erlik Takibi | Tasfiye sonrası düşüşün sürdürülebilirliği | Durum: AR-GE / dogrulanmadi
+T070 | Tengri Sıçraması | Tasfiye nedeniyle tek yönde geçici fiyat aşırılığı | Durum: AR-GE / dogrulanmadi
+
+=== OI FUNDING VE POZISYONLANMA ===
+T071 | Kök OI Yükselişi | Fiyat ve açık pozisyonun beraber büyümesi | Durum: AR-GE / dogrulanmadi
+T072 | Kara OI Ayrışması | Fiyat artarken açık pozisyon azalması | Durum: AR-GE / dogrulanmadi
+T073 | Mavi OI Birikimi | Fiyat yatayken türev pozisyon büyümesi | Durum: AR-GE / dogrulanmadi
+T074 | Kızıl Funding | Aşırı pozitif fonlama rejimi | Durum: AR-GE / dogrulanmadi
+T075 | Ak Funding | Aşırı negatif fonlama rejimi | Durum: AR-GE / dogrulanmadi
+T076 | Bumin Basis | Funding ile piyasa eğilimi ayrışması | Durum: AR-GE / dogrulanmadi
+T077 | İlteriş Kapanışı | OI daralmasıyla yönlü pozisyon kapama | Durum: AR-GE / dogrulanmadi
+T078 | Kut Dengesizliği | Long short tarafının yoğunlaşması | Durum: AR-GE / dogrulanmadi
+T079 | Tarkan Yeniden Açılışı | Tasfiye sonrasında OI hızlı yenilenmesi | Durum: AR-GE / dogrulanmadi
+T080 | Ay Han Dönemeç | Fonlama zamanı çevresindeki fiyat davranışı | Durum: AR-GE / dogrulanmadi
+
+=== VADELI VE SPOT PIYASA AYRIŞMALARI ===
+T081 | Turan Baz Farkı | Spot ve perpetual fiyatı arasındaki sapma | Durum: AR-GE / dogrulanmadi
+T082 | Akdeniz Taşıma | Vadeli eğri ve taşıma maliyeti ayrışması | Durum: AR-GE / dogrulanmadi
+T083 | Ordu Spot Liderliği | Spot hareketin futures fiyatını önden izlemesi | Durum: AR-GE / dogrulanmadi
+T084 | Börü Perp Liderliği | Perpetual işlemlerin spotu önden sürüklemesi | Durum: AR-GE / dogrulanmadi
+T085 | Atabey Basis Dönüşü | Vadeli bazın ortalamaya dönüşü | Durum: AR-GE / dogrulanmadi
+T086 | Oğuz Vade Eğrisi | Vade yapısının ani şekil değiştirmesi | Durum: AR-GE / dogrulanmadi
+T087 | Demir Teminat | Teminat türleriyle oynaklık ilişkisinin değişmesi | Durum: AR-GE / dogrulanmadi
+T088 | Kıpçak Uyuşmazlığı | Vadeli borsalar arasında işlem yapılabilir fiyat farkı | Durum: AR-GE / dogrulanmadi
+T089 | Uluğ Finansman Eşiği | Fonlama ve komisyon sonrası teorik fırsat sınırı | Durum: AR-GE / dogrulanmadi
+T090 | Kutalmış Açık Pozisyon | Vadeli likidite ve pozisyon büyümesi uyumsuzluğu | Durum: AR-GE / dogrulanmadi
+
+=== BTC VE PIYASA REJIMI ===
+T091 | Gökbörü Hakimiyeti | BTC dominansı değişirken altcoin tepkisi | Durum: AR-GE / dogrulanmadi
+T092 | Ay Ata Çarpanı | BTC hareketine göre dinamik beta | Durum: AR-GE / dogrulanmadi
+T093 | Ergenekon Ayrışması | BTC yatayken altcoin anomalisi | Durum: AR-GE / dogrulanmadi
+T094 | Tengri Rüzgarı | BTC ani şokunun gecikmeli altcoin etkisi | Durum: AR-GE / dogrulanmadi
+T095 | Bilge Rejim | Trend ve yatay piyasa koşulunu ayırma | Durum: AR-GE / dogrulanmadi
+T096 | Uluğ Risk İştağı | Geniş piyasa risk alma/riskten kaçınma değişimi | Durum: AR-GE / dogrulanmadi
+T097 | Kara Korelasyon | BTC korelasyonunun aniden kopması | Durum: AR-GE / dogrulanmadi
+T098 | Kızıl Makas | BTC yükselirken altcoin zayıflığı | Durum: AR-GE / dogrulanmadi
+T099 | Akın Dalga | BTC düşüş sonrası altcoin toparlanma sırası | Durum: AR-GE / dogrulanmadi
+T100 | Oğuz Eşik | BTC volatilitesi aşılınca altcoin strateji askısı | Durum: AR-GE / dogrulanmadi
+
+=== COINLER ARASI ILIŞKILER ===
+T101 | Börü Öncüsü | Bir coin hareketinin benzer grubu önden uyarması | Durum: AR-GE / dogrulanmadi
+T102 | Kayı Gecikeni | Sektör grubuna gecikmeli katılım | Durum: AR-GE / dogrulanmadi
+T103 | Alp Sektör Dalgası | Sektör geneline yayılan ortak hareket | Durum: AR-GE / dogrulanmadi
+T104 | Otağ Eşleşmesi | Yüksek korelasyonlu çiftte geçici kopma | Durum: AR-GE / dogrulanmadi
+T105 | Orhun Yayılımı | Haber etkisinin ilişkili tokenlara gecikmeli dağılması | Durum: AR-GE / dogrulanmadi
+T106 | Tamga Rotasyonu | Bir temadan diğer temaya hacim devri | Durum: AR-GE / dogrulanmadi
+T107 | Aybars Bağımsızlık | Piyasa düşerken tek coinde göreli güç | Durum: AR-GE / dogrulanmadi
+T108 | Kara Ayrışma | Pozitif piyasa içinde anormal zayıflık | Durum: AR-GE / dogrulanmadi
+T109 | Simurg Sepeti | Sektör sepeti ile tek coin anormalliği | Durum: AR-GE / dogrulanmadi
+T110 | Turan Zincir Etkisi | Ekosistem tokenlarında ardışık fiyat tepkisi | Durum: AR-GE / dogrulanmadi
+
+=== HABER OLAY VE SOSYAL TETIKLEYICILER ===
+T111 | Dede Korkut Haber | Doğrulanmış haberin ilk fiyat tepkisi | Durum: AR-GE / dogrulanmadi
+T112 | Kızıl Elma Listeleme | Borsa listeleme ilanı etkisi | Durum: AR-GE / dogrulanmadi
+T113 | Kara Bayrak Delist | Delist duyurusunun likidite etkisi | Durum: AR-GE / dogrulanmadi
+T114 | Ay Ana Kilit Açımı | Token unlock takviminin fiyatla ilişkisi | Durum: AR-GE / dogrulanmadi
+T115 | Altın Tamga Oylama | Governance sonucu sonrası fiyat keşfi | Durum: AR-GE / dogrulanmadi
+T116 | Gökçe Söylenti | Doğrulanmamış söylenti ve fiyat ayrışması | Durum: AR-GE / dogrulanmadi
+T117 | Börü Sosyal Sıçrama | Sosyal ilgi artışının hacimle teyidi | Durum: AR-GE / dogrulanmadi
+T118 | Korkut Düzeltmesi | İlk haber tepkisinin tersine dönüşü | Durum: AR-GE / dogrulanmadi
+T119 | Kut Anlatısı | Narrative değişiminin çoklu token etkisi | Durum: AR-GE / dogrulanmadi
+T120 | Ak Söz Sahte Haber | Yalanlanan bilginin piyasa geri dönüşü | Durum: AR-GE / dogrulanmadi
+
+=== ONCHAIN VE BÜYÜK CÜZDAN AKIŞI ===
+T121 | Altay Borsa Girişi | Borsalara büyük token transferi | Durum: AR-GE / dogrulanmadi
+T122 | Akın Borsa Çıkışı | Borsalardan net büyük transfer | Durum: AR-GE / dogrulanmadi
+T123 | Demir Balina | Büyük cüzdan bakiyesindeki rejim değişimi | Durum: AR-GE / dogrulanmadi
+T124 | Umay Yeni Cüzdan | Yeni aktif cüzdanlarda anormal artış | Durum: AR-GE / dogrulanmadi
+T125 | Orhun Zincir Hızı | Zincir üstü transfer yoğunluğu sıçraması | Durum: AR-GE / dogrulanmadi
+T126 | Bumin Kasa | Borsa rezervleri ile fiyat ayrışması | Durum: AR-GE / dogrulanmadi
+T127 | Kara Köprü | Köprü işlemlerinde olağan dışı hareket | Durum: AR-GE / dogrulanmadi
+T128 | Tamga Hazinesi | Proje hazinesi cüzdanlarının hareketleri | Durum: AR-GE / dogrulanmadi
+T129 | Kayı Dağıtımı | Büyük sahibin çok sayıda adrese dağıtımı | Durum: AR-GE / dogrulanmadi
+T130 | Gök Balina Gecikmesi | Büyük transfer sonrası gecikmeli piyasa tepkisi | Durum: AR-GE / dogrulanmadi
+
+=== ZAMAN VE SEANS ETKILERI ===
+T131 | Şafak Nöbeti | Asya açılışı etrafında likidite değişimi | Durum: AR-GE / dogrulanmadi
+T132 | Öğle Toyu | Avrupa seansı hacim devri | Durum: AR-GE / dogrulanmadi
+T133 | Günbatımı Akını | ABD seansı fiyat keşfi | Durum: AR-GE / dogrulanmadi
+T134 | Kutlu Devir | Seans geçişinde spread ve yön değişimi | Durum: AR-GE / dogrulanmadi
+T135 | Ay Tutulması | Hafta sonu düşük derinlik anomalisi | Durum: AR-GE / dogrulanmadi
+T136 | Bozkır Pazartesisi | Hafta açılışı gap benzeri fiyat davranışı | Durum: AR-GE / dogrulanmadi
+T137 | Korkut Takvimi | Ekonomik veri açıklaması öncesi-sonrası risk | Durum: AR-GE / dogrulanmadi
+T138 | Yılkı Dönemi | Ay sonu türev pozisyon ayarlamaları | Durum: AR-GE / dogrulanmadi
+T139 | Kızıl Saat | Fonlama hesap saatlerinde mikro fiyat hareketi | Durum: AR-GE / dogrulanmadi
+T140 | Turan Nöbeti | Piyasa aktivitesinin mevsimsel gün içi döngüsü | Durum: AR-GE / dogrulanmadi
+
+=== İSTATISTIK VE ANOMALI MODELLEME ===
+T141 | Bilge Z-Skoru | Getiri sapmasının standartlaştırılması | Durum: AR-GE / dogrulanmadi
+T142 | Uluğ Kuantil | Aşırı yüzdelik getiri rejimi | Durum: AR-GE / dogrulanmadi
+T143 | Orhun CUSUM | Kümülatif değişim noktasını erken bulma | Durum: AR-GE / dogrulanmadi
+T144 | Göktürk HMM | Gizli piyasa rejimleri arasında geçiş | Durum: AR-GE / dogrulanmadi
+T145 | Kutadgu Artık | Faktör modeli artık getirisi | Durum: AR-GE / dogrulanmadi
+T146 | Ak Sakal Entropi | Fiyat hareketi düzensizliğinin değişmesi | Durum: AR-GE / dogrulanmadi
+T147 | Yada Fraktal | Piyasa ölçekleme davranışının kayması | Durum: AR-GE / dogrulanmadi
+T148 | Simurg Nedensellik | Öncü göstergeyle gecikmeli ilişki sınaması | Durum: AR-GE / dogrulanmadi
+T149 | Kök Uç Değer | Extreme value theory ile kuyruk eşiği | Durum: AR-GE / dogrulanmadi
+T150 | Erkin Kalıcılık | Anomali sonrası etkinin yaşam süresi | Durum: AR-GE / dogrulanmadi
+
+=== SAHTE SINYALLER VE KARŞI TEZLER ===
+T151 | Alkarısı Aynası | Başarısız long sinyalinde ters yön testi | Durum: AR-GE / dogrulanmadi
+T152 | Erlik Aynası | Başarısız short sinyalinde ters yön testi | Durum: AR-GE / dogrulanmadi
+T153 | Kara Damga Yanıltma | Sık yanlış pozitif veren hacim sinyali | Durum: AR-GE / dogrulanmadi
+T154 | Bozkurt Sahte Kırılma | Breakout sonrası bant içine dönüş | Durum: AR-GE / dogrulanmadi
+T155 | Umay Sahte Dönüş | Reversal sinyalinden sonra trendin sürmesi | Durum: AR-GE / dogrulanmadi
+T156 | Tulpar İkili Tuzak | Çift yönlü yanlış kırılma | Durum: AR-GE / dogrulanmadi
+T157 | Korkut Gürültü Filtresi | İşlem sayısı artışı ama gerçek hacim yokluğu | Durum: AR-GE / dogrulanmadi
+T158 | Kalkan Boş Sinyal | Likidite yetersizken doğru tahminin işlem dışı kalması | Durum: AR-GE / dogrulanmadi
+T159 | Simurg Çelişki | Bağımsız stratejilerin zıt tahmin vermesi | Durum: AR-GE / dogrulanmadi
+T160 | Ayna Kayması | Ters strateji performansının rejime göre değişmesi | Durum: AR-GE / dogrulanmadi
+
+=== EMIR UYGULAMA VE POZISYON ÇIKIŞLARI ===
+T161 | Tarkan Kademesi | Parçalı girişin dolum ve kayma etkisi | Durum: AR-GE / dogrulanmadi
+T162 | Akıncı Bekleyişi | Limit emirle bekleme ve kaçırma maliyeti | Durum: AR-GE / dogrulanmadi
+T163 | Kalkan Zaman Kesiti | Belirli süre ilerlemeyen pozisyonun kapanması | Durum: AR-GE / dogrulanmadi
+T164 | Tulpar Kâr Kilidi | İvmeye bağlı izleyen stop | Durum: AR-GE / dogrulanmadi
+T165 | Umay Bölüşümü | Kademeli kâr almanın beklenti üzerindeki etkisi | Durum: AR-GE / dogrulanmadi
+T166 | Börü Koruması | Volatiliteye göre stop mesafesi | Durum: AR-GE / dogrulanmadi
+T167 | Ay Han Tekrar Giriş | Stop sonrası yeniden giriş için koşul | Durum: AR-GE / dogrulanmadi
+T168 | Kara Er Risk Kesmesi | Likidite rejimi bozulunca pozisyon azaltma | Durum: AR-GE / dogrulanmadi
+T169 | Ergenekon Karşılaştırması | Aynı sinyalde market-limit uygulanabilirliği | Durum: AR-GE / dogrulanmadi
+T170 | Altay Net Eşik | Komisyon funding spread sonrası minimum getiri gereği | Durum: AR-GE / dogrulanmadi
+
+=== STRATEJI FÜZYONU VE META SINYALLER ===
+T171 | Simurg Üç Tamga | Bağımsız fiyat hacim OI sinyallerinin eşzamanı | Durum: AR-GE / dogrulanmadi
+T172 | Dokuz Oğuz Meclisi | Farklı ailelerin oy çokluğuyla ortak sonuç üretmesi | Durum: AR-GE / dogrulanmadi
+T173 | Bilge Hakem | Geçmiş rejime göre model ağırlığı | Durum: AR-GE / dogrulanmadi
+T174 | Kök Çelişki Çözücü | Long ve short sinyali çelişkisinde belirsizlik puanı | Durum: AR-GE / dogrulanmadi
+T175 | Turan Hiyerarşi | Piyasa rejim filtresi sonrası yerel sinyal | Durum: AR-GE / dogrulanmadi
+T176 | Alp Er Öncelik | Çakışan fırsatların net beklentiyle seçimi | Durum: AR-GE / dogrulanmadi
+T177 | Orhun Güven Ölçeği | Sinyal güvenilirliğinin kalibrasyonu | Durum: AR-GE / dogrulanmadi
+T178 | Umay Kapısı | Emir uygulama koşulundan geçmeyen sinyali eleme | Durum: AR-GE / dogrulanmadi
+T179 | Bozkurt Yankısı | Benzer sinyallerin tek aile sayılarak çoğul sayımı engelleme | Durum: AR-GE / dogrulanmadi
+T180 | Kutlu Konsey | Farklı veri kaynaklarının ortak fakat bağımsız teyidi | Durum: AR-GE / dogrulanmadi
+
+=== GEÇMIŞ ÖĞRENME VE KAÇAN FIRSATLAR ===
+T181 | Kartal Geri Bakış | Başarılı hareket öncesi erişilebilir sinyal taraması | Durum: AR-GE / dogrulanmadi
+T182 | Dede Korkut Arşivi | Benzer tarihsel olayları olay-zamanıyla eşleme | Durum: AR-GE / dogrulanmadi
+T183 | Simurg Yeniden Doğuş | Emekliye ayrılan hipotezin yeni rejimde yeniden testi | Durum: AR-GE / dogrulanmadi
+T184 | Ayna Dersliği | Kaybeden işlemin ters yönünü ileri test etme | Durum: AR-GE / dogrulanmadi
+T185 | Kayı Kaçan Emir | NO_FILL sonrası gerçek fırsat kaybını ölçme | Durum: AR-GE / dogrulanmadi
+T186 | Erkin Pişmanlık | Gerçek giriş ile erişilebilir ideal giriş farkı | Durum: AR-GE / dogrulanmadi
+T187 | Kara Kutlu Ders | Kazananlarda ortak ama kaybedenlerde bulunmayan özellik | Durum: AR-GE / dogrulanmadi
+T188 | Orhun Sahte Hafıza | Sadece kazananları seçme yanlılığını denetleme | Durum: AR-GE / dogrulanmadi
+T189 | Göktürk Deney | Parametre değişiminin ayrılmış veride testi | Durum: AR-GE / dogrulanmadi
+T190 | Turan Soy Ağacı | Yeni ailenin hangi olay ve hipotezden türediğini izleme | Durum: AR-GE / dogrulanmadi
+
+=== PORTFÖY KAPASITE VE ADAPTASYON ===
+T191 | Kalkan Yoğunlaşma | İlişkili coinlerde eş yön riskin sınırlanması | Durum: AR-GE / dogrulanmadi
+T192 | Bilge Risk Bütçesi | Anlık oynaklığa göre toplam maruziyet | Durum: AR-GE / dogrulanmadi
+T193 | Kut Likidite Kapasitesi | Order book hacmine göre ölçeklenebilir pozisyon | Durum: AR-GE / dogrulanmadi
+T194 | Börü Çakışma | Tek kaynaktan gelen birden çok benzer sinyali tek risk sayma | Durum: AR-GE / dogrulanmadi
+T195 | Umay Seri Kayıp | Üst üste zarar sonrası araştırma rejimi değişimi | Durum: AR-GE / dogrulanmadi
+T196 | Tarkan Maliyet Eşiği | Minimum ekonomik girişin canlı maliyetle değişmesi | Durum: AR-GE / dogrulanmadi
+T197 | Orhun OOS Nöbeti | İleri dönem performans kaymasının tespiti | Durum: AR-GE / dogrulanmadi
+T198 | Erlik Çöküş Alarmı | Beklenen risk dağılımının bozulması | Durum: AR-GE / dogrulanmadi
+T199 | Simurg Adaptasyon | Kazanan ailelerin ağırlığını yalnız ileri doğrulamayla güncelleme | Durum: AR-GE / dogrulanmadi
+T200 | Tengri İşlemsizlik | Hiçbir avantaj doğrulanmadığında NO_TRADE seçimi | Durum: AR-GE / dogrulanmadi
+
+=== HAFTALIK DEGERLENDIRME SABLONU ===
+Olay ID / coin / zaman / veri kaynagi / giris oncesi erisilebilir sinyal / sinyal zamani / LONG-SHORT-NO_TRADE / dolum / komisyon / spread / kayma / funding / kaldirac ve tasfiye / OOS sonuc / ters hipotez / karar: ilerlet-uyut-ele-tersini test et.
+Gercek kar veya basari oranlari bu katalogdaki hipotezlerden cikartilamaz.
