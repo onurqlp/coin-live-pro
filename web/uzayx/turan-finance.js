@@ -21,11 +21,14 @@
   if(complete&&((reportedNotional!==null&&Math.abs(reportedNotional-notional)>0.05)||(reportedFloating!==null&&Math.abs(reportedFloating-floating)>0.05)))
    throw Error('Açık pozisyon toplamı hesapla uyuşmuyor');
   const closed=(Array.isArray(paper.recent_tickets)?paper.recent_tickets:[]).filter(x=>x.status==='CLOSED');
+  const closedComplete=closed.length===(counts.CLOSED||0);
+  const closedWins=closedComplete?closed.reduce((total,x)=>total+Math.max(0,N(x.realized_net_usdt)||0),0):null;
+  const closedLosses=closedComplete?closed.reduce((total,x)=>total+Math.min(0,N(x.realized_net_usdt)||0),0):null;
   const outcome=ops.cohorts?.['TÜMÜ'];
   return {time:ops.generated_at_utc,starting:N(paper.starting_balance_usdt),equity:N(s.virtual_equity_usdt),
    realized:N(s.realized_net_usdt),unrealized:N(s.unrealized_net_usdt),openCount:counts.OPEN??null,closedCount:counts.CLOSED??null,
    positive:outcome?.positive??null,negative:outcome?.negative??null,closedNet:N(outcome?.realized_total_usdt),margin,notional,
-   complete,open,closed,closedComplete:closed.length===(counts.CLOSED||0),funding:paper.funding_state||'UNMODELED',
+   complete,open,closed,closedComplete,closedWins,closedLosses,funding:paper.funding_state||'UNMODELED',
    realMoney:false};
  }
  function mount(doc){
@@ -92,6 +95,8 @@
    field('Açık teminat toplamı',model.complete?amount(model.margin):'DOĞRULANAMIYOR');
    field('Kalan nominal maruziyet',model.complete?amount(model.notional):'DOĞRULANAMIYOR');
    field('Açık / Kapanmış',model.openCount+' / '+model.closedCount);
+   field('Kapanışlarda toplam kazanç',model.closedComplete?usd(model.closedWins):'— · eksik işlem dökümü','positive');
+   field('Kapanışlarda toplam kayıp',model.closedComplete?usd(model.closedLosses):'— · eksik işlem dökümü','negative');
    field('Kapanan kâr / zarar adedi',model.positive+' / '+model.negative);
    const t=Date.parse(model.time||'');const age=Number.isFinite(t)?(Date.now()-t)/60000:null;
    status.textContent='Son kayıt: '+(Number.isFinite(t)?new Date(t).toLocaleString('tr-TR',{dateStyle:'short',timeStyle:'short'}):'bilinmiyor')+
