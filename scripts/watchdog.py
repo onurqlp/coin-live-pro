@@ -43,6 +43,28 @@ def diagnose(health, runs, now=None, max_age_minutes=25):
             "latest_run_url": completed[0].get("html_url") if completed else None}
 
 
+
+def recovery_decision(diagnosis, runs, now=None, cooldown_minutes=20):
+    """Queue at most one read-only recovery scan if no recent or active scan exists."""
+    now = now or dt.datetime.now(UTC)
+    if not diagnosis.get("unhealthy"):
+        return {"dispatch": False, "reason": "HEALTHY"}
+    for run in runs:
+        if run.get("status") in ("queued", "in_progress", "waiting", "pending", "requested"):
+            return {"dispatch": False, "reason": "SCAN_ALREADY_RUNNING_OR_QUEUED"}
+    recent = []
+    for run in runs:
+        started = parse_utc(run.get("created_at"))
+        if started:
+            age = (now - started).total_seconds() / 60
+            if -3 <= age < cooldown_minutes:
+                recent.append(age)
+    if recent:
+        return {"dispatch": False, "reason": "RECENT_RUN_COOLDOWN"}
+    if diagnosis.get("age_minutes") is not None and diagnosis["age_minutes"] < 25 and diagnosis.get("consecutive_failed_runs", 0) < 3:
+        return {"dispatch": False, "reason": "NO_RECOVERY_NEEDED"}
+    return {"dispatch": True, "reason": "STALE_OR_THREE_FAILED_SCANS"}
+
 def api(url, token, method="GET", payload=None):
     raw = json.dumps(payload).encode("utf-8") if payload is not None else None
     req = urllib.request.Request(url, data=raw, method=method, headers={
@@ -78,6 +100,15 @@ def main():
     health = json.loads(base64.b64decode(raw["content"]).decode("utf-8"))
     runs = api(base + "/actions/workflows/market.yml/runs?per_page=12", token).get("workflow_runs", [])
     status = diagnose(health, runs)
+    recovery = recovery_decision(status, runs)
+    print("autonomous_recovery:", json.dumps(recovery))
+    if recovery["dispatch"]:
+        try:
+            api(base + "/actions/workflows/market.yml/dispatches", token, "POST", {"ref": "main"})
+            print("Dispatched one read-only recovery market scan; no trade orders.")
+        except (urllib.error.URLError, TimeoutError, ValueError) as ex:
+            print("Recovery dispatch failed; GitHub incident creation continues:",
+                  type(ex).__name__)
     issues = api(base + "/issues?state=open&per_page=100", token)
     existing = [i for i in issues if str(i.get("title", "")).startswith(MARKER) and "pull_request" not in i]
     print(json.dumps(status))
