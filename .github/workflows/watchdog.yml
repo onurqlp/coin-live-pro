@@ -1,7 +1,7 @@
 name: COIN.LIVE — Independent Pipeline Watchdog
 on:
   schedule:
-    - cron: '14 * * * *'
+    - cron: '14,44 * * * *'
   workflow_dispatch:
   push:
     branches: [main]
@@ -10,7 +10,7 @@ on:
       - 'scripts/watchdog.py'
 permissions:
   contents: read
-  actions: read
+  actions: write
   issues: write
 jobs:
   watchdog:
