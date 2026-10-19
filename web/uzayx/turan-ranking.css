@@ -1,0 +1,63 @@
+/* Ranked first-30 TURAN research portfolio. One shared desktop/mobile interface. */
+#turan-top30{margin:10px 0 18px;padding:15px;border:1px solid #375866;background:#102838;border-radius:15px}
+.trank-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.trank-heading-main{display:flex;flex-direction:column;gap:4px}
+.trank-heading strong{font-size:18px;color:#eff9fc}
+.trank-heading small{font-size:12px;color:#a8becc;line-height:1.4}
+.trank-refresh,.trank-expand,.trank-more{border:1px solid #497381;border-radius:10px;background:#144b59;color:#e7f9ff;padding:10px 12px;min-height:41px;cursor:pointer;font:inherit;font-size:12px}
+.trank-refresh:disabled{opacity:.55}
+.trank-info{font-size:12px;line-height:1.5;color:#c6d4df;margin:12px 0}
+.trank-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.trank-stat{border:1px solid #304a5d;border-radius:11px;background:#0c1f30;padding:10px;display:flex;flex-direction:column;gap:6px}
+.trank-stat small{font-size:11px;color:#b1c9d3}.trank-stat strong{font-size:18px;color:#f1f9fb}
+.trank-controls{display:flex;gap:7px;flex-wrap:wrap;margin:13px 0}
+.trank-controls select,.trank-controls input{background:#153549;border:1px solid #466979;border-radius:10px;color:#f0f7fa;min-height:42px;padding:9px;font-size:12px}
+.trank-controls input{min-width:120px;flex:2 1 180px}
+.trank-controls select{flex:1 1 150px}
+.trank-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;align-items:start}
+.trank-card{border:1px solid #385567;border-radius:11px;background:#0c2433;overflow:hidden;min-width:0}
+.trank-card[open]{grid-column:span 2;border-color:#568c94}
+.trank-card-title{display:flex;justify-content:space-between;gap:12px;align-items:center;list-style:none;cursor:pointer;padding:12px}
+.trank-card-title::-webkit-details-marker{display:none}
+.trank-card-title::after{content:'⌄';color:#aac2ca;font-size:16px;margin-left:3px}
+.trank-card[open] .trank-card-title::after{content:'⌃'}
+.trank-name{display:flex;flex:1;min-width:0;flex-direction:column;gap:4px}
+.trank-name strong{color:#eff8fc;font-size:14px}.trank-name small{color:#a6c0cd;font-size:11px}
+.trank-right{display:flex;flex-direction:column;gap:4px;align-items:flex-end;min-width:0}
+.trank-right strong{font-size:13px;white-space:nowrap}
+.trank-right small{font-size:10px;color:#a9c4cd;text-align:right}
+.trank-money.not-available{color:#aac1cc}
+.trank-money.negative,.trank-event-result.negative{color:#ffb6b8}
+.trank-money.positive,.trank-event-result.positive{color:#a5e8ce}
+.trank-card-body{padding:12px 16px 17px;border-top:1px solid #334e60;background:#081f2e}
+.trank-line{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;padding:8px 0;border-bottom:1px solid #294657}
+.trank-line>span{color:#a8bfca;font-size:11px;flex:0 1 37%}
+.trank-line>strong{font-size:12px;font-weight:650;flex:1;text-align:right;line-height:1.45;color:#e4f3f8}
+.trank-subtitle{font-size:14px;margin:15px 0 8px}
+.trank-evidence{margin:12px 0}
+.trank-obs{border:1px solid #324d5d;border-radius:10px;margin:8px 0;padding:10px;background:#0b2a37}
+.trank-obs-label{font-size:12px;color:#c1d7df;margin:0 0 7px}
+.trank-obs-row,.trank-trade-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid #294653}
+.trank-event-meta{font-size:11px;color:#d5e6ed;overflow-wrap:anywhere;flex:1}
+.trank-event-result{font-size:11px;white-space:nowrap;font-weight:700}
+.trank-note,.trank-footer{font-size:11px;line-height:1.6;color:#a7c1cb;margin:9px 0}
+.trank-more{margin-top:9px}
+.trank-old{margin-top:15px;border:1px solid #355769;border-radius:11px;padding:12px}
+.trank-old>summary{cursor:pointer;font-size:12px;font-weight:750}
+.trank-old #turan-catalog{margin-top:13px}
+#turan-current-group>article.panel[aria-label="TURAN mevcut strateji havuzu"]{display:none!important}
+.trank-refresh:focus-visible,.trank-expand:focus-visible,.trank-card-title:focus-visible,.trank-controls input:focus-visible,.trank-controls select:focus-visible{outline:2px solid #8ae1c8;outline-offset:2px}
+@media(max-width:760px){
+ #turan-top30{padding:11px}
+ .trank-list{grid-template-columns:1fr}
+ .trank-card[open]{grid-column:auto}
+ .trank-stats{gap:6px}
+ .trank-stat{padding:8px}
+ .trank-stat strong{font-size:15px}
+ .trank-controls .trank-expand{flex:1 1 125px}
+ .trank-card-title{gap:5px;padding:10px 9px}
+ .trank-card-body{padding:10px 11px 14px}
+ .trank-line>span{flex:0 1 41%}
+ .trank-line>strong{font-size:11px}
+ .trank-obs-row,.trank-trade-row{align-items:flex-start;flex-direction:column;gap:3px}
+}
