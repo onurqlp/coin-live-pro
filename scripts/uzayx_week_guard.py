@@ -5,6 +5,7 @@ Run baseline before an OKX collection and verify after all JSONs are produced.
 Fail the publication if paper counters regress or ledger/public scan IDs diverge.
 Never write a market, archive, trade or strategy file.
 """
+import hashlib
 import json
 import os
 import pathlib
@@ -78,14 +79,40 @@ def verify_counters(before, after):
 
 def run(mode):
     if mode == "baseline":
-        result = validate(load("v4-spark-paper.json"), watch=load("v4-watch-archive.json"))
+        spark = load("v4-spark-paper.json")
+        result = validate(spark, watch=load("v4-watch-archive.json"))
+        result['epoch_id'] = spark.get('epoch_id')
         BASE.write_text(json.dumps(result), encoding="utf-8")
         print("UZAYX_WEEK_BASELINE", result)
     elif mode == "verify":
         before = json.loads(BASE.read_text(encoding="utf-8"))
         manifest, paper = load("v4-manifest.json"), load("v4-paper.json")
-        after = validate(load("v4-spark-paper.json"), manifest, paper, load("v4-watch-archive.json"))
-        verify_counters(before, after)
+        spark = load("v4-spark-paper.json")
+        after = validate(spark, manifest, paper, load("v4-watch-archive.json"))
+        after['epoch_id'] = spark.get('epoch_id')
+        if before.get('epoch_id') != after['epoch_id']:
+            # Allow one explicit epoch rollover ONLY after all prior cashbooks
+            # have been byte-perfect archived in the same publication commit.
+            name = after['epoch_id']
+            config = json.loads((ROOT / 'config/uzayx-paper-epoch.json').read_text())
+            if not name or name != config['epoch_id'] or paper.get('epoch_id') != name:
+                raise ValueError('UNAUTHORIZED_PAPER_EPOCH_RESET')
+            folder = ROOT / 'archive/epochs' / name
+            cp = json.loads((folder / 'checkpoint.json').read_text())
+            if cp.get('epoch_id') != name or cp.get('previous_all_events_count') != before['all'] or cp.get('previous_ledger_epoch') != before.get('epoch_id'):
+                raise ValueError('PAPER_RESET_ARCHIVE_COUNTER_MISMATCH')
+            for key in ('spark-ledger', 'v4-ledger', 'spark-public', 'v4-public'):
+                raw = (folder / (key + '.json')).read_bytes()
+                if hashlib.sha256(raw).hexdigest() != cp['archived_sha256'][key]:
+                    raise ValueError('PAPER_RESET_ARCHIVE_SHA_MISMATCH: '+key)
+            old = json.loads((folder / 'spark-public.json').read_text())
+            if old.get('all_events_count') != before['all'] or old.get('summary',{}).get('counts',{}).get('CLOSED') != before['closed']:
+                raise ValueError('PAPER_RESET_OLD_BOOK_MISMATCH')
+            if after['watch'] is not None and before.get('watch') is not None and after['watch'] < before['watch']:
+                raise ValueError('WATCH_RESEARCH_ARCHIVE_REGRESSION')
+            print('UZAYX_AUDITED_NEW_CASH_EPOCH', name, 'archived prior count', before['all'])
+        else:
+            verify_counters(before, after)
         print("UZAYX_WEEK_CONTINUITY_OK", after)
     else:
         raise ValueError("Expected baseline or verify")
