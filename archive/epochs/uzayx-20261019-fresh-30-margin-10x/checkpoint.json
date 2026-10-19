@@ -1,0 +1,18 @@
+{
+  "schema": "uzayx.paper.cutover.v1",
+  "epoch_id": "uzayx-20261019-fresh-30-margin-10x",
+  "cutover_at_utc": "2026-10-19T14:15:32.992540+00:00",
+  "cutover_ms": 1792419332992,
+  "archived_sha256": {
+    "spark-ledger": "9dbdc737695c80298e412f9cece4872ac019b0f06cb36a990bdd980eabeda8f9",
+    "v4-ledger": "5f259526bd81b65615db3b58808979d9053cd45d5e585bfcf32552888cbdbd42",
+    "spark-public": "4df9200e77395f8dd46738ec9b32d9f2a75fb46a0e83c198596139a14ef1230c",
+    "v4-public": "394c68c340060a6fdc2129bad7239c12e4c0e19b5652734302ceb5cf2c05ada7"
+  },
+  "previous_all_events_count": 1518,
+  "previous_v4_order_count": 0,
+  "previous_ledger_epoch": null,
+  "new_entries_forward_only": true,
+  "previous_positions_not_claimed_closed": true,
+  "real_orders": false
+}
