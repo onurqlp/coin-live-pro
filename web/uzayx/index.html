@@ -105,10 +105,19 @@
 <div class="cash-kpis"><div><small>Açık</small><b id="cash-open">—</b></div><div><small>Mum bekleyen</small><b id="cash-waiting">—</b></div><div><small>Kapanmış</small><b id="cash-closed">—</b></div><div><small>Tüm keşifler</small><b id="cash-total">—</b></div></div>
 <div class="cash-actions"><button type="button" id="cash-reload" class="secondary">↻ Kasayı yenile</button><button type="button" id="cash-audit" class="secondary">Sağlığı denetle ↗</button></div>
 <p class="muted tiny" id="cash-coverage">Kayıt durumu bekleniyor.</p>
+<article class="panel cash-recent" aria-label="Son sanal işlem ve maliyet durumu">
+ <div class="panel-heading"><h3>Son işlemler ve büyüklük</h3><span class="chip">GERÇEK EMİR YOK</span></div>
+ <div class="cash-recent-grid">
+   <div><small>Son sanal giriş</small><strong id="cash-latest-open">Kontrol ediliyor</strong><span id="cash-latest-open-time">—</span></div>
+   <div><small>Son sanal kapanış</small><strong id="cash-latest-close">Kontrol ediliyor</strong><span id="cash-latest-close-time">—</span></div>
+   <div><small>Yeni işlem büyüklüğü</small><strong id="cash-size-policy">—</strong><span id="cash-size-note">Eski kayıtlar korunur</span></div>
+ </div>
+ <p class="muted tiny">Tarih/saat Türkiye saatidir. Yeni büyüklük, kaldıraçlı teminat değil sanal pozisyonun nominal tutarıdır. Fonlama hesaba katılmadı.</p>
+</article>
 <article class="panel cash-chart"><div class="panel-heading"><h3>Günlük gerçekleşen sanal sonuç</h3><span class="faint">İşlem kapanış günü · UTC</span></div><canvas id="cash-performance" role="img" aria-label="Gün bazında gerçekleşen sanal sonuçlar"></canvas><p class="muted tiny">Görünür arşiv günleri kullanılır; bulunmayan fiyatlar veya hesap getirileri tamamlanmaz.</p></article>
 <div class="cash-workspace"><article class="panel"><div class="panel-heading"><h3>Hangi pozisyonlar var?</h3><span class="faint" id="position-count">—</span></div>
 <div class="position-filters"><button type="button" class="selected" data-position-filter="OPEN">Açık</button><button type="button" data-position-filter="WAITING_FUTURE_BAR">Bekleyen</button><button type="button" data-position-filter="CLOSED">Kapanmış</button></div>
-<input type="search" id="position-search" placeholder="Pozisyon ara · SOL…" aria-label="Sanal pozisyon ara"><div class="position-rows" id="position-rows"></div></article>
+<input type="search" id="position-search" placeholder="Pozisyon ara · SOL…" aria-label="Sanal pozisyon ara"><div class="position-rows" id="position-rows"></div><button id="position-more" class="secondary position-more" type="button" hidden>Daha fazla pozisyon göster</button></article>
 <article class="panel"><div class="panel-heading"><h3>Seçilen pozisyon</h3><span class="chip amber">SANAL</span></div>
 <div id="position-detail"><p class="muted">Pozisyon seçerek ayrıntıları görün.</p></div><div class="chart-canvas position-canvas"><canvas id="position-chart" role="img" aria-label="Pozisyon giriş stop TP ve fiyat grafiği"></canvas></div><p class="muted tiny" id="position-chart-state">Doğrulanmış kapanmış mum bekleniyor.</p></article>
 </div>

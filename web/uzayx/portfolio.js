@@ -8,7 +8,13 @@
  'use strict';
  const fmt=(v,d=2)=>typeof v==='number'&&Number.isFinite(v)?v.toLocaleString('tr-TR',{minimumFractionDigits:d,maximumFractionDigits:d}):'—';
  const signed=v=>(typeof v==='number'&&v>0?'+':'')+fmt(v,4);
- const money=v=>fmt(v,2)+' USDT';
+ const money=v=>typeof v==='number'&&Number.isFinite(v)?fmt(v,2)+' USDT':'—';
+ const numeric=v=>typeof v==='number'&&Number.isFinite(v);
+ const pct=v=>numeric(v)?(v>0?'+':'')+fmt(v,2)+'%':'—';
+ const positionNet=t=>t?.status==='WAITING_FUTURE_BAR'?null:
+  numeric(t?.realized_net_usdt)&&numeric(t?.unrealized_net_usdt)?t.realized_net_usdt+t.unrealized_net_usdt:
+  numeric(t?.realized_net_usdt)&&t?.status==='CLOSED'?t.realized_net_usdt:null;
+ const statusName=v=>({OPEN:'Açık',CLOSED:'Kapandı',WAITING_FUTURE_BAR:'Mum bekleniyor',DATA_GAP:'Veri boşluğu',CAPACITY_BLOCKED:'Kasa limiti',INVALID_LEVEL:'Seviye geçersiz',OPPOSITE_CANCELLED:'Karşı sinyal iptali'})[v]||String(v||'—');
  const stamp=s=>{const t=Date.parse(s||'');return Number.isFinite(t)?new Date(t).toLocaleString('tr-TR',{timeZone:'Europe/Istanbul',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'—';};
  const $=id=>root.document?.getElementById(id);
  const node=(tag,cls,text)=>{const n=root.document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=String(text);return n;};
@@ -37,7 +43,7 @@
      .filter(t=>!query||String(t.symbol||'').toUpperCase().includes(query))
      .sort((a,b)=>(Date.parse(b.filled_at_utc||b.signal_at_utc)||0)-(Date.parse(a.filled_at_utc||a.signal_at_utc)||0));
  }
- let source=null,filter='OPEN',query='',selectedId=null,focused=null,homeSearch='',homeExpanded=false;
+ let source=null,filter='OPEN',query='',selectedId=null,focused=null,homeSearch='',homeExpanded=false,positionLimit=80;
  const HOME_PREVIEW=12;
  const paperPnl=v=>typeof v==='number'&&Number.isFinite(v)?signed(v)+' USDT':'—';
  function completeOpenPositions(doc){
@@ -101,6 +107,23 @@
    });
  }
  function moneyCell(label,value){const n=node('div','position-stat');n.append(node('small','',label),node('b','',value));return n;}
+ function renderRecent(doc){
+   const recent=Array.isArray(doc?.recent_tickets)?doc.recent_tickets:[];
+   const full=completeOpenPositions(doc);
+   const byId=new Map([...recent,...full.rows].filter(x=>x?.event_id).map(x=>[x.event_id,x]));
+   const lastOpen=[...byId.values()].filter(x=>Date.parse(x.filled_at_utc||''))
+     .sort((a,b)=>Date.parse(b.filled_at_utc)-Date.parse(a.filled_at_utc))[0];
+   const lastClose=recent.filter(x=>x.status==='CLOSED'&&Date.parse(x.closed_at_utc||''))
+     .sort((a,b)=>Date.parse(b.closed_at_utc)-Date.parse(a.closed_at_utc))[0];
+   $('cash-latest-open').textContent=lastOpen?lastOpen.symbol+' · '+lastOpen.side:'Henüz doğrulanan yok';
+   $('cash-latest-open-time').textContent=lastOpen?
+     stamp(lastOpen.filled_at_utc)+' · '+money(lastOpen.reference_notional_usdt)+' nominal':'Giriş için sonraki kapanmış mum bekleniyor';
+   $('cash-latest-close').textContent=lastClose?lastClose.symbol+' · '+lastClose.side:'Son örnekte yok';
+   $('cash-latest-close-time').textContent=lastClose?
+     stamp(lastClose.closed_at_utc)+' · net '+paperPnl(lastClose.realized_net_usdt):'Kapanmış kayıtlar son bilet örneğinden okunur';
+   $('cash-size-policy').textContent=money(doc?.minimum_new_ticket_notional_usdt??doc?.reference_ticket_notional_usdt);
+   $('cash-size-note').textContent='Yeni sanal niyetler · eski 10 USDT kayıtlarına dokunulmaz';
+ }
  function renderDaily(doc){
    const canvas=$('cash-performance');if(!canvas)return;
    const days=(doc?.daily?.days||[]).filter(d=>typeof d.realized_net_usdt==='number')
@@ -128,17 +151,48 @@
    const info=$('position-detail');if(!info)return;
    if(!t){info.replaceChildren(node('p','muted','Göstermek için bir sanal pozisyon seçin.'));return;}
    info.replaceChildren();
-   const title=node('div','position-detail-head');title.append(node('strong','',t.symbol+' · '+t.side),node('span','chip',t.status));info.append(title);
+   const title=node('div','position-detail-head');
+   title.append(node('strong','',t.symbol+' · '+t.side),node('span','chip',statusName(t.status)));
+   info.append(title);
+   const size=t.reference_notional_usdt;
+   const net=positionNet(t);
+   const roi=numeric(net)&&numeric(size)&&size>0?100*net/size:null;
    const detail=node('div','position-stats');
    detail.append(
-    moneyCell('Sinyal fiyatı',fmt(t.signal_price,6)),moneyCell('Sanal giriş',fmt(t.fill_price,6)),
-    moneyCell('Son işaretleme',fmt(t.mark_price,6)),moneyCell('STOP',fmt(t.stop,6)),
-    moneyCell('TP1 / TP2 / TP3',[t.tp1,t.tp2,t.tp3].map(v=>fmt(v,6)).join(' / ')),
-    moneyCell('Gerçekleşmiş',money(t.realized_net_usdt)),moneyCell('Açık değerleme',money(t.unrealized_net_usdt)),
-    moneyCell('Notional',money(t.reference_notional_usdt)));
+     moneyCell('Sinyal zamanı (TR)',stamp(t.signal_at_utc)),
+     moneyCell('Giriş zamanı (TR)',stamp(t.filled_at_utc)),
+     moneyCell('Kapanış zamanı (TR)',stamp(t.closed_at_utc)),
+     moneyCell('Yön ve aşama',t.side+' · '+String(t.entry_class||t.stage_at_birth||'KIVILCIM')),
+     moneyCell('Sinyal fiyatı (OKX)',fmt(t.signal_price,7)),
+     moneyCell('Sanal giriş fiyatı',fmt(t.fill_price,7)),
+     moneyCell('Son kayıtlı fiyat',fmt(t.mark_price,7)),
+     moneyCell('STOP',fmt(t.stop,7)),
+     moneyCell('TP1 / TP2 / TP3',[t.tp1,t.tp2,t.tp3].map(v=>fmt(v,7)).join(' / ')),
+     moneyCell('Başlangıç nominali',money(size)),
+     moneyCell('Kalan pozisyon nominali',money(t.remaining_notional_usdt)),
+     moneyCell('Kayıtlı birim miktar',fmt(t.remaining_qty,8)),
+     moneyCell('Gerçekleşen net sanal kâr/zarar',money(t.realized_net_usdt)),
+     moneyCell('Açık net sanal değerleme',t.status==='OPEN'?money(t.unrealized_net_usdt):'—'),
+     moneyCell('Toplam net sonuç',numeric(net)?paperPnl(net):'—'),
+     moneyCell('Nominale göre net sonuç',pct(roi)),
+     moneyCell('Tahmini ödenen komisyon',money(t.fees_estimated_usdt)),
+     moneyCell('Giriş komisyonu',money(t.entry_fee_usdt)),
+     moneyCell('Değerleme durumu',String(t.valuation_status||'—'))
+   );
    info.append(detail);
-   info.append(node('p','muted tiny','Sinyal '+stamp(t.signal_at_utc)+' · Sanal giriş '+stamp(t.filled_at_utc)+
-     ' · Kaynak: kapanmış OKX 5 dakikalık mumdan tahmini dolum. Funding modellenmedi.'));
+   const records=Array.isArray(t.exits)?t.exits:[];
+   const ledger=node('div','position-exits');
+   ledger.append(node('h4','','Gerçekleşen sanal çıkışlar · '+records.length));
+   if(records.length)records.forEach(x=>{
+     ledger.append(node('p','position-exit-row',
+       String(x.kind||'Çıkış')+' · '+stamp(x.closed_at_utc)+' · Fiyat '+fmt(x.price,7)+
+       ' · Miktar '+fmt(x.qty,7)+' · Net '+paperPnl(x.net_usdt)));
+   });else ledger.append(node('p','muted tiny','Henüz kayıtlı sanal çıkış yok.'));
+   info.append(ledger);
+   info.append(node('p','muted tiny',
+     'Kaynak: ileride kapanmış OKX 5 dakikalık mumundan tahmini dolum. Komisyon varsayımı ve kayma modele dahildir; fonlama, gerçek emir fiyatı ve tasfiye dahil değildir. '+ 
+     (numeric(size)&&size<30?'Bu işlem 30 USDT kuralından önceki tarihsel kayıttır.':'')+
+     ' Gerçek emir verilmez.'));
    root.dispatchEvent(new CustomEvent('uzayx:position-selected',{detail:{ticket:t}}));
  }
  function renderRows(){
@@ -148,18 +202,33 @@
      const on=b.dataset.positionFilter===filter;
      b.classList.toggle('selected',on);b.setAttribute('aria-pressed',String(on));
    });
-   if(!items.length){area.append(node('p','muted','Bu durumda görüntülenecek güncel örnek yok.'));show(null);return;}
-   items.slice(0,40).forEach(t=>{
-     const b=node('button','position-row'+(selectedId===t.event_id?' selected':''));b.type='button';
-     b.append(node('span','position-symbol',t.symbol+' · '+t.side),
-       node('span','position-entry',t.status==='WAITING_FUTURE_BAR'?'Giriş bekliyor':fmt(t.fill_price,6)),
-       node('span','position-pnl '+((t.unrealized_net_usdt||0)+(t.realized_net_usdt||0)>=0?'positive':'negative'),
-         t.status==='WAITING_FUTURE_BAR'?'—':signed((t.unrealized_net_usdt||0)+(t.realized_net_usdt||0))+' USDT'));
+   if(!items.length){
+     area.append(node('p','muted','Bu durumda görüntülenecek güncel örnek yok.'));
+     $('position-more').hidden=true;
+     $('position-count').textContent='0 kayıt · kapanmış kayıtlar son bilet örneği ile sınırlıdır';
+     show(null);return;
+   }
+   items.slice(0,positionLimit).forEach(t=>{
+     const pnl=positionNet(t);
+     const b=node('button','position-row'+(selectedId===t.event_id?' selected':''));
+     b.type='button';
+     b.append(
+       node('span','position-symbol',t.symbol+' · '+t.side),
+       node('span','position-entry',
+         (t.status==='WAITING_FUTURE_BAR'?'Giriş bekleniyor':stamp(t.filled_at_utc))+
+         ' · '+money(t.reference_notional_usdt)),
+       node('span','position-pnl '+(numeric(pnl)?pnl<0?'negative':'positive':'muted'),
+         numeric(pnl)?paperPnl(pnl):'—')
+     );
      b.addEventListener('click',()=>{show(t);renderRows();});
      area.append(b);
    });
-   if(!items.some(x=>x.event_id===selectedId))show(items[0]);
-   $('position-count').textContent='Son kayıt örneğinde '+items.length+' eşleşme · ilk 40 gösteriliyor';
+   const more=$('position-more');
+   more.hidden=items.length<=positionLimit;
+   more.textContent='Sonraki '+Math.min(80,items.length-positionLimit)+' pozisyonu göster';
+   $('position-count').textContent=items.length+' eşleşen sanal kayıt · '+Math.min(positionLimit,items.length)+
+     ' gösteriliyor'+(filter==='CLOSED'?' · son kayıt örneği':'');
+   show(items.find(x=>x.event_id===selectedId)||items[0]);
  }
  function render(){
    const doc=source?.db?.spark||{},summary=reconcile(doc),paper=source?.db?.paper||{};
@@ -182,7 +251,7 @@
    $('cash-asof').textContent='Kayıt: '+stamp(doc.updated_at)+' · '+(valid?'Kaynak uyumlu':'Kontrol gerekli');
    $('cash-main').textContent=money(paper.equity_usdt);
    $('cash-main-open').textContent=fmt(paper.open_positions?.length||0,0)+' ana pozisyon';
-   renderDaily(doc);renderRows();renderHome();
+   renderDaily(doc);renderRecent(doc);renderRows();renderHome();
  }
  if(root.document){
    root.addEventListener('uzayx:loaded',e=>{source=e.detail;render();});
@@ -190,9 +259,10 @@
    root.addEventListener('resize',()=>{if(source&&$('funds')?.classList.contains('active'))renderDaily(source.db.spark);});
    root.document.addEventListener('DOMContentLoaded',()=>{
      root.document.querySelectorAll('[data-position-filter]').forEach(b=>b.addEventListener('click',()=>{
-       filter=b.dataset.positionFilter;renderRows();
+       filter=b.dataset.positionFilter;positionLimit=80;renderRows();
      }));
-     $('position-search')?.addEventListener('input',e=>{query=e.target.value.toUpperCase().trim();renderRows();});
+     $('position-search')?.addEventListener('input',e=>{query=e.target.value.toUpperCase().trim();positionLimit=80;renderRows();});
+     $('position-more')?.addEventListener('click',()=>{positionLimit+=80;renderRows();});
      $('home-position-search')?.addEventListener('input',e=>{homeSearch=e.target.value.toUpperCase().trim();homeExpanded=false;renderHome();});
      $('home-open-more')?.addEventListener('click',()=>{homeExpanded=!homeExpanded;renderHome();});
      $('cash-reload')?.addEventListener('click',()=>root.document.getElementById('reload')?.click());

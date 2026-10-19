@@ -42,6 +42,14 @@ class TestV4Paper(unittest.TestCase):
     self.assertEqual(log['orders']['A']['status'],'PENDING')
     return log
 
+ def test_new_fill_below_30_usdt_is_blocked_without_raising_risk(self):
+    log=self.initial()
+    low_risk={**POL,'paper':{**POL['paper'],'risk_per_trade_pct':.001}}
+    log,_=paper.advance(log,{'events':[]},MARKET,T+600000+2000,
+        {'BTCUSDT':[candle(T+paper.BAR)]},{'BTCUSDT':SPEC},low_risk)
+    self.assertEqual(log['orders']['A']['status'],'NO_FILL')
+    self.assertEqual(log['orders']['A']['no_fill_reason'],'BELOW_30_USDT_MIN_NOTIONAL')
+
  def test_first_closed_future_bar_required(self):
     log=self.initial()
     log,view=paper.advance(log,{'events':[]},MARKET,T+200000,

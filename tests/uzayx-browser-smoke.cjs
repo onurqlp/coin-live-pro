@@ -114,6 +114,17 @@ async function run(){
      status:document.querySelector('#cash-status')?.textContent
    }));
    assert.match(cash.title,/Kasa|kasa/);
+   const paperAudit=await page.evaluate(()=>({
+     latest:document.querySelector('#cash-latest-open')?.textContent,
+     latestAt:document.querySelector('#cash-latest-open-time')?.textContent,
+     minSize:document.querySelector('#cash-size-policy')?.textContent,
+     positionEntry:document.querySelector('#position-rows .position-entry')?.textContent,
+     details:document.querySelector('#position-detail')?.textContent
+   }));
+   assert.ok(paperAudit.latest&&paperAudit.latestAt&&paperAudit.minSize);
+   assert.match(paperAudit.details,/Giriş zamanı|Gerçekleşen net sanal kâr\/zarar/);
+   assert.match(paperAudit.details,/Giriş komisyonu|Tahmini ödenen komisyon/);
+
    assert.ok(cash.rows>0,'Cash must show sampled positions');
    await page.locator('#position-rows .position-row').click();
    await page.waitForFunction(()=>document.querySelector('#position-detail .position-stat'),{timeout:5000});
