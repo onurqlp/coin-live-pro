@@ -186,6 +186,152 @@
         }
       ],
       "not_a_win_probability": true
+    },
+    {
+      "day_utc": "2026-10-19",
+      "recorded_at_utc": "2026-10-19T06:50:40.114372+00:00",
+      "source_scan_id": "9e6c31634676a3eea9ec9ead",
+      "source_timestamp_utc": "2026-10-19T06:49:36.139000+00:00",
+      "source_provider": "OKX",
+      "paper_live_orders": false,
+      "sample_independence_verified": false,
+      "inverse_replay_verified": false,
+      "old_policy_modified": false,
+      "cohort_statistics": {
+        "TÜMÜ": {
+          "closed": 1244,
+          "positive": 563,
+          "negative": 681,
+          "positive_share_observed": 0.452572,
+          "mean_net_per_closed_ticket_usdt": -0.00512,
+          "net_usdt": -6.36938,
+          "independent_observations": false
+        },
+        "GELDI_OTOMATIK_GIRIS": {
+          "closed": 188,
+          "positive": 74,
+          "negative": 114,
+          "positive_share_observed": 0.393617,
+          "mean_net_per_closed_ticket_usdt": -0.0245,
+          "net_usdt": -4.60557,
+          "independent_observations": false
+        },
+        "LONG": {
+          "closed": 153,
+          "positive": 15,
+          "negative": 138,
+          "positive_share_observed": 0.098039,
+          "mean_net_per_closed_ticket_usdt": -0.14851,
+          "net_usdt": -22.72221,
+          "independent_observations": false
+        },
+        "SHORT": {
+          "closed": 1091,
+          "positive": 548,
+          "negative": 543,
+          "positive_share_observed": 0.502291,
+          "mean_net_per_closed_ticket_usdt": 0.01499,
+          "net_usdt": 16.35284,
+          "independent_observations": false
+        },
+        "AŞAMA_1": {
+          "closed": 221,
+          "positive": 98,
+          "negative": 123,
+          "positive_share_observed": 0.443439,
+          "mean_net_per_closed_ticket_usdt": 0.00314,
+          "net_usdt": 0.69412,
+          "independent_observations": false
+        },
+        "AŞAMA_2": {
+          "closed": 644,
+          "positive": 316,
+          "negative": 328,
+          "positive_share_observed": 0.490683,
+          "mean_net_per_closed_ticket_usdt": 0.00322,
+          "net_usdt": 2.07121,
+          "independent_observations": false
+        },
+        "AŞAMA_3": {
+          "closed": 376,
+          "positive": 147,
+          "negative": 229,
+          "positive_share_observed": 0.390957,
+          "mean_net_per_closed_ticket_usdt": -0.02466,
+          "net_usdt": -9.27035,
+          "independent_observations": false
+        },
+        "RSI_4H_50_70": {
+          "closed": 119,
+          "positive": 27,
+          "negative": 92,
+          "positive_share_observed": 0.226891,
+          "mean_net_per_closed_ticket_usdt": -0.10802,
+          "net_usdt": -12.85461,
+          "independent_observations": false
+        },
+        "RSI_4H_30_50": {
+          "closed": 1050,
+          "positive": 520,
+          "negative": 530,
+          "positive_share_observed": 0.495238,
+          "mean_net_per_closed_ticket_usdt": 0.01213,
+          "net_usdt": 12.7356,
+          "independent_observations": false
+        },
+        "BB_4H_SIKIŞMA": {
+          "closed": 648,
+          "positive": 333,
+          "negative": 315,
+          "positive_share_observed": 0.513889,
+          "mean_net_per_closed_ticket_usdt": 0.01305,
+          "net_usdt": 8.45426,
+          "independent_observations": false
+        }
+      },
+      "research_lessons": [
+        {
+          "cohort": "TÜMÜ",
+          "finding": "NEGATIVE_HISTORICAL_AVERAGE",
+          "proposal": "COMPARE_ORIGINAL_MIRROR_AND_SKIP",
+          "mirror_result": "NO_FORWARD_BAR_REPLAY",
+          "mirror_pnl_usdt": null,
+          "auto_strategy_change": false
+        },
+        {
+          "cohort": "GELDI_OTOMATIK_GIRIS",
+          "finding": "NEGATIVE_HISTORICAL_AVERAGE",
+          "proposal": "COMPARE_ORIGINAL_MIRROR_AND_SKIP",
+          "mirror_result": "NO_FORWARD_BAR_REPLAY",
+          "mirror_pnl_usdt": null,
+          "auto_strategy_change": false
+        },
+        {
+          "cohort": "LONG",
+          "finding": "NEGATIVE_HISTORICAL_AVERAGE",
+          "proposal": "COMPARE_ORIGINAL_MIRROR_AND_SKIP",
+          "mirror_result": "NO_FORWARD_BAR_REPLAY",
+          "mirror_pnl_usdt": null,
+          "auto_strategy_change": false
+        },
+        {
+          "cohort": "AŞAMA_3",
+          "finding": "NEGATIVE_HISTORICAL_AVERAGE",
+          "proposal": "COMPARE_ORIGINAL_MIRROR_AND_SKIP",
+          "mirror_result": "NO_FORWARD_BAR_REPLAY",
+          "mirror_pnl_usdt": null,
+          "auto_strategy_change": false
+        },
+        {
+          "cohort": "RSI_4H_50_70",
+          "finding": "NEGATIVE_HISTORICAL_AVERAGE",
+          "proposal": "COMPARE_ORIGINAL_MIRROR_AND_SKIP",
+          "mirror_result": "NO_FORWARD_BAR_REPLAY",
+          "mirror_pnl_usdt": null,
+          "auto_strategy_change": false
+        }
+      ],
+      "not_a_win_probability": true
     }
   ]
 }
