@@ -13,9 +13,9 @@
 <script defer src="./archive.js"></script>
 <script defer src="./watch.js"></script>
 <script defer src="./portfolio.js"></script>
-<script defer src="./support-proof.js"></script><script defer src="./atlas.js"></script><script defer src="./turan.js?v=2"></script><script defer src="./turan-catalog.js?v=4"></script><script defer src="./turan-families.js?v=2"></script><script defer src="./turan-finance.js?v=1"></script><script defer src="./mobile-shell.js?v=2"></script>
+<script defer src="./support-proof.js"></script><script defer src="./atlas.js"></script><script defer src="./turan.js?v=2"></script><script defer src="./turan-catalog.js?v=4"></script><script defer src="./turan-ranking.js?v=1"></script><script defer src="./turan-ranking-ui.js?v=1"></script><script defer src="./turan-families.js?v=2"></script><script defer src="./turan-finance.js?v=1"></script><script defer src="./mobile-shell.js?v=2"></script>
 <link rel="stylesheet" href="./desk.css">
-<link rel="stylesheet" href="./proof.css"><link rel="stylesheet" href="./atlas.css"><link rel="stylesheet" href="./turan.css?v=1"><link rel="stylesheet" href="./mobile-shell.css"><link rel="stylesheet" href="./simple-ui.css?v=1"><link rel="stylesheet" href="./turan-catalog.css?v=3"><link rel="stylesheet" href="./turan-finance.css?v=1"><link rel="stylesheet" href="./ux-daily-clean.css?v=1"><link rel="stylesheet" href="./turan-families.css?v=1">
+<link rel="stylesheet" href="./proof.css"><link rel="stylesheet" href="./atlas.css"><link rel="stylesheet" href="./turan.css?v=1"><link rel="stylesheet" href="./mobile-shell.css"><link rel="stylesheet" href="./simple-ui.css?v=1"><link rel="stylesheet" href="./turan-catalog.css?v=3"><link rel="stylesheet" href="./turan-ranking.css?v=1"><link rel="stylesheet" href="./turan-finance.css?v=1"><link rel="stylesheet" href="./ux-daily-clean.css?v=1"><link rel="stylesheet" href="./turan-families.css?v=1">
 </head><body>
 <a class="skip" href="#main">İçeriğe geç</a>
 <div class="layout">
@@ -77,12 +77,13 @@
 <p class="muted tiny" id="chart-indicator-note"></p>
 </div><article class="panel scenario-card"><div class="panel-heading"><h3>Kaydedilmiş senaryo</h3><span class="chip amber">TEYİT GEREKİR</span></div><b id="scenario-title">Senaryo kontrol ediliyor.</b><p class="muted" id="scenario-detail">Eski kayıt yeni emir sinyali değildir.</p><details class="advanced"><summary>Grafiği doğru okumak</summary><p class="muted">Eşik kapalı mum yapısından gelir; STOP ve TP kayıtlı araştırma seviyeleridir. Kaydedilmiş senaryo geçerli giriş koşulu anlamına gelmez. Göstergelerden başarı olasılığı türetilmez.</p></details></article></section>
 <section class="workspace" id="turan" aria-labelledby="turan-page-title">
-<div class="sectionhead"><div><h2 id="turan-page-title">TURAN · Strateji Merkezi</h2><p class="muted">Sanal para sonuçları, 30 mevcut araştırma yaklaşımı ve 200 yeni AR-GE ailesi.</p></div></div>
+<div class="sectionhead"><div><h2 id="turan-page-title">TURAN · Strateji Merkezi</h2><p class="muted">Stratejilerin gerçek sanal sonuçlarını, gözlemlerini ve coin bazında kayıtlarını incele.</p></div></div>
 <div id="turan-cash-view" role="region" aria-label="Sanal işlemlerin para durumu">Sanal hesap okunuyor…</div>
 <div class="turan-mode-bar" role="group" aria-label="TURAN strateji katalogları">
-<button type="button" class="selected" data-turan-mode="current" aria-pressed="true">30 mevcut strateji</button>
-<button type="button" data-turan-mode="research" aria-pressed="false">200 yeni AR-GE ailesi</button></div>
+<button type="button" class="selected" data-turan-mode="current" aria-pressed="true">İlk 30 · Performans</button>
+<button type="button" data-turan-mode="research" aria-pressed="false">Tüm 200 aile</button></div>
 <div id="turan-current-group">
+<div id="turan-top30" role="region" aria-label="Performansa göre ilk otuz strateji">Stratejiler ve gözlem sonuçları kontrol ediliyor…</div>
 <article class="panel" id="turan-lab" aria-labelledby="turan-title"><div class="panel-heading"><div><h3 id="turan-title">Öğrenme özeti</h3></div><span class="chip amber">SANAL ARAŞTIRMA</span></div>
 <div id="turan-results" class="turan-results" role="status">Kapanan sanal işlemler okunuyor…</div></article>
 <article class="panel" aria-label="TURAN mevcut strateji havuzu"><div class="panel-heading"><h3>30 stratejinin durumu</h3><span class="chip amber">ARAŞTIRMA</span></div>
