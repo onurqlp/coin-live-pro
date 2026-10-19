@@ -1,0 +1,42 @@
+/* Proposed research families: readable on desktop, mobile and the shared UZAYX PWA */
+#turan-research-group[hidden],#turan-current-group[hidden]{display:none!important}
+.turan-mode-bar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 16px}
+.turan-mode-bar button{padding:11px 15px;min-height:43px;background:#102a3a;border:1px solid #37566a;color:#e2f3fa;border-radius:11px;font-size:13px;font-weight:750;cursor:pointer}
+.turan-mode-bar button.selected,.turan-mode-bar button[aria-pressed="true"]{background:#205465;border-color:#75aaae;color:#fff}
+.turan-families-intro{color:#b5c8d6;font-size:13px;line-height:1.6;margin:0 0 14px}
+.turan-family-tools{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.turan-family-tools input,.turan-family-tools select,.turan-family-tools button{background:#102b3d;border:1px solid #3f6074;color:#eaf5fb;padding:10px 12px;border-radius:10px;min-height:42px;font:inherit;font-size:12px}
+.turan-family-tools input{flex:2 1 190px;min-width:130px}
+.turan-family-tools select{flex:1 1 200px;min-width:160px;max-width:100%}
+.turan-family-tools button{cursor:pointer;flex:0 1 auto}
+.turan-family-tools button:focus-visible,.turan-mode-bar button:focus-visible,.turan-family-card summary:focus-visible,.turan-direction-btn:focus-visible{outline:2px solid #a4ead8;outline-offset:2px}
+.turan-family-summary{margin:9px 0 12px;color:#b6d6d0;font-size:12px;font-weight:700}
+.turan-family-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;gap:9px}
+.turan-family-card{border:1px solid #355365;border-radius:12px;background:#102939;min-width:0;overflow:hidden}
+.turan-family-card[open]{grid-column:span 2;border-color:#5f8c91}
+.turan-family-card-head{display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer;padding:14px 13px;list-style:none}
+.turan-family-card-head::-webkit-details-marker{display:none}
+.turan-family-card-head::after{content:'⌄';color:#c5d5de;margin-left:0;font-size:16px}
+.turan-family-card[open] .turan-family-card-head::after{content:'⌃'}
+.turan-family-name{display:flex;flex:1;min-width:0;flex-direction:column;gap:5px}
+.turan-family-name strong{font-size:14px;color:#edf6f9;font-weight:800}
+.turan-family-name small{font-size:12px;color:#b1c5d1;line-height:1.45}
+.turan-family-state{border:1px solid #71664a;border-radius:999px;color:#e2ca9d;padding:4px 8px;font-size:10px;white-space:nowrap}
+.turan-family-detail{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 16px;background:#081d2b;padding:10px 15px;border-top:1px solid #345365}
+.turan-family-field{padding:10px 0;border-bottom:1px solid #254253;min-width:0}
+.turan-family-field small,.turan-direction-chooser>small{display:block;color:#94b3c2;font-size:11px}
+.turan-family-field p{font-size:12px;color:#e1f0f4;line-height:1.55;overflow-wrap:anywhere;margin:5px 0 0}
+.turan-direction-chooser{grid-column:1/-1;padding:14px 0;border-bottom:1px solid #254253}
+.turan-direction-buttons{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0}
+.turan-direction-btn{padding:7px 11px;border-radius:9px;border:1px solid #436076;color:#dbeaf3;background:#143244;font-size:12px;cursor:pointer}
+.turan-direction-btn[aria-pressed="true"]{background:#22655c;border-color:#72c4b0;color:#fff}
+.turan-scenario-result{color:#c7dde7;line-height:1.55;font-size:12px;margin:8px 0 2px}
+.turan-family-more{margin:14px 0;padding:11px 16px;background:#1e5161;color:#fff;border:1px solid #42838d;border-radius:11px;cursor:pointer;font-weight:750}
+.turan-family-more[hidden]{display:none}
+.turan-family-protocol{margin-top:14px;padding:11px 14px;border:1px solid #365667;border-radius:12px}
+.turan-family-protocol summary{cursor:pointer;font-weight:700}
+.turan-family-protocol-content{color:#bbd0dc;font-size:12px;line-height:1.6}
+.turan-family-provenance{margin:16px 0 7px;font-size:12px;color:#b2c0d2}
+.turan-family-export{font-size:12px;color:#8ad7cb}
+.turan-family-empty{padding:16px;color:#d4a69b}
+@media(max-width:750px){.turan-family-list{grid-template-columns:1fr}.turan-family-card[open]{grid-column:auto}.turan-family-detail{grid-template-columns:1fr}.turan-family-tools button{flex:1 1 120px}.turan-family-card-head{padding:13px 11px}.turan-family-field{padding:9px 0}.turan-mode-bar button{flex:1 1 135px}}
