@@ -1,6 +1,6 @@
 import datetime as dt
 import unittest
-from scripts.watchdog import diagnose
+from scripts.watchdog import diagnose, recovery_decision
 
 
 class WatchdogTest(unittest.TestCase):
@@ -19,6 +19,24 @@ class WatchdogTest(unittest.TestCase):
         result = diagnose({"updated_at": "2026-10-17T16:29:00Z", "status": "OK"}, runs, self.now)
         self.assertTrue(result["unhealthy"])
         self.assertEqual(result["consecutive_failed_runs"], 3)
+
+
+    def test_recovery_requires_real_stall_and_skips_active_scan(self):
+        degraded = {"unhealthy": True, "age_minutes": 31, "consecutive_failed_runs": 0}
+        stale_run = {"status": "completed", "conclusion": "success",
+                     "created_at": "2026-10-17T15:55:00Z"}
+        self.assertTrue(recovery_decision(degraded, [stale_run], self.now)["dispatch"])
+        active = {"status": "in_progress", "created_at": "2026-10-17T16:29:00Z"}
+        self.assertEqual(recovery_decision(degraded, [active], self.now)["reason"],
+                         "SCAN_ALREADY_RUNNING_OR_QUEUED")
+        recent = {"status": "completed", "conclusion": "failure",
+                  "created_at": "2026-10-17T16:25:00Z"}
+        self.assertEqual(recovery_decision(degraded, [recent], self.now)["reason"],
+                         "RECENT_RUN_COOLDOWN")
+
+    def test_recovery_never_dispatches_when_fresh_and_healthy(self):
+        good = {"unhealthy": False, "age_minutes": 2, "consecutive_failed_runs": 0}
+        self.assertFalse(recovery_decision(good, [], self.now)["dispatch"])
 
 
 if __name__ == "__main__":
