@@ -40,6 +40,9 @@ jobs:
       - run: node --check web/uzayx/turan-finance.js
       - run: node --check web/uzayx/turan-catalog.js
       - run: node --test tests/uzayx-turan-finance.test.cjs
+      - run: node --check web/uzayx/turan-ranking.js
+      - run: node --check web/uzayx/turan-ranking-ui.js
+      - run: node --test tests/uzayx-turan-ranking.test.cjs
       - run: node --check web/uzayx/turan-200.js
       - run: node --check web/uzayx/support-proof.js
       - run: node --test tests/uzayx-support-proof.test.cjs
