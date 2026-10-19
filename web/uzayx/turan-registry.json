@@ -1,0 +1,1848 @@
+{
+  "schema": "turan.unified_registry.v1",
+  "source_note": "T001–T200 uploaded hypotheses + preserved original 30 candidate designs (L001–L030); these are independent identities until verified",
+  "not_real_trades": true,
+  "no_backfilled_profit": true,
+  "entries": [
+    {
+      "id": "T001",
+      "name": "Bozkurt İzi",
+      "desc": "Normal volatiliteye göre sıra dışı fiyat sapması",
+      "family": "FIYAT ANOMALILERI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T002",
+      "name": "Alp Er Tunga Eşiği",
+      "desc": "Sık sınanan seviyede fiyat kabulü",
+      "family": "FIYAT ANOMALILERI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T003",
+      "name": "Göktürk Kırılması",
+      "desc": "Rejim dışı ilk fiyat kopuşu",
+      "family": "FIYAT ANOMALILERI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T004",
+      "name": "Kayı Merdiveni",
+      "desc": "Yüksek diplerle kademeli ilerleme",
+      "family": "FIYAT ANOMALILERI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T005",
+      "name": "Oğuz Kıvılcımı",
+      "desc": "Sakin bantta biriken mikro momentum",
+      "family": "FIYAT ANOMALILERI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T006",
+      "name": "Ergenekon Çıkışı",
+      "desc": "Uzun dar banttan geniş aralığa geçiş",
+      "family": "FIYAT ANOMALILERI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T007",
+      "name": "Tengri Şoku",
+      "desc": "Getiri dağılımının aşırı kuyruğunda hareket",
+      "family": "FIYAT ANOMALILERI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T008",
+      "name": "Kutlu Fitil",
+      "desc": "Uzun fitillerin yönlü reddi",
+      "family": "FIYAT ANOMALILERI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T009",
+      "name": "Orhun Hafızası",
+      "desc": "Tarihsel tepki bölgelerinin tekrar sınanması",
+      "family": "FIYAT ANOMALILERI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T010",
+      "name": "Turan Gecikmesi",
+      "desc": "Erken anormalliği izleyen gecikmiş fiyat tepkisi",
+      "family": "FIYAT ANOMALILERI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T011",
+      "name": "Umay Hacmi",
+      "desc": "Fiyatla teyit edilen bağıl hacim patlaması",
+      "family": "HACIM VE IŞLEM AKIŞI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T012",
+      "name": "Demirci Nefesi",
+      "desc": "Yüksek agresif emirle fiyatın sabit kalması",
+      "family": "HACIM VE IŞLEM AKIŞI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T013",
+      "name": "Korkut Deltası",
+      "desc": "Kümülatif delta ve fiyat ayrışması",
+      "family": "HACIM VE IŞLEM AKIŞI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T014",
+      "name": "Börü Baskısı",
+      "desc": "Sürekli agresif alım akışı",
+      "family": "HACIM VE IŞLEM AKIŞI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T015",
+      "name": "Erlik Baskısı",
+      "desc": "Sürekli agresif satış akışı",
+      "family": "HACIM VE IŞLEM AKIŞI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T016",
+      "name": "Ak Ana Kümesi",
+      "desc": "Büyük işlemlerin zamansal kümelenmesi",
+      "family": "HACIM VE IŞLEM AKIŞI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T017",
+      "name": "Yıldıray Devri",
+      "desc": "Bir dalgadan sonraki hacim el değiştirmesi",
+      "family": "HACIM VE IŞLEM AKIŞI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T018",
+      "name": "Kızıl Elma Hızı",
+      "desc": "Saniye başı işlem yoğunluğunun sıçraması",
+      "family": "HACIM VE IŞLEM AKIŞI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T019",
+      "name": "Tarkan Buzdağı",
+      "desc": "Tekrarlanan parçalı büyük emir yürütümü",
+      "family": "HACIM VE IŞLEM AKIŞI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T020",
+      "name": "Uluğ Hacimsizliği",
+      "desc": "Kırılmada katılım eksikliği",
+      "family": "HACIM VE IŞLEM AKIŞI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T021",
+      "name": "Kartal Mıknatısı",
+      "desc": "Yoğun limit likiditesine fiyat yaklaşması",
+      "family": "EMIR DEFTERI VE LIKIDITE",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T022",
+      "name": "Kalkan Duvarı",
+      "desc": "Gerçek fiyat duvarının tüketilmesi",
+      "family": "EMIR DEFTERI VE LIKIDITE",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T023",
+      "name": "Tulpar Kaçağı",
+      "desc": "Büyük emirlerin eşleşmeden çekilmesi",
+      "family": "EMIR DEFTERI VE LIKIDITE",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T024",
+      "name": "Akıncı Boşluğu",
+      "desc": "Çok seviyeli derinlik kaybı",
+      "family": "EMIR DEFTERI VE LIKIDITE",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T025",
+      "name": "Yada Spreadi",
+      "desc": "Normalin dışına çıkan bid-ask farkı",
+      "family": "EMIR DEFTERI VE LIKIDITE",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T026",
+      "name": "Ay Ata Dönüşü",
+      "desc": "Çekilmiş derinliğin geri dolması",
+      "family": "EMIR DEFTERI VE LIKIDITE",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T027",
+      "name": "Yel Ana İnceliği",
+      "desc": "Düşük derinliğe göre fiyat etki oranı",
+      "family": "EMIR DEFTERI VE LIKIDITE",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T028",
+      "name": "Kürşad Yenilemesi",
+      "desc": "Sürekli yenilenen limit emirlerin tespiti",
+      "family": "EMIR DEFTERI VE LIKIDITE",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T029",
+      "name": "Bozkır Vakumu",
+      "desc": "Ardışık seviyelerde likidite yokluğu",
+      "family": "EMIR DEFTERI VE LIKIDITE",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T030",
+      "name": "Bumin Dengesi",
+      "desc": "Tahta alış/satış yoğunluğu asimetrisi",
+      "family": "EMIR DEFTERI VE LIKIDITE",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T031",
+      "name": "Alparslan İlk Adım",
+      "desc": "Yataydan yönlü trende geçiş",
+      "family": "TREND DEVAMI VE IVME",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T032",
+      "name": "Bilge Kağan Onayı",
+      "desc": "Kırılma ardından kabul ve retest",
+      "family": "TREND DEVAMI VE IVME",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T033",
+      "name": "Mete İkinci Akın",
+      "desc": "İlk dürtü sonrası yeni trend dalgası",
+      "family": "TREND DEVAMI VE IVME",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T034",
+      "name": "Kür Şad Hızlanması",
+      "desc": "Momentumun ikinci türeviyle ivmelenmesi",
+      "family": "TREND DEVAMI VE IVME",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T035",
+      "name": "Yıldırım Soluğu",
+      "desc": "Pozitif fiyat ama düşen ivme",
+      "family": "TREND DEVAMI VE IVME",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T036",
+      "name": "Sungur Dönüşü",
+      "desc": "Trend içinde normalleşme geri çekilmesi",
+      "family": "TREND DEVAMI VE IVME",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T037",
+      "name": "Gökalp Bayrağı",
+      "desc": "Trend içi dar bayrak sonrası devam",
+      "family": "TREND DEVAMI VE IVME",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T038",
+      "name": "Börü Mirası",
+      "desc": "Kısa trendin daha uzun ölçeğe taşınması",
+      "family": "TREND DEVAMI VE IVME",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T039",
+      "name": "Aybars Uyumlanması",
+      "desc": "Birden fazla zaman ölçeğinde yön onayı",
+      "family": "TREND DEVAMI VE IVME",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T040",
+      "name": "Atilla Kırılganlığı",
+      "desc": "Trend iç yapısının zayıflaması",
+      "family": "TREND DEVAMI VE IVME",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T041",
+      "name": "Ergenekon Yayı",
+      "desc": "Düşük gerçekleşmiş volatilite sonrası açılım",
+      "family": "VOLATILITE VE SIKIŞMA",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T042",
+      "name": "Gök Gürültüsü",
+      "desc": "ATR şokları",
+      "family": "VOLATILITE VE SIKIŞMA",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T043",
+      "name": "Ayaz Kümesi",
+      "desc": "Oynaklığın ardışık kümelenmesi",
+      "family": "VOLATILITE VE SIKIŞMA",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T044",
+      "name": "Kıl Çadırı",
+      "desc": "İç içe fiyat daralmaları",
+      "family": "VOLATILITE VE SIKIŞMA",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T045",
+      "name": "Dede Korkut Geçidi",
+      "desc": "Düşükten yüksek volatilite rejimine geçiş",
+      "family": "VOLATILITE VE SIKIŞMA",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T046",
+      "name": "Ak Sakal Sönümü",
+      "desc": "Şok sonrasında volatilite normalleşmesi",
+      "family": "VOLATILITE VE SIKIŞMA",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T047",
+      "name": "Kara Han Kuyruğu",
+      "desc": "Aşırı uç getiri yoğunluğu",
+      "family": "VOLATILITE VE SIKIŞMA",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T048",
+      "name": "Alaca Alanı",
+      "desc": "Gün içi aralığın sıra dışı açılması",
+      "family": "VOLATILITE VE SIKIŞMA",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T049",
+      "name": "Kök Tengri Asimetrisi",
+      "desc": "Aşağı ve yukarı oynaklığın asimetrisi",
+      "family": "VOLATILITE VE SIKIŞMA",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T050",
+      "name": "Tamga Sıkışması",
+      "desc": "Birden çok ölçekte eşzamanlı daralma",
+      "family": "VOLATILITE VE SIKIŞMA",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T051",
+      "name": "Erlik Zirvesi",
+      "desc": "Yüksek fiyata rağmen zayıflayan talep",
+      "family": "ZIRVE DIP VE DÖNÜŞ",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T052",
+      "name": "Umay Dibi",
+      "desc": "Yüksek satışa rağmen fiyatın düşmemesi",
+      "family": "ZIRVE DIP VE DÖNÜŞ",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T053",
+      "name": "Alkarısı Tuzağı",
+      "desc": "Yeni zirvenin hızla reddi",
+      "family": "ZIRVE DIP VE DÖNÜŞ",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T054",
+      "name": "Ak Ana Tuzağı",
+      "desc": "Yeni dibin hızla geri alınması",
+      "family": "ZIRVE DIP VE DÖNÜŞ",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T055",
+      "name": "Tulpar Son Nefes",
+      "desc": "Parabolik eğimden kırılmaya geçiş",
+      "family": "ZIRVE DIP VE DÖNÜŞ",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T056",
+      "name": "Demir Dağ Dağıtımı",
+      "desc": "Yüksek hacimde yatay fiyat ve artan arz",
+      "family": "ZIRVE DIP VE DÖNÜŞ",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T057",
+      "name": "Kara Gün Teslimiyeti",
+      "desc": "Kapitülasyon sonrası satıcı tükenişi",
+      "family": "ZIRVE DIP VE DÖNÜŞ",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T058",
+      "name": "Altay V Dönüşü",
+      "desc": "Keskin düşüşten hızlı toparlanma",
+      "family": "ZIRVE DIP VE DÖNÜŞ",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T059",
+      "name": "Orhun Yay Dönüşü",
+      "desc": "Kademeli yön değiştirme",
+      "family": "ZIRVE DIP VE DÖNÜŞ",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T060",
+      "name": "Simurg Kırık Kanat",
+      "desc": "Devam sinyalinin kısa sürede iptali",
+      "family": "ZIRVE DIP VE DÖNÜŞ",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T061",
+      "name": "Börü Short Sıkışması",
+      "desc": "Short tasfiyeleriyle yükseliş ivmesi",
+      "family": "TASFIYE VE SQUEEZE",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T062",
+      "name": "Kara Alp Long Sıkışması",
+      "desc": "Long tasfiyeleriyle düşüş ivmesi",
+      "family": "TASFIYE VE SQUEEZE",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T063",
+      "name": "Çifte Tamga",
+      "desc": "İki yönde ardışık stop temizliği",
+      "family": "TASFIYE VE SQUEEZE",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T064",
+      "name": "Kurt Kapanı",
+      "desc": "Stop kümelerinde fiyatın hızlı ters dönmesi",
+      "family": "TASFIYE VE SQUEEZE",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T065",
+      "name": "Yelbörü Zinciri",
+      "desc": "Tasfiye akışının art arda ivmelenmesi",
+      "family": "TASFIYE VE SQUEEZE",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T066",
+      "name": "Demir Ağ Sönümü",
+      "desc": "Tasfiye fırtınası sonrasında akış tükenmesi",
+      "family": "TASFIYE VE SQUEEZE",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T067",
+      "name": "Akıncı Fitili",
+      "desc": "Tasfiye spike fitili sonrası geri dönüş",
+      "family": "TASFIYE VE SQUEEZE",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T068",
+      "name": "Umay Savunması",
+      "desc": "Likidasyon baskısına rağmen seviye korunması",
+      "family": "TASFIYE VE SQUEEZE",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T069",
+      "name": "Erlik Takibi",
+      "desc": "Tasfiye sonrası düşüşün sürdürülebilirliği",
+      "family": "TASFIYE VE SQUEEZE",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T070",
+      "name": "Tengri Sıçraması",
+      "desc": "Tasfiye nedeniyle tek yönde geçici fiyat aşırılığı",
+      "family": "TASFIYE VE SQUEEZE",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T071",
+      "name": "Kök OI Yükselişi",
+      "desc": "Fiyat ve açık pozisyonun beraber büyümesi",
+      "family": "OI FUNDING VE POZISYONLANMA",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T072",
+      "name": "Kara OI Ayrışması",
+      "desc": "Fiyat artarken açık pozisyon azalması",
+      "family": "OI FUNDING VE POZISYONLANMA",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T073",
+      "name": "Mavi OI Birikimi",
+      "desc": "Fiyat yatayken türev pozisyon büyümesi",
+      "family": "OI FUNDING VE POZISYONLANMA",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T074",
+      "name": "Kızıl Funding",
+      "desc": "Aşırı pozitif fonlama rejimi",
+      "family": "OI FUNDING VE POZISYONLANMA",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T075",
+      "name": "Ak Funding",
+      "desc": "Aşırı negatif fonlama rejimi",
+      "family": "OI FUNDING VE POZISYONLANMA",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T076",
+      "name": "Bumin Basis",
+      "desc": "Funding ile piyasa eğilimi ayrışması",
+      "family": "OI FUNDING VE POZISYONLANMA",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T077",
+      "name": "İlteriş Kapanışı",
+      "desc": "OI daralmasıyla yönlü pozisyon kapama",
+      "family": "OI FUNDING VE POZISYONLANMA",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T078",
+      "name": "Kut Dengesizliği",
+      "desc": "Long short tarafının yoğunlaşması",
+      "family": "OI FUNDING VE POZISYONLANMA",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T079",
+      "name": "Tarkan Yeniden Açılışı",
+      "desc": "Tasfiye sonrasında OI hızlı yenilenmesi",
+      "family": "OI FUNDING VE POZISYONLANMA",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T080",
+      "name": "Ay Han Dönemeç",
+      "desc": "Fonlama zamanı çevresindeki fiyat davranışı",
+      "family": "OI FUNDING VE POZISYONLANMA",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T081",
+      "name": "Turan Baz Farkı",
+      "desc": "Spot ve perpetual fiyatı arasındaki sapma",
+      "family": "VADELI VE SPOT PIYASA AYRIŞMALARI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T082",
+      "name": "Akdeniz Taşıma",
+      "desc": "Vadeli eğri ve taşıma maliyeti ayrışması",
+      "family": "VADELI VE SPOT PIYASA AYRIŞMALARI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T083",
+      "name": "Ordu Spot Liderliği",
+      "desc": "Spot hareketin futures fiyatını önden izlemesi",
+      "family": "VADELI VE SPOT PIYASA AYRIŞMALARI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T084",
+      "name": "Börü Perp Liderliği",
+      "desc": "Perpetual işlemlerin spotu önden sürüklemesi",
+      "family": "VADELI VE SPOT PIYASA AYRIŞMALARI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T085",
+      "name": "Atabey Basis Dönüşü",
+      "desc": "Vadeli bazın ortalamaya dönüşü",
+      "family": "VADELI VE SPOT PIYASA AYRIŞMALARI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T086",
+      "name": "Oğuz Vade Eğrisi",
+      "desc": "Vade yapısının ani şekil değiştirmesi",
+      "family": "VADELI VE SPOT PIYASA AYRIŞMALARI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T087",
+      "name": "Demir Teminat",
+      "desc": "Teminat türleriyle oynaklık ilişkisinin değişmesi",
+      "family": "VADELI VE SPOT PIYASA AYRIŞMALARI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T088",
+      "name": "Kıpçak Uyuşmazlığı",
+      "desc": "Vadeli borsalar arasında işlem yapılabilir fiyat farkı",
+      "family": "VADELI VE SPOT PIYASA AYRIŞMALARI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T089",
+      "name": "Uluğ Finansman Eşiği",
+      "desc": "Fonlama ve komisyon sonrası teorik fırsat sınırı",
+      "family": "VADELI VE SPOT PIYASA AYRIŞMALARI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T090",
+      "name": "Kutalmış Açık Pozisyon",
+      "desc": "Vadeli likidite ve pozisyon büyümesi uyumsuzluğu",
+      "family": "VADELI VE SPOT PIYASA AYRIŞMALARI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T091",
+      "name": "Gökbörü Hakimiyeti",
+      "desc": "BTC dominansı değişirken altcoin tepkisi",
+      "family": "BTC VE PIYASA REJIMI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T092",
+      "name": "Ay Ata Çarpanı",
+      "desc": "BTC hareketine göre dinamik beta",
+      "family": "BTC VE PIYASA REJIMI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T093",
+      "name": "Ergenekon Ayrışması",
+      "desc": "BTC yatayken altcoin anomalisi",
+      "family": "BTC VE PIYASA REJIMI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T094",
+      "name": "Tengri Rüzgarı",
+      "desc": "BTC ani şokunun gecikmeli altcoin etkisi",
+      "family": "BTC VE PIYASA REJIMI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T095",
+      "name": "Bilge Rejim",
+      "desc": "Trend ve yatay piyasa koşulunu ayırma",
+      "family": "BTC VE PIYASA REJIMI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T096",
+      "name": "Uluğ Risk İştağı",
+      "desc": "Geniş piyasa risk alma/riskten kaçınma değişimi",
+      "family": "BTC VE PIYASA REJIMI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T097",
+      "name": "Kara Korelasyon",
+      "desc": "BTC korelasyonunun aniden kopması",
+      "family": "BTC VE PIYASA REJIMI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T098",
+      "name": "Kızıl Makas",
+      "desc": "BTC yükselirken altcoin zayıflığı",
+      "family": "BTC VE PIYASA REJIMI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T099",
+      "name": "Akın Dalga",
+      "desc": "BTC düşüş sonrası altcoin toparlanma sırası",
+      "family": "BTC VE PIYASA REJIMI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T100",
+      "name": "Oğuz Eşik",
+      "desc": "BTC volatilitesi aşılınca altcoin strateji askısı",
+      "family": "BTC VE PIYASA REJIMI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T101",
+      "name": "Börü Öncüsü",
+      "desc": "Bir coin hareketinin benzer grubu önden uyarması",
+      "family": "COINLER ARASI ILIŞKILER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T102",
+      "name": "Kayı Gecikeni",
+      "desc": "Sektör grubuna gecikmeli katılım",
+      "family": "COINLER ARASI ILIŞKILER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T103",
+      "name": "Alp Sektör Dalgası",
+      "desc": "Sektör geneline yayılan ortak hareket",
+      "family": "COINLER ARASI ILIŞKILER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T104",
+      "name": "Otağ Eşleşmesi",
+      "desc": "Yüksek korelasyonlu çiftte geçici kopma",
+      "family": "COINLER ARASI ILIŞKILER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T105",
+      "name": "Orhun Yayılımı",
+      "desc": "Haber etkisinin ilişkili tokenlara gecikmeli dağılması",
+      "family": "COINLER ARASI ILIŞKILER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T106",
+      "name": "Tamga Rotasyonu",
+      "desc": "Bir temadan diğer temaya hacim devri",
+      "family": "COINLER ARASI ILIŞKILER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T107",
+      "name": "Aybars Bağımsızlık",
+      "desc": "Piyasa düşerken tek coinde göreli güç",
+      "family": "COINLER ARASI ILIŞKILER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T108",
+      "name": "Kara Ayrışma",
+      "desc": "Pozitif piyasa içinde anormal zayıflık",
+      "family": "COINLER ARASI ILIŞKILER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T109",
+      "name": "Simurg Sepeti",
+      "desc": "Sektör sepeti ile tek coin anormalliği",
+      "family": "COINLER ARASI ILIŞKILER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T110",
+      "name": "Turan Zincir Etkisi",
+      "desc": "Ekosistem tokenlarında ardışık fiyat tepkisi",
+      "family": "COINLER ARASI ILIŞKILER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T111",
+      "name": "Dede Korkut Haber",
+      "desc": "Doğrulanmış haberin ilk fiyat tepkisi",
+      "family": "HABER OLAY VE SOSYAL TETIKLEYICILER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T112",
+      "name": "Kızıl Elma Listeleme",
+      "desc": "Borsa listeleme ilanı etkisi",
+      "family": "HABER OLAY VE SOSYAL TETIKLEYICILER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T113",
+      "name": "Kara Bayrak Delist",
+      "desc": "Delist duyurusunun likidite etkisi",
+      "family": "HABER OLAY VE SOSYAL TETIKLEYICILER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T114",
+      "name": "Ay Ana Kilit Açımı",
+      "desc": "Token unlock takviminin fiyatla ilişkisi",
+      "family": "HABER OLAY VE SOSYAL TETIKLEYICILER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T115",
+      "name": "Altın Tamga Oylama",
+      "desc": "Governance sonucu sonrası fiyat keşfi",
+      "family": "HABER OLAY VE SOSYAL TETIKLEYICILER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T116",
+      "name": "Gökçe Söylenti",
+      "desc": "Doğrulanmamış söylenti ve fiyat ayrışması",
+      "family": "HABER OLAY VE SOSYAL TETIKLEYICILER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T117",
+      "name": "Börü Sosyal Sıçrama",
+      "desc": "Sosyal ilgi artışının hacimle teyidi",
+      "family": "HABER OLAY VE SOSYAL TETIKLEYICILER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T118",
+      "name": "Korkut Düzeltmesi",
+      "desc": "İlk haber tepkisinin tersine dönüşü",
+      "family": "HABER OLAY VE SOSYAL TETIKLEYICILER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T119",
+      "name": "Kut Anlatısı",
+      "desc": "Narrative değişiminin çoklu token etkisi",
+      "family": "HABER OLAY VE SOSYAL TETIKLEYICILER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T120",
+      "name": "Ak Söz Sahte Haber",
+      "desc": "Yalanlanan bilginin piyasa geri dönüşü",
+      "family": "HABER OLAY VE SOSYAL TETIKLEYICILER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T121",
+      "name": "Altay Borsa Girişi",
+      "desc": "Borsalara büyük token transferi",
+      "family": "ONCHAIN VE BÜYÜK CÜZDAN AKIŞI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T122",
+      "name": "Akın Borsa Çıkışı",
+      "desc": "Borsalardan net büyük transfer",
+      "family": "ONCHAIN VE BÜYÜK CÜZDAN AKIŞI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T123",
+      "name": "Demir Balina",
+      "desc": "Büyük cüzdan bakiyesindeki rejim değişimi",
+      "family": "ONCHAIN VE BÜYÜK CÜZDAN AKIŞI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T124",
+      "name": "Umay Yeni Cüzdan",
+      "desc": "Yeni aktif cüzdanlarda anormal artış",
+      "family": "ONCHAIN VE BÜYÜK CÜZDAN AKIŞI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T125",
+      "name": "Orhun Zincir Hızı",
+      "desc": "Zincir üstü transfer yoğunluğu sıçraması",
+      "family": "ONCHAIN VE BÜYÜK CÜZDAN AKIŞI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T126",
+      "name": "Bumin Kasa",
+      "desc": "Borsa rezervleri ile fiyat ayrışması",
+      "family": "ONCHAIN VE BÜYÜK CÜZDAN AKIŞI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T127",
+      "name": "Kara Köprü",
+      "desc": "Köprü işlemlerinde olağan dışı hareket",
+      "family": "ONCHAIN VE BÜYÜK CÜZDAN AKIŞI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T128",
+      "name": "Tamga Hazinesi",
+      "desc": "Proje hazinesi cüzdanlarının hareketleri",
+      "family": "ONCHAIN VE BÜYÜK CÜZDAN AKIŞI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T129",
+      "name": "Kayı Dağıtımı",
+      "desc": "Büyük sahibin çok sayıda adrese dağıtımı",
+      "family": "ONCHAIN VE BÜYÜK CÜZDAN AKIŞI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T130",
+      "name": "Gök Balina Gecikmesi",
+      "desc": "Büyük transfer sonrası gecikmeli piyasa tepkisi",
+      "family": "ONCHAIN VE BÜYÜK CÜZDAN AKIŞI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T131",
+      "name": "Şafak Nöbeti",
+      "desc": "Asya açılışı etrafında likidite değişimi",
+      "family": "ZAMAN VE SEANS ETKILERI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T132",
+      "name": "Öğle Toyu",
+      "desc": "Avrupa seansı hacim devri",
+      "family": "ZAMAN VE SEANS ETKILERI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T133",
+      "name": "Günbatımı Akını",
+      "desc": "ABD seansı fiyat keşfi",
+      "family": "ZAMAN VE SEANS ETKILERI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T134",
+      "name": "Kutlu Devir",
+      "desc": "Seans geçişinde spread ve yön değişimi",
+      "family": "ZAMAN VE SEANS ETKILERI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T135",
+      "name": "Ay Tutulması",
+      "desc": "Hafta sonu düşük derinlik anomalisi",
+      "family": "ZAMAN VE SEANS ETKILERI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T136",
+      "name": "Bozkır Pazartesisi",
+      "desc": "Hafta açılışı gap benzeri fiyat davranışı",
+      "family": "ZAMAN VE SEANS ETKILERI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T137",
+      "name": "Korkut Takvimi",
+      "desc": "Ekonomik veri açıklaması öncesi-sonrası risk",
+      "family": "ZAMAN VE SEANS ETKILERI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T138",
+      "name": "Yılkı Dönemi",
+      "desc": "Ay sonu türev pozisyon ayarlamaları",
+      "family": "ZAMAN VE SEANS ETKILERI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T139",
+      "name": "Kızıl Saat",
+      "desc": "Fonlama hesap saatlerinde mikro fiyat hareketi",
+      "family": "ZAMAN VE SEANS ETKILERI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T140",
+      "name": "Turan Nöbeti",
+      "desc": "Piyasa aktivitesinin mevsimsel gün içi döngüsü",
+      "family": "ZAMAN VE SEANS ETKILERI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T141",
+      "name": "Bilge Z-Skoru",
+      "desc": "Getiri sapmasının standartlaştırılması",
+      "family": "İSTATISTIK VE ANOMALI MODELLEME",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T142",
+      "name": "Uluğ Kuantil",
+      "desc": "Aşırı yüzdelik getiri rejimi",
+      "family": "İSTATISTIK VE ANOMALI MODELLEME",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T143",
+      "name": "Orhun CUSUM",
+      "desc": "Kümülatif değişim noktasını erken bulma",
+      "family": "İSTATISTIK VE ANOMALI MODELLEME",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T144",
+      "name": "Göktürk HMM",
+      "desc": "Gizli piyasa rejimleri arasında geçiş",
+      "family": "İSTATISTIK VE ANOMALI MODELLEME",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T145",
+      "name": "Kutadgu Artık",
+      "desc": "Faktör modeli artık getirisi",
+      "family": "İSTATISTIK VE ANOMALI MODELLEME",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T146",
+      "name": "Ak Sakal Entropi",
+      "desc": "Fiyat hareketi düzensizliğinin değişmesi",
+      "family": "İSTATISTIK VE ANOMALI MODELLEME",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T147",
+      "name": "Yada Fraktal",
+      "desc": "Piyasa ölçekleme davranışının kayması",
+      "family": "İSTATISTIK VE ANOMALI MODELLEME",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T148",
+      "name": "Simurg Nedensellik",
+      "desc": "Öncü göstergeyle gecikmeli ilişki sınaması",
+      "family": "İSTATISTIK VE ANOMALI MODELLEME",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T149",
+      "name": "Kök Uç Değer",
+      "desc": "Extreme value theory ile kuyruk eşiği",
+      "family": "İSTATISTIK VE ANOMALI MODELLEME",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T150",
+      "name": "Erkin Kalıcılık",
+      "desc": "Anomali sonrası etkinin yaşam süresi",
+      "family": "İSTATISTIK VE ANOMALI MODELLEME",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T151",
+      "name": "Alkarısı Aynası",
+      "desc": "Başarısız long sinyalinde ters yön testi",
+      "family": "SAHTE SINYALLER VE KARŞI TEZLER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T152",
+      "name": "Erlik Aynası",
+      "desc": "Başarısız short sinyalinde ters yön testi",
+      "family": "SAHTE SINYALLER VE KARŞI TEZLER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T153",
+      "name": "Kara Damga Yanıltma",
+      "desc": "Sık yanlış pozitif veren hacim sinyali",
+      "family": "SAHTE SINYALLER VE KARŞI TEZLER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T154",
+      "name": "Bozkurt Sahte Kırılma",
+      "desc": "Breakout sonrası bant içine dönüş",
+      "family": "SAHTE SINYALLER VE KARŞI TEZLER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T155",
+      "name": "Umay Sahte Dönüş",
+      "desc": "Reversal sinyalinden sonra trendin sürmesi",
+      "family": "SAHTE SINYALLER VE KARŞI TEZLER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T156",
+      "name": "Tulpar İkili Tuzak",
+      "desc": "Çift yönlü yanlış kırılma",
+      "family": "SAHTE SINYALLER VE KARŞI TEZLER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T157",
+      "name": "Korkut Gürültü Filtresi",
+      "desc": "İşlem sayısı artışı ama gerçek hacim yokluğu",
+      "family": "SAHTE SINYALLER VE KARŞI TEZLER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T158",
+      "name": "Kalkan Boş Sinyal",
+      "desc": "Likidite yetersizken doğru tahminin işlem dışı kalması",
+      "family": "SAHTE SINYALLER VE KARŞI TEZLER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T159",
+      "name": "Simurg Çelişki",
+      "desc": "Bağımsız stratejilerin zıt tahmin vermesi",
+      "family": "SAHTE SINYALLER VE KARŞI TEZLER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T160",
+      "name": "Ayna Kayması",
+      "desc": "Ters strateji performansının rejime göre değişmesi",
+      "family": "SAHTE SINYALLER VE KARŞI TEZLER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T161",
+      "name": "Tarkan Kademesi",
+      "desc": "Parçalı girişin dolum ve kayma etkisi",
+      "family": "EMIR UYGULAMA VE POZISYON ÇIKIŞLARI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T162",
+      "name": "Akıncı Bekleyişi",
+      "desc": "Limit emirle bekleme ve kaçırma maliyeti",
+      "family": "EMIR UYGULAMA VE POZISYON ÇIKIŞLARI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T163",
+      "name": "Kalkan Zaman Kesiti",
+      "desc": "Belirli süre ilerlemeyen pozisyonun kapanması",
+      "family": "EMIR UYGULAMA VE POZISYON ÇIKIŞLARI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T164",
+      "name": "Tulpar Kâr Kilidi",
+      "desc": "İvmeye bağlı izleyen stop",
+      "family": "EMIR UYGULAMA VE POZISYON ÇIKIŞLARI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T165",
+      "name": "Umay Bölüşümü",
+      "desc": "Kademeli kâr almanın beklenti üzerindeki etkisi",
+      "family": "EMIR UYGULAMA VE POZISYON ÇIKIŞLARI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T166",
+      "name": "Börü Koruması",
+      "desc": "Volatiliteye göre stop mesafesi",
+      "family": "EMIR UYGULAMA VE POZISYON ÇIKIŞLARI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T167",
+      "name": "Ay Han Tekrar Giriş",
+      "desc": "Stop sonrası yeniden giriş için koşul",
+      "family": "EMIR UYGULAMA VE POZISYON ÇIKIŞLARI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T168",
+      "name": "Kara Er Risk Kesmesi",
+      "desc": "Likidite rejimi bozulunca pozisyon azaltma",
+      "family": "EMIR UYGULAMA VE POZISYON ÇIKIŞLARI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T169",
+      "name": "Ergenekon Karşılaştırması",
+      "desc": "Aynı sinyalde market-limit uygulanabilirliği",
+      "family": "EMIR UYGULAMA VE POZISYON ÇIKIŞLARI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T170",
+      "name": "Altay Net Eşik",
+      "desc": "Komisyon funding spread sonrası minimum getiri gereği",
+      "family": "EMIR UYGULAMA VE POZISYON ÇIKIŞLARI",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T171",
+      "name": "Simurg Üç Tamga",
+      "desc": "Bağımsız fiyat hacim OI sinyallerinin eşzamanı",
+      "family": "STRATEJI FÜZYONU VE META SINYALLER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T172",
+      "name": "Dokuz Oğuz Meclisi",
+      "desc": "Farklı ailelerin oy çokluğuyla ortak sonuç üretmesi",
+      "family": "STRATEJI FÜZYONU VE META SINYALLER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T173",
+      "name": "Bilge Hakem",
+      "desc": "Geçmiş rejime göre model ağırlığı",
+      "family": "STRATEJI FÜZYONU VE META SINYALLER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T174",
+      "name": "Kök Çelişki Çözücü",
+      "desc": "Long ve short sinyali çelişkisinde belirsizlik puanı",
+      "family": "STRATEJI FÜZYONU VE META SINYALLER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T175",
+      "name": "Turan Hiyerarşi",
+      "desc": "Piyasa rejim filtresi sonrası yerel sinyal",
+      "family": "STRATEJI FÜZYONU VE META SINYALLER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T176",
+      "name": "Alp Er Öncelik",
+      "desc": "Çakışan fırsatların net beklentiyle seçimi",
+      "family": "STRATEJI FÜZYONU VE META SINYALLER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T177",
+      "name": "Orhun Güven Ölçeği",
+      "desc": "Sinyal güvenilirliğinin kalibrasyonu",
+      "family": "STRATEJI FÜZYONU VE META SINYALLER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T178",
+      "name": "Umay Kapısı",
+      "desc": "Emir uygulama koşulundan geçmeyen sinyali eleme",
+      "family": "STRATEJI FÜZYONU VE META SINYALLER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T179",
+      "name": "Bozkurt Yankısı",
+      "desc": "Benzer sinyallerin tek aile sayılarak çoğul sayımı engelleme",
+      "family": "STRATEJI FÜZYONU VE META SINYALLER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T180",
+      "name": "Kutlu Konsey",
+      "desc": "Farklı veri kaynaklarının ortak fakat bağımsız teyidi",
+      "family": "STRATEJI FÜZYONU VE META SINYALLER",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T181",
+      "name": "Kartal Geri Bakış",
+      "desc": "Başarılı hareket öncesi erişilebilir sinyal taraması",
+      "family": "GEÇMIŞ ÖĞRENME VE KAÇAN FIRSATLAR",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T182",
+      "name": "Dede Korkut Arşivi",
+      "desc": "Benzer tarihsel olayları olay-zamanıyla eşleme",
+      "family": "GEÇMIŞ ÖĞRENME VE KAÇAN FIRSATLAR",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T183",
+      "name": "Simurg Yeniden Doğuş",
+      "desc": "Emekliye ayrılan hipotezin yeni rejimde yeniden testi",
+      "family": "GEÇMIŞ ÖĞRENME VE KAÇAN FIRSATLAR",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T184",
+      "name": "Ayna Dersliği",
+      "desc": "Kaybeden işlemin ters yönünü ileri test etme",
+      "family": "GEÇMIŞ ÖĞRENME VE KAÇAN FIRSATLAR",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T185",
+      "name": "Kayı Kaçan Emir",
+      "desc": "NO_FILL sonrası gerçek fırsat kaybını ölçme",
+      "family": "GEÇMIŞ ÖĞRENME VE KAÇAN FIRSATLAR",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T186",
+      "name": "Erkin Pişmanlık",
+      "desc": "Gerçek giriş ile erişilebilir ideal giriş farkı",
+      "family": "GEÇMIŞ ÖĞRENME VE KAÇAN FIRSATLAR",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T187",
+      "name": "Kara Kutlu Ders",
+      "desc": "Kazananlarda ortak ama kaybedenlerde bulunmayan özellik",
+      "family": "GEÇMIŞ ÖĞRENME VE KAÇAN FIRSATLAR",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T188",
+      "name": "Orhun Sahte Hafıza",
+      "desc": "Sadece kazananları seçme yanlılığını denetleme",
+      "family": "GEÇMIŞ ÖĞRENME VE KAÇAN FIRSATLAR",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T189",
+      "name": "Göktürk Deney",
+      "desc": "Parametre değişiminin ayrılmış veride testi",
+      "family": "GEÇMIŞ ÖĞRENME VE KAÇAN FIRSATLAR",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T190",
+      "name": "Turan Soy Ağacı",
+      "desc": "Yeni ailenin hangi olay ve hipotezden türediğini izleme",
+      "family": "GEÇMIŞ ÖĞRENME VE KAÇAN FIRSATLAR",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T191",
+      "name": "Kalkan Yoğunlaşma",
+      "desc": "İlişkili coinlerde eş yön riskin sınırlanması",
+      "family": "PORTFÖY KAPASITE VE ADAPTASYON",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T192",
+      "name": "Bilge Risk Bütçesi",
+      "desc": "Anlık oynaklığa göre toplam maruziyet",
+      "family": "PORTFÖY KAPASITE VE ADAPTASYON",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T193",
+      "name": "Kut Likidite Kapasitesi",
+      "desc": "Order book hacmine göre ölçeklenebilir pozisyon",
+      "family": "PORTFÖY KAPASITE VE ADAPTASYON",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T194",
+      "name": "Börü Çakışma",
+      "desc": "Tek kaynaktan gelen birden çok benzer sinyali tek risk sayma",
+      "family": "PORTFÖY KAPASITE VE ADAPTASYON",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T195",
+      "name": "Umay Seri Kayıp",
+      "desc": "Üst üste zarar sonrası araştırma rejimi değişimi",
+      "family": "PORTFÖY KAPASITE VE ADAPTASYON",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T196",
+      "name": "Tarkan Maliyet Eşiği",
+      "desc": "Minimum ekonomik girişin canlı maliyetle değişmesi",
+      "family": "PORTFÖY KAPASITE VE ADAPTASYON",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T197",
+      "name": "Orhun OOS Nöbeti",
+      "desc": "İleri dönem performans kaymasının tespiti",
+      "family": "PORTFÖY KAPASITE VE ADAPTASYON",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T198",
+      "name": "Erlik Çöküş Alarmı",
+      "desc": "Beklenen risk dağılımının bozulması",
+      "family": "PORTFÖY KAPASITE VE ADAPTASYON",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T199",
+      "name": "Simurg Adaptasyon",
+      "desc": "Kazanan ailelerin ağırlığını yalnız ileri doğrulamayla güncelleme",
+      "family": "PORTFÖY KAPASITE VE ADAPTASYON",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "T200",
+      "name": "Tengri İşlemsizlik",
+      "desc": "Hiçbir avantaj doğrulanmadığında NO_TRADE seçimi",
+      "family": "PORTFÖY KAPASITE VE ADAPTASYON",
+      "source": "proposal",
+      "model": null
+    },
+    {
+      "id": "L001",
+      "name": "Bozkurt",
+      "desc": "Trend kırılımı",
+      "family": "MEVCUT 30 ARAŞTIRMA",
+      "source": "legacy",
+      "model": "TREND_BREAKOUT"
+    },
+    {
+      "id": "L002",
+      "name": "Tulpar",
+      "desc": "Hacim ivmesi",
+      "family": "MEVCUT 30 ARAŞTIRMA",
+      "source": "legacy",
+      "model": "VOLUME_EXPANSION"
+    },
+    {
+      "id": "L003",
+      "name": "Umay",
+      "desc": "Sermaye koruma filtresi",
+      "family": "MEVCUT 30 ARAŞTIRMA",
+      "source": "legacy",
+      "model": null
+    },
+    {
+      "id": "L004",
+      "name": "Erlik",
+      "desc": "Düşüşün devamı",
+      "family": "MEVCUT 30 ARAŞTIRMA",
+      "source": "legacy",
+      "model": "SHORT_BREAKDOWN"
+    },
+    {
+      "id": "L005",
+      "name": "Alkarısı",
+      "desc": "Sahte kırılım dönüşü",
+      "family": "MEVCUT 30 ARAŞTIRMA",
+      "source": "legacy",
+      "model": "BREAKOUT_RETEST"
+    },
+    {
+      "id": "L006",
+      "name": "Simurg",
+      "desc": "Yön değişimi",
+      "family": "MEVCUT 30 ARAŞTIRMA",
+      "source": "legacy",
+      "model": "REVERSAL_SETUP"
+    },
+    {
+      "id": "L007",
+      "name": "Kürşad",
+      "desc": "Kırılım sonrası geri test",
+      "family": "MEVCUT 30 ARAŞTIRMA",
+      "source": "legacy",
+      "model": null
+    },
+    {
+      "id": "L008",
+      "name": "Oğuz",
+      "desc": "Zaman dilimi uzlaşması",
+      "family": "MEVCUT 30 ARAŞTIRMA",
+      "source": "legacy",
+      "model": null
+    },
+    {
+      "id": "L009",
+      "name": "Göktürk",
+      "desc": "1H son kapanış teyidi",
+      "family": "MEVCUT 30 ARAŞTIRMA",
+      "source": "legacy",
+      "model": null
+    },
+    {
+      "id": "L010",
+      "name": "Börü",
+      "desc": "Trend içi geri çekilme",
+      "family": "MEVCUT 30 ARAŞTIRMA",
+      "source": "legacy",
+      "model": null
+    },
+    {
+      "id": "L011",
+      "name": "Ak Ana",
+      "desc": "Likidite koruma filtresi",
+      "family": "MEVCUT 30 ARAŞTIRMA",
+      "source": "legacy",
+      "model": null
+    },
+    {
+      "id": "L012",
+      "name": "Kayra",
+      "desc": "Aşırı oynaklık koruması",
+      "family": "MEVCUT 30 ARAŞTIRMA",
+      "source": "legacy",
+      "model": null
+    },
+    {
+      "id": "L013",
+      "name": "Ülgen",
+      "desc": "Yukarı momentum devamı",
+      "family": "MEVCUT 30 ARAŞTIRMA",
+      "source": "legacy",
+      "model": null
+    },
+    {
+      "id": "L014",
+      "name": "Yada",
+      "desc": "Volatilite genişlemesi",
+      "family": "MEVCUT 30 ARAŞTIRMA",
+      "source": "legacy",
+      "model": null
+    },
+    {
+      "id": "L015",
+      "name": "Mergen",
+      "desc": "Momentum zayıflaması",
+      "family": "MEVCUT 30 ARAŞTIRMA",
+      "source": "legacy",
+      "model": null
+    },
+    {
+      "id": "L016",
+      "name": "Kızagan",
+      "desc": "Hızlı hareket düzeltmesi",
+      "family": "MEVCUT 30 ARAŞTIRMA",
+      "source": "legacy",
+      "model": null
+    },
+    {
+      "id": "L017",
+      "name": "Tepegöz",
+      "desc": "Aşırı alım sapması",
+      "family": "MEVCUT 30 ARAŞTIRMA",
+      "source": "legacy",
+      "model": null
+    },
+    {
+      "id": "L018",
+      "name": "Korkut",
+      "desc": "Net maliyet testi",
+      "family": "MEVCUT 30 ARAŞTIRMA",
+      "source": "legacy",
+      "model": null
+    },
+    {
+      "id": "L019",
+      "name": "Tengri",
+      "desc": "Piyasa rejimi seçici",
+      "family": "MEVCUT 30 ARAŞTIRMA",
+      "source": "legacy",
+      "model": null
+    },
+    {
+      "id": "L020",
+      "name": "Ay Ata",
+      "desc": "Fonlama ve açık pozisyon baskısı",
+      "family": "MEVCUT 30 ARAŞTIRMA",
+      "source": "legacy",
+      "model": "OI_FUNDING_PRESSURE"
+    },
+    {
+      "id": "L021",
+      "name": "Gün Ana",
+      "desc": "Likidite artışı",
+      "family": "MEVCUT 30 ARAŞTIRMA",
+      "source": "legacy",
+      "model": null
+    },
+    {
+      "id": "L022",
+      "name": "Demirci",
+      "desc": "Destek direnç testi",
+      "family": "MEVCUT 30 ARAŞTIRMA",
+      "source": "legacy",
+      "model": null
+    },
+    {
+      "id": "L023",
+      "name": "Ergenekon",
+      "desc": "Sıkışma kırılması",
+      "family": "MEVCUT 30 ARAŞTIRMA",
+      "source": "legacy",
+      "model": "VOLATILITY_SQUEEZE"
+    },
+    {
+      "id": "L024",
+      "name": "Ötüken",
+      "desc": "BTC pazar uyumu",
+      "family": "MEVCUT 30 ARAŞTIRMA",
+      "source": "legacy",
+      "model": null
+    },
+    {
+      "id": "L025",
+      "name": "Bayındır",
+      "desc": "Göreli trend gücü",
+      "family": "MEVCUT 30 ARAŞTIRMA",
+      "source": "legacy",
+      "model": null
+    },
+    {
+      "id": "L026",
+      "name": "Alp",
+      "desc": "Başarısız kırılım",
+      "family": "MEVCUT 30 ARAŞTIRMA",
+      "source": "legacy",
+      "model": null
+    },
+    {
+      "id": "L027",
+      "name": "Bengü",
+      "desc": "Çoklu strateji ortak aday",
+      "family": "MEVCUT 30 ARAŞTIRMA",
+      "source": "legacy",
+      "model": null
+    },
+    {
+      "id": "L028",
+      "name": "Kut",
+      "desc": "İşlem kalite puanı",
+      "family": "MEVCUT 30 ARAŞTIRMA",
+      "source": "legacy",
+      "model": null
+    },
+    {
+      "id": "L029",
+      "name": "Kartal",
+      "desc": "Yükseliş sonrası SHORT",
+      "family": "MEVCUT 30 ARAŞTIRMA",
+      "source": "legacy",
+      "model": null
+    },
+    {
+      "id": "L030",
+      "name": "Yel",
+      "desc": "Düşüş sonrası LONG",
+      "family": "MEVCUT 30 ARAŞTIRMA",
+      "source": "legacy",
+      "model": null
+    }
+  ]
+}
