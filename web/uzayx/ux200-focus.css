@@ -1,0 +1,28 @@
+/* UZAYX: strategy-first mobile terminal, 2026-10-20. Display-only; preserve model and ledger. */
+.hero.compact-hero{padding-top:12px;padding-bottom:8px}.hero.compact-hero .eyebrow,.hero.compact-hero .lede,.hero.compact-hero .hero-time small,.summary,.quick-note,.watch-disclaimer{display:none!important}
+.hero.compact-hero h1{font-size:clamp(19px,4.8vw,25px);margin:0}
+#overview .sectionhead,#overview .overview-decision,#overview .home-chart,#overview .watch-filters{display:none!important}
+#overview .overview-flow{display:block!important}
+#overview .watchdesk-list{width:100%;max-width:none}
+#overview .watchdesk-list .panel-heading h3{font-size:17px}
+#overview .home-positions{margin:0 0 12px!important;order:-1}
+#overview .home-positions .panel-heading{padding-bottom:8px}
+#overview .home-glance{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+#overview .home-glance>div{min-width:0}
+#overview .home-positions-toolbar{margin-top:7px}
+#overview .home-open-list{max-height:none}
+.ux200-intro{margin:8px 0 12px;padding:12px 14px;background:linear-gradient(125deg,#152538,#10202c);border:1px solid #30465b;border-radius:14px}
+.ux200-intro .ux200-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.ux200-intro strong{color:#f4f8fc;font-size:14px}.ux200-intro small{color:#aabed0;font-size:11px}
+.ux200-intro p{color:#9fb1c5;font-size:11px;margin:5px 0 0;line-height:1.5}
+.ux200-intro a{color:#9ed8e9;text-decoration:none;white-space:nowrap;font-size:12px}
+@media(max-width:700px){
+#desktop-tabs{padding-top:5px}
+#overview .home-glance{grid-template-columns:repeat(2,minmax(0,1fr))}
+#overview .home-glance>div{padding:9px!important}
+#overview .home-glance small{font-size:10px}
+#overview .home-glance strong{font-size:clamp(15px,4vw,19px)}
+#overview .watchdesk-list{margin-top:12px}
+#overview .watchdesk-list .panel-heading{padding:10px 12px}
+#overview .watchdesk-list #watch-search{max-width:100%}
+}
