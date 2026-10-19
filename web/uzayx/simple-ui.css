@@ -1,0 +1,12 @@
+/* UZAYX everyday UI: no source data or behaviors deleted. Detailed diagnostics remain in system/research/archive. */
+.hero .eyebrow,.hero .hero-time small,.sectionhead .eyebrow,.overview-decision .muted.tiny{display:none!important}
+.hero.compact-hero{padding-block:16px!important;margin-bottom:10px!important}.hero h1{font-size:clamp(26px,4vw,38px)!important;margin:0 0 5px!important}.hero .lede{font-size:13px!important;max-width:560px!important}
+.summary{margin:8px 0 14px!important;gap:8px!important}.summary article{padding:12px!important}.summary article small{font-size:10px!important}
+.sectionhead{margin-bottom:12px!important}.sectionhead h2{font-size:clamp(19px,2.7vw,25px)!important}.panel,.chart-panel{border-radius:14px!important}
+#overview .overview-flow{gap:12px!important}#overview .home-chart{margin-bottom:14px!important}
+#learn .learn-intro{padding:8px 0!important;margin-bottom:6px!important}#learn .learn-intro>p:not(#learn-trend){display:none!important}
+#research>p.muted,#system .source-links{display:none!important}
+#learn .atlas-disclosure,#learn .advanced,#learn .atlas-export{opacity:.9}
+#desktop-tabs .tab[data-tab="research"],#desktop-tabs .tab[data-tab="system"]{font-size:12px}
+#funds .sectionhead p.eyebrow{display:none!important}
+@media(max-width:620px){.hero.compact-hero{padding:10px 0!important}.summary{grid-template-columns:repeat(3,minmax(0,1fr))!important}.summary article{min-width:0;padding:9px 6px!important}.summary article strong{font-size:18px!important}.summary article span{font-size:10px!important}.summary article small{display:none!important}.sectionhead{gap:7px!important}.panel{padding:12px!important}#overview .home-chart{padding:10px!important}}
