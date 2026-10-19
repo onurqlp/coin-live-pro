@@ -18,7 +18,7 @@
     "max_open_risk_pct": 2,
     "max_daily_new_risk_pct": 2,
     "max_positions": 3,
-    "leverage": 3,
+    "leverage": 10,
     "max_margin_trade_pct": 25,
     "max_margin_total_pct": 50,
     "example_fee_side_pct": 0.05,
@@ -34,6 +34,9 @@
       2,
       3
     ],
-    "real_orders": false
+    "real_orders": false,
+    "minimum_margin_usdt": 30,
+    "maximum_leverage": 30,
+    "variable_leverage_only_after_confirmations": true
   }
 }
