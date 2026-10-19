@@ -228,8 +228,9 @@
       badges.replaceChildren();
       [['RSI 1H',indicators?.frames?.['1H']?.rsi_14],['RSI 4H',indicators?.frames?.['4H']?.rsi_14],
         ['MACD 4H',indicators?.frames?.['4H']?.macd_12_26_9?.hist_pct],
-        ['ADX 4H',indicators?.frames?.['4H']?.adx_14]].forEach(([n,v])=>{
-        const b=node('div','indicator-tile');b.append(node('span','',n),node('b','',fmt(v,2)));badges.append(b);
+        ['ADX 4H',indicators?.frames?.['4H']?.adx_14],
+        ['Hacim 4H',indicators?.frames?.['4H']?.volume_ratio_20]].forEach(([n,v])=>{
+        const b=node('div','indicator-tile');b.append(node('span','',n),node('b','',fmt(v,2)+(n==='Hacim 4H'&&isNum(v)?'×':'')));badges.append(b);
       });
     }
     text('scenario-title',c?(c.side==='SHORT'?'SHORT gözlemi':'LONG gözlemi')+' · '+(c.paper_entry_state==='ELIGIBLE'?'Koşullu inceleme':'Giriş teyidi yok'):'Bu pariteye ait güncel radar senaryosu yok');

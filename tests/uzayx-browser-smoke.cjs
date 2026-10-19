@@ -64,6 +64,14 @@ async function run(){
      age:document.querySelector('#home-open-time')?.textContent
    }));
    assert.ok(Number(summary.open.replaceAll('.',''))>=0,'Open position count is not numeric');
+   assert.ok(summary.rows<=12,'Homepage preview must keep open positions compact');
+   const allButton=await page.$('#home-open-more');
+   if(Number(summary.open.replaceAll('.',''))>12){
+     assert.ok(allButton,'All-positions expansion control is missing');
+     await allButton.click();
+     const expanded=await page.$eval('#home-open-list .home-open-row',rows=>rows.length);
+     assert.ok(expanded>12,'Expansion must reveal the rest of the open positions');
+   }
    if(Number(summary.open.replaceAll('.',''))>0)assert.ok(summary.rows>0,'Home must show open positions');
    const firstOpen=await page.$('.home-open-row');
    if(firstOpen){
@@ -84,12 +92,14 @@ async function run(){
     rsiCanvas:document.querySelector('#chart-rsi')?.width||0,
     macdCanvas:document.querySelector('#chart-macd')?.width||0,
     msg:document.querySelector('#chart-message')?.textContent.trim(),
-    indicatorCount:document.querySelectorAll('#chart-indicators .indicator-tile').length
+    indicatorCount:document.querySelectorAll('#chart-indicators .indicator-tile').length,
+    frames:[...document.querySelectorAll('[data-chart-tf]')].map(b=>b.dataset.chartTf)
    }));
    assert.ok(chart.scrollWidth<=width+3,'Chart overflow on '+name+': '+chart.scrollWidth);
    assert.ok(chart.priceCanvas>0,'Price chart not rendered: '+chart.msg);
    assert.ok(chart.rsiCanvas>0&&chart.macdCanvas>0,'Indicator charts not rendered: '+chart.msg);
-   assert.equal(chart.indicatorCount,4);
+   assert.equal(chart.indicatorCount,5);
+   assert.deepEqual(chart.frames,['5m','15m','1H','4H','12H','1D','1W']);
    await page.screenshot({path:'/tmp/uzayx-'+name+'-chart.png',fullPage:true});
    await openTab('funds');
    await page.waitForFunction(()=>document.querySelector('#cash-total')?.textContent!=='—',{timeout:15000});
