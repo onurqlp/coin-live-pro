@@ -40,6 +40,6 @@ test('TURAN v200 display keeps old 30, separate ATLAS and true embedded web/PWA 
 test('TURAN direction controls test all scenarios separately without execution',()=>{
  const js=read('web/uzayx/turan-200.js');
  new vm.Script(js);
- for(const word of ["LONG","SHORT","WAIT","NO_TRADE","Maliyet","Yön seç","Tüm grupları aç","Ters"])assert.ok(js.includes(word),'missing '+word);
+ for(const word of ["LONG","SHORT","WAIT","NO_TRADE","Maliyet","Yön seç","Tüm grupları aç","ters"])assert.ok(js.includes(word),'missing '+word);
  assert.doesNotMatch(js,/\b(createOrder|placeOrder|submitOrder|sendOrder)\s*\(/i);
 });
