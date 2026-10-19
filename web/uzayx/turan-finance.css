@@ -1,0 +1,30 @@
+/* UZAYX TURAN monetary evidence: responsive, readable, and strictly experimental */
+#turan-cash-view{margin:6px 0 14px;padding:16px;border:1px solid #375d6a;border-radius:15px;background:#102634}
+.uxf-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.uxf-heading{font-size:16px;font-weight:800;color:#f0f7fa}
+.uxf-refresh{background:#154759;border:1px solid #528593;border-radius:10px;padding:9px 11px;font-size:12px;color:#edf8fb;cursor:pointer;white-space:nowrap}
+.uxf-status,.uxf-foot{font-size:11px;color:#adc4cd;line-height:1.5;margin:8px 0 10px}
+.uxf-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.uxf-kpi{padding:12px;border-radius:11px;background:#0a1f2e;border:1px solid #29485a;min-width:0;display:flex;gap:6px;flex-direction:column}
+.uxf-kpi span{font-size:11px;color:#acc6d0}
+.uxf-kpi strong{font-size:clamp(13px,1.9vw,17px);color:#edf6f8;word-break:break-word;font-variant-numeric:tabular-nums}
+.uxf-kpi.negative strong,.uxf-ticket-pnl.loss{color:#ffc0bf}
+.uxf-kpi.positive strong,.uxf-ticket-pnl.gain{color:#a6f0cb}
+.uxf-expander{margin:13px 0 4px;border:1px solid #385b6b;border-radius:12px;padding:11px}
+.uxf-summary{font-size:13px;cursor:pointer;font-weight:750}
+.uxf-controls{display:flex;gap:8px;margin:12px 0}
+.uxf-controls select,.uxf-controls input,.uxf-more{background:#143444;border:1px solid #4a6d7c;color:#ecf5fa;border-radius:10px;padding:9px;font-size:12px}
+.uxf-controls input{min-width:0;flex:1}.uxf-controls select{max-width:175px}
+.uxf-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.uxf-ticket{border:1px solid #315668;border-radius:10px;background:#0d2937;min-width:0}
+.uxf-ticket[open]{grid-column:span 2}
+.uxf-ticket-head{display:flex;justify-content:space-between;gap:9px;align-items:center;padding:12px;cursor:pointer;list-style:none}
+.uxf-ticket-head::-webkit-details-marker{display:none}
+.uxf-ticket-name{font-weight:750;font-size:12px}
+.uxf-ticket-pnl{font-weight:850;font-size:13px}
+.uxf-ticket-info{padding:8px 13px 13px;display:grid;grid-template-columns:1fr 1fr;gap:7px 12px;border-top:1px solid #35566a}
+.uxf-ticket-row{display:flex;flex-direction:column;gap:3px}.uxf-ticket-row span{font-size:10px;color:#a6bdc8}.uxf-ticket-row b{font-size:12px}
+.uxf-more{margin-top:10px;cursor:pointer}.uxf-more[hidden]{display:none}
+.uxf-empty{font-size:12px;color:#b6c8d4;padding:14px}
+@media(max-width:860px){.uxf-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){#turan-cash-view{padding:12px}.uxf-list{grid-template-columns:1fr}.uxf-ticket[open]{grid-column:auto}.uxf-ticket-info{grid-template-columns:1fr}.uxf-kpi{padding:9px}.uxf-kpi strong{font-size:14px}}
