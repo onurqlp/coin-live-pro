@@ -199,6 +199,8 @@ def main():
              'starting_balance':100.,'model_version':MODEL,'orders':{},'journal':[]}
     started=int(log['pilot_started_ms'])
     records=sparks.get('events',[])
+    import uzayx_strategy_bank as bank
+    if bank.enabled():records=[]  # retain legacy book; one strategy cash desk
     for e in sorted(records,key=lambda x:int(x.get('at_ms',0))):
         if e.get('model_version')!='3.0.0-htf-sparks' or e.get('stage')!='CONFIRMED':continue
         # Only observations admitted under the CURRENT conservative gate can

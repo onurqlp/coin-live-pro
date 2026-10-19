@@ -8,6 +8,7 @@ The strict 10k V4 account remains independent and unmodified.
 """
 import datetime as dt
 import math
+import json
 import pathlib
 import mtf
 import v4_paper
@@ -32,6 +33,7 @@ def stamp(ms):return dt.datetime.fromtimestamp(ms/1000,dt.timezone.utc).isoforma
 def valid(x):return isinstance(x,(float,int)) and not isinstance(x,bool) and math.isfinite(x) and x>0
 def choose_leverage(candidate, source):
     """Conservative qualitative confirmation tiers, NOT calibrated success odds."""
+    if candidate.get('strategy_policy')=='TURAN200_ONLY':return BASE_LEVERAGE
     rank=candidate.get('research_rank')
     rank=float(rank) if isinstance(rank,(int,float)) and not isinstance(rank,bool) and math.isfinite(rank) else 0
     h=(source.get('frames') or {}).get('4H') or {}
@@ -60,11 +62,20 @@ def identity(early,event,kind,now_ms):
             'kind':kind,'fee':FEE,'slippage':SLIPPAGE,'max_hold':MAX_HOLD,
             'min_margin':MIN_MARGIN_USDT,'max_leverage':MAX_LEVERAGE,
             'risk_policy':RISK_POLICY}
-    return {'strategy_id':'SPARK_'+kind,'strategy_version':VERSION,
+    native={'strategy_id':'SPARK_'+kind,'strategy_version':VERSION,
             'strategy_config_hash':hashlib.sha256(json.dumps(config,sort_keys=True).encode()).hexdigest(),
             'parent_event_id':event.get('event_id'),'source_scan_id':early.get('scan_id'),
             'decision_at_utc':stamp(now_ms),'risk_policy_version':RISK_POLICY,
             'attribution_kind':'EXACT_NATIVE_RULE','turan_strategy_id':None}
+    if event.get('strategy_policy')=='TURAN200_ONLY':
+        native.update(strategy_id=event['strategy_id'],strategy_version=event['strategy_version'],
+            strategy_config_hash=event['strategy_config_hash'],strategy_ids=list(event['strategy_ids']),
+            strategy_family=event['strategy_family'],strategy_evidence=event['strategy_evidence'],
+            strategy_policy='TURAN200_ONLY',turan_strategy_id=event['strategy_id'],
+            attribution_kind='EXACT_TURAN_RULE_AT_BIRTH',control_strategy_ids=[
+                'T163','T165','T166','T167','T170','T174','T175','T178','T179',
+                'T191','T192','T194','T195','T196','T198','T200'])
+    return native
 
 def feature_snap(c):
     f=c.get('frames',{})
@@ -188,6 +199,15 @@ def mark(t,close):
     t['unrealized_net_usdt']=round(sign*(close-t['fill_price'])*t['remaining_qty']-
        remaining_entry_fee-t['remaining_qty']*close*FEE,9)
 def advance(prior,early,mtf_doc,now_ms,candles):
+    strategy_mode=early.get('strategy_policy')=='TURAN200_ONLY'
+    if strategy_mode:
+        import uzayx_strategy_bank as bank
+        rules={r['id']:r for r in bank.registry() if r['role']=='ENTRY_HYPOTHESIS'}
+        for x in early.get('candidates',[]):
+            rule=rules.get(x.get('strategy_id'))
+            if (rule is None or x.get('strategy_policy')!='TURAN200_ONLY' or
+                x.get('strategy_config_hash')!=rule['strategy_config_hash'] or x.get('strategy_version')!=rule['strategy_version']):
+                raise ValueError('UNVERIFIED_STRATEGY_CASH_INTENT')
     if early.get('source_mtf_at')!=mtf_doc.get('fetched_at'):
         raise RuntimeError('spark-mixed-mtf')
     if early.get('research_only') is not True or early.get('no_paper_entries') is not True:
@@ -207,6 +227,7 @@ def advance(prior,early,mtf_doc,now_ms,candles):
     since=max(int(old.get('last_run_ms',now_ms))-90000,
               int(old.get('epoch_cutoff_ms') or 0))
     for x in early.get('candidates',[]):
+        if strategy_mode:continue  # watch or spark alone never opens cash
         k=x.get('event_id');first=v4_early.epoch(x.get('first_seen_at_utc'))
         if (not k or k in index or x.get('paper_eligible') is not False or
             x.get('real_order_eligible') is not False or
@@ -276,6 +297,8 @@ def advance(prior,early,mtf_doc,now_ms,candles):
         if x.get('side') not in ('LONG','SHORT') or not valid(x.get('price_at_scan')):
             continue
         original=x.get('event_id')
+        if strategy_mode and (now_ms<int(old.get('strategy_cash_started_ms',now_ms+1)) or
+            (v4_early.epoch(x.get('source_closed_1h_at_utc')) or 0)+3600000<int(old.get('strategy_cash_started_ms',now_ms+1))):continue
         if not original or old.get('last_scan_id')==early.get('scan_id'):
             continue
         # A pre-reset candidate cannot become a new cash event by later promotion.
@@ -318,6 +341,7 @@ def advance(prior,early,mtf_doc,now_ms,candles):
             'valuation_status':'WAITING_FUTURE_OHLC' if ok else 'ATR_LEVEL_UNAVAILABLE',
             'no_backfilled_fill':True}
         entry.update(identity(early,x,'GELDI',now_ms))
+        if strategy_mode:entry['stage_definition']='VERSIONED_STRATEGY_TRIGGER_AND_COST_REGIME_GATE'
         index[key]=entry
         newly_confirmed_opposite.append(entry)
     # Independent, confirmed opposite GELDI intentions supersede an older paper
@@ -380,6 +404,22 @@ def advance(prior,early,mtf_doc,now_ms,candles):
             # Prospective policy only. Older pending tickets retain their birth policy.
             stop_exit=t['stop']*(1-sign*SLIPPAGE)
             stop_cost=qty*abs(filled-stop_exit)+ticket_notional*FEE+qty*stop_exit*FEE
+            if t.get('strategy_policy')=='TURAN200_ONLY':
+                active=[v for v in index.values() if v['status']=='OPEN']
+                cash=START_CASH+sum(float(v.get('realized_net_usdt') or 0) for v in index.values())
+                same_coin=any(v['symbol']==t['symbol'] for v in active)
+                coin_cooldown=any(v['symbol']==t['symbol'] and v['status']=='CLOSED' and
+                    now_ms-(v4_early.epoch(v.get('closed_at_utc')) or 0)<3600000 for v in index.values())
+                side_exposure=sum(v.get('remaining_notional_usdt',0) for v in active if v['side']==t['side'])
+                risk=sum(abs(float(v.get('mark_price') or v['fill_price'])-v['stop'])*v['remaining_qty']+
+                    v['remaining_qty']*float(v.get('mark_price') or v['fill_price'])*(FEE+SLIPPAGE) for v in active)
+                recent=sorted([v for v in index.values() if v['status']=='CLOSED' and v.get('strategy_policy')=='TURAN200_ONLY'],
+                              key=lambda v:v.get('closed_at_utc',''),reverse=True)[:5]
+                losing_pause=(len(recent)==5 and all(v['realized_net_usdt']<0 for v in recent) and
+                    now_ms-(v4_early.epoch(recent[0]['closed_at_utc']) or 0)<4*3600000)
+                if (not valid(cash) or same_coin or coin_cooldown or exposure+ticket_notional>cash*1.5 or
+                    side_exposure+ticket_notional>cash or stop_cost>cash*.005 or risk+stop_cost>cash*.02 or losing_pause):
+                    t['status']='CAPACITY_BLOCKED';t['valuation_status']='T191_T192_T194_T195_T198_RISK_GATE';continue
             if t.get('risk_policy_version')==RISK_POLICY and stop_cost>=required_margin:
                 t['status']='CAPACITY_BLOCKED'
                 t['valuation_status']='STOP_COST_EXCEEDS_INITIAL_MARGIN'
@@ -486,12 +526,21 @@ def advance(prior,early,mtf_doc,now_ms,candles):
         } for t in tickets if t['status']=='OPEN'],
         'open_positions_complete':True,
         'disclaimer':'Separate experimental cash-capped virtual tickets. Future closed 5m OHLC only; no real order, guarantee, or self-training. Funding/mark-to-market gap unknown.'}
+    if strategy_mode:
+        published.update(strategy_policy='TURAN200_ONLY',active_strategy_leverage=BASE_LEVERAGE,
+            strategy_cash_started_ms=doc.get('strategy_cash_started_ms'),
+            close_request_id=doc.get('close_request_id'),
+            new_entries_require_exact_strategy=True)
     return doc,published
 def main():
     now=int(dt.datetime.now(dt.timezone.utc).timestamp()*1000)
     early=v4_paper.read(DATA/'v4-early.json',{})
+    import uzayx_strategy_bank as bank
+    if bank.enabled() and early.get('strategy_policy')!='TURAN200_ONLY':raise ValueError('STRATEGY_ONLY_CASH_REQUIRED')
     mtf_doc=v4_paper.read(DATA/'mtf.json',{})
-    prior=v4_paper.read(ARCH,{})
+    prior=json.loads(ARCH.read_text(encoding='utf8'))
+    if prior.get('model_version') not in (VERSION,'4.0.2-spark-paper-a1'):
+        raise ValueError('UNRECOGNIZED_PERSISTENT_CASHBOOK_NO_RESET')
     pending=[t['symbol'] for t in prior.get('tickets',[]) if t['status'] in ('OPEN','WAITING_FUTURE_BAR')]
     fresh=[t['symbol'] for t in early.get('candidates',[]) if
         (v4_early.epoch(t.get('first_seen_at_utc')) or 0)>=now-90000]

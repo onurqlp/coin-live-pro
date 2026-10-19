@@ -21,6 +21,8 @@ import v4_watch_archive
 import v4_spark_paper
 import v4_spark_review
 import v4_early
+import uzayx_strategy_bank as strategy
+import uzayx_adaptive as adaptive
 
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 DATA=ROOT/'web'/'data'
@@ -35,6 +37,7 @@ class TestV4OfflineIntegrated(unittest.TestCase):
         health=read(DATA/'health.json')
         policy=read(ROOT/'config'/'v4-policy.json')
         now=int(dt.datetime.fromisoformat(health['updated_at']).timestamp()*1000)+1000
+        strategy_feed=strategy.build(m,market,read(DATA/'chart-pack.json'),now)
         oi=v4_oi.merge({},m,now)
         oi_pub={k:v for k,v in oi.items() if k not in ('recent','hourly')}
         original_data=v4_lifecycle.DATA
@@ -42,7 +45,7 @@ class TestV4OfflineIntegrated(unittest.TestCase):
             path=pathlib.Path(tmp)
             (path/'v4-oi.json').write_text(json.dumps(oi_pub))
             v4_lifecycle.DATA=path
-            try:life,board=v4_lifecycle.build(m,radar,market,{},now,policy)
+            try:life,board=v4_lifecycle.build(m,radar,market,{},now,policy,strategy_feed)
             finally:v4_lifecycle.DATA=original_data
             wallet,account=v4_paper.advance({},life,market,now,{}, {},policy)
             account['scan_id']=board['scan_id']
@@ -57,8 +60,10 @@ class TestV4OfflineIntegrated(unittest.TestCase):
                 'updated_at':board['updated_at'],'archive_days':90,
                 'archived_total':life['archived_count'],'events':life['events'][-140:]}
             watch_ledger,watch_public=v4_watch_archive.merge({},life,forward,now,board['scan_id'])
-            early_ledger,early_public=v4_early.build(m,market,board,{},watch_public,now)
+            early_ledger,early_public=v4_early.build(m,market,board,{},watch_public,now,strategy_feed)
             spark_ledger,spark_public=v4_spark_paper.advance({},early_public,m,now,{})
+            learned,learning_public=adaptive.run({},[spark_ledger],board['scan_id'],now)
+            close_public={'all_active_positions_closed':True,'real_orders':False,'test_empty_account':True}
             spark_review=v4_spark_review.build(spark_ledger,early_public,now)
             context_public={'model_version':'4.0.0-context-research-a1','updated_at':v4_lifecycle.iso(now),
                 'source_status':{'all':'UNAVAILABLE'},'latest_items':[],
@@ -68,7 +73,9 @@ class TestV4OfflineIntegrated(unittest.TestCase):
                             ('health',health),('v4-oi',oi_pub),('v4-radar',board),
                             ('v4-history-index',history),
                             ('v4-paper',account),('v4-shadow',shadow_public),
-                            ('v4-forward',forward_public),('v4-lab',lab)]:
+                            ('v4-forward',forward_public),('v4-lab',lab),
+                            ('uzayx-strategy-bank',strategy_feed),('uzayx-adaptive',learning_public),
+                            ('uzayx-cash-close',close_public)]:
                 (path/(key+'.json')).write_text(json.dumps(obj))
             old=v4_publication.DATA
             v4_publication.DATA=path
@@ -80,7 +87,7 @@ class TestV4OfflineIntegrated(unittest.TestCase):
                 self.assertFalse(account['legacy_v3_balance_included'])
                 self.assertTrue(account['no_real_orders'])
                 self.assertTrue(all(x['lifecycle_stage']=='WATCH' for x in life['items']))
-                self.assertEqual(len(manifest['sources']),16)
+                self.assertEqual(len(manifest['sources']),19)
                 self.assertEqual(watch_public['total'],len(watch_public['records']))
                 shadow_public['scan_id']='incorrect-mixed-round'
                 (path/'v4-shadow.json').write_text(json.dumps(shadow_public))

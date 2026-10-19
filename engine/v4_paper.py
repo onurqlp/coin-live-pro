@@ -362,6 +362,8 @@ def main():
     now_ms=int(dt.datetime.now(dt.timezone.utc).timestamp()*1000)
     policy=read(POLICY,{})
     life=read(ROOT/'archive'/'v4-lifecycle-ledger.json',{})
+    import uzayx_strategy_bank as bank
+    if bank.enabled():life={**life,'events':[]}  # old strict account retained; new cash uses T001-T200 desk
     market=read(DATA/'market.json',{})
     if life.get('policy_version')!=policy.get('policy_version'):
         raise RuntimeError('V4 paper/lifecycle policy mismatch')

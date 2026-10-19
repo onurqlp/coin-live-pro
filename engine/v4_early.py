@@ -9,6 +9,7 @@ import datetime as dt
 import hashlib
 import pathlib
 import math
+import json
 import v4_paper
 
 ROOT=pathlib.Path(__file__).resolve().parents[1]
@@ -130,7 +131,7 @@ def detect(item,quote,now_ms):
       'probability_calibrated':False,'verified_technical_entry':False,
       'paper_eligible':False,'real_order_eligible':False,'interpretation':'EARLY_WATCH_RESEARCH_ONLY',
       'source_quality':'VERIFIED_CLOSED_OHLC'}
-def build(mtf,market,radar,prior,watch,now_ms):
+def build(mtf,market,radar,prior,watch,now_ms,strategy_feed=None):
     """Create snapshot and event ledger ONLY from a matching, current scanned round."""
     if mtf.get('model_version')!='3.0.0-mtf-swing' or market.get('provider')!='OKX':
         raise RuntimeError('early-source-identity-invalid')
@@ -155,11 +156,16 @@ def build(mtf,market,radar,prior,watch,now_ms):
         key=(x['symbol'],x['side'])
         if key not in latest:latest[key]=x
     proposals=list(latest.values())
+    if strategy_feed is not None:
+        if strategy_feed.get('source_mtf_at')!=mtf['fetched_at'] or strategy_feed.get('registry_count')!=200:
+            raise ValueError('early-strategy-feed-mismatch')
+        proposals=[dict(x) for x in strategy_feed['signals']]
     # Stable event identity is a real first observation of a closed 1H candle,
     # never a retrospectively inferred price, success, or execution.
     old={e['event_id']:dict(e) for e in prior.get('events',[]) if e.get('event_id')}
     for x in proposals:
         signature='|'.join([x['symbol'],x['side'],str(x.get('source_closed_1h_at_utc'))])
+        if strategy_feed is not None:signature+='|'+x['strategy_id']+'|'+x['strategy_config_hash']
         event_id=hashlib.sha256(signature.encode()).hexdigest()[:24]
         prior_event=old.get(event_id)
         if prior_event is None:
@@ -180,7 +186,8 @@ def build(mtf,market,radar,prior,watch,now_ms):
                     prior_event.setdefault('stage_history',[]).append({
                        'at_utc':stamp(now_ms),'tier':x['research_tier'],'research_rank':x['research_rank']})
                 prior_event['last_research_tier']=x['research_tier']
-        x['paper_stage_number']=(3 if x['hourly_level_state']=='CLOSED_1H_LEVEL_BREACHED' else
+        x['paper_stage_number']=(x['paper_stage_number'] if strategy_feed is not None else
+                3 if x['hourly_level_state']=='CLOSED_1H_LEVEL_BREACHED' else
                 2 if x['research_tier'] in ('ERKEN_SINYAL','ISIK_GUCLENIYOR') else 1)
         x['paper_stage_name']={1:'İZLENEN',2:'GELMEKTE OLAN',3:'GELDİ'}[x['paper_stage_number']]
         x['event_id']=event_id
@@ -204,6 +211,10 @@ def build(mtf,market,radar,prior,watch,now_ms):
         'research_only':True,'no_paper_entries':True,'no_real_orders':True,
         'not_a_win_probability':True,'no_backfilled_outcomes':True,
         'warning':'An early signal is only a closed-candle research alert, not a recommendation to enter. Low volume and weekly conflict increase false-signal risk.'}
+    if strategy_feed is not None:
+        out.update(strategy_policy='TURAN200_ONLY',strategy_registry_hash=strategy_feed['registry_hash'],
+                   stage_definition='VERSIONED_STRATEGY_TRIGGER_AND_COST_REGIME_GATE',
+                   stage_3_requires_closed_1h_breakout=False)
     return ledger,out
 def main():
     now_ms=int(dt.datetime.now(dt.timezone.utc).timestamp()*1000)
@@ -211,7 +222,11 @@ def main():
     market=v4_paper.read(DATA/'market.json',{})
     radar=v4_paper.read(DATA/'v4-radar.json',{})
     watch=v4_paper.read(DATA/'v4-watch-archive.json',{})
-    ledger,pub=build(mtf,market,radar,v4_paper.read(ARCH,{}),watch,now_ms)
+    import uzayx_strategy_bank as bank
+    feed=bank.read_feed(mtf['fetched_at']) if bank.enabled() else None
+    prior=json.loads(ARCH.read_text(encoding='utf8'))
+    if prior.get('model_version')!=VERSION:raise ValueError('UNRECOGNIZED_EARLY_ARCHIVE_NO_RESET')
+    ledger,pub=build(mtf,market,radar,prior,watch,now_ms,feed)
     v4_paper.save(ARCH,ledger)
     v4_paper.save(DATA/'v4-early.json',pub)
     print('V4 EARLY WATCH',pub['total_fresh_candidates'],pub['counts'],

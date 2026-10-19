@@ -23,7 +23,9 @@ def cohort(t):
     side=1 if t['side']=='LONG' else -1
     keys=['TÜMÜ',t['side'],
           'GELDI_OTOMATIK_GIRIS' if t.get('entry_class')=='GELDI' else 'ERKEN_ARASTIRMA']
-    if t.get('stage_definition')=='CLOSED_1H_BREAKOUT_REQUIRED':
+    if t.get('stage_definition')=='VERSIONED_STRATEGY_TRIGGER_AND_COST_REGIME_GATE':
+        keys.append('TURAN_STRATEJI_AŞAMA_'+str(t.get('stage_at_birth_number',1)))
+    elif t.get('stage_definition')=='CLOSED_1H_BREAKOUT_REQUIRED':
         keys.append(f"AŞAMA_{t.get('stage_at_birth_number',paper.TIER_STAGE.get(t.get('stage_at_birth'),1))}")
     else:
         keys.append('ESKİ_AŞAMA_TANIMI_DÖNEMİ')

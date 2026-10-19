@@ -219,7 +219,7 @@ def project_view(ledger,scan_id,source_times,policy):
             'recheck':waiting[:20], 'no_real_orders':True,'probability_calibrated':False,
             'note':'A stage is an evidence-based research priority, not an entry or return guarantee.'}
 
-def build(mtf,radar,market,archive,now_ms,policy):
+def build(mtf,radar,market,archive,now_ms,policy,strategy_feed=None):
     # Same snapshot, same venue; fail-closed instead of mixing unequal rounds.
     if (mtf.get('model_version')!='3.0.0-mtf-swing' or
         radar.get('filter_policy')!='3.1-persistent-quant-20261016' or
@@ -252,6 +252,10 @@ def build(mtf,radar,market,archive,now_ms,policy):
             x['open_interest_delta_minutes']=delta['observed_minutes']
         spark=active.get((symbol,item.get('side')))
         propositions.extend(strat.evaluator(x,market_by[symbol],spark,now_ms))
+    if strategy_feed is not None:
+        import uzayx_strategy_bank as bank
+        if strategy_feed.get('source_mtf_at')!=mtf['fetched_at']:raise ValueError('lifecycle-strategy-feed-mismatch')
+        propositions=bank.lifecycle_proposals(strategy_feed,mtf.get('candidates',[]))
     ledger=evolve(archive,propositions,scan_id,now_ms,policy)
     board=project_view(ledger,scan_id,{'mtf':mtf['fetched_at'],'spark':radar['fetched_at']},policy)
     return ledger,board
@@ -264,7 +268,10 @@ def main():
     r=load(DATA/'swing-radar.json',{})
     market=load(DATA/'market.json',{})
     prior=load(ARCH,{})
-    ledger,board=build(m,r,market,prior,now_ms,policy)
+    import uzayx_strategy_bank as bank
+    feed=bank.read_feed(m['fetched_at']) if bank.enabled() else None
+    ledger,board=build(m,r,market,prior,now_ms,policy,feed)
+    if feed is not None:board['strategy_policy']='TURAN200_ONLY'
     # Passive parallel investigation: NEVER feeds evolve(), stage scoring or
     # the 10k account. Same closed-source MTF and OI scan, globally UTC.
     study,observatory=anomaly.collect(m,market,load(DATA/'v4-oi.json',{}),

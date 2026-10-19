@@ -350,6 +350,8 @@ def accumulate(old,items):
             'state':'OBSERVED_ONLY','realized_R':None,'win_rate':None,
             'is_executed_trade':False
         }
+        for key in ('strategy_id','strategy_ids','strategy_version','strategy_config_hash'):
+            if key in spark:event[key]=spark[key]
         history.append(event);existing.add(event_id);changes+=1
     history=[e for e in history if MS-int(e.get('at_ms',0))<90*86400000]
     return {'model_version':MODEL,'updated_at':UTC.isoformat(timespec='seconds'),
@@ -384,6 +386,15 @@ def main():
         if len(one)>=9:break
 
     sparks=build(macro,market,one)
+    import uzayx_strategy_bank as bank
+    if bank.enabled():
+        feed=bank.read_feed(macro['fetched_at'])
+        matches={(x['symbol'],x['side']):x for x in feed['signals']}
+        sparks=[s for s in sparks if (s['symbol'],s['side']) in matches]
+        for s in sparks:
+            match=matches[(s['symbol'],s['side'])]
+            for key in ('strategy_id','strategy_ids','strategy_version','strategy_config_hash'):
+                s[key]=match[key]
     previous=load(ACTIVE,{})
     # First migration seeds recent v3 radar only; never fabricate historical
     # observations from old archive entries with no raw candidate evidence.

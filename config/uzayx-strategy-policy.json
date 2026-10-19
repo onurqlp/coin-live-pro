@@ -1,0 +1,16 @@
+{
+  "schema": "uzayx.strategy.policy.v1",
+  "mode": "TURAN200_ONLY",
+  "version": "turan200-20261020-v1",
+  "close_request_id": "uzayx-20261020-turan200",
+  "catalog": "web/uzayx/turan-families-v1.json",
+  "minimum_margin_usdt": 30,
+  "leverage": 10,
+  "max_coin_positions": 1,
+  "max_gross_equity_multiple": 1.5,
+  "max_side_equity_multiple": 1.0,
+  "max_stop_risk_equity_pct": 2,
+  "max_trade_stop_risk_equity_pct": 0.5,
+  "legacy_cash_entries": false,
+  "real_orders": false
+}

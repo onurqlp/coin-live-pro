@@ -60,6 +60,23 @@ def produce(now_ms=None):
         raise RuntimeError('Invalid isolated V4 paper account')
     if data['v4-shadow'].get('combined_with_main_cash') is not False:
         raise RuntimeError('Shadow is incorrectly mixed into the paper account')
+    import uzayx_strategy_bank as bank
+    if bank.enabled():
+        strategy=json.loads((DATA/'uzayx-strategy-bank.json').read_text())
+        if (strategy.get('policy')!='TURAN200_ONLY' or strategy.get('source_mtf_at')!=m['fetched_at'] or
+            strategy.get('registry_count')!=200):raise ValueError('STRATEGY_FEED_MISMATCH')
+        learning=json.loads((DATA/'uzayx-adaptive.json').read_text())
+        closing=json.loads((DATA/'uzayx-cash-close.json').read_text())
+        if (learning.get('scan_id')!=v.get('scan_id') or learning.get('original_cash_untouched') is not True or
+            closing.get('all_active_positions_closed') is not True or
+            data['v4-early'].get('strategy_policy')!='TURAN200_ONLY' or
+            data['v4-spark-paper'].get('strategy_policy')!='TURAN200_ONLY'):
+            raise ValueError('STRATEGY_CUTOVER_OR_LEARNING_PUBLICATION_INVALID')
+        if any(not x.get('strategy_id') or not x.get('strategy_config_hash') for x in data['v4-early']['candidates']):
+            raise ValueError('ANONYMOUS_CURRENT_STRATEGY_SIGNAL')
+        for name in ('uzayx-strategy-bank','uzayx-adaptive','uzayx-cash-close'):
+            raw=(DATA/(name+'.json')).read_bytes()
+            files[name]={'sha256':hashlib.sha256(raw).hexdigest(),'bytes':len(raw)}
     return {'model_version':VERSION,'scan_id':v['scan_id'],
         'policy_version':v['policy_version'],
         'started_at_utc':m['fetched_at'],
