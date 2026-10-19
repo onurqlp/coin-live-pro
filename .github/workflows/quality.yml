@@ -35,6 +35,7 @@ jobs:
       - run: node --check web/uzayx/archive.js
       - run: node --check web/uzayx/watch.js
       - run: node --check web/uzayx/portfolio.js
+      - run: node --test tests/uzayx-turan-ui.test.cjs
       - run: node --check web/uzayx/support-proof.js
       - run: node --test tests/uzayx-support-proof.test.cjs
       - run: node --test tests/uzayx-watchdesk.test.cjs
