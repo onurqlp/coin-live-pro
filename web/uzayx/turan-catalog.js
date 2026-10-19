@@ -7,7 +7,7 @@
  const $=(tag,cls,txt)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=String(txt);return n};
  const spec=raw.map((r,i)=>({id:i+1,name:r[0],title:r[1],kind:r[2],trigger:r[3],invalid:r[4],reverse:r[5],partner:r[6],inputs:r[7],model:r[8],cohort:r[9],phase:r[10]}));
  let report=null,reportError='',opened=false,filter='all',term='',busy=false;
- const fmt=n=>Number.isFinite(Number(n))?Number(n).toLocaleString('tr-TR',{maximumFractionDigits:2}):'—';
+ const fmt=n=>n!==null&&n!==undefined&&n!==''&&Number.isFinite(Number(n))?Number(n).toLocaleString('tr-TR',{maximumFractionDigits:2}):'—';
  const today=s=>{const t=Date.parse(s||'');return Number.isFinite(t)?new Date(t).toLocaleString('tr-TR',{dateStyle:'short',timeStyle:'short'}):'bilinmiyor'};
  const countBy=k=>spec.filter(x=>x.phase===k).length;
  const toolbar=$('div','turan-tools');
