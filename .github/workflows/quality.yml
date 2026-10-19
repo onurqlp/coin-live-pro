@@ -49,3 +49,7 @@ jobs:
       - run: cp integrations/google-v4-sync.gs /tmp/coin-live-v4-sync.js && node --check /tmp/coin-live-v4-sync.js
       - run: python3 -m py_compile scripts/quant_report.py scripts/watchdog.py
       - run: python3 -m unittest discover -s tests -v
+      - name: Seven-day archived-ledger continuity smoke (no external services)
+        run: |
+          python3 scripts/uzayx_week_guard.py baseline
+          python3 scripts/uzayx_week_guard.py verify
