@@ -50,6 +50,10 @@ test('paper summary audit distinguishes 1058 ledger tickets from recent limited 
  assert.equal(portfolio.positions(doc,'WAITING_FUTURE_BAR')[0].fill_price,null);
  assert.equal(portfolio.positions(doc,'ALL','ETH').length,1);
  assert.equal(portfolio.reconcile({...doc,all_events_count:99}).proven,false);
+ assert.equal(portfolio.paperPnl(null),'—');
+ assert.equal(portfolio.paperPnl(undefined),'—');
+ assert.equal(portfolio.paperPnl(NaN),'—');
+ assert.notEqual(portfolio.paperPnl(0),'—');
 });
 test('logo asset, compact watch monitor and separate cash charts are present',()=>{
  const html=fs.readFileSync('web/uzayx/index.html','utf8');
