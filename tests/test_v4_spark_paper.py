@@ -220,6 +220,35 @@ class TestSparkPaper(unittest.TestCase):
         self.assertAlmostEqual(t['entry_fee_usdt'],10*paper.FEE)
         self.assertEqual(pub['reference_ticket_notional_usdt'],300)
 
+    def test_evidence_tiers_choose_10_to_30_never_claim_probability(self):
+        candle_data={'frames':{'4H':{'adx_14':35,'volume_ratio_20':1.6,
+            'macd_12_26_9':{'hist_pct':0.2}},'1D':{'trend':'UP'}}}
+        self.assertEqual(paper.choose_leverage({'side':'LONG','research_rank':42},candle_data),10)
+        self.assertEqual(paper.choose_leverage({'side':'LONG','research_rank':70},candle_data),15)
+        self.assertEqual(paper.choose_leverage({'side':'LONG','research_rank':83,'paper_stage_number':2},candle_data),20)
+        self.assertEqual(paper.choose_leverage({'side':'LONG','research_rank':95,'paper_stage_number':3},candle_data),30)
+        self.assertEqual(paper.choose_leverage({'side':'SHORT','research_rank':95,'paper_stage_number':3},candle_data),15)
+        self.assertEqual(paper.choose_leverage({'side':'LONG','research_rank':95,'paper_stage_number':3},{}),10)
+
+    def test_new_epoch_rejects_all_old_discoveries_without_fake_closures(self):
+        e,m=docs()
+        ledger=paper.initial(NOW)
+        ledger['epoch_id']='uzayx-new'
+        ledger['epoch_cutoff_ms']=NOW
+        output,pub=paper.advance(ledger,e,m,NOW,{})
+        self.assertEqual(output['tickets'],[])
+        self.assertEqual(pub['all_events_count'],0)
+        self.assertEqual(pub['epoch_id'],'uzayx-new')
+        # Only a truly first-observed event AFTER the cutover may enter new cash.
+        fresh={**e['candidates'][0], 'event_id':'new-epoch-ticket',
+               'first_seen_at_utc':stamp(NOW+1000)}
+        output,pub=paper.advance(output,{**e,'scan_id':'second','candidates':[fresh]},
+            m,NOW+2000,{})
+        self.assertEqual(len(output['tickets']),1)
+        self.assertEqual(output['tickets'][0]['reference_notional_usdt'],300)
+        self.assertEqual(output['tickets'][0]['leverage'],10)
+        self.assertEqual(output['tickets'][0]['initial_margin_usdt'],30)
+
     def test_corrupted_mixed_snapshot_fails(self):
         e,m=docs();m['fetched_at']='2001-01-01T00:00:00Z'
         with self.assertRaisesRegex(RuntimeError,'mixed'):
