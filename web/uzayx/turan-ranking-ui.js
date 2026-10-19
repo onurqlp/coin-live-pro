@@ -26,7 +26,7 @@
  old.append(oldHead);
  el.replaceChildren(head,info,stats,controls,list,footer,old);
  const original=document.getElementById('turan-catalog');if(original)old.append(original);
- let data=null,error='',busy=false,allOpen=false,limitObs=8;
+ let data=null,error='',busy=false,allOpen=false,limitObs=8;const expandedIds=new Set();
  function summaryCell(k,v,type=''){
   const b=$('div','trank-stat '+type);b.append($('small','',k),$('strong','',v));return b;
  }
@@ -47,7 +47,8 @@
   return row;
  }
  function card(x,index){
-  const root=$('details','trank-card');root.open=allOpen;
+  const root=$('details','trank-card');root.open=allOpen||expandedIds.has(x.id);
+  root.addEventListener('toggle',()=>{if(root.open)expandedIds.add(x.id);else expandedIds.delete(x.id)});
   const summary=$('summary','trank-card-title');
   const left=$('div','trank-name');left.append($('strong','',(index+1)+'. '+x.name),$('small','',x.id+' · '+(x.source==='legacy'?'Eski araştırma modeli':'Yeni AR-GE ailesi')));
   const right=$('div','trank-right');
@@ -121,7 +122,7 @@
   finally{clearTimeout(timeout);busy=false;btn.disabled=false;btn.textContent='↻ Verileri kontrol et'}
  }
  btn.addEventListener('click',reload);filter.addEventListener('change',render);query.addEventListener('input',render);
- expand.addEventListener('click',()=>{allOpen=!allOpen;list.querySelectorAll('details.trank-card').forEach(x=>x.open=allOpen);expand.textContent=allOpen?'Tüm detayları kapat':'Tüm detayları aç'});
+ expand.addEventListener('click',()=>{allOpen=!allOpen;expandedIds.clear();list.querySelectorAll('details.trank-card').forEach(x=>x.open=allOpen);expand.textContent=allOpen?'Tüm detayları kapat':'Tüm detayları aç'});
  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&document.getElementById('turan')?.classList.contains('active'))reload()});
  window.addEventListener('uzayx:tab',e=>{if(e.detail?.tab==='turan')reload()});
  setInterval(()=>{if(!document.hidden&&document.getElementById('turan')?.classList.contains('active'))reload()},120000);
