@@ -69,7 +69,8 @@ async function run(){
    if(Number(summary.open.replaceAll('.',''))>12){
      assert.ok(allButton,'All-positions expansion control is missing');
      await allButton.click();
-     const expanded=await page.$eval('#home-open-list .home-open-row',rows=>rows.length);
+     await page.waitForFunction(()=>document.querySelectorAll('#home-open-list .home-open-row').length>12,{timeout:7000});
+     const expanded=await page.evaluate(()=>document.querySelectorAll('#home-open-list .home-open-row').length);
      assert.ok(expanded>12,'Expansion must reveal the rest of the open positions');
    }
    if(Number(summary.open.replaceAll('.',''))>0)assert.ok(summary.rows>0,'Home must show open positions');
