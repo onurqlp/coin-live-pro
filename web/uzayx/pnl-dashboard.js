@@ -92,7 +92,7 @@
    row.append(left,right);host.append(row);
   }
  }
- root.addEventListener('uzayx:loaded',async e=>{
+ const receive=async e=>{
   const commit=e.detail?.sourceCommit,m=e.detail?.db?.manifest;
   root.__uxPnlManifest=m;
   if(!/^[a-f0-9]{40}$/.test(commit||'')||!m?.publication_valid){
@@ -104,6 +104,8 @@
    if(!response.ok)throw Error('HTTP '+response.status);
    result=await response.json();render();
   }catch(err){result=null;for(const p of Object.values(ensure()))if(p)status(p,'PNL_SOURCE_UNAVAILABLE · Tam kasa PNL raporu henüz üretilmedi.');}
- });
+ };
+ root.addEventListener('uzayx:loaded',receive);
+ root.addEventListener('uzayx:source-check',receive);
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ensure,{once:true});else ensure();
 })(typeof globalThis!=='undefined'?globalThis:this);
