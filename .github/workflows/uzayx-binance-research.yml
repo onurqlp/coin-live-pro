@@ -32,6 +32,8 @@ jobs:
           PYTHONPATH=engine python3 -m unittest discover -s tests -p test_uzayx_binance_archive.py
           python3 -m unittest discover -s tests -p test_uzayx_binance_coverage.py
       - name: Collect bounded verified monthly futures research
+        env:
+          UZAYX_BINANCE_ARTIFACT_BUDGET: '12'
         run: |
           python3 engine/uzayx_binance_archive.py
           python3 scripts/uzayx_binance_coverage.py
