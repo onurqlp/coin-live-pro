@@ -251,7 +251,7 @@ jobs:
           else
             echo "::warning::Supplementary report failed; core market publication continues"
           fi
-      - name: Refresh UzayX Google summary from this verified scan
+      - name: Reconcile all strategy and paper account PNL by full ledger\n        run: |\n          python3 -m unittest discover -s tests -p test_uzayx_pnl_report.py\n          python3 scripts/uzayx_pnl_report.py\n      - name: Refresh UzayX Google summary from this verified scan
         run: python3 scripts/uzayx_google_export.py
       - name: Publish only validated data
         run: |
@@ -264,7 +264,7 @@ jobs:
           git add web/data/v4-oi.json web/data/v4-radar.json web/data/v4-paper.json
           git add web/data/v4-history-index.json web/data/v4-shadow.json
           git add web/data/v4-lab.json web/data/v4-forward.json web/data/v4-manifest.json
-          git add web/data/uzayx-research.json archive/uzayx-research-ledger.json
+          git add web/data/uzayx-research.json archive/uzayx-research-ledger.json web/data/uzayx-pnl-report.json
           git add archive/closings web/data/uzayx-cash-close.json
           git add archive/uzayx-adaptive-ledger.json web/data/uzayx-adaptive.json web/data/uzayx-strategy-bank.json
           git add web/data/uzayx-guncel.csv
