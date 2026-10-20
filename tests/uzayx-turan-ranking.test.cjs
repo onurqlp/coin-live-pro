@@ -19,7 +19,9 @@ test('No strategy attribution is ever inferred from unexecuted observation or ov
  assert.equal(b.attributableCount,0);assert.equal(b.moneyRankingAvailable,false);
  assert.equal(b.top.length,30);assert.equal(b.total,230);
  assert.equal(b.entries.every(x=>!x.tagged&&x.closedCount===0),true);
- assert.ok(b.entries.some(x=>x.observations.length>0),'forward observations remain visible');
+ const knownModels=new Set(registry.entries.filter(x=>x.model).map(x=>x.model));
+ const eligible=forward.results.some(x=>x.not_executed_trade===true&&knownModels.has(x.strategy_id)&&observedHorizon(x));
+ assert.equal(b.entries.some(x=>x.observations.length>0),eligible,'only model-matched observed forward cases remain visible');
  assert.equal(b.entries.find(x=>x.id==='T001').observations.length,0,'proposal events do not inherit old models');
 });
 test('Forward 1H direction is already normalized to LONG/SHORT in source: no double side-flip',()=>{
