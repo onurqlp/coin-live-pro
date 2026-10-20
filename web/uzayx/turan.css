@@ -1,1 +1,11 @@
 #turan-lab{margin:14px 0 20px;border-color:#365d65}#turan-lab .panel-heading{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}.turan-results{margin:12px 0}.turan-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;gap:12px;border-bottom:1px solid #294253}.turan-row>div{display:flex;flex-direction:column;gap:5px}.turan-row small{color:#9fb5c4;font-size:12px}.turan-row span{font-weight:750;white-space:nowrap;font-variant-numeric:tabular-nums}.turan-positive{color:#7edfc0}.turan-negative{color:#ffaaad}@media(max-width:560px){.turan-row span{font-size:13px}}
+.turan-direct{display:inline-flex;gap:12px;align-items:center;justify-content:center;border:1px solid #7c6950;border-radius:9px;color:#f1ddbb!important;text-decoration:none!important;background:linear-gradient(120deg,#253443,#1d2939);font-weight:780;letter-spacing:.02em}
+.turan-direct:hover{background:#35495a;border-color:#d5b583;filter:brightness(1.07)}
+.top-direct{font-size:11px;padding:10px 13px;white-space:nowrap}
+.turan-big-cta{width:100%;padding:19px 21px;margin:18px 0 22px;justify-content:flex-start;min-height:104px}
+.turan-cta-icon{font-size:35px;color:#d3b786;width:48px;text-align:center}
+.turan-big-cta strong{display:block;font-size:16px;letter-spacing:.01em}
+.turan-big-cta small{display:block;color:#aabccc;line-height:1.5;font-weight:500;margin-top:6px;font-size:12px}
+.turan-cta-arrow{margin-left:auto;color:#8bd5cd;font-size:12px;white-space:nowrap}
+@media(max-width:750px){.top-direct{padding:9px 8px;font-size:10px}.turan-big-cta{flex-wrap:wrap;padding:16px;gap:8px}.turan-big-cta strong{font-size:14px}.turan-big-cta small{font-size:11px}.turan-cta-arrow{margin-left:56px}}
+@media(max-width:400px){.top-direct{display:none}}
