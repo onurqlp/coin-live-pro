@@ -6,6 +6,7 @@ on:
       - 'web/uzayx/**'
       - 'tests/uzayx-browser-smoke.cjs'
       - 'tests/uzayx-research-browser.cjs'
+      - 'tests/turan-browser-smoke.cjs'
       - '.github/workflows/uzayx-site-smoke.yml'
   workflow_dispatch:
 permissions:
@@ -38,6 +39,18 @@ jobs:
             test -s "/tmp/uzayx-$file"
           done
           echo "PUBLIC_ASSETS_OK"
+      - name: Verify deployed TURAN page and assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT="https://onurqlp.github.io/coin-live-pro/uzayx/turan/"
+          for file in index.html turan.css turan.js; do
+            curl -fsSL --max-time 25 "${ROOT}${file}?proof=$(date +%s%N)" -o "/tmp/live-turan-${file}"
+            test -s "/tmp/live-turan-${file}"
+            cmp "web/uzayx/turan/${file}" "/tmp/live-turan-${file}"
+          done
+          node --check web/uzayx/turan/turan.js
+          echo "PUBLIC_TURAN_ASSETS_OK"
       - name: Install minimal browser automation
         shell: bash
         run: |
@@ -50,6 +63,7 @@ jobs:
           test -n "$CHROME"
           export CHROME
           NODE_PATH=/tmp/uzayx-smoke/node_modules node tests/uzayx-research-browser.cjs
+          NODE_PATH=/tmp/uzayx-smoke/node_modules node tests/turan-browser-smoke.cjs
       - name: Save test screenshots
         if: always()
         uses: actions/upload-artifact@v4
