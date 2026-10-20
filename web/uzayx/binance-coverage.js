@@ -6,6 +6,7 @@
    x.real_orders===false && x.net_strategy_pnl_verified===false &&
    Number.isInteger(x.catalogue_observed_count) &&
    Number.isInteger(x.archived_symbol_count) &&
+   Number.isInteger(x.current_trading_verified_count) &&
    Number.isInteger(x.verified_1h_months) &&
    x.archived_symbol_count<=x.catalogue_observed_count &&
    x.verified_1h_months>=x.archived_symbol_count &&
@@ -37,7 +38,8 @@
   }
   const grid=tag('div','rd-grid','');
   for(const [label,value] of [
-   ['Enstrüman kataloğu',tr(x.catalogue_observed_count)],
+   ['Katalogdaki sözleşme',tr(x.catalogue_observed_count)],
+   ['Güncel durumu API ile doğrulanan',tr(x.current_trading_verified_count)],
    ['Doğrulanmış aylık dosya',tr(x.verified_1h_months)],
    ['OHLCV verisi olan sözleşme',tr(x.archived_symbol_count)],
    ['Doğrulanmış 1H mum',tr(x.verified_1h_bars)]]){
@@ -50,6 +52,7 @@
   if(x.funding!=='VERIFIED')warnings.push('Funding: '+String(x.funding));
   if(x.open_interest!=='VERIFIED')warnings.push('Open interest: '+String(x.open_interest));
   if(x.orderbook_history!=='VERIFIED')warnings.push('Emir defteri geçmişi: '+String(x.orderbook_history));
+  if(x.source_health?.um!=='OK'||x.source_health?.cm!=='OK')warnings.unshift('SOURCE_UNAVAILABLE · Binance canlı sözleşme API durumu doğrulanamadı.');
   warnings.push('Geriye dönük tüm delist edilmiş sözleşme evreni doğrulanmadı.');
   section.append(tag('p','rd-warning',warnings.join(' · ')));
   section.append(tag('p','rd-source',

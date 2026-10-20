@@ -21,14 +21,15 @@ def summarize(index):
     health = index.get('source_health')
     if not isinstance(instruments, list) or not isinstance(archives, dict) or not isinstance(health, dict):
         raise ValueError('INVALID_BINANCE_INDEX')
-    verified = [v for v in archives.values() if isinstance(v, dict)
+    verified = [(key, v) for key, v in archives.items() if isinstance(v, dict)
                 and v.get('status') == 'VERIFIED_CLOSED_OHLCV'
                 and isinstance(v.get('rows'), int) and v['rows'] > 0
                 and isinstance(v.get('first_ms'), int) and isinstance(v.get('last_ms'), int)
                 and v['last_ms'] >= v['first_ms']]
-    unique = {tuple(key.split('/')[:2]) for key, value in archives.items()
-              if value in verified and len(key.split('/')) == 3}
-    bounds = ([min(x['first_ms'] for x in verified), max(x['last_ms'] for x in verified)]
+    unique = {tuple(key.split('/')[:2]) for key, value in verified
+              if len(key.split('/')) == 3}
+    verified_rows = [value for _, value in verified]
+    bounds = ([min(x['first_ms'] for x in verified_rows), max(x['last_ms'] for x in verified_rows)]
               if verified else None)
     def iso(ms):
         return dt.datetime.fromtimestamp(ms/1000, tz=dt.timezone.utc).isoformat()
@@ -43,8 +44,8 @@ def summarize(index):
         'catalogue_observed_count': len(instruments),
         'current_trading_verified_count': live,
         'archived_symbol_count': len(unique),
-        'verified_1h_months': len(verified),
-        'verified_1h_bars': sum(x['rows'] for x in verified),
+        'verified_1h_months': len(verified_rows),
+        'verified_1h_bars': sum(x['rows'] for x in verified_rows),
         'first_bar_utc': iso(bounds[0]) if bounds else None,
         'last_bar_utc': iso(bounds[1]) if bounds else None,
         'source_health': health,
