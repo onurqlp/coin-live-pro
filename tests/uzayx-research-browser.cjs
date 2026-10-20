@@ -51,6 +51,14 @@ async function main(){
    assert.equal(scan.overflow,false,'Homepage horizontal overflow '+width);assert.equal(scan.ready,true);
    assert.match(scan.cash,/Fonlama dahil değil/);assert.match(scan.cash,/20x/);
    assert.match(scan.brief,/Hareketlenen/);
+   await page.waitForFunction(()=>document.querySelector('#mini-chart-state')?.textContent.includes('Son kapanmış mum'),{timeout:15000});
+   const homeCharts=await page.evaluate(()=>['mini-price','home-rsi','home-macd'].map(id=>{
+    const canvas=document.getElementById(id),rect=canvas.getBoundingClientRect();
+    const pixels=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;
+    let ink=false;for(let i=3;i<pixels.length;i+=4)if(pixels[i]){ink=true;break;}
+    return {id,visible:rect.width>80&&rect.height>50,ink};
+   }));
+   assert.ok(homeCharts.every(x=>x.visible&&x.ink),'Homepage charts visible and painted '+width+': '+JSON.stringify(homeCharts));
    const open=async tab=>page.evaluate(t=>document.querySelector('[data-tab="'+t+'"]').click(),tab);
    await open('turan');await page.locator('#research-desk > summary').click();await page.locator('[data-rd-horizon="7D"]').click();
    const lab=await page.evaluate(()=>({selected:document.querySelector('[data-rd-horizon="7D"]').getAttribute('aria-pressed'),

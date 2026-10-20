@@ -69,6 +69,9 @@
   let source=null,pack=null,mtf=null,loadedSha=null,loading=null,chosen=null,tf='1H',miniTf='1H',selectedOverride=null,selectedTicket=null;
   const $=id=>doc?.getElementById(id);
   const text=(id,v)=>{if($(id))$(id).textContent=v;};
+  function clearHome(){
+    ['mini-price','home-rsi','home-macd'].forEach(id=>{const c=$(id);if(c?.getContext)c.getContext('2d').clearRect(0,0,c.width,c.height);});
+  }
   function node(tag,cl,label){const x=doc.createElement(tag);if(cl)x.className=cl;if(label!==undefined)x.textContent=label;return x;}
   function allCandidates(){
     const r=source?.db?.radar||{};
@@ -109,7 +112,7 @@
         }
         updateSelector();paint();
         return true;
-      }catch(e){pack=null;mtf=null;loadedSha=null;text('mini-chart-state','Grafik doğrulanamadı: '+String(e.message||e));text('chart-message','Grafik doğrulanamadı: '+String(e.message||e));return false;}
+      }catch(e){pack=null;mtf=null;loadedSha=null;clearHome();text('mini-chart-state','Grafik doğrulanamadı: '+String(e.message||e));text('chart-message','Grafik doğrulanamadı: '+String(e.message||e));return false;}
       finally{loading=null;}
     })();
     return loading;
@@ -219,7 +222,7 @@
     const state=chartStateMessage();
     text('mini-chart-label',chosen+' · '+miniTf+' · '+(c?.side||'PİYASA'));
     text('mini-chart-state',chartStateMessage()+' · '+(miniRows.length?'Son kapanmış mum '+date(new Date(miniRows.at(-1)[0]).toISOString()):'Bu paritenin mumları henüz pakette yok'));
-    const miniCanvas=$('mini-price');if(miniCanvas&&miniRows.length<2){const cx=miniCanvas.getContext('2d');cx.clearRect(0,0,miniCanvas.width,miniCanvas.height);}
+    if(miniRows.length<2)clearHome();
     text('chart-heading',chosen+' · '+tf);
     text('chart-message',state+' · OKX kapanmış mumları, işlem tavsiyesi değil');
     if(miniRows.length<2)text('mini-chart-state',chosen+' için kayıtlı kapanmış mum grafiği yok; STOP/TP sadece sanal kayıttan gösterilir.');
@@ -238,7 +241,12 @@
       ' · Grafikteki eşik '+(c.kind==='SPARK'?'1H erken gözlem':'4H kapanmış mum yapısı')+' olup emir tetikleyicisi değildir.':'Seçilen parite için yalnız geçmiş kapanmış mumlar gösteriliyor.');
     levelTiles($('chart-levels'),levels,'Seviyeler OKX kaynaklı kaydedilmiş araştırma senaryosudur. Binance fiyatı farklı olabilir.');
     levelTiles($('mini-levels'),levels.slice(0,5),null);
-    if(miniRows.length>=2)priceChart($('mini-price'),miniRows,levels,true);
+    if(miniRows.length>=2){
+      priceChart($('mini-price'),miniRows,levels,true);
+      const homeOsc=computeIndicators(miniRows);
+      oscillator($('home-rsi'),homeOsc.rsi,'rsi');
+      oscillator($('home-macd'),homeOsc.hist,'macd');
+    }
     if(rows.length<2){const canvas=$('chart-price');if(canvas)canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);text('chart-message',chosen+' için doğrulanmış mum bulunamadı. Başka parite seçin.');paintPosition();return;}
     priceChart($('chart-price'),rows,levels,false);
     const osc=computeIndicators(rows);
@@ -278,7 +286,7 @@
   function onLoaded(ev){
     source=ev.detail;const sha=source?.sourceCommit;
     if(sha!==loadedSha){pack=null;mtf=null;loadedSha=null;selectedTicket=null;}
-    if(!sha||!source?.db?.radar){text('mini-chart-state','Kaynak doğrulanmadı; grafik gizli');return;}
+    if(!sha||!source?.db?.radar){clearHome();text('mini-chart-state','Kaynak doğrulanmadı; grafik gizli');return;}
     if(loadedSha===sha){paint();return;}
     ensure();
   }

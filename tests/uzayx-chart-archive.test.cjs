@@ -53,10 +53,11 @@ test('homepage contract: Futures only in header, full chart in a secondary works
  const page=fs.readFileSync('web/uzayx/site.html','utf8');
  const app=fs.readFileSync('web/uzayx/app.js','utf8');
  assert.equal((page.match(/binance\.com\/en\/futures\/home/g)||[]).length,1);
- for(const id of ['overview','chart','chart-price','chart-rsi','chart-macd','archive-file','archive-comparison','mini-price','chart-levels','mini-levels']){
+ for(const id of ['overview','chart','chart-price','chart-rsi','chart-macd','archive-file','archive-comparison','mini-price','home-rsi','home-macd','chart-levels','mini-levels']){
    assert.match(page,new RegExp('id="'+id+'"'));
  }
  assert.match(page,/src="\.\/charts\.js"/);
+ assert.doesNotMatch(fs.readFileSync('web/uzayx/ux200-focus.css','utf8'),/#overview \.home-chart\s*,[^\n]*display:none|#overview \.home-chart\s*\{display:none/);
  assert.match(page,/src="\.\/archive\.js"/);
  assert.match(app,/setInterval\(minuteCheck,60000\)/);
  assert.doesNotMatch(app,/binance\.com\/en\/futures\/home/);

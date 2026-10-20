@@ -1,8 +1,13 @@
 /* UZAYX: strategy-first mobile terminal, 2026-10-20. Display-only; preserve model and ledger. */
 .hero.compact-hero{padding-top:12px;padding-bottom:8px}.hero.compact-hero .eyebrow,.hero.compact-hero .lede,.hero.compact-hero .hero-time small,.summary,.quick-note,.watch-disclaimer{display:none!important}
 .hero.compact-hero h1{font-size:clamp(19px,4.8vw,25px);margin:0}
-#overview .sectionhead,#overview .overview-decision,#overview .home-chart,#overview .watch-filters{display:none!important}
+#overview .sectionhead,#overview .overview-decision,#overview .watch-filters{display:none!important}
 #overview .overview-flow{display:block!important}
+#overview .home-chart{display:block!important;width:100%;margin-top:12px}
+#overview .home-indicator-graphs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:10px 0}
+#overview .home-indicator-graphs>div{min-width:0;padding:8px;border:1px solid #283d4e;border-radius:10px;background:#091826}
+#overview .home-indicator-graphs span{display:block;margin-bottom:5px;color:#afc4d2;font-size:11px}
+#overview .home-indicator-graphs canvas{display:block;width:100%;height:106px}
 #overview .watchdesk-list{width:100%;max-width:none}
 #overview .watchdesk-list .panel-heading h3{font-size:17px}
 #overview .home-positions{margin:0 0 12px!important;order:-1}
@@ -23,6 +28,7 @@
 #overview .home-glance small{font-size:10px}
 #overview .home-glance strong{font-size:clamp(15px,4vw,19px)}
 #overview .watchdesk-list{margin-top:12px}
+#overview .home-indicator-graphs{grid-template-columns:minmax(0,1fr)}
 #overview .watchdesk-list .panel-heading{padding:10px 12px}
 #overview .watchdesk-list #watch-search{max-width:100%}
 }
