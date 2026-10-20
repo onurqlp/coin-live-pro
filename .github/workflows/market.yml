@@ -251,7 +251,11 @@ jobs:
           else
             echo "::warning::Supplementary report failed; core market publication continues"
           fi
-      - name: Reconcile all strategy and paper account PNL by full ledger\n        run: |\n          python3 -m unittest discover -s tests -p test_uzayx_pnl_report.py\n          python3 scripts/uzayx_pnl_report.py\n      - name: Refresh UzayX Google summary from this verified scan
+      - name: Reconcile all strategy and paper account PNL by full ledger
+        run: |
+          python3 -m unittest discover -s tests -p test_uzayx_pnl_report.py
+          python3 scripts/uzayx_pnl_report.py
+      - name: Refresh UzayX Google summary from this verified scan
         run: python3 scripts/uzayx_google_export.py
       - name: Publish only validated data
         run: |
