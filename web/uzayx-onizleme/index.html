@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>UzayX · Araştırma önizlemesi</title>
+<meta name="theme-color" content="#091725">
+<style>
+:root{color-scheme:dark;font:15px/1.48 system-ui,sans-serif;background:#091725;color:#e7f0f6}
+*{box-sizing:border-box}body{margin:0}main{max-width:1120px;margin:auto;padding:22px 16px 48px}
+header{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:20px}
+a{color:#91dddc;text-decoration:none}a:hover{text-decoration:underline}.mark{font-size:24px;font-weight:850;letter-spacing:.08em}.tag{display:inline-block;padding:5px 9px;border-radius:7px;border:1px solid #467684;color:#a6dbdc;font-size:11px;font-weight:700}
+h1{font-size:clamp(23px,5vw,36px);margin:8px 0 5px}h2{font-size:18px;margin:0 0 13px}p{margin:5px 0;color:#a4bdcc}.intro{margin-bottom:22px}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;margin:14px 0 24px}.card,.panel{background:#112438;border:1px solid #28435a;border-radius:13px;padding:16px;min-width:0}
+.card small{display:block;color:#a7c0d1}.card strong{display:block;font-size:clamp(19px,3vw,27px);overflow-wrap:anywhere;margin:7px 0}.card em{font-style:normal;color:#94b9ca;font-size:12px}.negative{color:#f09ba8}.positive{color:#7cddbc}
+.columns{display:grid;grid-template-columns:1fr 1fr;gap:12px}.panel{margin-bottom:12px}.line{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid #294254}.line:last-child{border:0}.line span{color:#a7c0d1}.line b{text-align:right;overflow-wrap:anywhere}
+.notice{border-left:3px solid #e4b372;padding-left:11px;color:#d5c7b4;margin:12px 0}.muted{font-size:12px;color:#94aebb}.links{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
+@media(max-width:720px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.columns{grid-template-columns:1fr}}
+</style></head><body><main>
+<header><div class="mark">UZAYX <span class="tag">ARAŞTIRMA ÖNİZLEMESİ</span></div><a href="../uzayx/">Mevcut siteyi aç ↗</a></header>
+<div class="intro"><h1>Strateji yarışının kanıt tablosu</h1><p>Geçmiş arşiv, sanal kasa ve kaynak durumu. Bu sayfa gerçek işlem başlatmaz; mevcut canlı siteyi değiştirmez.</p><p class="muted" id="stamp">Doğrulanmış kaynak bekleniyor…</p></div>
+<div class="grid" aria-label="Sanal kasa sonuçları">
+ <article class="card"><small>Bugün kapanan net · UTC</small><strong id="day">—</strong><em>Sanal, gerçekleşmiş</em></article>
+ <article class="card"><small>Son 7 günde mevcut kayıtlar</small><strong id="week">—</strong><em id="week-count">Kapsam bekleniyor</em></article>
+ <article class="card"><small>Tüm kayıtlı kapanışlar</small><strong id="total">—</strong><em>Başlangıçtan itibaren sanal net</em></article>
+ <article class="card"><small>Açık sanal pozisyon</small><strong id="open">—</strong><em id="float">Açık net bekleniyor</em></article>
+</div>
+<div class="columns">
+ <section class="panel"><h2>200 strateji · kanıt aşaması</h2><div id="strategies">Veri bekleniyor</div><p class="muted">Destekleyici eşleşmeler ayrı işlem veya ayrı kâr sayılmaz. İleri doğrulama olmadan kazanan ilan edilmez.</p></section>
+ <section class="panel"><h2>Binance geçmiş verisi</h2><div id="history">Arşiv bekleniyor</div><p class="notice">Tarihsel klasörün bulunması güncel Binance işlem izni anlamına gelmez. Bu arşivden henüz net backtest PnL üretilmiyor.</p></section>
+</div>
+<section class="panel"><h2>Kaynak uyarıları</h2><p id="alerts">Denetim bekleniyor.</p><p class="muted">Fonlama ve gerçek likidasyon sonucu modellenmedi. Açık emir, hesap bakiyesi veya gerçek işlem verisi yoktur.</p></section>
+<div class="links"><a href="../uzayx/#overview">Ana ekran ve grafikler ↗</a><a href="../uzayx/#funds">Sanal kasa ↗</a><a href="https://github.com/onurqlp/coin-live-pro/tree/main/research/binance-history" target="_blank" rel="noopener noreferrer">Kaynak arşivi ↗</a></div>
+</main><script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id),set=(id,value)=>{const n=$(id);if(n)n.textContent=value;};
+const line=(title,value)=>{const x=document.createElement('div');x.className='line';const a=document.createElement('span'),b=document.createElement('b');a.textContent=title;b.textContent=value;x.append(a,b);return x};
+const money=v=>typeof v==='number'&&Number.isFinite(v)?v.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})+' USDT':'—';
+const paintMoney=(id,v)=>{const x=$(id);x.textContent=money(v);x.className=typeof v==='number'&&Number.isFinite(v)?v<0?'negative':'positive':''};
+async function json(url){const c=new AbortController(),timeout=setTimeout(()=>c.abort(),10000);try{const r=await fetch(url,{cache:'no-store',signal:c.signal});if(!r.ok)throw Error('HTTP '+r.status);return await r.json()}finally{clearTimeout(timeout)}}
+async function main(){
+ try{
+  const head=await json('https://api.github.com/repos/onurqlp/coin-live-pro/commits/main');
+  if(!/^[a-f0-9]{40}$/.test(head.sha||''))throw Error('SOURCE_UNAVAILABLE_HEAD');
+  const root='https://raw.githubusercontent.com/onurqlp/coin-live-pro/'+head.sha+'/';
+  const [manifest,spark,bank,mtf,index]=await Promise.all([
+   'web/data/v4-manifest.json','web/data/v4-spark-paper.json','web/data/uzayx-strategy-bank.json','web/data/mtf.json','research/binance-history/index.json'
+  ].map(path=>json(root+path)));
+  const matching=manifest.publication_valid===true&&manifest.no_real_orders===true&&
+      spark.no_real_orders===true&&spark.scan_id===manifest.scan_id&&
+      bank.source_mtf_at===mtf.fetched_at&&spark.source_mtf_at===mtf.fetched_at;
+  const age=Date.now()-Date.parse(manifest.finished_at_utc||'');
+  const fresh=matching&&age>=-120000&&age<=25*60000;
+  set('stamp','Kaynak: '+head.sha.slice(0,10)+' · '+new Date(manifest.finished_at_utc).toLocaleString('tr-TR',{timeZone:'Europe/Istanbul'})+' (TSİ) · '+(fresh?'güncel doğrulanmış tarama':'gecikmiş veya uyuşmayan tarama'));
+  if(fresh){
+   const today=new Date().toISOString().slice(0,10),d=spark.daily?.today;
+   paintMoney('day',d?.date_utc===today?d.realized_net_usdt:null);
+   const days=(spark.daily?.days||[]).filter(x=>x.date_utc>=new Date(Date.now()-6*86400000).toISOString().slice(0,10)&&x.date_utc<=today&&Number.isFinite(x.realized_net_usdt));
+   paintMoney('week',days.length?days.reduce((sum,x)=>sum+x.realized_net_usdt,0):null);
+   set('week-count',days.length+' kayıtlı gün / 7 gün');
+   paintMoney('total',spark.summary?.realized_net_usdt);
+   set('open',Number.isInteger(spark.summary?.counts?.OPEN)?String(spark.summary.counts.OPEN):'—');
+   set('float','Açık net tahmini: '+money(spark.summary?.unrealized_net_usdt));
+  }
+  const board=bank.strategy_contest?.board||{},cases=Object.values(board).reduce((sum,x)=>sum+(x.independent_primary_closed||0),0);
+  const rows=[['Katalog',String(bank.registry_count||'—')],
+   ['OHLCV ile izlenen',String(bank.state_counts?.IMPLEMENTED_FORWARD_PAPER??'—')],
+   ['Kontrol ve öğrenme',String(bank.state_counts?.IMPLEMENTED_CONTROL??'—')],
+   ['Kaynak bekleyen',String(bank.state_counts?.BLOCKED_REQUIRED_EVIDENCE??'—')],
+   ['Bağımsız kapanmış T örneği',String(cases)],
+   ['İleri doğrulanmış aday',String(bank.strategy_contest?.provisional_winners?.length??'—')],
+   ['Geçici yeni giriş duraklatma',(bank.strategy_contest?.paused_primary_ids||[]).join(', ')||'Yok']];
+  $('strategies').replaceChildren(...rows.map(x=>line(...x)));
+  const archive=Object.values(index.archives||{}).filter(x=>x.status==='VERIFIED_CLOSED_OHLCV');
+  $('history').replaceChildren(...[
+   ['Tarihsel sözleşme klasörü',String(index.instruments?.length??'—')],
+   ['Doğrulanmış sözleşme/ay',String(archive.length)],
+   ['Doğrulanmış saatlik mum',String(archive.reduce((sum,x)=>sum+x.rows,0))],
+   ['Kapsanan veri','Yalnız 1 saatlik OHLCV']].map(x=>line(...x)));
+  const errors=[];
+  if(!fresh)errors.push('DATA_STALE veya LEDGER_MISMATCH: kasa sayıları güncel olarak gösterilmiyor.');
+  if(index.source_health?.um!=='OK'||index.source_health?.cm!=='OK')errors.push('SOURCE_UNAVAILABLE: Binance güncel sözleşme API erişimi kısıtlı; arşiv klasörleri güncel işlem durumunu teyit etmiyor.');
+  if(!archive.length)errors.push('BACKTEST_INVALID: doğrulanmış tarihsel mum yok.');
+  set('alerts',errors.join(' ')||'Kaynak zamanları eşleşti; tarihsel araştırma sanal kasadan ayrı.');
+ }catch(e){set('stamp','SOURCE_UNAVAILABLE · Veriler doğrulanamadı');set('alerts','SOURCE_UNAVAILABLE: '+String(e.message||e).slice(0,100));}
+}main();
+})();
+</script></body></html>
