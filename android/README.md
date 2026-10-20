@@ -8,6 +8,7 @@ Bu uygulama **onurqlp/coin-live-pro** reposunda üretilir ve mevcut **UzayX** si
 - Android 7.0+ (API 24). Telefon internet bağlantısı ve güncel Android System WebView / Chrome gerekir.
 - HTML, CSS, JS, radar ve JSON verileri APK içinde **dondurulmaz**. Kullanımda güncel site yüklenir. GitHub Pages ve HTTP önbelleklerinin yayılma süresi olabilir; her değişiklik anında görünme garantisi yoktur.
 - Site güncellemeleri (web/**) Android iş akışını **tetiklemez**. Yeni APK yalnız Android kaynakları veya Android iş akışı değişirse oluşturulur.
+- 1.1.0 sürümü aynı doğrulanmış web adresini açar; tarihsel Binance araştırması uygulamada gerçek işlem etkinleştirmez.
 - Uygulama tek başına piyasa emirleri vermez, canlı işlemleri etkinleştirmez ve hesap giriş bilgilerini saklamaya çalışmaz.
 - Haricî siteler (örn. Binance Futures) tarayıcıda açılır. Bağlantı yoksa yeniden dene ekranı çıkar.
 - İlk sürüm geliştirme amaçlı **debug-signed APK**'dır; Play Store yayını değildir. Tekrar oluşturulan debug APK'nın imzası farklı olabileceği için kurulu bir sürümün üzerine güncelleme yükleme desteklenmeyebilir. İnternet sitesi güncellemelerinde zaten yeni APK yüklemek gerekmez. Gerçek dağıtım için kalıcı imza anahtarı güvenli GitHub Actions Secrets içinde kurulmalıdır.

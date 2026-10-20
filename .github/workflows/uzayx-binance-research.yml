@@ -1,0 +1,43 @@
+name: UzayX — Binance Historical Research
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'engine/uzayx_binance_archive.py'
+      - '.github/workflows/uzayx-binance-research.yml'
+  workflow_dispatch:
+  schedule:
+    - cron: '40 3 * * *'
+permissions:
+  contents: write
+concurrency:
+  group: uzayx-binance-history
+  cancel-in-progress: false
+jobs:
+  historical-research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate historical source and timestamp contract
+        run: PYTHONPATH=engine python3 -m unittest discover -s tests -p test_uzayx_binance_archive.py
+      - name: Collect bounded verified monthly futures research
+        run: python3 engine/uzayx_binance_archive.py
+      - name: Persist historical checkpoint without publishing a trading signal
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/binance-history
+          if ! git diff --cached --quiet; then
+            git commit -m 'research: incremental verified Binance futures history [skip ci]'
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi

@@ -1,0 +1,7 @@
+# UzayX Binance geçmiş araştırması — kontrol noktası
+
+Kaynak: Binance USDⓈ-M ve COIN-M `exchangeInfo` enstrüman anlık görüntüsü; Binance Public Data aylık `1h` klines ZIP ve `.CHECKSUM` dosyaları. `index.json` ilk başarılı çalışmadan sonra oluşur. Sadece kapanmış saatlik mumlar SHA-256 doğrulamasından sonra sıkıştırılmış parçalara ve indeksine kaydedilir. Günlük iş en çok dört ay/sözleşme parçası işler; kesintide indeksin `attempts` alanından devam eder. 404 ay açık `SOURCE_MISSING` olarak kaydedilir.
+
+Bu çalışma **retrospektif araştırmadır**; mevcut OKX kaynaklı sanal işlemleri, strateji sıralamasını ve ekran fiyatlarını değiştirmez. `exchangeInfo` geçmişte listeden çıkarılmış tüm sözleşmeleri veya eski durumlarını yeniden oluşturmaz. İlk envanterden önceki evren bilinmiyor. Yalnız `1h` OHLCV kapsanır; funding, OI, long/short oranı, geçmiş emir defteri, tasfiye, haber ve gerçek işlem PnL'si henüz bu arşivde yoktur. Veriler tamamlanıp zaman ayrımlı maliyetli yürütme simülasyonu kurulmadan strateji başarı iddiası yapılamaz.
+
+Sıradaki adım: indeksin gerçek kaynak durumu ve kapsamını doğrulamak; doğrulanmış sembol/ayları genişletmek; farklı veri tiplerini ancak kaynaklarının tarihsel erişimi kanıtlandığında bağımsız arşivlere eklemek. İş akışı: `.github/workflows/uzayx-binance-research.yml`.
