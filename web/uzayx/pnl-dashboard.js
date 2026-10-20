@@ -24,7 +24,7 @@
  }
  function ensure(){return {
   home:panel(document.getElementById('overview'),'pnl-home','Sanal Net PNL · Kasa Özeti'),
-  strategies:panel(document.getElementById('turan'),'pnl-strategies','200 Strateji · PNL ve Aktivasyon')
+  strategies:panel(document.getElementById('turan'),'pnl-strategies','TURAN · 200 Stratejinin Sanal PNL Kayıtları')
  };}
  function status(p,txt){while(p.children.length>1)p.lastElementChild.remove();p.append(node('p','pnl-warning',txt));}
  function render(){
@@ -46,28 +46,19 @@
   if(ps.strategies){
    const st=data.strategy_activation;
    ps.strategies.append(node('p','pnl-source',
-    st.paper_active+' PAPER aktif · '+st.controls_active+' kontrol etkin · '+st.blocked_source+' kaynak eksik · Gerçek emir: 0.'),
+    st.paper_active+' PAPER kuralı · '+st.controls_active+' risk/kontrol · '+st.blocked_source+' kaynak bekleyen hipotez · Gerçek emir: 0.'),
     node('p','pnl-note','Stratejinin gerçek PNL sütunu yalnız tam defterde ilk/ana strateji kimliğiyle eşleşen sanal işlemdir. Bir işlemin destek verdiği diğer stratejiye kazanç yazılmaz.'));
    const controls=node('div','pnl-controls');
    const select=node('select','pnl-select');
-   for(const [value,label] of [['ALL','Tüm stratejiler'],['PAPER_ACTIVE','PAPER aktif'],['RESEARCH_SOURCE_BLOCKED','Verisi eksik'],['PNL','İşlem sonucu olan']]){
+   for(const [value,label] of [['ALL','T001–T200 (tamamı)'],['PAPER_ACTIVE','PAPER aktif'],['RESEARCH_SOURCE_BLOCKED','Verisi eksik'],['PNL','İşlem sonucu olan']]){
     const op=node('option','',label);op.value=value;select.append(op);}
    select.value=filters.type;select.addEventListener('change',()=>{filters.type=select.value;drawRows();});
    const search=node('input','pnl-search');search.type='search';search.placeholder='Strateji veya ID ara';search.value=filters.text;
    search.addEventListener('input',()=>{filters.text=search.value;drawRows();});
    controls.append(select,search);ps.strategies.append(controls);
    const table=node('div','pnl-table');table.id='pnl-strategy-list';ps.strategies.append(table);
-   const legacy=node('details','pnl-legacy');legacy.append(node('summary','','Önceki kimliksiz / eski strateji hesapları · kâr dağıtımı yapılmadı'));
-   for(const x of data.legacy_unassigned){
-    const p=node('p','pnl-row');p.append(node('span','',x.name+' · '+x.closed+' kapanmış'),node('b',x.realized<0?'pnl-loss':'pnl-profit',usd(x.realized)));legacy.append(p);}
-   ps.strategies.append(legacy,node('p','pnl-source',note));
-   const coins=node('details','pnl-legacy');coins.append(node('summary','','Coin bazında tüm sanal PNL · '+data.coins.length+' parite'));
-   for(const x of data.coins){
-    const p=node('p','pnl-row');const total=x.realized+x.unrealized;
-    p.append(node('span','',x.symbol+' · '+x.closed+' kapanan / '+x.open+' açık'),
-     node('b',total<0?'pnl-loss':'pnl-profit',usd(total)));coins.append(p);
-   }
-   ps.strategies.append(coins);
+   // Earlier unattributed cash remains in the permanent ledger and in home funds.
+   // TURAN renders only T001–T200; no duplicate profits for supporting matches.
    drawRows();
   }
  }
@@ -86,15 +77,39 @@
    const left=node('div','pnl-entry-main');left.append(node('b','',x.id+' · '+x.name),
     node('small','',x.state==='PAPER_ACTIVE'?'PAPER AKTİF':x.state==='CONTROL_ACTIVE'?'KONTROL AKTİF':'KAYNAK BEKLİYOR'));
    const right=node('div','pnl-entry-stat');
-   right.append(node('strong',x.realized<0?'pnl-loss':x.realized>0?'pnl-profit':'',
-    x.primary_ticket_count>0?usd(x.realized):'PNL YOK'));
-   right.append(node('small','',x.closed+' kapanan · '+x.open+' açık · '+x.supporting_matches+' destek'));
+   const net=x.realized+x.unrealized;
+   right.append(node('strong',net<0?'pnl-loss':net>0?'pnl-profit':'',
+    x.primary_ticket_count>0?usd(net):'İŞLEM PNL YOK'));
+   if(x.primary_ticket_count>0)right.append(node('small','','Gerçekleşen '+usd(x.realized)));
+
+   right.append(node('small','',x.closed+' kapanan · '+x.open+' açık · '+x.supporting_matches+' bağımlı eşleşme'));
+   if(x.primary_ticket_count>0){
+    const details=node('details','pnl-detail');details.append(node('summary','','İşlem ve maliyet ayrıntıları'));
+    const grid=node('div','pnl-detail-grid');
+    for(const [k,v] of [['Gerçekleşen net',usd(x.realized)],['Açık tahmini',usd(x.unrealized)],
+      ['Toplam tahmini net',usd(x.realized+x.unrealized)],['Tahmini ücret',fmt(x.fees)+' USDT'],
+      ['Kapanan işlem',String(x.closed)],['Açık işlem',String(x.open)],
+      ['Tarihsel sanal niyet',String(x.primary_ticket_count)]]){
+      const line=node('p','pnl-detail-line');line.append(node('span','',k),node('strong','',v));grid.append(line);
+    }
+    details.append(grid);row.append(details);
+   }
+   const signal=(root.__uxStrategyBank?.signals||[]).find(t=>
+     t.strategy_id===x.id&&typeof t.symbol==='string');
+   if(signal){
+    const button=node('button','pnl-open-chart','Grafik · '+signal.symbol+' ↗');button.type='button';
+    button.addEventListener('click',()=>{
+      document.querySelector('[data-tab="chart"]')?.click();
+      document.dispatchEvent(new CustomEvent('uzayx:open-chart',{detail:{symbol:signal.symbol}}));
+    });row.append(button);
+   }
    row.append(left,right);host.append(row);
   }
  }
  const receive=async e=>{
   const commit=e.detail?.sourceCommit,m=e.detail?.db?.manifest;
   root.__uxPnlManifest=m;
+  root.__uxStrategyBank=e.detail?.db?.strategyBank||null;
   if(!/^[a-f0-9]{40}$/.test(commit||'')||!m?.publication_valid){
    for(const p of Object.values(ensure()))if(p)status(p,'SOURCE_UNAVAILABLE · Güvenilir kaynak SHA bulunamadı.');return;}
   if(last===commit&&result)return;last=commit;
