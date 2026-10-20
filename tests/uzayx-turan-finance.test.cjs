@@ -42,7 +42,7 @@ test('Mixed scan or incomplete paper source blocks false money claims',()=>{
  assert.match(site,/id="volcano-atlas"/);
   assert.ok(site.includes('id="turan-legacy" hidden'));
   assert.ok(!site.includes('src="./turan-finance.js'));
- assert.match(site,/src="\.\/turan-finance\.js/);
+ assert.ok(site.includes('src="./pnl-dashboard.js'));
  assert.match(site,/href="\.\/turan-finance\.css/);
  assert.doesNotMatch(site,/src="\.\/turan-200\.js/);
 });
