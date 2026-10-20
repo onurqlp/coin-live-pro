@@ -15,6 +15,7 @@ from collections import Counter
 
 import v4_early as early
 import v4_paper
+from uzayx_strategy_tournament import contest
 from uzayx_research import closed_rows
 
 ROOT=pathlib.Path(__file__).resolve().parents[1]
@@ -205,6 +206,21 @@ def matches(conditions,m):
     return True
 
 
+def news_research_snapshot(now):
+    """Editorial first sightings are context, never trade confirmations."""
+    path=ROOT/'web/data/v4-context.json'
+    try:
+        doc=json.loads(path.read_text())
+        seen=early.epoch(doc.get('updated_at'))
+        if seen is None or not 0<=now-seen<=480000:return {'state':'STALE_OR_UNAVAILABLE','used_for_entry':False}
+        return {'state':'OBSERVED_CONTEXT','source_at_utc':doc['updated_at'],
+                'source_status':doc.get('source_status',{}),
+                'headline_count':len(doc.get('latest_items',[])),
+                'used_for_entry':False}
+    except (OSError,ValueError,KeyError,TypeError):
+        return {'state':'STALE_OR_UNAVAILABLE','used_for_entry':False}
+
+
 def strategy_priority(book,now):
     """Only exact, forward-born primary attribution may earn a future weight.
 
@@ -249,7 +265,8 @@ def build(mtf,market,pack,now,prior_cash=None):
         if len(rows)<30 or any(b['t']-a['t']!=H for a,b in zip(rows,rows[1:])):rows_by[s]=[]
     btc=rows_by.get('BTCUSDT',[]);moves=[change(r,4) for r in rows_by.values() if len(r)>4]
     bank=registry();index={r['id']:r for r in bank};quotes={x['symbol']:x for x in market['rows']};signals=[];evaluated=Counter();blocked=Counter()
-    priority=strategy_priority(prior_cash,now) if prior_cash else {};seen=set()
+    tournament=contest([prior_cash]+[json.loads(p.read_text()) for p in sorted((ROOT/'archive/epochs').glob('*/spark-ledger.json'))],now) if prior_cash else None
+    priority=tournament['promoted'] if tournament else {};paused=tournament['quarantine'] if tournament else {};seen=set()
     for c in mtf.get('candidates',[]):
         sym=c.get('symbol');side=c.get('side');q=quotes.get(sym,{})
         if (sym,side) in seen or side not in ('LONG','SHORT'):continue
@@ -266,13 +283,15 @@ def build(mtf,market,pack,now,prior_cash=None):
             evaluated[sid]+=1
             if matches(conditions,m):triggered.append(sid)
         if not triggered:continue
-        triggered.sort(key=lambda sid:(-priority.get(sid,0),sid))
+        triggered.sort(key=lambda sid:(sid in paused,-priority.get(sid,0),sid))
         costs=.18+(q['spread_bps'] if number(q.get('spread_bps')) else 1000)/100
         liquid=number(q.get('volume')) and q['volume']>=10000000 and number(q.get('spread_bps')) and q['spread_bps']<=20 and number(q.get('listing_age_days')) and q['listing_age_days']>=7
         no_btc_shock=bool(len(btc)>4 and abs(change(btc,1))<3)
         cash=bool(m['macro'] and liquid and no_btc_shock and f['1H']['atr_pct']>costs*3 and
                   (not m['breakout'] or (m.get('relative_volume') or 0)>=.6))
-        primary=triggered[0];stage=3 if cash else 2 if m['macro'] else 1
+        primary=triggered[0]
+        if primary in paused:cash=False
+        stage=3 if cash else 2 if m['macro'] else 1
         level=f['1H'].get('breakout_high_prev8' if side=='LONG' else 'breakout_low_prev8') or q['price']
         signals.append({'symbol':sym,'side':side,'strategy_id':primary,'strategy_ids':triggered,
             'strategy_version':VERSION,'strategy_config_hash':index[primary]['strategy_config_hash'],
@@ -293,7 +312,7 @@ def build(mtf,market,pack,now,prior_cash=None):
             'trend_1w':(f.get('1W') or {}).get('trend','UNKNOWN'),
             'aligned_main_count':int(m['macro'])*2,'supporting_factor_count':len(triggered),
             'structure_risk_score':c.get('structure_risk_score'),'spread_bps':q.get('spread_bps'),'volume_24h_usdt':q.get('volume'),
-            'reasons':[primary,'T175_REGIME','T170_MODELED_COSTS'] if cash else [primary,'WAIT_CASH_GATES'],
+            'reasons':[primary,'T175_REGIME','T170_MODELED_COSTS'] if cash else [primary,'FORWARD_LOSS_PAUSE' if primary in paused else 'WAIT_CASH_GATES'],
             'paper_eligible':False,'real_order_eligible':False,'source_quality':'VERIFIED_CLOSED_OHLC',
             'probability_calibrated':False,'verified_technical_entry':cash,
             'modeled_roundtrip_cost_pct':costs,'funding':'UNMODELED'})
@@ -308,7 +327,11 @@ def build(mtf,market,pack,now,prior_cash=None):
             'registry_hash':fingerprint(bank),'signals':signals,'role_counts':dict(Counter(r['role'] for r in bank)),
             'state_counts':dict(Counter(r['state'] for r in bank)),
             'no_trade':not any(s['paper_stage_number']==3 for s in signals),'no_real_orders':True,
-            'forward_validated_priority':priority,
+            'forward_validated_priority':priority,'news_research':news_research_snapshot(now),
+            'strategy_contest':{'board':tournament['board'],'source_audit':tournament['source_audit'],
+                'paused_primary_ids':sorted(paused),'provisional_winners':sorted(priority),
+                'selection_requires_days':7,'selection_requires_primary_closed':60,
+                'supporting_matches_share_the_same_position':True,'inverse_pnl_pct':None} if tournament else None,
             'hypotheses_are_not_validated_profits':True,'funding':'UNMODELED','liquidation':'UNVERIFIED'}
 
 
