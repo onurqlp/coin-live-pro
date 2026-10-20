@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b1320">
+  <meta name="description" content="TURAN CORE: UzayX'in bağımsız veri, strateji, araştırma ve sürekli öğrenme merkezi.">
+  <title>TURAN CORE | UzayX Araştırma Merkezi</title>
+  <link rel="icon" type="image/svg+xml" href="../icon.svg">
+  <link rel="stylesheet" href="./turan.css?v=1">
+  <script defer src="./turan.js?v=1"></script>
+</head>
+<body>
+<a class="skip" href="#content">İçeriğe geç</a>
+<div class="shell">
+  <aside class="side" aria-label="TURAN gezinme">
+    <a class="identity" href="./" aria-label="TURAN ana sayfa">
+      <span class="sigil" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><path d="M24 5 41 15v18L24 43 7 33V15L24 5Z" stroke="currentColor" stroke-width="1.6"/><path d="m15 18 9-5 9 5-9 17-9-17Z" stroke="currentColor" stroke-width="1.6"/><path d="M15 18h18M24 13v22" stroke="currentColor" stroke-width="1.6"/></svg></span>
+      <span><strong>TURAN<span class="mark">.</span></strong><small>RESEARCH ENGINE</small></span>
+    </a>
+    <div class="side-meta">UZAYX / ARAŞTIRMA ALTYAPISI</div>
+    <nav id="nav">
+      <button class="nav-link selected" data-view="command"><span class="nav-icon">◫</span> Komuta merkezi</button>
+      <button class="nav-link" data-view="arena"><span class="nav-icon">◈</span> Strateji arenası</button>
+      <button class="nav-link" data-view="cases"><span class="nav-icon">⌁</span> Olay hafızası</button>
+      <button class="nav-link" data-view="learning"><span class="nav-icon">◎</span> Öğrenme laboratuvarı</button>
+      <button class="nav-link" data-view="sources"><span class="nav-icon">▤</span> Veri ve sistem</button>
+    </nav>
+    <div class="side-foot"><div class="side-foot-title"><span class="live-led"></span> SALT OKUNUR ARAŞTIRMA</div><p>Veriler kaynak taramalarıyla güncellenir. Bu merkez gerçek emir göndermez.</p><a href="../">← UZAYX terminaline dön</a></div>
+  </aside>
+
+  <div class="workspace">
+    <header class="topbar">
+      <div class="top-crumb">UZAYX <span>/</span> TURAN <span>/</span> <b id="crumb-view">Komuta merkezi</b></div>
+      <div class="toolbar"><span id="live-state" class="status-pill"><span class="status-dot"></span> Kaynak denetleniyor</span><button id="refresh" type="button" class="refresh" aria-label="Verileri güncelle">↻ <span>Yenile</span></button><a class="return" href="../">UZAYX ↗</a></div>
+    </header>
+
+    <main id="content">
+      <section class="view active" id="view-command">
+        <div class="hero">
+          <div class="hero-copy"><div class="eyebrow">TURAN CORE / OPERASYON PANELİ <span class="hero-slash">//</span> V1.0</div><h1>Veriden öğrenen.<br><span>Kanıtla gelişen.</span></h1><p>Piyasadaki her yeni olay, geçmiş örnekler ve strateji kurallarıyla karşılaştırılır. Araştırma hafızası büyür; sonuçlar kanıtlanmadan stratejiler kârlı ilan edilmez.</p>
+          <div class="hero-actions"><button type="button" data-open="arena" class="primary">Stratejileri incele <span>↗</span></button><button type="button" data-open="cases" class="soft">Olay hafızası →</button></div></div>
+          <div class="hero-orbit" aria-hidden="true"><div class="orbit outer"></div><div class="orbit inner"></div><div class="orbit-center"><span>✧</span><strong>TURAN</strong><small>OBSERVE · LEARN</small></div><div class="orbit-point one"></div><div class="orbit-point two"></div></div>
+        </div>
+        <div class="section-title"><div><small>01 / ARAŞTIRMA ÖZETİ</small><h2>Sistemin son durumu</h2></div><span id="last-update" class="time-hint">Rapor bekleniyor</span></div>
+        <div class="kpis" id="kpis"><div class="empty full">Doğrulanmış kaynak okunuyor…</div></div>
+        <div class="twocol">
+          <article class="card"><div class="card-head"><div><div class="kicker">STRATEJİ DURUMU</div><h3>200 strateji rolü</h3></div><span class="mini-chip">CANLI RAPOR</span></div><div id="roles-chart" class="roles"></div><p class="card-note">Uygulanan kural, veri bekleyen hipotez ve araştırma kontrolü birbirinden ayrılır.</p></article>
+          <article class="card"><div class="card-head"><div><div class="kicker">SON EŞLEŞMELER</div><h3>Olay akışı</h3></div><button class="tiny-link" data-open="cases">Tümünü aç ↗</button></div><div class="event-list" id="live-events"><p class="muted">Olaylar hazırlanıyor.</p></div></article>
+        </div>
+        <div class="twocol">
+          <article class="card"><div class="card-head"><div><div class="kicker">ÖĞRENME İZİ</div><h3>Model değerlendirmesi</h3></div><span class="mini-chip">İLERİ GÖZLEM</span></div><div class="learner" id="learning-summary"></div></article>
+          <article class="card"><div class="card-head"><div><div class="kicker">VERİ KAYNAKLARI</div><h3>Kaynak sağlığı</h3></div><button class="tiny-link" data-open="sources">Ayrıntı ↗</button></div><div id="source-summary" class="source-list"></div></article>
+        </div>
+      </section>
+
+      <section class="view" id="view-arena">
+        <div class="page-head"><div class="eyebrow">02 / STRATEJİ ARENASI</div><h1>Tüm stratejiler.<br><span>Tek kanıt standardı.</span></h1><p>200 araştırma bankası ve önceki 30 tasarım. Sıralama doğrulanmış kârlılık iddiası değildir; sanal kayıt, gözlem ve veri yeterliliği ayrı sunulur.</p></div>
+        <div class="section-title"><div><small>STRATEJİ KAYIT DEFTERİ</small><h2>230 araştırma kimliği</h2></div><span id="arena-count" class="time-hint"></span></div>
+        <div class="filters"><input type="search" id="strategy-search" placeholder="Kod, isim, strateji ailesi ara…" aria-label="Strateji ara"><select id="strategy-filter" aria-label="Strateji durumu"><option value="ALL">Bütün durumlar</option><option value="IMPLEMENTED_FORWARD_PAPER">İleri sanal deneme</option><option value="BLOCKED_REQUIRED_EVIDENCE">Veri kaynağı bekleyen</option><option value="IMPLEMENTED_CONTROL">Kontrol / risk</option><option value="RESEARCH_ONLY">Önceki araştırma</option></select><select id="strategy-order" aria-label="Strateji sıralaması"><option value="ID">Kimlik sırasıyla</option><option value="PAPER">Sanal kapanış sayısı</option><option value="OBSERVED">1H gözlem sayısı</option></select></div>
+        <div class="strategy-grid" id="strategies"><div class="empty">Strateji raporları hazırlanıyor…</div></div><button id="show-more" class="show-more" type="button" hidden>Daha fazla strateji göster ↓</button>
+      </section>
+
+      <section class="view" id="view-cases">
+        <div class="page-head"><div class="eyebrow">03 / OLAY HAFIZASI</div><h1>Her hareket,<br><span>yeni bir kayıt.</span></h1><p>Kapanmış mum sonrası ölçülmüş yön hareketleri ve devam eden gözlemler. Fiyat yönü bir işlem dolumu veya net PNL değildir.</p></div>
+        <div class="section-title"><div><small>GEÇMİŞ / İLERİ KAYITLAR</small><h2>Son olay pencereleri</h2></div><span class="time-hint">Veri zamanı gösterilir</span></div>
+        <div class="filters"><input id="case-search" type="search" placeholder="Coin veya strateji kodu ara…" aria-label="Olay ara"><select id="case-filter" aria-label="Olay sonucu"><option value="ALL">Bütün olaylar</option><option value="OBSERVED">1H gözlemi tamamlanan</option><option value="TRACKING">İzlenmeye devam eden</option></select></div>
+        <div class="table-wrap"><table class="data-table"><thead><tr><th>Coin / Yön</th><th>Strateji</th><th>Olay zamanı</th><th>1H yön hareketi</th><th>Durum</th></tr></thead><tbody id="cases-body"><tr><td colspan="5">Olaylar okunuyor…</td></tr></tbody></table></div>
+      </section>
+
+      <section class="view" id="view-learning">
+        <div class="page-head"><div class="eyebrow">04 / MODEL LABORATUVARI</div><h1>Sonuçları biriktirir.<br><span>Hataları saklar.</span></h1><p>İleriye dönük tahminlerin sonraki gerçekleşen sonuçlarıyla karşılaştırıldığı araştırma alanı. Eski model otomatik olarak silinmez; üretim politikası değiştirilmez.</p></div>
+        <div class="kpis" id="learn-kpis"></div>
+        <div class="twocol"><article class="card"><div class="card-head"><div><div class="kicker">MODEL KARTI</div><h3>Öğrenme kanıtı</h3></div></div><div id="model-card"></div></article><article class="card"><div class="card-head"><div><div class="kicker">DOĞRULAMA</div><h3>Şampiyonluk şartları</h3></div></div><div id="validation-card"></div></article></div>
+        <article class="card broad"><div class="card-head"><div><div class="kicker">DEĞİŞMEZ KAYIT</div><h3>Öğrenme günlüğü</h3></div><span class="mini-chip">GITHUB / UTC</span></div><div id="journal-summary" class="journal"></div><p class="card-note">Günlük yeni piyasa verileri ve sanal deney sonuçları depolanır. GitHub zamanlayıcısı kesintisiz yayın garantisi değildir.</p></article>
+      </section>
+
+      <section class="view" id="view-sources">
+        <div class="page-head"><div class="eyebrow">05 / VERİ ALTYAPISI</div><h1>Veri varsa kanıt.<br><span>Yoksa açık uyarı.</span></h1><p>OKX taraması, Binance tarihsel verisi, araştırma arşivi, OI, funding ve piyasa derinliği kaynaklarını ayrı ayrı değerlendir.</p></div>
+        <div class="section-title"><div><small>DATA PIPELINE / SOURCE AUDIT</small><h2>Kaynak envanteri</h2></div><button class="refresh" type="button" id="source-refresh">↻ Yeniden kontrol et</button></div>
+        <div class="source-cards" id="sources"><p class="empty">Kaynaklar yükleniyor…</p></div>
+        <div class="twocol"><article class="card"><div class="kicker">SİSTEM SÖZLEŞMESİ</div><h3>Değişmeyen ilkeler</h3><ul class="principles"><li>Google Sheets ve Apps Script değiştirilmez.</li><li>Mevcut sanal kasa, fiyat motoru ve emir politikası değiştirilmez.</li><li>Model hipotezi, net kârlılık kanıtı değildir.</li><li>Kayıtlı kaynak yaşı, veri boşluğu ve sürüm saklanır.</li></ul></article><article class="card"><div class="kicker">KAYNAK VE İŞLETİM</div><h3>Doğrudan bağlantılar</h3><div class="links"><a href="https://github.com/onurqlp/coin-live-pro/actions/workflows/market.yml" target="_blank" rel="noopener">Merkezî piyasa taraması ↗</a><a href="https://github.com/onurqlp/coin-live-pro/actions/workflows/uzayx-binance-research.yml" target="_blank" rel="noopener">Binance tarihsel araştırma ↗</a><a href="https://github.com/onurqlp/coin-live-pro/blob/main/engine/turan_core.py" target="_blank" rel="noopener">TURAN kaynak kodu ↗</a><a href="https://github.com/onurqlp/coin-live-pro/blob/main/archive/turan-core-journal.jsonl" target="_blank" rel="noopener">Öğrenme günlüğü ↗</a></div></article></div>
+      </section>
+    </main>
+    <footer><span>TURAN CORE <b>×</b> UZAYX</span><span>Bağımsız, kaynaklı, sanal araştırma · Gerçek emir yok</span></footer>
+  </div>
+</div>
+<nav class="mobile-nav" aria-label="Mobil gezinme"><button data-view="command" class="selected">◫<span>Merkez</span></button><button data-view="arena">◈<span>Strateji</span></button><button data-view="cases">⌁<span>Olaylar</span></button><button data-view="learning">◎<span>Öğrenme</span></button><button data-view="sources">▤<span>Veri</span></button></nav>
+</body></html>
