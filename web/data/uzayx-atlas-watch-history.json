@@ -649,6 +649,88 @@
       "real_order": false,
       "simulated_fill": false,
       "note": "Historical token name overlap only, not recurring pattern proof or actionable signal."
+    },
+    {
+      "observed_at_utc": "2026-10-20T13:34:46Z",
+      "scan_id": "cd005347a55ee83b0863e02c",
+      "market_asof_utc": "2026-10-20T13:29:39.283000+00:00",
+      "market_age_minutes": 5.1,
+      "market_state": "FRESH_RESEARCH",
+      "fresh_early_candidate_count": 16,
+      "historical_symbol_matches": [
+        {
+          "symbol": "TRUMPUSDT",
+          "base": "TRUMP",
+          "research_tier": "ISIK_GUCLENIYOR",
+          "side_observed": "SHORT",
+          "source_closed_1h_at_utc": "2026-10-20T12:00:00+00:00",
+          "source_closed_4h_at_utc": "2026-10-20T08:00:00+00:00",
+          "observed_at_utc": "2026-10-20T13:29:07+00:00",
+          "historical_event_prediction": false,
+          "trade_ready": false
+        }
+      ],
+      "module_context": {
+        "state": "OBSERVATION_CONTEXT_ONLY",
+        "asof_utc": "2026-10-20T12:12:48Z",
+        "modules": [
+          {
+            "id": "A1",
+            "state": "OBSERVING",
+            "data_scope": "PUBLIC_UNLICENSED_EOD_INPUTS_ONLY",
+            "observations": 1,
+            "signal": false,
+            "executable": false
+          },
+          {
+            "id": "A2",
+            "state": "OBSERVING",
+            "data_scope": "PUBLIC_UNLICENSED_EOD_INPUTS_ONLY",
+            "observations": 1,
+            "signal": false,
+            "executable": false
+          },
+          {
+            "id": "A3",
+            "state": "OBSERVING",
+            "data_scope": "DAILY_SPOT_INPUTS_ONLY",
+            "observations": 1,
+            "signal": false,
+            "executable": false
+          },
+          {
+            "id": "B1",
+            "state": "OBSERVING",
+            "data_scope": "REALIZED_FUNDING_ONLY",
+            "observations": 2,
+            "signal": false,
+            "executable": false
+          },
+          {
+            "id": "B2",
+            "state": "OBSERVING",
+            "data_scope": "CROSS_VENUE_BOOK_SCREEN_ONLY",
+            "observations": 1,
+            "signal": false,
+            "executable": false
+          },
+          {
+            "id": "T0",
+            "state": "OBSERVING",
+            "data_scope": "TREASURY_YIELD_REFERENCE_ONLY",
+            "observations": 1,
+            "signal": false,
+            "executable": false
+          }
+        ]
+      },
+      "atlas_source_sha256": "c5538743a2550bede523fa5ffd04aed833eff45865b55fa7947e46870d77d821",
+      "ohlcv_backtest": false,
+      "predictions_verified": false,
+      "futures_tradability_verified": false,
+      "real_order": false,
+      "simulated_fill": false,
+      "note": "Historical token name overlap only, not recurring pattern proof or actionable signal."
     }
   ]
 }
