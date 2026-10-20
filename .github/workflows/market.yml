@@ -255,6 +255,8 @@ jobs:
         run: |
           python3 -m unittest discover -s tests -p test_uzayx_pnl_report.py
           python3 scripts/uzayx_pnl_report.py
+      - name: Build TURAN independent evidence index and append-only learning journal
+        run: python3 engine/turan_core.py
       - name: Refresh UzayX Google summary from this verified scan
         run: python3 scripts/uzayx_google_export.py
       - name: Publish only validated data
@@ -272,6 +274,7 @@ jobs:
           git add archive/closings web/data/uzayx-cash-close.json
           git add archive/uzayx-adaptive-ledger.json web/data/uzayx-adaptive.json web/data/uzayx-strategy-bank.json
           git add web/data/uzayx-guncel.csv
+          git add web/data/turan-core.json archive/turan-core-journal.jsonl
           git add web/data/v4-watch-archive.json web/data/v4-context.json web/data/v4-early.json web/data/v4-spark-paper.json web/data/v4-spark-review.json
           git add web/data/swing-radar.json web/data/swing-history.json web/data/swing-outcomes.json
           git add archive/epochs
