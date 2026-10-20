@@ -51,7 +51,7 @@ test('Mixed scans or partial ticket archives prevent profit ranking',()=>{
  assert.equal(board.completeLedger,false);assert.equal(board.moneyRankingAvailable,false);
 });
 test('TURAN only 200 PNL displays, old ranking remains archived and ATLAS retained',()=>{
-  for(const x of ['id="turan-legacy" hidden','id="turan-families-root"','id="turan-catalog"','id="volcano-atlas"','src="./pnl-dashboard.js?v=1"'])assert.ok(html.includes(x),x);
+  for(const x of ['id="turan-legacy" hidden','id="turan-families-root"','id="turan-catalog"','id="volcano-atlas"','src="./pnl-dashboard.js?v=3"'])assert.ok(html.includes(x),x);
   assert.ok(!html.includes('src="./turan-ranking-ui.js'));
  new vm.Script(read('web/uzayx/turan-ranking-ui.js'));
  const mobile=read('web/uzayx/index.html');assert.match(mobile,/src="\.\/site\.html"/);

@@ -65,6 +65,21 @@ async function main(){
     blocked:document.querySelector('#research-families').innerText,overflow:document.documentElement.scrollWidth>innerWidth+2}));
    assert.equal(lab.selected,'true');assert.equal(lab.overflow,false);assert.match(lab.blocked,/Sektör kaynağı bekleniyor/);
    await page.screenshot({path:'/tmp/uzayx-research-'+width+'.png',fullPage:false});
+   if(fixture){
+    await open('turan');
+    await page.waitForFunction(()=>document.querySelectorAll('#pnl-strategy-list .pnl-strategy-card').length>0,{timeout:16000});
+    const overview=await page.evaluate(()=>({visible:document.querySelectorAll('#pnl-strategy-list .pnl-strategy-card').length,
+     open:document.querySelector('.pnl-turan-metrics')?.innerText,
+     legacy:document.getElementById('turan-legacy')?.getBoundingClientRect().height}));
+    assert.ok(overview.visible>=20,'TURAN visible cards missing');
+    assert.equal(overview.legacy,0,'Archived 30/200 UI leaked into final page');
+    assert.match(overview.open,/Açık sanal pozisyon/);
+    await page.evaluate(()=>{document.querySelector('#pnl-strategy-list .pnl-strategy-card').open=true;});
+    const detail=await page.evaluate(()=>({lab:document.querySelector('.pnl-strategy-card[open] .pnl-inverse')?.innerText,
+     evidence:document.querySelector('.pnl-strategy-card[open] .pnl-learning')?.innerText}));
+    assert.match(detail.lab,/SHORT \/ ters varsayım/);assert.match(detail.evidence,/Bağımsız kapanış/);
+    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false);
+   }
    await open('funds');assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false);
    const closeControl=await page.$eval('#cash-close-all',n=>({text:n.textContent,url:n.href,target:n.target,width:n.getBoundingClientRect().width}));
    assert.match(closeControl.text,/Tüm işlemleri kapat/);
