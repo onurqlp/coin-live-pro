@@ -40,7 +40,7 @@ function init(){
   b.addEventListener('click',()=>{horizon=id;render();});frames.append(b);
  }
  const families=el('div','rd-families');families.id='research-families';families.textContent='Araştırma kaydı yükleniyor…';
- lab.append(frames,families);turan.insertBefore(lab,$('turan-cash-view'));
+ lab.append(frames,families);doc.getElementById('research')?.append(lab);
  const risk=el('article','panel rd-panel');risk.id='risk-desk';risk.append(heading('Kasa ve ortak risk','SANAL HESAP'));
  const body=el('div');body.id='risk-desk-body';body.textContent='Tam kayıt defteri doğrulanıyor…';risk.append(body);
  const first=funds.querySelector('.cash-kpis');if(first)first.after(risk);else funds.append(risk);

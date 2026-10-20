@@ -14,7 +14,7 @@
       const intro=document.createElement('aside');
       intro.className='ux200-intro';
       intro.setAttribute('aria-label','UZAYX strateji motoru');
-      intro.innerHTML='<div class="ux200-top"><strong>UZAYX · Strateji Merkezi</strong><a href="#turan" data-goto="turan">Stratejileri incele ↗</a></div><p>30 TURAN stratejisi ve 200 AR-GE ailesi ayrı doğrulama aşamalarındadır. Sanal kasa ve açık pozisyonlar önceliklidir; geçmiş test kazancı canlı performans değildir.</p>';
+      intro.innerHTML='<div class="ux200-top"><strong>UZAYX · Strateji Merkezi</strong><a href="#turan" data-goto="turan">Stratejileri incele ↗</a></div><p>T001–T200 tek strateji evrenidir. Kıvılcımlar ve yeni sanal işlemler bu bankadan gelir; eski kayıtlar kasada arşivlenir. Canlı grafikler ve açık pozisyonlar korunur.</p>';
       overview.insertBefore(intro,positions);
       intro.querySelector('a').addEventListener('click',function(e){
         const tab=document.querySelector('[data-tab="turan"]');

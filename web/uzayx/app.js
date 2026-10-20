@@ -20,7 +20,7 @@
     manifest: 'v4-manifest.json', health: 'health.json', radar: 'v4-radar.json',
     paper: 'v4-paper.json', spark: 'v4-spark-paper.json', early: 'v4-early.json',
     review: 'v4-spark-review.json', ops: 'ops-report.json', diary: 'uzayx-lessons-history.json',
-    research: 'uzayx-research.json'
+    research: 'uzayx-research.json', strategyBank: 'uzayx-strategy-bank.json'
   };
   const MAKINE = 'https://raw.githubusercontent.com/onurqlp/makine-core/main/site/data/support.json';
   let db = {}, faults = [], mode = 'ALL', stage = 'ALL', search = '';
@@ -53,7 +53,7 @@
     const badge=el('span','readiness '+(isEligible?'readiness-ready':'readiness-wait'),isEligible?'Araştırma koşulları oluştu':'Giriş teyidi yok');
     head.append(el('strong','',str(p.symbol)),el('span','side '+(p.side==='SHORT'?'short':''),str(p.side)),badge);
     n.append(head);
-    const status=el('p','coin-reason',readableStage(p.lifecycle_stage)+' · '+str(strategyLabels[p.strategy_id]||'Fiyat hareketi')+' · '+(p.confirmation_state==='WAIT_4H_CLOSE'?'4 saatlik kapanış bekleniyor':'Teyit bekleniyor'));
+    const status=el('p','coin-reason',readableStage(p.lifecycle_stage)+' · '+str(p.strategy_id||strategyLabels[p.strategy_id]||'Strateji gözlemi')+' · '+(p.confirmation_state==='WAIT_4H_CLOSE'?'4 saatlik kapanış bekleniyor':'Teyit bekleniyor'));
     n.append(status);
     const meta=el('div','coin-main');
     [['Piyasa fiyatı (OKX)',num(p.price,6)],['Stop seviyesi (senaryo)',num(p.stop,6)]].forEach(([a,b])=>{
@@ -241,9 +241,11 @@
     const updated={};
     results.forEach((r,i)=>{const key=entries[i][0];if(r.status==='fulfilled')updated[key]=r.value;else{faults.push(key);updated[key]=null;}});
     db=updated;
+    db.strategyMode=true; // Strict TURAN200 feed; legacy signals never fall back into home.
     const stamp=age(db.manifest?.finished_at_utc);
     const id=db.manifest?.scan_id;
     const feeds=[db.radar,db.paper,db.spark,db.review,db.early];
+    if(!db.strategyBank||db.strategyBank.policy!=='TURAN200_ONLY'||db.strategyBank.registry_count!==200||db.strategyBank.no_real_orders!==true||db.strategyBank.source_mtf_at!==db.spark?.source_mtf_at)faults.push('STRATEGY_200_SOURCE_MISMATCH');
     if(!id || feeds.some(f=>!f || f.scan_id!==id)){faults.push('SCAN_ID_MISMATCH');db.radar=null;}
     renderConnection();
     lastCheckedAt=new Date().toISOString();

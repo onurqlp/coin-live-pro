@@ -39,6 +39,33 @@
    stale:false};
  }
  function buildGroups(db,sha,now=Date.now()){
+   // UI in production is strictly fed by the 200 registered strategies.
+   if(db?.strategyMode===true){
+     const groups={WATCH:[],MOTION:[],SPARK:[]},m=db.manifest,b=db.strategyBank;
+     const valid=Boolean(/^[a-f0-9]{40}$/.test(sha||'')&&m?.publication_valid===true&&m?.no_real_orders===true&&
+       db.spark?.scan_id===m.scan_id&&b?.policy==='TURAN200_ONLY'&&b?.registry_count===200&&
+       b?.no_real_orders===true&&b?.source_mtf_at===db.spark?.source_mtf_at&&
+       within(m.finished_at_utc,now)&&within(b.updated_at,now));
+     if(!valid)return {valid:false,groups,reason:'STRATEGY_200_SOURCE_MISMATCH'};
+     const dedup=new Set();
+     for(const s of b.signals||[]){
+       if(!/^T(?:0[0-9]{2}|1[0-9]{2}|200)$/.test(s.strategy_id||'')||
+        !['LONG','SHORT'].includes(s.side)||!s.symbol||!Number.isFinite(s.price_at_scan)||
+        !within(s.source_observed_at_utc,now))continue;
+       const id=s.strategy_id+':'+s.symbol+':'+s.side+':'+(s.source_closed_1h_at_utc||'');
+       if(dedup.has(id))continue;dedup.add(id);
+       const kind=s.paper_stage_number===3?'SPARK':s.paper_stage_number===2?'MOTION':'WATCH';
+       groups[kind].push({id,event_id:id,symbol:s.symbol,side:s.side,kind,
+        strategy_id:s.strategy_id,strategy_ids:s.strategy_ids||[s.strategy_id],stage:s.paper_stage_name,
+        price:s.price_at_scan,stop:null,targets:[],score:s.research_rank,
+        last_evaluated_at:s.source_observed_at_utc,review_state:'TURAN200_VERIFIED_SOURCE',
+        confirmation_state:s.hourly_level_state||'WAIT_FOR_CLOSED_1H',
+        paper_entry_state:s.paper_eligible?'ELIGIBLE':'NOT_ELIGIBLE',paperStatus:'OBSERVING',
+        metrics:{'4h_relative_volume':s.relative_volume_4h},stale:false});
+     }
+     for(const k of Object.keys(groups))groups[k].sort((a,b)=>(b.score||0)-(a.score||0)||a.id.localeCompare(b.id));
+     return {valid:true,groups,reason:null,strategy_only:true};
+   }
    const ok=eligibleScan(db,sha,now);
    const groups={WATCH:[],MOTION:[],SPARK:[]};
    if(!ok)return {valid:false,groups,reason:'Veri zamanı veya tarama kimliği doğrulanamadı.'};
@@ -94,7 +121,7 @@
      panel.hidden=false;
      $('watch-detail-title').textContent=item.symbol+' · '+item.side;
      $('watch-detail-meta').textContent=(item.kind==='SPARK'?'Kıvılcım / '+item.stage:labels(item.kind))+
-      ' · '+(item.kind==='SPARK'?'Araştırma, giriş teyidi yok':item.review_state)+
+      ' · '+(item.strategy_id?item.strategy_id+' · ':'')+(item.kind==='SPARK'?'Araştırma, giriş teyidi yok':item.review_state)+
       ' · Gözlem '+time(item.last_evaluated_at);
      $('watch-detail-price').textContent=price(item.price);
      $('watch-detail-stop').textContent=price(item.stop);
