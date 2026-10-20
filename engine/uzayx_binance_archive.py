@@ -15,12 +15,15 @@ import pathlib
 import re
 import urllib.error
 import urllib.request
+import urllib.parse
+import xml.etree.ElementTree as ET
 import zipfile
 
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 OUT=ROOT/'research/binance-history'
 INDEX=OUT/'index.json'
 BASE='https://data.binance.vision/data/futures'
+S3='https://s3-ap-northeast-1.amazonaws.com/data.binance.vision'
 MARKETS={'um':'https://fapi.binance.com/fapi/v1/exchangeInfo',
          'cm':'https://dapi.binance.com/dapi/v1/exchangeInfo'}
 MAX_BYTES=3000000
@@ -39,6 +42,29 @@ def month_after(ym):
     return f'{year+int(month==12):04d}-{month%12+1:02d}'
 def month_at(ms):
     return dt.datetime.fromtimestamp(int(ms)/1000,dt.timezone.utc).strftime('%Y-%m')
+def listing(prefix,delimiter='',fetch=get):
+    marker='';items=[]
+    for _ in range(12):
+        params={'prefix':prefix,'max-keys':1000}
+        if delimiter:params['delimiter']=delimiter
+        if marker:params['marker']=marker
+        root=ET.fromstring(fetch(S3+'?'+urllib.parse.urlencode(params),350000))
+        ns={'s':'http://s3.amazonaws.com/doc/2006-03-01/'}
+        tag='s:CommonPrefixes/s:Prefix' if delimiter else 's:Contents/s:Key'
+        items.extend(x.text for x in root.findall(tag,ns) if x.text and x.text.startswith(prefix))
+        if root.findtext('s:IsTruncated',default='false',namespaces=ns)!='true':return items
+        marker=root.findtext('s:NextMarker',namespaces=ns) or (items[-1] if items else None)
+        if not marker:raise ValueError('ARCHIVE_LIST_PAGINATION')
+    raise ValueError('ARCHIVE_LIST_PAGE_LIMIT')
+
+
+def oldest_month(market,symbol,fetch=get):
+    prefix=f'data/futures/{market}/monthly/klines/{symbol}/1h/'
+    dates=[]
+    for key in listing(prefix,fetch=fetch):
+        match=re.fullmatch(re.escape(prefix)+re.escape(symbol)+r'-1h-(\d{4}-\d{2})\.zip',key)
+        if match:dates.append(match.group(1))
+    return min(dates) if dates else None
 def catalogue(fetch=get):
     rows=[];health={}
     for market,url in MARKETS.items():
@@ -58,6 +84,23 @@ def catalogue(fetch=get):
             health[market]='OK'
         except (OSError,ValueError,KeyError,TypeError,urllib.error.URLError) as exc:
             health[market]='SOURCE_UNAVAILABLE_'+type(exc).__name__
+        # Archive listing also exposes discontinued instruments, without
+        # pretending that archival presence proves current tradability.
+        try:
+            prefix=f'data/futures/{market}/monthly/klines/'
+            existing={s['symbol'] for s in rows if s['market']==market}
+            added=0
+            for item in listing(prefix,'/',fetch):
+                symbol=item[len(prefix):].strip('/')
+                if not re.fullmatch(r'[A-Z0-9_]{3,40}',symbol) or symbol in existing:continue
+                if market=='um' and not symbol.endswith('USDT'):continue
+                rows.append({'market':market,'symbol':symbol,'contract_type':'UNKNOWN',
+                    'status':'UNKNOWN_CURRENT_STATUS','onboard_ms':None,'delivery_ms':None,
+                    'historical_listing_reconstruction':'ARCHIVE_PRESENT_STATUS_UNKNOWN'})
+                added+=1
+            health[market+'_archive_listing']='OK' if added or existing else 'EMPTY'
+        except (OSError,ValueError,ET.ParseError,urllib.error.URLError) as exc:
+            health[market+'_archive_listing']='SOURCE_UNAVAILABLE_'+type(exc).__name__
     return rows,health
 
 
@@ -104,13 +147,25 @@ def run(fetch=get,max_artifacts=4,clock=None):
     latest=month_at(clock.timestamp()*1000)
     candidates=[]
     for s in index['instruments']:
-        if s['status']!='TRADING':continue
-        onboard=s.get('onboard_ms')
-        if not isinstance(onboard,int) or onboard<1500000000000:continue
-        key=s['market']+'/'+s['symbol'];cursor=previous.get('attempts',{}).get(key,{}).get('next_month') or month_at(onboard)
-        if cursor<latest:candidates.append((cursor,key,s))
-    # Least advanced symbol first, bounded work per invocation.
-    for ym,key,s in sorted(candidates)[:max_artifacts]:
+        if s['status'] not in ('TRADING','UNKNOWN_CURRENT_STATUS'):continue
+        key=s['market']+'/'+s['symbol']
+        cursor=previous.get('attempts',{}).get(key,{}).get('next_month')
+        if cursor is None or cursor<latest:candidates.append((key,s,cursor))
+    priority=('um/BTCUSDT','um/ETHUSDT','um/SOLUSDT','um/XRPUSDT','cm/BTCUSD_PERP','cm/ETHUSD_PERP')
+    candidates.sort(key=lambda x:(priority.index(x[0]) if x[0] in priority else len(priority),x[0]))
+    offset=previous.get('next_instrument_offset',0)%max(1,len(candidates))
+    chosen=(candidates[offset:]+candidates[:offset])[:max_artifacts]
+    index['next_instrument_offset']=(offset+len(chosen))%max(1,len(candidates))
+    for key,s,ym in chosen:
+        if ym is None:
+            try:ym=oldest_month(s['market'],s['symbol'],fetch)
+            except (OSError,ValueError,ET.ParseError,urllib.error.URLError) as exc:
+                index['attempts'][key]={'state':'ARCHIVE_LIST_UNAVAILABLE_'+type(exc).__name__,'next_month':None}
+                continue
+            if ym is None:
+                index['attempts'][key]={'state':'NO_1H_MONTHLY_ARCHIVE','next_month':None}
+                continue
+        if ym>=latest:continue
         name=f"{s['symbol']}-1h-{ym}";relative=f"{s['market']}/{s['symbol']}/1h/{ym}.json.gz"
         url=f"{BASE}/{s['market']}/monthly/klines/{s['symbol']}/1h/{name}.zip"
         record={'month':ym,'next_month':month_after(ym)}

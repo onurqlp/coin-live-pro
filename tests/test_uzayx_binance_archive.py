@@ -4,6 +4,7 @@ import io
 import json
 import tempfile
 import unittest
+import urllib.error
 import zipfile
 from pathlib import Path
 from unittest.mock import patch
@@ -21,6 +22,14 @@ def fixture(checksum_valid=True):
         'status':'TRADING','onboardDate':t}]*11}
     def fetch(url,limit=archive.MAX_BYTES):
         if url.endswith('exchangeInfo'):return json.dumps(exchange).encode()
+        if 'amazonaws.com/' in url:
+            from urllib.parse import parse_qs,urlsplit
+            q=parse_qs(urlsplit(url).query);prefix=q['prefix'][0]
+            item=(f'<CommonPrefixes><Prefix>{prefix}BTCUSDT/</Prefix></CommonPrefixes>' if
+                'delimiter' in q and '/um/' in prefix else
+                f'<Contents><Key>{prefix}BTCUSDT-1h-2026-09.zip</Key></Contents>' if '/BTCUSDT/1h/' in prefix else '')
+            return ('<ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">'
+                '<IsTruncated>false</IsTruncated>'+item+'</ListBucketResult>').encode()
         if url.endswith('.CHECKSUM'):return (checksum if checksum_valid else '0'*64).encode()+b'  sample.zip\n'
         return data
     return fetch
@@ -46,6 +55,19 @@ class ArchiveTest(unittest.TestCase):
                     clock=dt.datetime(2026,10,20,tzinfo=dt.timezone.utc))
                 self.assertEqual(result['archives'],{})
                 self.assertEqual(result['attempts']['um/BTCUSDT']['next_month'],'2026-09')
+
+    def test_historical_archive_survives_current_api_unavailable_without_active_claim(self):
+        original=fixture()
+        def blocked_exchange(url,limit=archive.MAX_BYTES):
+            if url.endswith('exchangeInfo'):raise urllib.error.HTTPError(url,451,'unavailable',{},None)
+            return original(url,limit)
+        with tempfile.TemporaryDirectory() as temp:
+            with patch.object(archive,'OUT',Path(temp)),patch.object(archive,'INDEX',Path(temp)/'index.json'):
+                result=archive.run(blocked_exchange,max_artifacts=1,
+                    clock=dt.datetime(2026,10,20,tzinfo=dt.timezone.utc))
+                self.assertEqual(result['instruments'][0]['status'],'UNKNOWN_CURRENT_STATUS')
+                self.assertEqual(len(result['archives']),1)
+                self.assertEqual(result['source_health']['um_archive_listing'],'OK')
 
 
 if __name__=='__main__':unittest.main()
