@@ -60,7 +60,7 @@ async function main(){
    }));
    assert.ok(homeCharts.every(x=>x.visible&&x.ink),'Homepage charts visible and painted '+width+': '+JSON.stringify(homeCharts));
    const open=async tab=>page.evaluate(t=>document.querySelector('[data-tab="'+t+'"]').click(),tab);
-   await open('turan');await page.locator('#research-desk > summary').click();await page.locator('[data-rd-horizon="7D"]').click();
+   await open('research');await page.locator('#research-desk > summary').click();await page.locator('[data-rd-horizon="7D"]').click();
    const lab=await page.evaluate(()=>({selected:document.querySelector('[data-rd-horizon="7D"]').getAttribute('aria-pressed'),
     blocked:document.querySelector('#research-families').innerText,overflow:document.documentElement.scrollWidth>innerWidth+2}));
    assert.equal(lab.selected,'true');assert.equal(lab.overflow,false);assert.match(lab.blocked,/Sektör kaynağı bekleniyor/);

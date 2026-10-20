@@ -29,9 +29,11 @@ test('Research browsing and independent directions never imply confirmed trade r
  for(const side of ['LONG','SHORT','BEKLE','NO_TRADE'])assert.match(scenarioText(side,source.families[0]),/Araştırma senaryosu/);
  assert.match(scenarioText('LONG',source.families[0]),/giriş önerisi değildir/);
 });
-test('TURAN 30/200 modes, independent ATLAS and shared live mobile HTML',()=>{
+test('TURAN 200 only, old UI archived and ATLAS independent',()=>{
  for(const x of ['id="turan-current-group"','id="turan-research-group"','id="turan-families-root"','id="turan-catalog"','id="volcano-atlas"','data-turan-mode="current"','data-turan-mode="research"'])assert.ok(page.includes(x),x);
- assert.match(page,/src="\.\/turan-families\.js(?:\?v=[^"]+)?"/);
+ assert.ok(page.includes('id="turan-legacy" hidden'));
+ assert.ok(page.includes('src="./pnl-dashboard.js'));
+ assert.ok(!page.includes('src="./turan-ranking-ui.js'));
  assert.match(page,/href="\.\/turan-families\.css(?:\?v=[^"]+)?"/);
  assert.match(app,/<iframe[^>]*src="\.\/site\.html"/);
  assert.match(app,/location\.reload/);
