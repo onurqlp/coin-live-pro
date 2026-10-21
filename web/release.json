@@ -1,18 +1,23 @@
 {
-  "product_version": "4.04",
+  "product_version": "4.05",
   "version_change_owner": "AUTOMATIC_MINOR_WITHIN_4",
-  "release_id": "OPS-20261021-4_04",
-  "updated_at_utc": "2026-10-21T13:59:19.886Z",
+  "release_id": "OPS-20261021-4_05",
+  "updated_at_utc": "2026-10-21T15:05:41Z",
   "timestamp_basis": "UTC",
   "market_data_timestamp_separate": true,
   "change_summary": [
-    "4.04: öğrenim ekranı, TURAN 200 kataloğunda ileri paper / kanıt bekleyen / kontrol durumlarını ayrı gösterir; 200 hipotezi doğrulanmış kâr diye sunmaz.",
-    "4.04: sanal kıvılcım kasasında toplam gerçekleşen tutar ile tamamen kapanmış kohort sonucunu ayırır; açık biletlerdeki kısmi çıkış farkını açıkça gösterir.",
+    "4.05: her başarılı TURAN veri döngüsünde T001–T200 için kararlı evaluation_id, durum ve event/signal atıflı kayıt. SIGNAL, NO_SIGNAL, BLOCKED_SOURCE ve CONTROL_RESEARCH_ONLY birbirinden ayrılır; eksik kaynaklar algoritma sonucu gibi gösterilmez. Bu kayıt, 200 doğrulanmış kârlı algoritma anlamına gelmez.",
+    "Paper-only araştırma sürer; gerçek emir kapalıdır.",
     "Sadece araştırma arayüzü ve rapor açıklığı güncellendi. Strateji kuralları, kasalar ve kayıtlar değişmedi; gerçek emir yok."
   ],
   "no_real_orders": true,
   "not_a_trading_signal": true,
   "change_log": [
+    {
+      "release_id": "OPS-20261021-4_05",
+      "updated_at_utc": "2026-10-21T15:05:41Z",
+      "summary": "4.05: her başarılı TURAN veri döngüsünde T001–T200 için kararlı evaluation_id, durum ve event/signal atıflı kayıt. SIGNAL, NO_SIGNAL, BLOCKED_SOURCE ve CONTROL_RESEARCH_ONLY birbirinden ayrılır; eksik kaynaklar algoritma sonucu gibi gösterilmez. Bu kayıt, 200 doğrulanmış kârlı algoritma anlamına gelmez."
+    },
     {
       "release_id": "OPS-20261021-4_04",
       "updated_at_utc": "2026-10-21T13:59:19.886Z",
