@@ -1,6 +1,9 @@
+import pathlib
+import sys
 import unittest
 
-from engine.uzayx_strategy_bank import cycle_evaluations
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "engine"))
+from uzayx_strategy_bank import cycle_evaluations
 
 
 class CycleEvaluationTests(unittest.TestCase):
