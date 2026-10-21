@@ -1,7 +1,7 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const get=p=>fs.readFileSync(p,'utf8');
-const js=get('web/uzayx/turan-catalog.js'),html=get('web/uzayx/site.html'),shell=get('web/uzayx/index.html'),app=get('web/uzayx/app.js'),coreUi=get('web/uzayx/turan/turan.js'),coreHtml=get('web/uzayx/turan/index.html');
+const js=get('web/uzayx/turan-catalog.js'),html=get('web/uzayx/site.html'),shell=get('web/uzayx/index.html'),app=get('web/uzayx/app.js'),coreUi=get('web/uzayx/turan/turan.js'),coreHtml=get('web/uzayx/turan/index.html'),coreCss=get('web/uzayx/turan/turan.css');
 test('Thirty distinct named TURAN designs, seven real forward observation mappings',()=>{
  const m=js.match(/const raw=(\[[\s\S]*?\]);\s*const kinds=/);
  assert.ok(m,'machine-readable strategy registry found');
@@ -46,7 +46,7 @@ test('TURAN has a separate dynamic learning progress view with evidence-based st
  assert.match(coreUi,/function learningProgressSummary/);
  assert.match(coreUi,/function learningStage/);
  assert.match(coreUi,/learning-progress-summary/);
- assert.match(coreHtml,/repeat\(6,minmax\(0,1fr\)\)/);
+ assert.match(coreCss,/repeat\(6,minmax\(0,1fr\)\)/);
  assert.match(coreUi,/turan\.core\.v1/);
 });
 test('All TURAN scripts parse',()=>{
