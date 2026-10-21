@@ -46,7 +46,7 @@ permissions:
   id-token: write
 concurrency:
   group: coin-live-pro-pages
-  cancel-in-progress: false
+  cancel-in-progress: ${{ startsWith(github.event.head_commit.message || '', '[skip-google]') }}
 jobs:
   collect:
     runs-on: ubuntu-latest
