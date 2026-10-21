@@ -1,7 +1,7 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const get=p=>fs.readFileSync(p,'utf8');
-const js=get('web/uzayx/turan-catalog.js'),html=get('web/uzayx/site.html'),shell=get('web/uzayx/index.html'),app=get('web/uzayx/app.js');
+const js=get('web/uzayx/turan-catalog.js'),html=get('web/uzayx/site.html'),shell=get('web/uzayx/index.html'),app=get('web/uzayx/app.js'),coreUi=get('web/uzayx/turan/turan.js'),coreHtml=get('web/uzayx/turan/index.html');
 test('Thirty distinct named TURAN designs, seven real forward observation mappings',()=>{
  const m=js.match(/const raw=(\[[\s\S]*?\]);\s*const kinds=/);
  assert.ok(m,'machine-readable strategy registry found');
@@ -31,6 +31,12 @@ test('Installed app and website keep the same actual HTML code',()=>{
  assert.match(shell,/location\.reload/);
  assert.doesNotMatch(shell,/src="\.\/app\.js"/);
 });
+test('TURAN exposes latest 200-ID cycle and per-strategy decision states',()=>{
+ assert.match(coreUi,/cycle_evaluation/);
+ assert.match(coreUi,/last_cycle_evaluation/);
+ for(const state of ['SIGNAL','NO_SIGNAL','BLOCKED_SOURCE','CONTROL_RESEARCH_ONLY'])assert.ok(coreUi.includes(state),state);
+ assert.match(coreHtml,/turan\.js\?v=2/);
+});
 test('All TURAN scripts parse',()=>{
- for(const path of ['web/uzayx/turan-catalog.js','web/uzayx/turan.js','web/uzayx/mobile-shell.js'])new vm.Script(get(path),{filename:path});
+ for(const path of ['web/uzayx/turan-catalog.js','web/uzayx/turan.js','web/uzayx/mobile-shell.js','web/uzayx/turan/turan.js'])new vm.Script(get(path),{filename:path});
 });

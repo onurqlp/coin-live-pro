@@ -113,6 +113,11 @@ def build(root=ROOT, now=None):
     if registry.get("schema") != "turan.unified_registry.v1" or len(registry.get("entries", [])) != 230:
         raise ValueError("TURAN_REGISTRY_INVALID")
 
+    cycle_summary = bank.get("evaluation_summary", {})
+    cycle_rows = bank.get("cycle_evaluations", [])
+    if not isinstance(cycle_rows, list):
+        cycle_rows = []
+    cycle_by_id = {x.get("strategy_id"): x for x in cycle_rows if isinstance(x, dict)}
     metrics = summarize_observations(source_events)
     paper = {s["id"]: s for s in pnl.get("strategies", []) if isinstance(s, dict) and isinstance(s.get("id"), str)}
     details = {s["id"]: s for s in bank.get("registry", []) if isinstance(s, dict) and isinstance(s.get("id"), str)}
@@ -130,6 +135,15 @@ def build(root=ROOT, now=None):
             "state": source.get("state") or "RESEARCH_ONLY",
             "required_source": source.get("required_source") or cash.get("required_source"),
             "evaluated_candidates": source.get("evaluated_candidates", 0),
+            "last_cycle_evaluation": ({
+                "status": cycle_by_id[sid].get("status"),
+                "evaluation_id": cycle_by_id[sid].get("evaluation_id"),
+                "run_id": cycle_by_id[sid].get("run_id"),
+                "workflow_run_id": cycle_by_id[sid].get("workflow_run_id"),
+                "candidate_count": cycle_by_id[sid].get("candidate_count", 0),
+                "signal_count": len(cycle_by_id[sid].get("signal_ids", [])),
+                "block_reason": cycle_by_id[sid].get("block_reason"),
+            } if sid in cycle_by_id else None),
             "research_events": m.get("events", 0),
             "observed_1h": m.get("observed_1h", 0),
             "positive_1h": m.get("positive_1h", 0),
@@ -172,6 +186,18 @@ def build(root=ROOT, now=None):
         "generated_at_utc": now.isoformat(),
         "source_scan_id": scan_id,
         "source_alignment": aligned,
+        "cycle_evaluation": {
+            "run_id": cycle_summary.get("run_id"),
+            "workflow_run_id": cycle_summary.get("workflow_run_id"),
+            "checked_count": cycle_summary.get("checked_count"),
+            "expected_count": cycle_summary.get("expected_count"),
+            "missing_count": cycle_summary.get("missing_count"),
+            "missing_ids": cycle_summary.get("missing_ids", []),
+            "data_ready_count": cycle_summary.get("data_ready_count"),
+            "rule_evaluated_count": cycle_summary.get("rule_evaluated_count"),
+            "status_counts": cycle_summary.get("status_counts", {}),
+            "last_cycle_evaluation_present": len(cycle_rows) == 200,
+        },
         "research_only": True,
         "no_real_orders": True,
         "no_cash_policy_change": True,
@@ -179,6 +205,12 @@ def build(root=ROOT, now=None):
         "totals": {
             "registered": len(strategies),
             "bank": bank.get("registry_count"),
+            "cycle_checked_count": cycle_summary.get("checked_count"),
+            "cycle_missing_count": cycle_summary.get("missing_count"),
+            "cycle_missing_ids": cycle_summary.get("missing_ids", []),
+            "cycle_data_ready_count": cycle_summary.get("data_ready_count"),
+            "cycle_rule_evaluated_count": cycle_summary.get("rule_evaluated_count"),
+            "cycle_status_counts": cycle_summary.get("status_counts", {}),
             "roles": bank.get("role_counts", {}),
             "states": bank.get("state_counts", {}),
             "research_events": len(source_events),

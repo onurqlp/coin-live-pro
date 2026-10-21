@@ -8,6 +8,7 @@
   const ago = v => {const t=Date.parse(v||'');if(!Number.isFinite(t))return 'Tarih doğrulanamadı';const m=Math.round((Date.now()-t)/60000);return m<0?'Saat uyumsuzluğu':m<1?'Az önce':m<60?m+' dk önce':m<1440?Math.floor(m/60)+' sa önce':Math.floor(m/1440)+' gün önce';};
   const valueRow = (label,value) => '<div class="learnline"><span>'+esc(label)+'</span><strong>'+esc(value)+'</strong></div>';
   const stateLabel = x => ({IMPLEMENTED_FORWARD_PAPER:'İleri sanal deney',BLOCKED_REQUIRED_EVIDENCE:'Kaynak bekleniyor',IMPLEMENTED_CONTROL:'Kontrol / araştırma',RESEARCH_ONLY:'Önceki araştırma'}[x]||x||'Araştırma');
+  const evaluationLabel = x => ({SIGNAL:'Araştırma sinyali eşleşti',NO_SIGNAL:'Sinyal yok',BLOCKED_SOURCE:'Kaynak/veri engeli',CONTROL_RESEARCH_ONLY:'Kontrol / bağımsız giriş değil',MISSING_REGISTRY_RECORD:'Katalog kaydı eksik'}[x]||'Bu döngüde kayıt yok');
   const displayView = {command:'Komuta merkezi',arena:'Strateji arenası',cases:'Olay hafızası',learning:'Öğrenme laboratuvarı',sources:'Veri ve sistem'};
   let data=null,limit=30;
   function go(view){
@@ -61,7 +62,11 @@
       valueRow('Sonuçlanan tahmin',number(t.settled_predictions)),
       valueRow('Ortalama mutlak hata',signed(learn.prospective_mae_pct,'%').replace(/^\+/,'') ),
       valueRow('Bağımsız ölçüm süresi',typeof learn.validation_span_days==='number'?number(learn.validation_span_days,1)+' gün':'Henüz yok'),
-      valueRow('Gölge şampiyon',learn.shadow_champion?'Aday mevcut':'Henüz doğrulanmadı')
+      valueRow('Gölge şampiyon',learn.shadow_champion?'Aday mevcut':'Henüz doğrulanmadı'),
+      valueRow('Son çevrim kapsamı',data.cycle_evaluation?number(data.cycle_evaluation.checked_count)+' / '+number(data.cycle_evaluation.expected_count)+' · '+number(data.cycle_evaluation.missing_count)+' eksik':'Henüz ölçülmedi'),
+      valueRow('Kural kapsamı / veri hazır',data.cycle_evaluation?number(data.cycle_evaluation.rule_evaluated_count)+' / 53 · '+number(data.cycle_evaluation.data_ready_count)+' hazır':'Henüz ölçülmedi'),
+      valueRow('Sinyal / sinyal yok',data.cycle_evaluation?number(data.cycle_evaluation.status_counts?.SIGNAL||0)+' / '+number(data.cycle_evaluation.status_counts?.NO_SIGNAL||0):'Henüz ölçülmedi'),
+      valueRow('Kaynak engeli / kontrol',data.cycle_evaluation?number(data.cycle_evaluation.status_counts?.BLOCKED_SOURCE||0)+' / '+number(data.cycle_evaluation.status_counts?.CONTROL_RESEARCH_ONLY||0):'Henüz ölçülmedi')
     ].join('');
     $('source-summary').innerHTML=(data.sources||[]).map(s=>'<div class="source-row"><span>'+esc(s.name)+'</span><b class="'+sourceColor(s)+'">'+esc(sourceStatus(s))+'</b></div>').join('');
   }
@@ -77,7 +82,9 @@
     $('arena-count').textContent=s.length+' / '+data.strategies.length+' strateji';
     $('strategies').innerHTML=s.length?s.slice(0,limit).map(x=>{
       const money=x.paper_closed>0?signed(x.paper_realized_usdt,' USDT'):'—';
-      return '<article class="strategy-card"><header><div><span class="strategy-id">'+esc(x.id)+'</span><h3>'+esc(x.name)+'</h3></div><span class="strategy-tag">'+esc(stateLabel(x.state))+'</span></header><p>'+esc(x.family)+'</p><div class="strategy-stats"><div><small>1H gözlem</small><strong>'+number(x.observed_1h)+'</strong></div><div><small>Sanal kapanış</small><strong>'+number(x.paper_closed)+'</strong></div><div><small>Sanal net*</small><strong>'+esc(money)+'</strong></div></div><details><summary>Kanıt ve kaynak detayları</summary><p>Kaynak: '+esc(x.required_source||'Mevcut kayıtta yok')+'</p><p>Eşleşen araştırma olayı: '+number(x.research_events)+' · Pozitif/negatif 1H yön gözlemi: '+number(x.positive_1h)+' / '+number(x.negative_1h)+'</p><p>1H ortalama yön hareketi: '+esc(signed(x.mean_direction_1h_pct,'%'))+' · Açık sanal pozisyon: '+number(x.paper_open)+'</p><p>'+esc(x.independent_profit_verified?'Bağımsız doğrulama kaydı mevcut.':'Pozitif beklenti bağımsız olarak doğrulanmadı.')+' *Sanal net tutar geçmişe ait atfedilmiş kayıttır; getiri garantisi değildir.</p></details></article>';
+      const cycle=x.last_cycle_evaluation||{};
+      const cycleStatus=evaluationLabel(cycle.status);
+      return '<article class="strategy-card"><header><div><span class="strategy-id">'+esc(x.id)+'</span><h3>'+esc(x.name)+'</h3></div><span class="strategy-tag">'+esc(stateLabel(x.state))+'</span></header><p>'+esc(x.family)+'</p><div class="strategy-stats"><div><small>1H gözlem</small><strong>'+number(x.observed_1h)+'</strong></div><div><small>Sanal kapanış</small><strong>'+number(x.paper_closed)+'</strong></div><div><small>Sanal net*</small><strong>'+esc(money)+'</strong></div></div><details><summary>Kanıt ve kaynak detayları</summary><p>Son çevrim: '+esc(cycleStatus)+' · aday '+number(cycle.candidate_count)+' · sinyal '+number(cycle.signal_count)+' · '+esc(cycle.evaluation_id?cycle.evaluation_id.slice(0,17)+'…':'EVAL kaydı yok')+'</p><p>Kaynak: '+esc(x.required_source||'Mevcut kayıtta yok')+'</p><p>Eşleşen araştırma olayı: '+number(x.research_events)+' · Pozitif/negatif 1H yön gözlemi: '+number(x.positive_1h)+' / '+number(x.negative_1h)+'</p><p>1H ortalama yön hareketi: '+esc(signed(x.mean_direction_1h_pct,'%'))+' · Açık sanal pozisyon: '+number(x.paper_open)+'</p><p>'+esc(x.independent_profit_verified?'Bağımsız doğrulama kaydı mevcut.':'Pozitif beklenti bağımsız olarak doğrulanmadı.')+' *Sanal net tutar geçmişe ait atfedilmiş kayıttır; getiri garantisi değildir.</p></details></article>';
     }).join(''):'<div class="empty">Bu filtreyle eşleşen strateji yok.</div>';
     $('show-more').hidden=s.length<=limit;
   }

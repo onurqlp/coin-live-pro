@@ -2,11 +2,11 @@
   "product_version": "4.05",
   "version_change_owner": "AUTOMATIC_MINOR_WITHIN_4",
   "release_id": "OPS-20261021-4_05",
-  "updated_at_utc": "2026-10-21T15:05:41Z",
+  "updated_at_utc": "2026-10-21T15:12:49Z",
   "timestamp_basis": "UTC",
   "market_data_timestamp_separate": true,
   "change_summary": [
-    "4.05: her başarılı TURAN veri döngüsünde T001–T200 için kararlı evaluation_id, durum ve event/signal atıflı kayıt. SIGNAL, NO_SIGNAL, BLOCKED_SOURCE ve CONTROL_RESEARCH_ONLY birbirinden ayrılır; eksik kaynaklar algoritma sonucu gibi gösterilmez. Bu kayıt, 200 doğrulanmış kârlı algoritma anlamına gelmez.",
+    "4.05: her başarılı TURAN veri döngüsünde T001–T200 için kararlı evaluation_id, durum ve event/signal atıflı kayıt. TURAN ekranı 200/200 kapsamı, kaynak engelleri ve her kimliğin son döngü kararını gösterir. Sinyal, NO_SIGNAL, BLOCKED_SOURCE ve kontrol rolleri ayrıdır; 200 doğrulanmış kârlı algoritma değildir.",
     "Paper-only araştırma sürer; gerçek emir kapalıdır.",
     "Sadece araştırma arayüzü ve rapor açıklığı güncellendi. Strateji kuralları, kasalar ve kayıtlar değişmedi; gerçek emir yok."
   ],
@@ -15,8 +15,8 @@
   "change_log": [
     {
       "release_id": "OPS-20261021-4_05",
-      "updated_at_utc": "2026-10-21T15:05:41Z",
-      "summary": "4.05: her başarılı TURAN veri döngüsünde T001–T200 için kararlı evaluation_id, durum ve event/signal atıflı kayıt. SIGNAL, NO_SIGNAL, BLOCKED_SOURCE ve CONTROL_RESEARCH_ONLY birbirinden ayrılır; eksik kaynaklar algoritma sonucu gibi gösterilmez. Bu kayıt, 200 doğrulanmış kârlı algoritma anlamına gelmez."
+      "updated_at_utc": "2026-10-21T15:12:49Z",
+      "summary": "4.05: her başarılı TURAN veri döngüsünde T001–T200 için kararlı evaluation_id, durum ve event/signal atıflı kayıt. TURAN ekranı 200/200 kapsamı, kaynak engelleri ve her kimliğin son döngü kararını gösterir. Sinyal, NO_SIGNAL, BLOCKED_SOURCE ve kontrol rolleri ayrıdır; 200 doğrulanmış kârlı algoritma değildir."
     },
     {
       "release_id": "OPS-20261021-4_04",
