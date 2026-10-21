@@ -7,8 +7,8 @@
   <meta name="description" content="TURAN CORE: UzayX'in bağımsız veri, strateji, araştırma ve sürekli öğrenme merkezi.">
   <title>TURAN CORE | UzayX Araştırma Merkezi</title>
   <link rel="icon" type="image/svg+xml" href="../icon.svg">
-  <link rel="stylesheet" href="./turan.css?v=1">
-  <script defer src="./turan.js?v=2"></script>
+  <link rel="stylesheet" href="./turan.css?v=2">
+  <script defer src="./turan.js?v=3"></script>
 </head>
 <body>
 <a class="skip" href="#content">İçeriğe geç</a>
@@ -23,6 +23,7 @@
       <button class="nav-link selected" data-view="command"><span class="nav-icon">◫</span> Komuta merkezi</button>
       <button class="nav-link" data-view="arena"><span class="nav-icon">◈</span> Strateji arenası</button>
       <button class="nav-link" data-view="cases"><span class="nav-icon">⌁</span> Olay hafızası</button>
+      <button class="nav-link" data-view="progress"><span class="nav-icon">◉</span> Öğrenim ilerlemesi</button>
       <button class="nav-link" data-view="learning"><span class="nav-icon">◎</span> Öğrenme laboratuvarı</button>
       <button class="nav-link" data-view="sources"><span class="nav-icon">▤</span> Veri ve sistem</button>
     </nav>
@@ -38,7 +39,7 @@
     <main id="content">
       <section class="view active" id="view-command">
         <div class="hero">
-          <div class="hero-copy"><div class="eyebrow">TURAN CORE / OPERASYON PANELİ <span class="hero-slash">//</span> V1.0</div><h1>Veriden öğrenen.<br><span>Kanıtla gelişen.</span></h1><p>Piyasadaki her yeni olay, geçmiş örnekler ve strateji kurallarıyla karşılaştırılır. Araştırma hafızası büyür; sonuçlar kanıtlanmadan stratejiler kârlı ilan edilmez.</p>
+          <div class="hero-copy"><div class="eyebrow">TURAN CORE / OPERASYON PANELİ <span class="hero-slash">//</span> V4.06</div><h1>Veriden öğrenen.<br><span>Kanıtla gelişen.</span></h1><p>Piyasadaki her yeni olay, geçmiş örnekler ve strateji kurallarıyla karşılaştırılır. Araştırma hafızası büyür; sonuçlar kanıtlanmadan stratejiler kârlı ilan edilmez.</p>
           <div class="hero-actions"><button type="button" data-open="arena" class="primary">Stratejileri incele <span>↗</span></button><button type="button" data-open="cases" class="soft">Olay hafızası →</button></div></div>
           <div class="hero-orbit" aria-hidden="true"><div class="orbit outer"></div><div class="orbit inner"></div><div class="orbit-center"><span>✧</span><strong>TURAN</strong><small>OBSERVE · LEARN</small></div><div class="orbit-point one"></div><div class="orbit-point two"></div></div>
         </div>
@@ -75,8 +76,17 @@
         <article class="card broad"><div class="card-head"><div><div class="kicker">DEĞİŞMEZ KAYIT</div><h3>Öğrenme günlüğü</h3></div><span class="mini-chip">GITHUB / UTC</span></div><div id="journal-summary" class="journal"></div><p class="card-note">Günlük yeni piyasa verileri ve sanal deney sonuçları depolanır. GitHub zamanlayıcısı kesintisiz yayın garantisi değildir.</p></article>
       </section>
 
+      <section class="view" id="view-progress">
+        <div class="page-head"><div class="eyebrow">05 / ÖĞRENİM İLERLEMESİ</div><h1>Ne kadar yol aldık?<br><span>Kanıt neyi söylüyor?</span></h1><p>İlerleme; strateji kapsamı, veri hazırlığı, kapanan ileri tahminler ve bağımsız doğrulama şartlarıyla hesaplanır. Eksik kaynak, eksik örnek ve doğrulanmış sonuç birbirinden ayrılır.</p></div>
+        <div class="kpis" id="learning-progress-kpis"><div class="empty full">Güncel öğrenim verisi okunuyor…</div></div>
+        <div class="twocol"><article class="card"><div class="card-head"><div><div class="kicker">GENEL YAKINLIK</div><h3>Bir sonraki doğrulama eşiği</h3></div><span class="mini-chip">VERİYE DAYALI</span></div><div class="learner" id="learning-progress-summary"></div></article><article class="card"><div class="card-head"><div><div class="kicker">ÖNCELİKLİ ADIMLAR</div><h3>İlerlemeyi açan işler</h3></div></div><div class="learner" id="learning-progress-next"></div></article></div>
+        <div class="section-title"><div><small>STRATEJİ BAZINDA ÖĞRENİM</small><h2>Güncel düzey ve kanıt</h2></div><span class="time-hint" id="learning-progress-count"></span></div>
+        <div class="filters"><input id="progress-search" type="search" placeholder="Kimlik, strateji, kaynak ara…" aria-label="Öğrenim stratejisi ara"><select id="progress-filter" aria-label="Öğrenim aşaması"><option value="ALL">Bütün aşamalar</option><option value="Kaynak bekliyor">Kaynak bekliyor</option><option value="İleri gözlem">İleri gözlem</option><option value="Sonuç birikiyor">Sonuç birikiyor</option><option value="Döngüde değerlendirildi">Döngüde değerlendirildi</option><option value="Kontrol / araştırma">Kontrol / araştırma</option></select></div>
+        <div class="progress-grid" id="learning-progress-strategies"><div class="empty">Strateji öğrenim kayıtları hazırlanıyor…</div></div>
+      </section>
+
       <section class="view" id="view-sources">
-        <div class="page-head"><div class="eyebrow">05 / VERİ ALTYAPISI</div><h1>Veri varsa kanıt.<br><span>Yoksa açık uyarı.</span></h1><p>OKX taraması, Binance tarihsel verisi, araştırma arşivi, OI, funding ve piyasa derinliği kaynaklarını ayrı ayrı değerlendir.</p></div>
+        <div class="page-head"><div class="eyebrow">06 / VERİ ALTYAPISI</div><h1>Veri varsa kanıt.<br><span>Yoksa açık uyarı.</span></h1><p>OKX taraması, Binance tarihsel verisi, araştırma arşivi, OI, funding ve piyasa derinliği kaynaklarını ayrı ayrı değerlendir.</p></div>
         <div class="section-title"><div><small>DATA PIPELINE / SOURCE AUDIT</small><h2>Kaynak envanteri</h2></div><button class="refresh" type="button" id="source-refresh">↻ Yeniden kontrol et</button></div>
         <div class="source-cards" id="sources"><p class="empty">Kaynaklar yükleniyor…</p></div>
         <div class="twocol"><article class="card"><div class="kicker">SİSTEM SÖZLEŞMESİ</div><h3>Değişmeyen ilkeler</h3><ul class="principles"><li>Google Sheets ve Apps Script değiştirilmez.</li><li>Mevcut sanal kasa, fiyat motoru ve emir politikası değiştirilmez.</li><li>Model hipotezi, net kârlılık kanıtı değildir.</li><li>Kayıtlı kaynak yaşı, veri boşluğu ve sürüm saklanır.</li></ul></article><article class="card"><div class="kicker">KAYNAK VE İŞLETİM</div><h3>Doğrudan bağlantılar</h3><div class="links"><a href="https://github.com/onurqlp/coin-live-pro/actions/workflows/market.yml" target="_blank" rel="noopener">Merkezî piyasa taraması ↗</a><a href="https://github.com/onurqlp/coin-live-pro/actions/workflows/uzayx-binance-research.yml" target="_blank" rel="noopener">Binance tarihsel araştırma ↗</a><a href="https://github.com/onurqlp/coin-live-pro/blob/main/engine/turan_core.py" target="_blank" rel="noopener">TURAN kaynak kodu ↗</a><a href="https://github.com/onurqlp/coin-live-pro/blob/main/archive/turan-core-journal.jsonl" target="_blank" rel="noopener">Öğrenme günlüğü ↗</a></div></article></div>
@@ -85,5 +95,5 @@
     <footer><span>TURAN CORE <b>×</b> UZAYX</span><span>Bağımsız, kaynaklı, sanal araştırma · Gerçek emir yok</span></footer>
   </div>
 </div>
-<nav class="mobile-nav" aria-label="Mobil gezinme"><button data-view="command" class="selected">◫<span>Merkez</span></button><button data-view="arena">◈<span>Strateji</span></button><button data-view="cases">⌁<span>Olaylar</span></button><button data-view="learning">◎<span>Öğrenme</span></button><button data-view="sources">▤<span>Veri</span></button></nav>
+<nav class="mobile-nav" aria-label="Mobil gezinme"><button data-view="command" class="selected">◫<span>Merkez</span></button><button data-view="arena">◈<span>Strateji</span></button><button data-view="cases">⌁<span>Olaylar</span></button><button data-view="progress">◉<span>İlerleme</span></button><button data-view="learning">◎<span>Model</span></button><button data-view="sources">▤<span>Veri</span></button></nav>
 </body></html>

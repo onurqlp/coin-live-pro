@@ -35,7 +35,19 @@ test('TURAN exposes latest 200-ID cycle and per-strategy decision states',()=>{
  assert.match(coreUi,/cycle_evaluation/);
  assert.match(coreUi,/last_cycle_evaluation/);
  for(const state of ['SIGNAL','NO_SIGNAL','BLOCKED_SOURCE','CONTROL_RESEARCH_ONLY'])assert.ok(coreUi.includes(state),state);
- assert.match(coreHtml,/turan\.js\?v=2/);
+ assert.match(coreHtml,/turan\.js\?v=3/);
+});
+test('TURAN has a separate dynamic learning progress view with evidence-based stages',()=>{
+ assert.match(coreHtml,/data-view="progress"/);
+ assert.match(coreHtml,/Öğrenim ilerlemesi/);
+ assert.match(coreHtml,/id="view-progress"/);
+ assert.match(coreHtml,/id="learning-progress-summary"/);
+ assert.match(coreHtml,/id="learning-progress-strategies"/);
+ assert.match(coreUi,/function learningProgressSummary/);
+ assert.match(coreUi,/function learningStage/);
+ assert.match(coreUi,/learning-progress-summary/);
+ assert.match(coreHtml,/repeat\(6,minmax\(0,1fr\)\)/);
+ assert.match(coreUi,/turan\.core\.v1/);
 });
 test('All TURAN scripts parse',()=>{
  for(const path of ['web/uzayx/turan-catalog.js','web/uzayx/turan.js','web/uzayx/mobile-shell.js','web/uzayx/turan/turan.js'])new vm.Script(get(path),{filename:path});

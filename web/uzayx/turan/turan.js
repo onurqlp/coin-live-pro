@@ -9,7 +9,7 @@
   const valueRow = (label,value) => '<div class="learnline"><span>'+esc(label)+'</span><strong>'+esc(value)+'</strong></div>';
   const stateLabel = x => ({IMPLEMENTED_FORWARD_PAPER:'İleri sanal deney',BLOCKED_REQUIRED_EVIDENCE:'Kaynak bekleniyor',IMPLEMENTED_CONTROL:'Kontrol / araştırma',RESEARCH_ONLY:'Önceki araştırma'}[x]||x||'Araştırma');
   const evaluationLabel = x => ({SIGNAL:'Araştırma sinyali eşleşti',NO_SIGNAL:'Sinyal yok',BLOCKED_SOURCE:'Kaynak/veri engeli',CONTROL_RESEARCH_ONLY:'Kontrol / bağımsız giriş değil',MISSING_REGISTRY_RECORD:'Katalog kaydı eksik'}[x]||'Bu döngüde kayıt yok');
-  const displayView = {command:'Komuta merkezi',arena:'Strateji arenası',cases:'Olay hafızası',learning:'Öğrenme laboratuvarı',sources:'Veri ve sistem'};
+  const displayView = {command:'Komuta merkezi',arena:'Strateji arenası',cases:'Olay hafızası',progress:'Öğrenim ilerlemesi',learning:'Öğrenme laboratuvarı',sources:'Veri ve sistem'};
   let data=null,limit=30;
   function go(view){
     if(!displayView[view])return;
@@ -118,6 +118,62 @@
       '<div class="journal-entry"><strong class="journal-number">'+(j.source_event_regression?'!':'✓')+'</strong><div><b>Kaynak bütünlüğü</b><small>'+(j.source_event_regression?'Olay adedinde azalma görüldü; kontrol gerekli.':'Mevcut kaynak sayısı önceki kayıtla uyumlu.')+'</small></div></div>'
     ].join('');
   }
+  function learningProgressSummary(snapshot){
+    const totals=snapshot.totals||{},learn=snapshot.learning||{},contest=snapshot.contest||{},cycle=snapshot.cycle_evaluation||null;
+    const expected=cycle?.expected_count??totals.bank??200;
+    const evaluated=cycle?.checked_count??(snapshot.strategies||[]).filter(x=>x.last_cycle_evaluation?.evaluation_id).length;
+    const missing=cycle?.missing_count??Math.max(0,expected-evaluated);
+    const predictions=totals.prospective_predictions||0,settled=totals.settled_predictions||0;
+    const requiredDays=contest.selection_requires_days??7;
+    const observedDays=learn.validation_span_days;
+    return {expected,evaluated,missing,ruleEvaluated:cycle?.rule_evaluated_count??null,dataReady:cycle?.data_ready_count??null,blocked:cycle?.status_counts?.BLOCKED_SOURCE??null,signal:cycle?.status_counts?.SIGNAL??null,noSignal:cycle?.status_counts?.NO_SIGNAL??null,predictions,settled,maturedPct:predictions>0?Math.min(100,settled/predictions*100):null,requiredDays,observedDays,daysRemaining:typeof observedDays==='number'?Math.max(0,requiredDays-observedDays):null,shadowChampion:learn.shadow_champion||null,independentlyVerified:totals.verified_profitable||0,cyclePublished:Boolean(cycle)};
+  }
+  function learningStage(strategy){
+    const cycle=strategy.last_cycle_evaluation||{},state=strategy.state||'';
+    if(cycle.status==='BLOCKED_SOURCE'||state==='BLOCKED_REQUIRED_EVIDENCE')return 'Kaynak bekliyor';
+    if(state==='IMPLEMENTED_CONTROL'||strategy.role==='CONTROL_OR_RESEARCH')return 'Kontrol / araştırma';
+    if(strategy.paper_closed>0)return 'Sonuç birikiyor';
+    if(cycle.status==='SIGNAL'||cycle.status==='NO_SIGNAL')return 'Döngüde değerlendirildi';
+    if(state==='IMPLEMENTED_FORWARD_PAPER')return 'İleri gözlem';
+    return 'Kontrol / araştırma';
+  }
+  function showProgress(){
+    const p=learningProgressSummary(data),l=data.learning||{},c=data.contest||{},items=data.strategies||[];
+    $('learning-progress-kpis').innerHTML=[
+      kpi('TURAN kimliği',number(data.totals?.registered),'Banka '+number(data.totals?.bank)+' / önceki '+number(Math.max(0,(data.totals?.registered||0)-(data.totals?.bank||0)))),
+      kpi('Son çevrimde değerlendirilen',p.cyclePublished?number(p.evaluated)+' / '+number(p.expected):'Yayımlanmadı',p.cyclePublished?number(p.missing)+' eksik kimlik':'En yeni strateji döngüsü bekleniyor'),
+      kpi('Sonuçlanan ileri tahmin',number(p.settled)+' / '+number(p.predictions),'Kapanış oranı '+(p.maturedPct===null?'—':number(p.maturedPct,1)+'%')),
+      kpi('Bağımsız doğrulama',number(p.independentlyVerified),'Doğrulanmış kârlı strateji')
+    ].join('');
+    const coverage=p.cyclePublished?number(p.ruleEvaluated)+' / '+number(53)+' kural · '+number(p.dataReady)+' veri hazır':'Son 200 kimlik çevrimi veri paketinde yok';
+    const proximity=typeof p.observedDays==='number'?number(p.observedDays,2)+' / '+number(p.requiredDays)+' gün'+(p.daysRemaining>0?' · en az '+number(p.daysRemaining,2)+' gün daha':' · süre eşiği sağlandı'):'Gözlem süresi raporlanmadı';
+    $('learning-progress-summary').innerHTML=[
+      valueRow('Strateji çevrimi',p.cyclePublished?number(p.evaluated)+' / '+number(p.expected)+' kimlik · '+number(p.missing)+' eksik':'Henüz yayımlanmadı'),
+      valueRow('Kural ve kaynak hazırlığı',coverage),
+      valueRow('İleri doğrulama süresi',proximity),
+      valueRow('Tahmin sonuçlanma oranı',p.maturedPct===null?'Hesaplanamıyor':number(p.settled)+' / '+number(p.predictions)+' · '+number(p.maturedPct,1)+'%'),
+      valueRow('Şampiyon adayı',p.shadowChampion?'Aday kaydı var':'Henüz doğrulanmadı'),
+      valueRow('Güncel öğrenme modeli',l.model_id?l.model_id.slice(0,16)+'…':'Model kimliği yok')
+    ].join('');
+    const remaining=p.daysRemaining===null?'Gözlem süresini ve model hatasını güncel rapora yaz.':p.daysRemaining>0?'En az '+number(p.daysRemaining,2)+' gün daha ileri veri biriktir; ardından bağımsız doğrulamayı tekrar ölç.':'Gözlem günü eşiği tamam; kapanmış örnek koşulunu ve hata ölçüsünü denetle.';
+    const sourceStep=p.cyclePublished&&p.blocked!==null?number(p.blocked)+' strateji kaydında kaynak engeli var; gerekli veri arşivlerini tamamla.':'Son çevrim ve kaynak hazırlığı yayımlandığında engelli stratejiler otomatik görünür.';
+    $('learning-progress-next').innerHTML=[
+      valueRow('1 · İleri örnek',remaining),
+      valueRow('2 · Veri erişimi',sourceStep),
+      valueRow('3 · Şampiyon seçimi',c.selection_requires_primary_closed===null||c.selection_requires_primary_closed===undefined?'Ana kapanış eşiği raporlanmadı':number(c.selection_requires_primary_closed)+' ana kapanış gerekir; mevcut sayı raporda ayrı değil'),
+      valueRow('4 · Karar kapısı',p.independentlyVerified>0?'Doğrulama kayıtlarını ve şampiyon şartlarını incele.':'Bağımsız kanıt oluşana kadar şampiyon veya kârlılık ilan edilmez.')
+    ].join('');
+    const q=($('progress-search').value||'').trim().toLocaleLowerCase('tr-TR'),f=$('progress-filter').value;
+    const filtered=items.filter(x=>(f==='ALL'||learningStage(x)===f)&&(!q||[x.id,x.name,x.family,x.required_source].some(v=>String(v||'').toLocaleLowerCase('tr-TR').includes(q))));
+    $('learning-progress-count').textContent=filtered.length+' / '+items.length+' strateji';
+    $('learning-progress-strategies').innerHTML=filtered.length?filtered.map(x=>{
+      const stage=learningStage(x),cycle=x.last_cycle_evaluation||{};
+      const evidence=cycle.evaluation_id?evaluationLabel(cycle.status)+' · '+esc(cycle.evaluation_id.slice(0,14))+'…':'Son 200-ID çevrim kaydı yok';
+      const metric=x.paper_closed>0?number(x.paper_closed)+' kapanmış sanal kayıt':number(x.evaluated_candidates)+' aday · '+number(x.research_events)+' araştırma olayı';
+      const direction=number(x.positive_1h)+' pozitif / '+number(x.negative_1h)+' negatif 1H yön gözlemi';
+      return '<article class="progress-card"><header><div><span class="strategy-id">'+esc(x.id)+'</span><h3>'+esc(x.name)+'</h3></div><span class="progress-stage">'+esc(stage)+'</span></header><p>'+esc(x.family)+' · '+esc(stateLabel(x.state))+'</p><div class="progress-evidence">'+esc(evidence)+'</div><div class="progress-stats"><span>'+esc(metric)+'</span><span>'+esc(direction)+'</span><span>Gerekli kaynak: '+esc(x.required_source||'Belirtilmemiş')+'</span></div><p class="progress-foot">'+esc(x.independent_profit_verified?'Bağımsız sonuç doğrulanmış.':'Bağımsız kârlılık doğrulanmadı.')+'</p></article>';
+    }).join(''):'<div class="empty">Bu aşama veya aramayla eşleşen strateji yok.</div>';
+  }
   function showSources(){
     $('sources').innerHTML=(data.sources||[]).map(s=>'<div class="source-card"><span class="id">'+esc(s.id)+'</span><b>'+esc(s.name)+'</b><span class="'+sourceColor(s)+'">'+esc(sourceStatus(s))+'</span><p>Son kaydedilen zaman: '+esc(clock(s.observed_at))+' · '+esc(ago(s.observed_at))+'</p></div>').join('');
   }
@@ -126,14 +182,14 @@
     const timestamp=Date.parse(data.generated_at_utc||'');
     const age=(Date.now()-timestamp)/60000;
     status(!Number.isFinite(age)?'fail':age>25?'stale':'ok',!Number.isFinite(age)?'Veri zamanı eksik':age>25?'Gecikmiş araştırma · '+ago(data.generated_at_utc):'Doğrulanmış rapor · '+ago(data.generated_at_utc));
-    showCommand();showArena();showCases();showLearning();showSources();
+    showCommand();showArena();showCases();showLearning();showProgress();showSources();
   }
   let busy=false;
   async function refresh(){
     if(busy)return;busy=true;
     $('refresh').disabled=true;status('','Kaynak kontrol ediliyor');
     try{data=await download();render();}
-    catch(e){data=null;status('fail',e.message||'Kaynak okunamadı');['kpis','learn-kpis','strategies','live-events','sources'].forEach(id=>{if($(id))$(id).innerHTML='<div class="empty">Veri doğrulanamadı. Daha sonra yeniden deneyin; eski rapor canlı gibi gösterilmez.</div>';});}
+    catch(e){data=null;status('fail',e.message||'Kaynak okunamadı');['kpis','learn-kpis','learning-progress-kpis','learning-progress-summary','learning-progress-next','learning-progress-strategies','strategies','live-events','sources'].forEach(id=>{if($(id))$(id).innerHTML='<div class="empty">Veri doğrulanamadı. Daha sonra yeniden deneyin; eski rapor canlı gibi gösterilmez.</div>';});}
     finally{busy=false;$('refresh').disabled=false;}
   }
   $('refresh').addEventListener('click',refresh);
@@ -141,6 +197,7 @@
   ['strategy-search','strategy-filter','strategy-order'].forEach(id=>$(id).addEventListener(id==='strategy-search'?'input':'change',()=>{limit=30;showArena();}));
   $('show-more').addEventListener('click',()=>{limit+=30;showArena();});
   ['case-search','case-filter'].forEach(id=>$(id).addEventListener(id==='case-search'?'input':'change',showCases));
+  ['progress-search','progress-filter'].forEach(id=>$(id).addEventListener(id==='progress-search'?'input':'change',showProgress));
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh();});
   refresh();
   setInterval(()=>{if(!document.hidden)refresh();},120000);
