@@ -340,7 +340,7 @@ def build(mtf,market,pack,now,prior_cash=None):
             s['reasons'].append('T174_DIRECTION_CONFLICT_NO_TRADE')
     for r in bank:r.update(evaluated_candidates=evaluated[r['id']],source_blocked_candidates=blocked[r['id']])
     evaluations,evaluation_summary=cycle_evaluations(evaluation_cycle_id,bank,evaluated,blocked,
-        matched_events,strategy_signals,candidate_events)
+        matched_events,strategy_signals,candidate_events,workflow_run_id)
     return {'model_version':VERSION,'updated_at':early.stamp(now),'source_mtf_at':mtf['fetched_at'],
             'evaluation_cycle_id':evaluation_cycle_id,'workflow_run_id':workflow_run_id,
             'cycle_evaluations':evaluations,'evaluation_summary':evaluation_summary,
