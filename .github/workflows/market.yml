@@ -208,7 +208,7 @@ jobs:
           assert set(v4['v4-radar']['counts']) >= {'spotlight','motion','watch','active_total'}
           from pathlib import Path
           release=json.loads(Path('web/release.json').read_text())
-          assert release['product_version']=='4.03' and release['version_change_owner']=='AUTOMATIC_MINOR_WITHIN_4'
+          assert release['product_version'].startswith('4.') and release['product_version'][2:].isdigit() and release['version_change_owner']=='AUTOMATIC_MINOR_WITHIN_4' and release['major_version_5_requires_user_approval'] is True
           study=v4['v4-radar'].get('anomaly_research',{})
           assert study.get('not_used_in_v4_score') is True
           assert study.get('no_real_orders') is True
