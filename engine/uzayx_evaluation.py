@@ -12,7 +12,8 @@ def _digest(value):
 
 
 def cycle_evaluations(run_id, registry, evaluated_candidates=None, blocked_candidates=None,
-                      matched_event_ids=None, signal_ids=None, candidate_event_ids=None):
+                      matched_event_ids=None, signal_ids=None, candidate_event_ids=None,
+                      workflow_run_id=None):
     """Create one explicit, idempotent status record for every catalog ID.
 
     Source-dependent hypotheses and controls stay visible without being mislabeled
@@ -72,6 +73,7 @@ def cycle_evaluations(run_id, registry, evaluated_candidates=None, blocked_candi
         identity = {
             "run_id": run_id,
             "strategy_id": sid,
+            "workflow_run_id": workflow_run_id,
             "strategy_version": version,
             "rules_hash": config_hash,
         }
@@ -100,6 +102,7 @@ def cycle_evaluations(run_id, registry, evaluated_candidates=None, blocked_candi
     missing_ids = [row["strategy_id"] for row in rows if row["status"] == "MISSING_REGISTRY_RECORD"]
     summary = {
         "run_id": run_id,
+        "workflow_run_id": workflow_run_id,
         "expected_count": 200,
         "checked_count": 200 - len(missing_ids),
         "missing_count": len(missing_ids),
