@@ -73,7 +73,7 @@ assert.ok(v4code.includes("timeZone:'UTC'"),'V4 displayed market timestamps must
 assert.ok(v4code.includes('renderGlobalResearch(r,manifest)'),'UTC market research view unconnected');
 assert.ok(v4code.includes('loadRelease();load()'),'Version release.json not loaded');
 const release=JSON.parse(fs.readFileSync('web/release.json','utf8'));
-assert.equal(release.product_version,'4.04','Automatic 4.xx minor update from user approval');
+assert.match(release.product_version,/^4\.\d{2}$/ ,'Automatic 4.xx minor update from user approval');
 assert.equal(release.version_change_owner,'AUTOMATIC_MINOR_WITHIN_4');
 assert.ok(Number.isFinite(Date.parse(release.updated_at_utc)),'Update stamp missing');
 assert.ok(html.includes('releaseHistoryList')&&v4code.includes('meta.change_log'),'UTC release history missing');
@@ -104,7 +104,7 @@ assert.ok(v4code.includes('v4Evidence')&&v4code.includes('factorLamps(x)'),
   'Collapsible research details must retain real source metrics');
 assert.ok(ui.includes('prefers-reduced-motion')&&ui.includes(':focus-visible'),
   'Keyboard focus and reduced motion styles must exist');
-assert.equal(JSON.parse(fs.readFileSync('web/release.json')).product_version,'4.04',
+assert.match(JSON.parse(fs.readFileSync('web/release.json')).product_version,/^4\.\d{2}$/ ,
   'User approved automatic 4.xx revisions; only 5.0 requires approval');
 for(const id of ['v4Early','v4EarlyCount','v4EarlyStatus','v4EarlyLabel','v4EarlyHistoryHint'])
   assert.ok(ids.includes(id),'Independent early alert UI missing '+id);
