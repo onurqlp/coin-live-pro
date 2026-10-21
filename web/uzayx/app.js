@@ -135,9 +135,14 @@
     set('learn-net',all?usd(all.realized_total_usdt):'—');
     set('learn-rate',all?.closed?num(all.positive/all.closed*100,1)+'%':'—');
     const records=db.diary?.records;
-    set('learn-trend',Array.isArray(records)&&records.length
-      ? 'Günlük arşiv: '+records.length+' ayrı UTC günü · son kayıt: '+str(records.at(-1)?.day_utc)+' · yöntemler arka planda karşılaştırılıyor.'
-      : 'Günlük kayıt arşivi hazır; yeni rapor bekleniyor.');
+    const archive=Array.isArray(records)&&records.length
+      ? 'Günlük arşiv: '+records.length+' ayrı UTC günü · son kayıt: '+str(records.at(-1)?.day_utc)
+      : 'Günlük kayıt arşivi hazır; yeni rapor bekleniyor.';
+    const bank=db.strategyBank||{},states=bank.state_counts||{};
+    const strategyStatus=bank.registry_count===200
+      ? 'TURAN 200: '+num(states.IMPLEMENTED_FORWARD_PAPER,0)+' ileri paper · '+num(states.BLOCKED_REQUIRED_EVIDENCE,0)+' kanıt bekliyor · '+num(states.IMPLEMENTED_CONTROL,0)+' kontrol. Katalog, kâr kanıtı değildir.'
+      : 'TURAN strateji kataloğu doğrulanamadı.';
+    set('learn-trend',archive+' · '+strategyStatus);
     const lessonBox=clear($('lessons'));
     const lessons=window.UzayXLessonEngine?.analyze(db.review,db.spark);
     if(!lessons?.hypotheses?.length)lessonBox.append(el('div','','Yeterli incelenebilir geçmiş yok. Yeni kapanışlar bekleniyor.'));
@@ -170,7 +175,10 @@
     set('strict-balance',usd(p.equity_usdt));
     set('strict-info','Başlangıç '+usd(p.starting_balance_usdt)+' · Gerçekleşen '+usd(p.realized_pnl_usdt)+' · Açık işlem '+num(p.open_positions?.length,0)+' · Fonlama '+str(p.funding_state));
     set('spark-balance',usd(c.virtual_equity_usdt));
-    set('spark-info',num(c.counts?.CLOSED,0)+' kapanan · '+num(c.counts?.OPEN,0)+' açık · Realize '+usd(c.realized_net_usdt)+' · Henüz tahmini fiyatlama');
+    const cohort=db.review?.cohorts?.['TÜMÜ'];
+    const closedNet=Number(cohort?.realized_total_usdt),accountNet=Number(c.realized_net_usdt);
+    const partialNet=Number.isFinite(closedNet)&&Number.isFinite(accountNet)?accountNet-closedNet:null;
+    set('spark-info',num(c.counts?.CLOSED,0)+' kapanan · '+num(c.counts?.OPEN,0)+' açık · Paper toplam realize '+usd(c.realized_net_usdt)+' · Tam kapanan kohort '+usd(closedNet)+' · Açık bilet kısmi çıkışları '+usd(partialNet)+' · deneysel, kâr kanıtı değil');
   }
   function renderLeverage() {
     const lev=Number($('leverage').value),capital=100,notional=capital*lev,roundTrip=2*(0.0006+0.0003)*notional;
