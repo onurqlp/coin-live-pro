@@ -258,6 +258,7 @@ jobs:
       - name: Build TURAN independent evidence index and append-only learning journal
         run: python3 engine/turan_core.py
       - name: Refresh UzayX Google summary from this verified scan
+        if: ${{ github.event_name != 'push' || !startsWith(github.event.head_commit.message || '', '[skip-google]') }}
         run: python3 scripts/uzayx_google_export.py
       - name: Publish only validated data
         run: |
