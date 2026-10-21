@@ -9,14 +9,16 @@ import datetime as dt
 import hashlib
 import json
 import math
+import os
 import pathlib
 import statistics as st
-from collections import Counter
+from collections import Counter, defaultdict
 
 import v4_early as early
 import v4_paper
 from uzayx_strategy_tournament import contest
 from uzayx_research import closed_rows
+from uzayx_evaluation import cycle_evaluations
 
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 VERSION='turan200-20261020-v1'
@@ -265,6 +267,10 @@ def build(mtf,market,pack,now,prior_cash=None):
         if len(rows)<30 or any(b['t']-a['t']!=H for a,b in zip(rows,rows[1:])):rows_by[s]=[]
     btc=rows_by.get('BTCUSDT',[]);moves=[change(r,4) for r in rows_by.values() if len(r)>4]
     bank=registry();index={r['id']:r for r in bank};quotes={x['symbol']:x for x in market['rows']};signals=[];evaluated=Counter();blocked=Counter()
+    candidate_events=defaultdict(list);matched_events=defaultdict(list);strategy_signals=defaultdict(list)
+    evaluation_cycle_id=fingerprint({'model':VERSION,'mtf':mtf['fetched_at'],'market':market['fetched_at'],
+        'chart_pack':pack.get('fetched_at'),'candidate_symbols':sorted(c.get('symbol','') for c in mtf.get('candidates',[]))})[:24]
+    workflow_run_id=os.environ.get('GITHUB_RUN_ID')
     tournament=contest([prior_cash]+[json.loads(p.read_text()) for p in sorted((ROOT/'archive/epochs').glob('*/spark-ledger.json'))],now) if prior_cash else None
     priority=tournament['promoted'] if tournament else {};paused=tournament['quarantine'] if tournament else {};seen=set()
     for c in mtf.get('candidates',[]):
@@ -274,14 +280,21 @@ def build(mtf,market,pack,now,prior_cash=None):
         if c.get('quality')!='COMPLETE' or not all(early.closed(f.get(tf),tf,now) for tf in ('1D','4H','1H')):continue
         if not rows_by.get(sym) or rows_by[sym][-1]['t']!=early.epoch(f['1H']['last_candle_utc']):continue
         if q.get('instrument_state')!='live' or not number(q.get('price')) or q['price']<=0:continue
+        event_id='EVT-'+fingerprint({'cycle':evaluation_cycle_id,'symbol':sym,'side':side,
+            'closed_1h':f['1H'].get('last_candle_utc'),'closed_4h':f['4H'].get('last_candle_utc'),
+            'closed_1d':f['1D'].get('last_candle_utc')})[:24]
         m=metrics(c,rows_by.get(sym,[]),btc,moves,side)
-        if not m:continue
+        if not m:
+            for i in RULES:
+                sid=f'T{i:03}';blocked[sid]+=1;candidate_events[sid].append(event_id)
+            continue
         triggered=[]
         for i,conditions in RULES.items():
-            sid=f'T{i:03}'
+            sid=f'T{i:03}';candidate_events[sid].append(event_id)
             if any(m.get(k) is None for k,_,_ in conditions):blocked[sid]+=1;continue
             evaluated[sid]+=1
-            if matches(conditions,m):triggered.append(sid)
+            if matches(conditions,m):
+                triggered.append(sid);matched_events[sid].append(event_id)
         if not triggered:continue
         triggered.sort(key=lambda sid:(sid in paused,-priority.get(sid,0),sid))
         costs=.18+(q['spread_bps'] if number(q.get('spread_bps')) else 1000)/100
@@ -290,10 +303,14 @@ def build(mtf,market,pack,now,prior_cash=None):
         cash=bool(m['macro'] and liquid and no_btc_shock and f['1H']['atr_pct']>costs*3 and
                   (not m['breakout'] or (m.get('relative_volume') or 0)>=.6))
         primary=triggered[0]
+        per_strategy_signal_ids={sid:'SIG-'+fingerprint({'event_id':event_id,'strategy_id':sid,
+            'strategy_version':VERSION,'strategy_config_hash':index[sid]['strategy_config_hash']})[:24] for sid in triggered}
+        for sid,sigid in per_strategy_signal_ids.items():strategy_signals[sid].append(sigid)
         if primary in paused:cash=False
         stage=3 if cash else 2 if m['macro'] else 1
         level=f['1H'].get('breakout_high_prev8' if side=='LONG' else 'breakout_low_prev8') or q['price']
-        signals.append({'symbol':sym,'side':side,'strategy_id':primary,'strategy_ids':triggered,
+        signals.append({'event_id':event_id,'signal_id':per_strategy_signal_ids[primary],
+            'strategy_signal_ids':per_strategy_signal_ids,'symbol':sym,'side':side,'strategy_id':primary,'strategy_ids':triggered,
             'strategy_version':VERSION,'strategy_config_hash':index[primary]['strategy_config_hash'],
             'strategy_family':index[primary]['category'],'strategy_policy':'TURAN200_ONLY',
             'selection_basis':'FORWARD_IDENTIFIED_STRESS_EVIDENCE' if primary in priority else 'FIXED_ID_NO_VALIDATED_WINNER',
@@ -322,7 +339,11 @@ def build(mtf,market,pack,now,prior_cash=None):
             s.update(paper_stage_number=2,paper_stage_name='GELMEKTE OLAN',hourly_level_state='WAIT_FOR_NEW_1H_CLOSE',verified_technical_entry=False)
             s['reasons'].append('T174_DIRECTION_CONFLICT_NO_TRADE')
     for r in bank:r.update(evaluated_candidates=evaluated[r['id']],source_blocked_candidates=blocked[r['id']])
+    evaluations,evaluation_summary=cycle_evaluations(evaluation_cycle_id,bank,evaluated,blocked,
+        matched_events,strategy_signals,candidate_events)
     return {'model_version':VERSION,'updated_at':early.stamp(now),'source_mtf_at':mtf['fetched_at'],
+            'evaluation_cycle_id':evaluation_cycle_id,'workflow_run_id':workflow_run_id,
+            'cycle_evaluations':evaluations,'evaluation_summary':evaluation_summary,
             'source_market_at':market['fetched_at'],'policy':'TURAN200_ONLY','registry':bank,'registry_count':200,
             'registry_hash':fingerprint(bank),'signals':signals,'role_counts':dict(Counter(r['role'] for r in bank)),
             'state_counts':dict(Counter(r['state'] for r in bank)),
