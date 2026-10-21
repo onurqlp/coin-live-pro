@@ -38,6 +38,7 @@ jobs:
       - run: node --check web/uzayx/watch.js
       - run: node --check web/uzayx/portfolio.js
       - run: node --test tests/uzayx-turan-ui.test.cjs
+      - run: node --test tests/turan-learning-progress.test.cjs
       - run: node --test tests/uzayx-turan-200.test.cjs tests/uzayx-strategy-only.test.cjs
       - run: node --check web/uzayx/turan-finance.js
       - run: node --check web/uzayx/turan-catalog.js
