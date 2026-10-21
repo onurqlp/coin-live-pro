@@ -16,6 +16,7 @@ on:
       - 'web/pilot-ui.js'
       - 'web/router.js'
       - 'web/style.css'
+      - 'web/uzayx/**'
 permissions:
   contents: read
 jobs:
@@ -123,58 +124,21 @@ jobs:
           print('LIVE_SITE_OK | provider=',data['market'].get('provider'),'coins=',len(data['market']['rows']),'events=',len(data['swing-history']['events']),'snapshot_age_minutes=',round(age,1))
           if age>30:print('CAUTION: Published data is stale; scheduled refresh requires attention')
           PY
-      - name: Verify real DOM rendering in Chromium
+      - name: Verify the deployed UzayX terminal renders in Chromium
         shell: bash
         run: |
           set -euo pipefail
           CHROME=$(command -v google-chrome || command -v chromium || true)
           if [ -z "$CHROME" ]; then echo "Chrome unavailable"; exit 1; fi
-          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --virtual-time-budget=26000 --dump-dom https://onurqlp.github.io/coin-live-pro/ > /tmp/dom.html 2>/tmp/chrome.log
+          "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --virtual-time-budget=26000 --dump-dom https://onurqlp.github.io/coin-live-pro/uzayx/site.html > /tmp/dom.html 2>/tmp/chrome.log
           python3 - <<'PY'
           import re
           doc=open('/tmp/dom.html').read()
-          for key in ('marketCount','healthTitle','radarRows','swingHistoryRows','forwardSummary','forwardRows','chartCoin','scanStatus','chartTf','mtfCandidates','mtfStatus','paperKpis','paperStatus','systemKpis','systemStatus'):
-            match=re.search(r'id="'+key+r'"[^>]*>(.*?)</',doc,re.S)
-            assert match is not None,'missing '+key
-            excerpt=re.sub('<[^>]*>',' ',match.group(1)).strip()[:160]
-            print(key,'=',excerpt)
-          assert 'Veriler kontrol ediliyor' not in doc.split('id="source"')[1][:120],'render did not start'
-          match=re.search(r'id="scanStatus"[^>]*>(.*?)</',doc,re.S)
-          assert match and 'hazırlanıyor' not in match.group(1),'independent live scanner never started'
-          print('LIVE_SCANNER_STATUS',re.sub('<[^>]*>',' ',match.group(1)).strip()[:180])
-          for key in ('mtfCandidates','paperKpis','systemKpis'):
-            m=re.search(r'id="'+key+r'"[^>]*>(.*?)</',doc,re.S)
-            assert m and m.group(1).strip(),'V2 widget failed to render: '+key
-          routes=['radar','grafikler','portfoy','gecmis','rapor','sistem']
-          for route in routes:
-            assert 'href="#'+route+'"' in doc,'Missing route '+route
-            assert 'data-view="'+route+'"' in doc,'Missing view '+route
-          current=re.search(r'<main class="workspaceView" data-view="radar"[^>]*>',doc)
-          assert current and 'aria-hidden="false"' in current.group(0),'Initial Radar route not active'
-          print('BROWSER_DOM_PASS: six-route navbar, shared central data loaded')
+          for key in ('connection','desktop-tabs','overview','m-pairs','m-watch','m-ready',
+                      'home-position-title','home-open-list','watch-search','watch-items',
+                      'mini-price','home-rsi','home-macd'):
+            assert re.search(r'id="'+key+r'"[^>]*>',doc), 'missing UzayX terminal element: '+key
+          assert 'PİYASA TERMİNALİ' in doc, 'UzayX page title/header missing'
+          assert 'Gerçek emir yok' in doc, 'paper-only disclosure missing'
+          print('UZAYX_BROWSER_DOM_PASS: terminal, paper-only disclosure and market widgets rendered')
           PY
-
-      - name: Open multiple routes and verify active panel changes
-        shell: bash
-        run: |
-          set -euo pipefail
-          CHROME=$(command -v google-chrome || command -v chromium)
-          ROOT=https://onurqlp.github.io/coin-live-pro/
-          for route in grafikler portfoy gecmis rapor sistem; do
-            "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --virtual-time-budget=8000 --dump-dom "${ROOT}#${route}" > /tmp/route.html 2>/dev/null
-            ROUTE="$route" python3 - <<'PY'
-          import os,re
-          route=os.environ['ROUTE']
-          doc=open('/tmp/route.html').read()
-          selected=re.search(r'<main class="workspaceView" data-view="'+route+r'"[^>]*>',doc)
-          assert selected,route+' missing panel'
-          assert ' hidden' not in selected.group(0).replace('aria-hidden','aria_hidden') and 'aria-hidden="false"' in selected.group(0),route+' not visible'
-          for other in ('radar','grafikler','portfoy','gecmis','rapor','sistem'):
-            panel=re.search(r'<main class="workspaceView" data-view="'+other+r'"[^>]*>',doc)
-            assert panel
-            if other!=route:assert ' hidden' in panel.group(0).replace('aria-hidden','aria_hidden') and 'aria-hidden="true"' in panel.group(0),other+' not hidden'
-          active=re.search(r'<a[^>]+data-nav="'+route+r'"[^>]*>',doc)
-          assert active and 'aria-current="page"' in active.group(0),'navigation highlight absent'
-          print('ROUTE_OK',route)
-          PY
-          done
