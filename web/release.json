@@ -1,25 +1,23 @@
 {
-  "product_version": "4.03",
+  "product_version": "4.04",
   "version_change_owner": "AUTOMATIC_MINOR_WITHIN_4",
-  "release_id": "OPS-20261017-4_03",
-  "updated_at_utc": "2026-10-17T16:34:08.491Z",
+  "release_id": "OPS-20261021-4_04",
+  "updated_at_utc": "2026-10-21T13:59:19.886Z",
   "timestamp_basis": "UTC",
   "market_data_timestamp_separate": true,
   "change_summary": [
-    "4.03 operasyonel sertleştirme: veri akışında 220 bilet sınırı regresyonu düzeltildi; bağımsız watchdog, günlük/haftalık quant raporu, 90 gün tutulabilen günlük yedek artifact, CodeQL/Dependabot, çakışmasız MAKINE yayın yolu ve kaynak güvenilirliği testi eklendi.",
-    "4.03 GELDİ otomatik sanal emir talebi: kapanmış 1H eşiği doğrulanmış her benzersiz GELDİ sinyalinde anında kayıt; ileri 5m kapanışı olmadan sahte dolum yok.",
-    "4.02 erken sanal işlemler ve arşiv korunarak 4.03'e taşındı; GELDİ giriş kohortu araştırma denemelerinden ayrıldı.",
-    "UTC gün gün rapor: GELDİ sayısı, sanal giriş, kapanan, gerçekleşen net PnL ve açık PnL fonlama hariç.",
-    "Her GELDİ'nin RSI/MACD/BB özellikleri, o anki fiyat, 1H kaynak, stop ve TP1/2/3 kayıtlı; veri boşluğu gizlenmez.",
-    "Ana sayfada sade tek günlük sayaç, Sanal Kasa alanında GELDİ pozisyonları ve 14 günlük performans.",
-    "AR-GE raporundaki Binance küçük coin kapsamı ve haber/mikroyapı eksiklikleri sonraki araştırmaya ayrıldı; mevcut OKX motorları ve 7 strateji değiştirilmedi.",
-    "Gerçek emir yok, 10 USDT nominal sanal bilet ve ayrı 10.000 USDT deney kasası; ana V4 10k portföy değişmedi.",
-    "Kurumsal mobil/tablet/masaüstü grafik görünümü: tek dokunuşla grafik sekmesi, doğrulanmış merkezi kapanmış OHLC yedeği, veri kaynağı durumu ve küçük ekranlara uyumlu mum çizimi; sinyal/ledger/paper kuralları değişmedi.",
-    "Telefon UX düzeni: kullanıcı önce güncel adayları ve koşulları görür, genişleyen kartlardan bütün kaynaklara ve grafiğe ulaşır; piyasa/tahmin/işlem kuralları değiştirilmedi."
+    "4.04: öğrenim ekranı, TURAN 200 kataloğunda ileri paper / kanıt bekleyen / kontrol durumlarını ayrı gösterir; 200 hipotezi doğrulanmış kâr diye sunmaz.",
+    "4.04: sanal kıvılcım kasasında toplam gerçekleşen tutar ile tamamen kapanmış kohort sonucunu ayırır; açık biletlerdeki kısmi çıkış farkını açıkça gösterir.",
+    "Sadece araştırma arayüzü ve rapor açıklığı güncellendi. Strateji kuralları, kasalar ve kayıtlar değişmedi; gerçek emir yok."
   ],
   "no_real_orders": true,
   "not_a_trading_signal": true,
   "change_log": [
+    {
+      "release_id": "OPS-20261021-4_04",
+      "updated_at_utc": "2026-10-21T13:59:19.886Z",
+      "summary": "4.04: öğrenim ekranı, TURAN 200 kataloğunda ileri paper / kanıt bekleyen / kontrol durumlarını ayrı gösterir; 200 hipotezi doğrulanmış kâr diye sunmaz. 4.04: sanal kıvılcım kasasında toplam gerçekleşen tutar ile tamamen kapanmış kohort sonucunu ayırır; açık biletlerdeki kısmi çıkış farkını açıkça gösterir. Sadece araştırma arayüzü ve rapor açıklığı güncellendi. Strateji kuralları, kasalar ve kayıtlar değişmedi; gerçek emir yok."
+    },
     {
       "release_id": "OPS-20261017-4_03",
       "updated_at_utc": "2026-10-17T16:34:08.491Z",
@@ -74,11 +72,6 @@
       "release_id": "UTC-20261016-2250",
       "updated_at_utc": "2026-10-16T22:50:10.527Z",
       "summary": "UTC saat birliği, OKX teyitli mumlar, görünür yayın geçmişi ve hafta sonu seans düzeltmesi. Ürün sürümü aynı."
-    },
-    {
-      "release_id": "UTC-20261017-A",
-      "updated_at_utc": "2026-10-16T22:36:05.003Z",
-      "summary": "İlk global UTC/anomali araştırması ve son kod güncelleme etiketi."
     }
   ],
   "major_version_5_requires_user_approval": true
