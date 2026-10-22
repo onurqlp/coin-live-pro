@@ -1732,6 +1732,97 @@
       "real_order": false,
       "simulated_fill": false,
       "note": "Historical token name overlap only, not recurring pattern proof or actionable signal."
+    },
+    {
+      "observed_at_utc": "2026-10-22T22:21:54Z",
+      "scan_id": "5175d5e708bb40ba1c1fd62a",
+      "market_asof_utc": "2026-10-22T22:14:37.265000+00:00",
+      "market_age_minutes": 7.3,
+      "market_state": "FRESH_RESEARCH",
+      "fresh_early_candidate_count": 16,
+      "historical_symbol_matches": [
+        {
+          "symbol": "TRXUSDT",
+          "base": "TRX",
+          "research_tier": "ERKEN_SINYAL",
+          "side_observed": "SHORT",
+          "source_closed_1h_at_utc": "2026-10-22T21:00:00+00:00",
+          "source_closed_4h_at_utc": "2026-10-22T16:00:00+00:00",
+          "observed_at_utc": "2026-10-22T22:14:08+00:00",
+          "historical_event_prediction": false,
+          "trade_ready": false
+        },
+        {
+          "symbol": "HYPEUSDT",
+          "base": "HYPE",
+          "research_tier": "ERKEN_SINYAL",
+          "side_observed": "SHORT",
+          "source_closed_1h_at_utc": "2026-10-22T21:00:00+00:00",
+          "source_closed_4h_at_utc": "2026-10-22T16:00:00+00:00",
+          "observed_at_utc": "2026-10-22T22:14:08+00:00",
+          "historical_event_prediction": false,
+          "trade_ready": false
+        },
+        {
+          "symbol": "SOLUSDT",
+          "base": "SOL",
+          "research_tier": "ERKEN_SINYAL",
+          "side_observed": "SHORT",
+          "source_closed_1h_at_utc": "2026-10-22T21:00:00+00:00",
+          "source_closed_4h_at_utc": "2026-10-22T16:00:00+00:00",
+          "observed_at_utc": "2026-10-22T22:14:08+00:00",
+          "historical_event_prediction": false,
+          "trade_ready": false
+        },
+        {
+          "symbol": "ZECUSDT",
+          "base": "ZEC",
+          "research_tier": "KIVILCIM",
+          "side_observed": "LONG",
+          "source_closed_1h_at_utc": "2026-10-22T21:00:00+00:00",
+          "source_closed_4h_at_utc": "2026-10-22T16:00:00+00:00",
+          "observed_at_utc": "2026-10-22T22:14:08+00:00",
+          "historical_event_prediction": false,
+          "trade_ready": false
+        }
+      ],
+      "module_context": {
+        "state": "UNAVAILABLE",
+        "asof_utc": null,
+        "modules": [
+          {
+            "id": "A1",
+            "state": "UNAVAILABLE"
+          },
+          {
+            "id": "A2",
+            "state": "UNAVAILABLE"
+          },
+          {
+            "id": "A3",
+            "state": "UNAVAILABLE"
+          },
+          {
+            "id": "B1",
+            "state": "UNAVAILABLE"
+          },
+          {
+            "id": "B2",
+            "state": "UNAVAILABLE"
+          },
+          {
+            "id": "T0",
+            "state": "UNAVAILABLE"
+          }
+        ]
+      },
+      "atlas_source_sha256": "c5538743a2550bede523fa5ffd04aed833eff45865b55fa7947e46870d77d821",
+      "ohlcv_backtest": false,
+      "predictions_verified": false,
+      "futures_tradability_verified": false,
+      "real_order": false,
+      "simulated_fill": false,
+      "note": "Historical token name overlap only, not recurring pattern proof or actionable signal."
     }
   ]
 }
