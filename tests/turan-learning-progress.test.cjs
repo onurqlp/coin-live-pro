@@ -8,7 +8,16 @@ const extract=name=>{
  return match[0];
 };
 const context={};
-vm.runInNewContext(`${extract('learningProgressSummary')}\n${extract('learningStage')}\nthis.summarize=learningProgressSummary;this.stage=learningStage;`,context);
+vm.runInNewContext(`${extract('learningProgressSummary')}\n${extract('paperEvidenceSummary')}\n${extract('learningStage')}\nthis.summarize=learningProgressSummary;this.cash=paperEvidenceSummary;this.stage=learningStage;`,context);
+
+test('cash evidence is shown only when it matches the same verified read-only scan',()=>{
+ const snapshot={source_scan_id:'scan-a',paper_evidence:{scan_id:'scan-a',source:'OKX_MODELLED_PAPER_LEDGER',reconciled:true,no_real_orders:true,starting_usdt:10000,equity_usdt:9613.95,total_pnl_usdt:-386.05,fees_estimated_usdt:92.82,closed_count:240,open_count:15,funding:'UNMODELED',liquidation:'UNVERIFIED'}};
+ const cash=context.cash(snapshot);
+ assert.equal(cash.totalPnl,-386.05);assert.equal(cash.equity,9613.95);assert.equal(cash.closed,240);assert.equal(cash.open,15);
+ assert.equal(cash.funding,'UNMODELED');assert.equal(cash.liquidation,'UNVERIFIED');
+ assert.equal(context.cash({...snapshot,paper_evidence:{...snapshot.paper_evidence,scan_id:'scan-b'}}),null);
+ assert.equal(context.cash({...snapshot,paper_evidence:{...snapshot.paper_evidence,no_real_orders:false}}),null);
+});
 
 test('summary derives coverage, maturation and validation gap from current report only',()=>{
  const summary=context.summarize({totals:{registered:230,bank:200,prospective_predictions:345,settled_predictions:55,verified_profitable:0},learning:{validation_span_days:3.917,shadow_champion:null},contest:{selection_requires_days:7},strategies:[]});

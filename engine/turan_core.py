@@ -36,6 +36,45 @@ def valid_number(value):
     return isinstance(value, (int, float)) and not isinstance(value, bool) and float("-inf") < value < float("inf")
 
 
+def paper_cash_evidence(pnl, scan_id):
+    """Return a reconciled, same-scan research ledger summary; never real PnL."""
+    if not isinstance(pnl, dict) or not isinstance(scan_id, str):
+        return None
+    if (pnl.get("schema") != "uzayx.pnl.ledger.v1" or pnl.get("scan_id") != scan_id or
+            pnl.get("source") != "OKX_MODELLED_PAPER_LEDGER" or
+            pnl.get("not_realized_exchange_pnl") is not True or
+            pnl.get("historical_research_is_not_executed_cash") is not True or
+            pnl.get("no_real_orders") is not True or pnl.get("reconciled") is not True):
+        return None
+    numeric = ("starting_usdt", "equity_usdt", "realized_usdt", "unrealized_usdt", "total_pnl_usdt")
+    if not all(valid_number(pnl.get(key)) for key in numeric):
+        return None
+    counts = ("open_count", "closed_count")
+    if not all(isinstance(pnl.get(key), int) and not isinstance(pnl.get(key), bool) and pnl[key] >= 0 for key in counts):
+        return None
+    fees = pnl.get("fees_estimated_usdt")
+    if fees is not None and not valid_number(fees):
+        return None
+    return {
+        "scan_id": scan_id,
+        "source": pnl["source"],
+        "source_at_utc": pnl.get("source_at_utc"),
+        "reconciled": True,
+        "no_real_orders": True,
+        "starting_usdt": pnl["starting_usdt"],
+        "equity_usdt": pnl["equity_usdt"],
+        "realized_usdt": pnl["realized_usdt"],
+        "unrealized_usdt": pnl["unrealized_usdt"],
+        "total_pnl_usdt": pnl["total_pnl_usdt"],
+        "fees_estimated_usdt": fees,
+        "open_count": pnl["open_count"],
+        "closed_count": pnl["closed_count"],
+        "funding": pnl.get("funding", "UNKNOWN"),
+        "liquidation": pnl.get("liquidation", "UNKNOWN"),
+        "independent_profit_verified": False,
+    }
+
+
 def source_age(reference, now):
     if not reference:
         return None
@@ -198,6 +237,7 @@ def build(root=ROOT, now=None):
             "status_counts": cycle_summary.get("status_counts", {}),
             "last_cycle_evaluation_present": len(cycle_rows) == 200,
         },
+        "paper_evidence": paper_cash_evidence(pnl, scan_id),
         "research_only": True,
         "no_real_orders": True,
         "no_cash_policy_change": True,

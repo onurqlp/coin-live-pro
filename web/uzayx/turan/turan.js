@@ -128,6 +128,15 @@
     const observedDays=learn.validation_span_days;
     return {expected,evaluated,missing,ruleEvaluated:cycle?.rule_evaluated_count??null,dataReady:cycle?.data_ready_count??null,blocked:cycle?.status_counts?.BLOCKED_SOURCE??null,signal:cycle?.status_counts?.SIGNAL??null,noSignal:cycle?.status_counts?.NO_SIGNAL??null,predictions,settled,maturedPct:predictions>0?Math.min(100,settled/predictions*100):null,requiredDays,observedDays,daysRemaining:typeof observedDays==='number'?Math.max(0,requiredDays-observedDays):null,shadowChampion:learn.shadow_champion||null,independentlyVerified:totals.verified_profitable||0,cyclePublished:Boolean(cycle)};
   }
+  function paperEvidenceSummary(snapshot){
+    const p=snapshot.paper_evidence||{};
+    if(p.scan_id!==snapshot.source_scan_id||p.source!=='OKX_MODELLED_PAPER_LEDGER'||p.reconciled!==true||p.no_real_orders!==true)return null;
+    const numeric=k=>typeof p[k]==='number'&&Number.isFinite(p[k])?p[k]:null;
+    const totalPnl=numeric('total_pnl_usdt'),equity=numeric('equity_usdt'),starting=numeric('starting_usdt');
+    const closed=numeric('closed_count'),open=numeric('open_count');
+    if(totalPnl===null||equity===null||starting===null||closed===null||open===null)return null;
+    return {totalPnl,equity,starting,fees:numeric('fees_estimated_usdt'),closed,open,funding:p.funding||'UNKNOWN',liquidation:p.liquidation||'UNKNOWN'};
+  }
   function learningStage(strategy){
     const cycle=strategy.last_cycle_evaluation||{},state=strategy.state||'';
     if(cycle.status==='BLOCKED_SOURCE'||state==='BLOCKED_REQUIRED_EVIDENCE')return 'Kaynak bekliyor';
@@ -138,7 +147,7 @@
     return 'Kontrol / araştırma';
   }
   function showProgress(){
-    const p=learningProgressSummary(data),l=data.learning||{},c=data.contest||{},items=data.strategies||[];
+    const p=learningProgressSummary(data),l=data.learning||{},c=data.contest||{},items=data.strategies||[],cash=paperEvidenceSummary(data);
     $('learning-progress-kpis').innerHTML=[
       kpi('TURAN kimliği',number(data.totals?.registered),'Banka '+number(data.totals?.bank)+' / önceki '+number(Math.max(0,(data.totals?.registered||0)-(data.totals?.bank||0)))),
       kpi('Son çevrimde değerlendirilen',p.cyclePublished?number(p.evaluated)+' / '+number(p.expected):'Yayımlanmadı',p.cyclePublished?number(p.missing)+' eksik kimlik':'En yeni strateji döngüsü bekleniyor'),
@@ -152,6 +161,9 @@
       valueRow('Kural ve kaynak hazırlığı',coverage),
       valueRow('İleri doğrulama süresi',proximity),
       valueRow('Tahmin sonuçlanma oranı',p.maturedPct===null?'Hesaplanamıyor':number(p.settled)+' / '+number(p.predictions)+' · '+number(p.maturedPct,1)+'%'),
+      valueRow('İleri tahmin hatası (MAE)',typeof l.prospective_mae_pct==='number'?number(l.prospective_mae_pct,3)+'%':'Henüz ölçülemiyor'),
+      valueRow('Sanal model P&L (gerçek değil)',cash?signed(cash.totalPnl,' USDT')+' · öz kaynak '+number(cash.equity,2)+' / '+number(cash.starting,2)+' USDT':'Aynı çevrimde doğrulanmış kayıt yok'),
+      valueRow('Sanal sonuç kapsamı',cash?number(cash.closed)+' kapalı · '+number(cash.open)+' açık · tahmini ücret '+number(cash.fees,2)+' USDT · fonlama '+cash.funding+' · tasfiye '+cash.liquidation:'Kasa özeti doğrulanmadı'),
       valueRow('Şampiyon adayı',p.shadowChampion?'Aday kaydı var':'Henüz doğrulanmadı'),
       valueRow('Güncel öğrenme modeli',l.model_id?l.model_id.slice(0,16)+'…':'Model kimliği yok')
     ].join('');

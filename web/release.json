@@ -1,11 +1,12 @@
 {
-  "product_version": "4.06",
+  "product_version": "4.07",
   "version_change_owner": "AUTOMATIC_MINOR_WITHIN_4",
-  "release_id": "OPS-20261021-4_06",
-  "updated_at_utc": "2026-10-21T16:25:00Z",
+  "release_id": "OPS-20261022-4_07",
+  "updated_at_utc": "2026-10-22T20:37:49Z",
   "timestamp_basis": "UTC",
   "market_data_timestamp_separate": true,
   "change_summary": [
+    "4.07: TURAN öğrenim ekranında aynı scan_id ile doğrulanmış sanal P&L, ücret tahmini, açık/kapalı kayıt, ileri tahmin MAE ve sonuçlanma oranı birlikte gösterilir. Fonlama/tasfiye belirsizliği korunur; gerçek P&L veya otomatik strateji değişikliği değildir.",
     "4.06: TURAN'a ayrı Öğrenim ilerlemesi sekmesi eklendi. 230 stratejinin kanıt aşaması, son çevrim kapsamı, tahmin kapanış oranı, gözlem süresi ve kaynak engelleri güncel rapordan hesaplanır. Google entegrasyonları değiştirilmedi; gerçek emir yok.",
     "4.05: her başarılı TURAN veri döngüsünde T001–T200 için kararlı evaluation_id, durum ve event/signal atıflı kayıt. TURAN ekranı 200/200 kapsamı, kaynak engelleri ve her kimliğin son döngü kararını gösterir. Sinyal, NO_SIGNAL, BLOCKED_SOURCE ve kontrol rolleri ayrıdır; 200 doğrulanmış kârlı algoritma değildir.",
     "Paper-only araştırma sürer; gerçek emir kapalıdır.",
@@ -14,6 +15,11 @@
   "no_real_orders": true,
   "not_a_trading_signal": true,
   "change_log": [
+    {
+      "release_id": "OPS-20261022-4_07",
+      "updated_at_utc": "2026-10-22T20:37:49Z",
+      "summary": "TURAN öğrenim özeti: ileri tahmin MAE ve sonuçlanma ile aynı çevrim sanal kasa kanıtı yan yana. Fonlama/tasfiye belirsizliği açık; Google, strateji kuralları ve gerçek emir politikası değişmedi."
+    },
     {
       "release_id": "OPS-20261021-4_06",
       "updated_at_utc": "2026-10-21T16:25:00Z",
