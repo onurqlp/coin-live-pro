@@ -1628,6 +1628,110 @@
       "real_order": false,
       "simulated_fill": false,
       "note": "Historical token name overlap only, not recurring pattern proof or actionable signal."
+    },
+    {
+      "observed_at_utc": "2026-10-22T18:34:17Z",
+      "scan_id": "3b928f35ce55a2dd9c14d4d3",
+      "market_asof_utc": "2026-10-22T18:24:44.298000+00:00",
+      "market_age_minutes": 9.6,
+      "market_state": "FRESH_RESEARCH",
+      "fresh_early_candidate_count": 14,
+      "historical_symbol_matches": [
+        {
+          "symbol": "OKBUSDT",
+          "base": "OKB",
+          "research_tier": "ISIK_GUCLENIYOR",
+          "side_observed": "SHORT",
+          "source_closed_1h_at_utc": "2026-10-22T17:00:00+00:00",
+          "source_closed_4h_at_utc": "2026-10-22T12:00:00+00:00",
+          "observed_at_utc": "2026-10-22T18:24:12+00:00",
+          "historical_event_prediction": false,
+          "trade_ready": false
+        },
+        {
+          "symbol": "SOLUSDT",
+          "base": "SOL",
+          "research_tier": "KIVILCIM",
+          "side_observed": "SHORT",
+          "source_closed_1h_at_utc": "2026-10-22T17:00:00+00:00",
+          "source_closed_4h_at_utc": "2026-10-22T12:00:00+00:00",
+          "observed_at_utc": "2026-10-22T18:24:12+00:00",
+          "historical_event_prediction": false,
+          "trade_ready": false
+        },
+        {
+          "symbol": "AEROUSDT",
+          "base": "AERO",
+          "research_tier": "KIVILCIM",
+          "side_observed": "SHORT",
+          "source_closed_1h_at_utc": "2026-10-22T17:00:00+00:00",
+          "source_closed_4h_at_utc": "2026-10-22T12:00:00+00:00",
+          "observed_at_utc": "2026-10-22T18:24:12+00:00",
+          "historical_event_prediction": false,
+          "trade_ready": false
+        }
+      ],
+      "module_context": {
+        "state": "OBSERVATION_CONTEXT_ONLY",
+        "asof_utc": "2026-10-22T17:38:30Z",
+        "modules": [
+          {
+            "id": "A1",
+            "state": "BLOCKED_SOURCE",
+            "data_scope": "NOT_CONNECTED",
+            "observations": 0,
+            "signal": false,
+            "executable": false
+          },
+          {
+            "id": "A2",
+            "state": "BLOCKED_SOURCE",
+            "data_scope": "NOT_CONNECTED",
+            "observations": 0,
+            "signal": false,
+            "executable": false
+          },
+          {
+            "id": "A3",
+            "state": "BLOCKED_SOURCE",
+            "data_scope": "NOT_CONNECTED",
+            "observations": 0,
+            "signal": false,
+            "executable": false
+          },
+          {
+            "id": "B1",
+            "state": "BLOCKED_SOURCE",
+            "data_scope": "NOT_CONNECTED",
+            "observations": 0,
+            "signal": false,
+            "executable": false
+          },
+          {
+            "id": "B2",
+            "state": "BLOCKED_SOURCE",
+            "data_scope": "NOT_CONNECTED",
+            "observations": 0,
+            "signal": false,
+            "executable": false
+          },
+          {
+            "id": "T0",
+            "state": "BLOCKED_SOURCE",
+            "data_scope": "NOT_CONNECTED",
+            "observations": 0,
+            "signal": false,
+            "executable": false
+          }
+        ]
+      },
+      "atlas_source_sha256": "c5538743a2550bede523fa5ffd04aed833eff45865b55fa7947e46870d77d821",
+      "ohlcv_backtest": false,
+      "predictions_verified": false,
+      "futures_tradability_verified": false,
+      "real_order": false,
+      "simulated_fill": false,
+      "note": "Historical token name overlap only, not recurring pattern proof or actionable signal."
     }
   ]
 }
