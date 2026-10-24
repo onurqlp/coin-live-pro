@@ -305,4 +305,4 @@ jobs:
           path: web
       - name: Publish refreshed UZAYX production site
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
