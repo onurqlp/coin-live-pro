@@ -58,7 +58,7 @@ def new_experiment(signal, strategy, scan):
     available = epoch(signal.get('source_available_at'))
     price, atr, spread = (signal.get(k) for k in ('price_at_scan','atr_pct_at_decision','spread_bps'))
     if (decision is None or available is None or available>decision or
-        not number(price) or price<=0 or not number(atr) or not 0<atr<35):
+        not number(price) or price<=0 or not number(atr) or atr<=0):
         raise ValueError('TURAN_EXPERIMENT_INVALID_BIRTH')
     arms = {}
     for arm in ARMS:
@@ -66,6 +66,8 @@ def new_experiment(signal, strategy, scan):
             side='SHORT' if arm=='INVERSE' and sign==1 else 'LONG' if arm=='INVERSE' else signal['side'],
             modeled_net_usdt=0. if arm=='NO_TRADE' else None,
             complete_net_usdt=0. if arm=='NO_TRADE' else None)
+        if atr>=35 and arm!='NO_TRADE':
+            arms[arm].update(status='BLOCKED_RISK',block_reason='ATR_OUTSIDE_REPLAY_DOMAIN')
     return dict(**identity, experiment_id='EXP-'+digest(identity), episode_id='EP-'+digest({
         'symbol':signal['symbol'], 'direction':signal['side'], 'utc_day':iso(decision)[:10]}),
         experiment_policy=POLICY, challenger_version=sid+'-vNext-CHALLENGER-1',
@@ -81,7 +83,7 @@ def new_experiment(signal, strategy, scan):
 
 
 def update_arm(arm, experiment, bars, hours, now, kind):
-    if arm['status'] in ('CLOSED','NO_CONFIRMATION','BENCHMARK'):
+    if arm['status'] in ('CLOSED','NO_CONFIRMATION','BENCHMARK','BLOCKED_RISK'):
         return
     birth = experiment['decision_ms']
     eligible = birth
@@ -232,6 +234,9 @@ def advance(prior, bank, manifest, pack, now):
             experiment_count=len(items), episode_count=len({x['episode_id'] for x in items}),
             learning_state='NEW_EVIDENCE' if sid in changed else 'BLOCKED_SOURCE' if registry[sid]['role']=='SOURCE_DEPENDENT_HYPOTHESIS' else 'NO_NEW_EVIDENCE',
             evidence_state='NEW_EVIDENCE' if sid in changed else 'NO_NEW_EVIDENCE',
+            arm_status_counts={kind:dict(Counter(x['arms'][kind]['status'] for x in items)) for kind in ARMS},
+            risk_blocked_count=sum(x['status']=='BLOCKED_RISK' for x in original),
+            source_gap_count=sum(x['status']=='SOURCE_GAP' for x in original),
             arms=arms, original_outcomes=dict(Counter(x['outcome'] for x in original_closed)),
             horizon_counts={h:sum(x['horizons'].get(h,{}).get('state')=='OBSERVED' for x in items) for h in HORIZONS}))
     report=dict(schema=SCHEMA,scan_id=manifest['scan_id'],generated_at_utc=iso(now),

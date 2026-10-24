@@ -38,6 +38,17 @@ def run(prior=None, now=NOW, bars=None):
 
 
 class ExperimentTests(unittest.TestCase):
+    def test_extreme_real_atr_is_recorded_as_risk_block_without_stopping_cycle(self):
+        bank,manifest,pack=fixture()
+        bank['signals'][0]['atr_pct_at_decision']=53.013
+        ledger,report=exp.advance({},bank,manifest,pack,NOW)
+        self.assertEqual(report['experiment_count'],2)
+        self.assertEqual(report['strategies'][0]['risk_blocked_count'],1)
+        for item in ledger['experiments']:
+            for key in ('ORIGINAL','INVERSE','WAIT'):
+                self.assertEqual(item['arms'][key]['status'],'BLOCKED_RISK')
+                self.assertIsNone(item['arms'][key]['modeled_net_usdt'])
+
     def test_four_independent_arms_and_200_families_without_cash_credit(self):
         ledger, report = run()
         self.assertEqual(len(ledger['experiments']), 2)

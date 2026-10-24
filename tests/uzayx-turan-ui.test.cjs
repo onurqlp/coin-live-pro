@@ -35,7 +35,7 @@ test('TURAN exposes latest 200-ID cycle and per-strategy decision states',()=>{
  assert.match(coreUi,/cycle_evaluation/);
  assert.match(coreUi,/last_cycle_evaluation/);
  for(const state of ['SIGNAL','NO_SIGNAL','BLOCKED_SOURCE','CONTROL_RESEARCH_ONLY'])assert.ok(coreUi.includes(state),state);
- assert.match(coreHtml,/turan\.js\?v=3/);
+ assert.match(coreHtml,/turan\.js\?v=4/);
 });
 test('TURAN has a separate dynamic learning progress view with evidence-based stages',()=>{
  assert.match(coreHtml,/data-view="progress"/);

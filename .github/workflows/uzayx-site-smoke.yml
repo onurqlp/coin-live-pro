@@ -44,11 +44,16 @@ jobs:
         run: |
           set -euo pipefail
           ROOT="https://onurqlp.github.io/coin-live-pro/uzayx/turan/"
-          for file in index.html turan.css turan.js; do
-            curl -fsSL --max-time 25 "${ROOT}${file}?proof=$(date +%s%N)" -o "/tmp/live-turan-${file}"
-            test -s "/tmp/live-turan-${file}"
-            cmp "web/uzayx/turan/${file}" "/tmp/live-turan-${file}"
+          ready=0
+          for attempt in $(seq 1 36); do
+            matched=1
+            for file in index.html turan.css turan.js; do
+              if ! curl -fsSL --max-time 25 "${ROOT}${file}?proof=$(date +%s%N)" -o "/tmp/live-turan-${file}" || ! cmp -s "web/uzayx/turan/${file}" "/tmp/live-turan-${file}"; then matched=0;break;fi
+            done
+            if [ "$matched" = 1 ]; then ready=1;break;fi
+            sleep 7
           done
+          test "$ready" = 1
           node --check web/uzayx/turan/turan.js
           echo "PUBLIC_TURAN_ASSETS_OK"
       - name: Install minimal browser automation
