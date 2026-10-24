@@ -2338,6 +2338,154 @@
       "real_order": false,
       "simulated_fill": false,
       "note": "Historical token name overlap only, not recurring pattern proof or actionable signal."
+    },
+    {
+      "observed_at_utc": "2026-10-24T05:56:28Z",
+      "scan_id": "5d3598d8bc10658a6756d718",
+      "market_asof_utc": "2026-10-24T05:54:45.779000+00:00",
+      "market_age_minutes": 1.7,
+      "market_state": "FRESH_RESEARCH",
+      "fresh_early_candidate_count": 18,
+      "historical_symbol_matches": [
+        {
+          "symbol": "TRUMPUSDT",
+          "base": "TRUMP",
+          "research_tier": "ERKEN_SINYAL",
+          "side_observed": "SHORT",
+          "source_closed_1h_at_utc": "2026-10-24T04:00:00+00:00",
+          "source_closed_4h_at_utc": "2026-10-24T00:00:00+00:00",
+          "observed_at_utc": "2026-10-24T05:54:08+00:00",
+          "historical_event_prediction": false,
+          "trade_ready": false
+        },
+        {
+          "symbol": "HYPEUSDT",
+          "base": "HYPE",
+          "research_tier": "ERKEN_SINYAL",
+          "side_observed": "SHORT",
+          "source_closed_1h_at_utc": "2026-10-24T04:00:00+00:00",
+          "source_closed_4h_at_utc": "2026-10-24T00:00:00+00:00",
+          "observed_at_utc": "2026-10-24T05:54:08+00:00",
+          "historical_event_prediction": false,
+          "trade_ready": false
+        },
+        {
+          "symbol": "SUIUSDT",
+          "base": "SUI",
+          "research_tier": "ERKEN_SINYAL",
+          "side_observed": "SHORT",
+          "source_closed_1h_at_utc": "2026-10-24T04:00:00+00:00",
+          "source_closed_4h_at_utc": "2026-10-24T00:00:00+00:00",
+          "observed_at_utc": "2026-10-24T05:54:08+00:00",
+          "historical_event_prediction": false,
+          "trade_ready": false
+        },
+        {
+          "symbol": "ONDOUSDT",
+          "base": "ONDO",
+          "research_tier": "ERKEN_SINYAL",
+          "side_observed": "SHORT",
+          "source_closed_1h_at_utc": "2026-10-24T04:00:00+00:00",
+          "source_closed_4h_at_utc": "2026-10-24T00:00:00+00:00",
+          "observed_at_utc": "2026-10-24T05:54:08+00:00",
+          "historical_event_prediction": false,
+          "trade_ready": false
+        },
+        {
+          "symbol": "SOLUSDT",
+          "base": "SOL",
+          "research_tier": "ERKEN_SINYAL",
+          "side_observed": "SHORT",
+          "source_closed_1h_at_utc": "2026-10-24T04:00:00+00:00",
+          "source_closed_4h_at_utc": "2026-10-24T00:00:00+00:00",
+          "observed_at_utc": "2026-10-24T05:54:08+00:00",
+          "historical_event_prediction": false,
+          "trade_ready": false
+        },
+        {
+          "symbol": "STXUSDT",
+          "base": "STX",
+          "research_tier": "ERKEN_SINYAL",
+          "side_observed": "SHORT",
+          "source_closed_1h_at_utc": "2026-10-24T04:00:00+00:00",
+          "source_closed_4h_at_utc": "2026-10-24T00:00:00+00:00",
+          "observed_at_utc": "2026-10-24T05:54:08+00:00",
+          "historical_event_prediction": false,
+          "trade_ready": false
+        },
+        {
+          "symbol": "PEPEUSDT",
+          "base": "PEPE",
+          "research_tier": "KIVILCIM",
+          "side_observed": "LONG",
+          "source_closed_1h_at_utc": "2026-10-24T04:00:00+00:00",
+          "source_closed_4h_at_utc": "2026-10-24T00:00:00+00:00",
+          "observed_at_utc": "2026-10-24T05:54:08+00:00",
+          "historical_event_prediction": false,
+          "trade_ready": false
+        }
+      ],
+      "module_context": {
+        "state": "OBSERVATION_CONTEXT_ONLY",
+        "asof_utc": "2026-10-24T05:50:41Z",
+        "modules": [
+          {
+            "id": "A1",
+            "state": "BLOCKED_SOURCE",
+            "data_scope": "NOT_CONNECTED",
+            "observations": 0,
+            "signal": false,
+            "executable": false
+          },
+          {
+            "id": "A2",
+            "state": "BLOCKED_SOURCE",
+            "data_scope": "NOT_CONNECTED",
+            "observations": 0,
+            "signal": false,
+            "executable": false
+          },
+          {
+            "id": "A3",
+            "state": "BLOCKED_SOURCE",
+            "data_scope": "NOT_CONNECTED",
+            "observations": 0,
+            "signal": false,
+            "executable": false
+          },
+          {
+            "id": "B1",
+            "state": "BLOCKED_SOURCE",
+            "data_scope": "NOT_CONNECTED",
+            "observations": 0,
+            "signal": false,
+            "executable": false
+          },
+          {
+            "id": "B2",
+            "state": "BLOCKED_SOURCE",
+            "data_scope": "NOT_CONNECTED",
+            "observations": 0,
+            "signal": false,
+            "executable": false
+          },
+          {
+            "id": "T0",
+            "state": "BLOCKED_SOURCE",
+            "data_scope": "NOT_CONNECTED",
+            "observations": 0,
+            "signal": false,
+            "executable": false
+          }
+        ]
+      },
+      "atlas_source_sha256": "c5538743a2550bede523fa5ffd04aed833eff45865b55fa7947e46870d77d821",
+      "ohlcv_backtest": false,
+      "predictions_verified": false,
+      "futures_tradability_verified": false,
+      "real_order": false,
+      "simulated_fill": false,
+      "note": "Historical token name overlap only, not recurring pattern proof or actionable signal."
     }
   ]
 }
