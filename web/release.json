@@ -1,11 +1,12 @@
 {
-  "product_version": "4.08",
+  "product_version": "4.09",
   "version_change_owner": "AUTOMATIC_MINOR_WITHIN_4",
-  "release_id": "OPS-20261024-4_08",
-  "updated_at_utc": "2026-10-24T08:00:10Z",
+  "release_id": "OPS-20261025-4_09",
+  "updated_at_utc": "2026-10-24T08:51:24.950696+00:00",
   "timestamp_basis": "UTC",
   "market_data_timestamp_separate": true,
   "change_summary": [
+    "4.09: Her sinyalin evaluation/snapshot/zaman zinciri sanal bilete taşınır; geçmiş atıf EXACT/RECONSTRUCTED/CANDIDATE/UNATTRIBUTED olarak denetlenir. Ortak kasadan ayrı, asıl/ters/teyit-bekle/NO_TRADE ileri deneyleri, 8 gözlem ufku ve sıkıştırılmış değişmez 200-ID çevrim arşivi eklendi. Fonlama/tasfiye bilinmiyorsa tam net PnL bilinmiyor; otomatik kural terfisi veya gerçek emir yok.",
     "4.08: TURAN raporu T001–T200 için yalnızca satır adedini değil, benzersiz ve eksiksiz kimlik kümesini, değerlendirme kayıtlarını ve çevrim özeti mutabakatını doğrular; tutarsızlıkta rapor üretimi durur. Kasa, strateji kuralları, Google entegrasyonları ve gerçek emir politikası değişmedi.",
     "4.07: TURAN öğrenim ekranında aynı scan_id ile doğrulanmış sanal P&L, ücret tahmini, açık/kapalı kayıt, ileri tahmin MAE ve sonuçlanma oranı birlikte gösterilir. Fonlama/tasfiye belirsizliği korunur; gerçek P&L veya otomatik strateji değişikliği değildir.",
     "4.06: TURAN'a ayrı Öğrenim ilerlemesi sekmesi eklendi. 230 stratejinin kanıt aşaması, son çevrim kapsamı, tahmin kapanış oranı, gözlem süresi ve kaynak engelleri güncel rapordan hesaplanır. Google entegrasyonları değiştirilmedi; gerçek emir yok.",
@@ -16,6 +17,11 @@
   "no_real_orders": true,
   "not_a_trading_signal": true,
   "change_log": [
+    {
+      "release_id": "OPS-20261025-4_09",
+      "updated_at_utc": "2026-10-24T08:51:24.950696+00:00",
+      "summary": "4.09: Her sinyalin evaluation/snapshot/zaman zinciri sanal bilete taşınır; geçmiş atıf EXACT/RECONSTRUCTED/CANDIDATE/UNATTRIBUTED olarak denetlenir. Ortak kasadan ayrı, asıl/ters/teyit-bekle/NO_TRADE ileri deneyleri, 8 gözlem ufku ve sıkıştırılmış değişmez 200-ID çevrim arşivi eklendi. Fonlama/tasfiye bilinmiyorsa tam net PnL bilinmiyor; otomatik kural terfisi veya gerçek emir yok."
+    },
     {
       "release_id": "OPS-20261024-4_08",
       "updated_at_utc": "2026-10-24T08:00:10Z",
@@ -97,5 +103,7 @@
       "summary": "UTC saat birliği, OKX teyitli mumlar, görünür yayın geçmişi ve hafta sonu seans düzeltmesi. Ürün sürümü aynı."
     }
   ],
-  "major_version_5_requires_user_approval": true
+  "major_version_5_requires_user_approval": true,
+  "product_name": "UZAYX",
+  "release_label": "25 Ekim 2026 güncellemesi"
 }

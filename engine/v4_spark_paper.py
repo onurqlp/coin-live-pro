@@ -75,6 +75,12 @@ def identity(early,event,kind,now_ms):
             attribution_kind='EXACT_TURAN_RULE_AT_BIRTH',control_strategy_ids=[
                 'T163','T165','T166','T167','T170','T174','T175','T178','T179',
                 'T191','T192','T194','T195','T196','T198','T200'])
+        for field in ('signal_id','evaluation_id','cycle_id','snapshot_id','strategy_signal_ids',
+                      'strategy_evaluation_ids','source_available_at','decision_at','observed_at',
+                      'bar_close_at','exchange','contract_type','direction'):
+            if field in event:native[field]=event[field]
+        native['strategy_event_id']=event.get('strategy_event_id',event.get('event_id'))
+        native['ledger_id']='UZAYX_SHARED_SPARK_PAPER'
     return native
 
 def feature_snap(c):
@@ -341,6 +347,7 @@ def advance(prior,early,mtf_doc,now_ms,candles):
             'valuation_status':'WAITING_FUTURE_OHLC' if ok else 'ATR_LEVEL_UNAVAILABLE',
             'no_backfilled_fill':True}
         entry.update(identity(early,x,'GELDI',now_ms))
+        entry['position_id']=key
         if strategy_mode:entry['stage_definition']='VERSIONED_STRATEGY_TRIGGER_AND_COST_REGIME_GATE'
         index[key]=entry
         newly_confirmed_opposite.append(entry)
@@ -502,6 +509,9 @@ def advance(prior,early,mtf_doc,now_ms,candles):
         'open_positions':[{
             'event_id':t['event_id'],'symbol':t['symbol'],'side':t['side'],
             'strategy_id':t.get('strategy_id'),'strategy_version':t.get('strategy_version'),
+            **{key:t.get(key) for key in ('signal_id','evaluation_id','cycle_id','snapshot_id',
+                'strategy_event_id','source_scan_id','source_available_at','decision_at',
+                'exchange','contract_type','direction','position_id','ledger_id','attribution_kind')},
             'parent_event_id':t.get('parent_event_id'),'risk_policy_version':t.get('risk_policy_version'),
             'status':t['status'],'signal_at_utc':t.get('signal_at_utc'),
             'signal_price':t.get('signal_price'), 'entry_class':t.get('entry_class'),

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import datetime as dt
 import hashlib
+import gzip
 import json
 import pathlib
 from collections import defaultdict
@@ -181,6 +182,7 @@ def build(root=ROOT, now=None):
     adaptive = load(data / "uzayx-adaptive.json", {})
     pnl = load(data / "uzayx-pnl-report.json", {})
     coverage = load(data / "uzayx-binance-coverage.json", {})
+    experiments = load(data / "turan-experiments.json", {})
     registry = load(root / "web" / "uzayx" / "turan-registry.json", {})
     ledger = load(root / "archive" / "uzayx-research-ledger.json", {})
     source_events = ledger.get("events", []) if isinstance(ledger, dict) else []
@@ -197,6 +199,11 @@ def build(root=ROOT, now=None):
     }
     if not all(aligned.values()):
         raise ValueError("TURAN_SOURCE_SCAN_MISMATCH: " + repr(aligned))
+    if experiments and (experiments.get('scan_id')!=scan_id or
+            experiments.get('no_real_orders') is not True or
+            experiments.get('separate_from_shared_cash') is not True):
+        raise ValueError('TURAN_EXPERIMENT_SCAN_MISMATCH')
+    experiment_by_id={s['strategy_id']:s for s in experiments.get('strategies',[])}
     if registry.get("schema") != "turan.unified_registry.v1" or len(registry.get("entries", [])) != 230:
         raise ValueError("TURAN_REGISTRY_INVALID")
 
@@ -223,6 +230,8 @@ def build(root=ROOT, now=None):
             "state": source.get("state") or "RESEARCH_ONLY",
             "required_source": source.get("required_source") or cash.get("required_source"),
             "evaluated_candidates": source.get("evaluated_candidates", 0),
+            "attribution": pnl.get('attribution',{}).get('by_strategy',{}).get(sid),
+            "experiment": experiment_by_id.get(sid),
             "last_cycle_evaluation": ({
                 "status": cycle_by_id[sid].get("status"),
                 "evaluation_id": cycle_by_id[sid].get("evaluation_id"),
@@ -231,6 +240,9 @@ def build(root=ROOT, now=None):
                 "candidate_count": cycle_by_id[sid].get("candidate_count", 0),
                 "signal_count": len(cycle_by_id[sid].get("signal_ids", [])),
                 "block_reason": cycle_by_id[sid].get("block_reason"),
+                "evaluated_at_utc": cycle_by_id[sid].get("evaluated_at_utc"),
+                "snapshot_id": cycle_by_id[sid].get("snapshot_id"),
+                "source_available_at": cycle_by_id[sid].get("source_available_at"),
             } if sid in cycle_by_id else None),
             "research_events": m.get("events", 0),
             "observed_1h": m.get("observed_1h", 0),
@@ -288,6 +300,8 @@ def build(root=ROOT, now=None):
             "last_cycle_evaluation_present": len(cycle_rows) == 200,
         },
         "paper_evidence": paper_cash_evidence(pnl, scan_id),
+        "attribution": pnl.get('attribution'),
+        "experiments": {k:v for k,v in experiments.items() if k not in ('strategies','recent_experiments')},
         "research_only": True,
         "no_real_orders": True,
         "no_cash_policy_change": True,
@@ -342,6 +356,32 @@ def build(root=ROOT, now=None):
     return report
 
 
+def archive_cycle(root, record):
+    # A retry may run after UTC midnight. Bucket by immutable source time,
+    # never by retry/observation time, so the same scan keeps one archive.
+    source_time=record.get('source_mtf_at')
+    try:
+        stamp=dt.datetime.fromisoformat(str(source_time).replace('Z','+00:00'))
+        day=stamp.astimezone(dt.timezone.utc).date().isoformat() if stamp.tzinfo else 'undated'
+    except ValueError:
+        day='undated'
+    relative='archive/turan-cycles/'+day+'.jsonl.gz'
+    path=root/relative
+    immutable={k:v for k,v in record.items() if k!='at_utc'}
+    if path.exists():
+        with gzip.open(path,'rt',encoding='utf8') as archive:
+            for raw in archive:
+                old=json.loads(raw)
+                if old.get('scan_id')==record['scan_id']:
+                    if {k:v for k,v in old.items() if k!='at_utc'}!=immutable:
+                        raise ValueError('TURAN_IMMUTABLE_CYCLE_CONFLICT')
+                    return dict(path=relative,sha256=hashlib.sha256(raw.encode()).hexdigest())
+    raw=json.dumps(record,ensure_ascii=False,separators=(',',':')).encode()+b'\n'
+    path.parent.mkdir(parents=True,exist_ok=True)
+    with gzip.open(path,'ab') as archive:archive.write(raw)
+    return dict(path=relative,sha256=hashlib.sha256(raw).hexdigest())
+
+
 def run(root=ROOT, now=None):
     now = now or dt.datetime.now(dt.timezone.utc)
     out = root / "web" / "data" / "turan-core.json"
@@ -361,12 +401,21 @@ def run(root=ROOT, now=None):
     atomic_json(out, report)
     if report["source_scan_id"] not in ids:
         journal.parent.mkdir(parents=True, exist_ok=True)
+        # Preserve all 200 evaluation records without duplicating OHLC snapshots.
+        bank=load(root/'web/data/uzayx-strategy-bank.json',{})
+        cycle_record=dict(scan_id=report['source_scan_id'],at_utc=now.isoformat(),
+            snapshot_id=bank.get('snapshot_id'),source_mtf_at=bank.get('source_mtf_at'),
+            evaluations=bank.get('cycle_evaluations',[]))
+        archived=archive_cycle(root,cycle_record)
         item = {
             "scan_id": report["source_scan_id"], "at_utc": now.isoformat(),
             "source_event_count": event_count,
             "new_source_events": report["journal"]["new_source_events_since_last_scan"],
             "paper_with_closed": report["totals"]["paper_with_closed"],
             "settled_predictions": report["totals"]["settled_predictions"],
+            "cycle_archive":archived['path'],"cycle_sha256":archived['sha256'],
+            "new_strategy_evidence_count":report['experiments'].get('new_evidence_count'),
+            "last_real_learning_at_utc":report['experiments'].get('last_learning_at_utc'),
             "source_hash": hashlib.sha256(json.dumps(report["source_alignment"], sort_keys=True).encode()).hexdigest(),
         }
         with journal.open("a", encoding="utf-8") as f:

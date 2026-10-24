@@ -1,10 +1,14 @@
 {
-  "release_id": "UZAYX-RESEARCH-20261020-1",
+  "release_id": "OPS-20261025-4_09",
   "legacy_cash_model": "4.03",
   "research_model": "uzayx.research.v1",
   "new_intents_max_leverage": 20,
   "historical_cash_rewritten": false,
   "funding_included": false,
   "exact_liquidation_model": "UNVERIFIED",
-  "no_real_orders": true
+  "no_real_orders": true,
+  "product_name": "UZAYX",
+  "product_version": "4.09",
+  "updated_at_utc": "2026-10-24T08:51:24.950696+00:00",
+  "experiment_model": "turan.experiments.v1"
 }

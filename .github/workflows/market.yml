@@ -1,4 +1,4 @@
-name: COIN.LIVE PRO — 4H/Daily Swing & Forward Archive
+name: UZAYX — TURAN 200 Learning & Paper Archive
 # Final publish: TURAN combined 230 registry, verified-identity top 30, 1H coin/time drilldowns and same mobile web.
 # Release: TURAN dynamic Top30 from 230 candidates, source-verified 1H coin/time outcomes, ID-gated paper PnL.
 # Final 19 Oct 2026 release: independent ATLAS, TURAN 30+200, reconciled virtual money details, shared PWA responsive polish.
@@ -64,6 +64,8 @@ jobs:
           python-version: '3.11'
       - name: Timestamp 5-minute best-effort scan
         run: echo "TRIGGER=${{ github.event_name }} UTC=$(date -u +%FT%TZ)"
+      - name: Verify TURAN timing, attribution and immutable experiment contracts
+        run: python3 -m unittest discover -s tests -p 'test_turan*.py'
       - name: Freeze previous published paper and watch counters
         run: python3 scripts/uzayx_week_guard.py baseline
       - name: One-time audited paper cash epoch cutover, keeping full prior books
@@ -256,7 +258,9 @@ jobs:
           python3 -m unittest discover -s tests -p test_uzayx_pnl_report.py
           python3 scripts/uzayx_pnl_report.py
       - name: Build TURAN independent evidence index and append-only learning journal
-        run: python3 engine/turan_core.py
+        run: |
+          python3 engine/turan_experiments.py
+          python3 engine/turan_core.py
       - name: Refresh UzayX Google summary from this verified scan
         if: ${{ github.event_name != 'push' || !startsWith(github.event.head_commit.message || '', '[skip-google]') }}
         run: python3 scripts/uzayx_google_export.py
@@ -276,6 +280,7 @@ jobs:
           git add archive/uzayx-adaptive-ledger.json web/data/uzayx-adaptive.json web/data/uzayx-strategy-bank.json
           git add web/data/uzayx-guncel.csv
           git add web/data/turan-core.json archive/turan-core-journal.jsonl
+          git add web/data/turan-experiments.json archive/turan-experiments-ledger.json archive/turan-cycles
           git add web/data/v4-watch-archive.json web/data/v4-context.json web/data/v4-early.json web/data/v4-spark-paper.json web/data/v4-spark-review.json
           git add web/data/swing-radar.json web/data/swing-history.json web/data/swing-outcomes.json
           git add archive/epochs
@@ -298,6 +303,6 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: web
-      - name: Publish refreshed COIN.LIVE PRO site
+      - name: Publish refreshed UZAYX production site
         id: deployment
         uses: actions/deploy-pages@v4

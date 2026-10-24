@@ -190,6 +190,8 @@ def build(mtf,market,radar,prior,watch,now_ms,strategy_feed=None):
                 3 if x['hourly_level_state']=='CLOSED_1H_LEVEL_BREACHED' else
                 2 if x['research_tier'] in ('ERKEN_SINYAL','ISIK_GUCLENIYOR') else 1)
         x['paper_stage_name']={1:'İZLENEN',2:'GELMEKTE OLAN',3:'GELDİ'}[x['paper_stage_number']]
+        if strategy_feed is not None:
+            x['strategy_event_id']=x['event_id']
         x['event_id']=event_id
         x['first_seen_at_utc']=old[event_id]['first_seen_at_utc']
         x['first_seen_price']=old[event_id]['first_seen_price']

@@ -23,6 +23,9 @@ from uzayx_evaluation import cycle_evaluations
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 VERSION='turan200-20261020-v1'
 H=3600000
+# 4.09 only adds lineage: retain the frozen v1 decision-rule implementation digest.
+# A future rule/metric change must bump VERSION and this implementation digest.
+RULE_IMPLEMENTATION_SHA256='4f08190450f31a05e0c451f0a84f88dde069e9db64c55947ab72e90de354070b'
 # Each threshold is frozen in a fingerprint; no random parameter search.
 # Conditions are ANDed. A missing metric blocks evaluation, never becomes zero.
 RULES={
@@ -93,7 +96,7 @@ def enabled():return policy().get('mode')=='TURAN200_ONLY'
 def registry():
     source=json.loads((ROOT/'web/uzayx/turan-families-v1.json').read_text())['families']
     if len(source)!=200 or {x['id'] for x in source}!={f'T{i:03}' for i in range(1,201)}:raise ValueError('CATALOG_200_ID_CONTRACT')
-    code=hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest();out=[]
+    code=RULE_IMPLEMENTATION_SHA256;out=[]
     for x in source:
         i=int(x['id'][1:]);row={**x,'strategy_version':VERSION,'category':x['category']}
         if i in RULES:row.update(role='ENTRY_HYPOTHESIS',state='IMPLEMENTED_FORWARD_PAPER',conditions=RULES[i],required_source='CLOSED_OKX_OHLCV_1D_4H_1H')
@@ -341,7 +344,27 @@ def build(mtf,market,pack,now,prior_cash=None):
     for r in bank:r.update(evaluated_candidates=evaluated[r['id']],source_blocked_candidates=blocked[r['id']])
     evaluations,evaluation_summary=cycle_evaluations(evaluation_cycle_id,bank,evaluated,blocked,
         matched_events,strategy_signals,candidate_events,workflow_run_id)
+    # One shared immutable source identity; every strategy links to the same data.
+    snapshot_id='SNAP-'+fingerprint({'mtf':mtf,'market':market,'chart_pack':pack})[:24]
+    available_at=early.stamp(max(source,qtime))
+    evaluation_by_id={row['strategy_id']:row for row in evaluations}
+    for row in evaluations:
+        row.update(snapshot_id=snapshot_id,cycle_id=evaluation_cycle_id,
+            evaluated_at_utc=early.stamp(now),source_available_at=available_at,
+            data_quality='VERIFIED_CLOSED_OHLC' if row['candidate_count'] else
+                         'CONTROL_RESEARCH_ONLY' if row['role']=='CONTROL_OR_RESEARCH' else 'BLOCKED_SOURCE')
+    for signal in signals:
+        signal.update(evaluation_id=evaluation_by_id[signal['strategy_id']]['evaluation_id'],
+            strategy_evaluation_ids={sid:evaluation_by_id[sid]['evaluation_id'] for sid in signal['strategy_ids']},
+            snapshot_id=snapshot_id,cycle_id=evaluation_cycle_id,decision_at=early.stamp(now),
+            source_available_at=available_at,observed_at=mtf['fetched_at'],
+            bar_close_at=early.stamp(max(early.epoch(signal['source_closed_1h_at_utc'])+H,
+                early.epoch(signal['source_closed_4h_at_utc'])+4*H,
+                early.epoch(signal['source_closed_1d_at_utc'])+24*H)),
+            exchange='OKX',contract_type='USDT-SWAP',direction=signal['side'],
+            atr_pct_at_decision=(next(c for c in mtf['candidates'] if c['symbol']==signal['symbol'] and c['side']==signal['side'])['frames']['1H']['atr_pct']))
     return {'model_version':VERSION,'updated_at':early.stamp(now),'source_mtf_at':mtf['fetched_at'],
+            'snapshot_id':snapshot_id,
             'evaluation_cycle_id':evaluation_cycle_id,'workflow_run_id':workflow_run_id,
             'cycle_evaluations':evaluations,'evaluation_summary':evaluation_summary,
             'source_market_at':market['fetched_at'],'policy':'TURAN200_ONLY','registry':bank,'registry_count':200,

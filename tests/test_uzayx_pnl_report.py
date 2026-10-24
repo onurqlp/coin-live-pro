@@ -13,6 +13,10 @@ def fixture():
       {'event_id':'a','symbol':'BTCUSDT','side':'LONG','status':'CLOSED','is_real_trade':False,
        'strategy_id':'T001','turan_strategy_id':'T001','strategy_ids':['T001','T002'],
        'attribution_kind':'EXACT_TURAN_RULE_AT_BIRTH','signal_at_utc':'2026-10-19T06:00:00Z',
+       'strategy_version':'v1','strategy_config_hash':'frozen-rule',
+       'decision_at_utc':'2026-10-19T06:00:00Z','source_1h_candle':'2026-10-19T05:00:00Z',
+       'strategy_evidence':{'matched_conditions':[['z','>=',2.5]],'observed':{'z':3}},
+       'features_at_birth':{'1H':{'atr_pct':1}},
        'realized_net_usdt':10.,'unrealized_net_usdt':0.,'fees_estimated_usdt':1.,
        'exits':[{'closed_at_utc':'2026-10-20T08:00:00+00:00','net_usdt':10.}]},
       {'event_id':'b','symbol':'ETHUSDT','side':'SHORT','status':'OPEN','is_real_trade':False,
@@ -51,5 +55,10 @@ class PNLReportTest(unittest.TestCase):
         a,b,c,d=fixture();a['tickets'][1]['exits'][0]['net_usdt']=20
         with self.assertRaisesRegex(ValueError,'PNL_EXIT_LEDGER_MISMATCH'):
             pnl.build(a,b,c,d)
+    def test_birth_flag_without_frozen_rule_cannot_receive_strategy_pnl(self):
+        a,b,c,d=fixture();a['tickets'][0].pop('strategy_evidence')
+        x=pnl.build(a,b,c,d)
+        self.assertEqual(x['strategies'][0]['realized'],0)
+        self.assertEqual(x['attribution']['counts']['CANDIDATE'],1)
 
 if __name__=='__main__':unittest.main()

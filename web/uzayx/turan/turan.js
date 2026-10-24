@@ -146,8 +146,14 @@
     if(state==='IMPLEMENTED_FORWARD_PAPER')return 'İleri gözlem';
     return 'Kontrol / araştırma';
   }
+  function strategyEvidenceSummary(snapshot){
+    const a=snapshot.attribution||null,e=snapshot.experiments||{};
+    const valid=e.scan_id===snapshot.source_scan_id&&e.no_real_orders===true&&e.separate_from_shared_cash===true;
+    return {attribution:a,experiments:valid?e:null};
+  }
   function showProgress(){
     const p=learningProgressSummary(data),l=data.learning||{},c=data.contest||{},items=data.strategies||[],cash=paperEvidenceSummary(data);
+    const proof=strategyEvidenceSummary(data),a=proof.attribution,e=proof.experiments;
     $('learning-progress-kpis').innerHTML=[
       kpi('TURAN kimliği',number(data.totals?.registered),'Banka '+number(data.totals?.bank)+' / önceki '+number(Math.max(0,(data.totals?.registered||0)-(data.totals?.bank||0)))),
       kpi('Son çevrimde değerlendirilen',p.cyclePublished?number(p.evaluated)+' / '+number(p.expected):'Yayımlanmadı',p.cyclePublished?number(p.missing)+' eksik kimlik':'En yeni strateji döngüsü bekleniyor'),
@@ -167,6 +173,14 @@
       valueRow('Şampiyon adayı',p.shadowChampion?'Aday kaydı var':'Henüz doğrulanmadı'),
       valueRow('Güncel öğrenme modeli',l.model_id?l.model_id.slice(0,16)+'…':'Model kimliği yok')
     ].join('');
+    $('learning-progress-summary').innerHTML+=[
+      valueRow('Strateji → bilet atfı',a?'EXACT '+number(a.counts?.EXACT)+' · RECONSTRUCTED '+number(a.counts?.RECONSTRUCTED)+' · CANDIDATE '+number(a.counts?.CANDIDATE)+' · UNATTRIBUTED '+number(a.counts?.UNATTRIBUTED):'Atıf denetimi bekleniyor'),
+      valueRow('Atfedilen maliyet modelli P&L',a?signed(a.attributed_modeled_pnl_usdt,' USDT')+' · dolum atıf oranı '+number(a.attribution_rate_pct,1)+'%':'Henüz ölçülmedi'),
+      valueRow('Ayrı strateji deney defteri',e?number(e.experiment_count)+' deney · '+number(e.new_experiments)+' yeni · '+number(e.settled_arms)+' yeni sonuç':'Aynı çevrim deney raporu bekleniyor'),
+      valueRow('Gerçek yeni kanıt / değişmeyen',e?number(e.new_evidence_count)+' / '+number(e.no_new_evidence_count)+' strateji':'Henüz ölçülmedi'),
+      valueRow('Son yeni öğrenme',e?clock(e.last_learning_at_utc):'Yeni kanıt bekleniyor'),
+      valueRow('Tam net P&L',e?'Bilinmiyor · fonlama / tasfiye '+e.funding+' / '+e.liquidation:'Bilinmiyor')
+    ].join('');
     const remaining=p.daysRemaining===null?'Gözlem süresini ve model hatasını güncel rapora yaz.':p.daysRemaining>0?'En az '+number(p.daysRemaining,2)+' gün daha ileri veri biriktir; ardından bağımsız doğrulamayı tekrar ölç.':'Gözlem günü eşiği tamam; kapanmış örnek koşulunu ve hata ölçüsünü denetle.';
     const sourceStep=p.cyclePublished&&p.blocked!==null?number(p.blocked)+' strateji kaydında kaynak engeli var; gerekli veri arşivlerini tamamla.':'Son çevrim ve kaynak hazırlığı yayımlandığında engelli stratejiler otomatik görünür.';
     $('learning-progress-next').innerHTML=[
@@ -183,7 +197,10 @@
       const evidence=cycle.evaluation_id?evaluationLabel(cycle.status)+' · '+esc(cycle.evaluation_id.slice(0,14))+'…':'Son 200-ID çevrim kaydı yok';
       const metric=x.paper_closed>0?number(x.paper_closed)+' kapanmış sanal kayıt':number(x.evaluated_candidates)+' aday · '+number(x.research_events)+' araştırma olayı';
       const direction=number(x.positive_1h)+' pozitif / '+number(x.negative_1h)+' negatif 1H yön gözlemi';
-      return '<article class="progress-card"><header><div><span class="strategy-id">'+esc(x.id)+'</span><h3>'+esc(x.name)+'</h3></div><span class="progress-stage">'+esc(stage)+'</span></header><p>'+esc(x.family)+' · '+esc(stateLabel(x.state))+'</p><div class="progress-evidence">'+esc(evidence)+'</div><div class="progress-stats"><span>'+esc(metric)+'</span><span>'+esc(direction)+'</span><span>Gerekli kaynak: '+esc(x.required_source||'Belirtilmemiş')+'</span></div><p class="progress-foot">'+esc(x.independent_profit_verified?'Bağımsız sonuç doğrulanmış.':'Bağımsız kârlılık doğrulanmadı.')+'</p></article>';
+      const experiment=e?x.experiment:null;
+      const arms=experiment?Object.entries(experiment.arms||{}).map(([key,v])=>({ORIGINAL:'Asıl',INVERSE:'Ters',WAIT:'Teyit bekle',NO_TRADE:'İşlem yapma'}[key]||key)+': '+number(v.closed)+' kapalı · '+signed(v.modeled_net_usdt,' USDT')).join(' | '):'';
+      const detail=experiment?'<details><summary>'+number(experiment.experiment_count)+' ayrı deney · '+number(experiment.episode_count)+' coin/yön/gün kümesi</summary><p>'+esc(arms)+'</p><p>Ufuk gözlemleri: '+esc(Object.entries(experiment.horizon_counts||{}).map(([k,v])=>k+' '+number(v)).join(' · '))+'</p><p>'+esc(experiment.challenger_version)+' · '+esc(experiment.evidence_state)+' · deney tutarları ortak kasaya eklenmez. Tam net P&L bilinmiyor.</p></details>':'';
+      return '<article class="progress-card" id="strategy-'+esc(x.id)+'"><header><div><a class="strategy-id" href="#strategy-'+esc(x.id)+'">'+esc(x.id)+'</a><h3>'+esc(x.name)+'</h3></div><span class="progress-stage">'+esc(stage)+'</span></header><p>'+esc(x.family)+' · '+esc(stateLabel(x.state))+'</p><div class="progress-evidence">'+esc(evidence)+'</div><div class="progress-stats"><span>'+esc(metric)+'</span><span>'+esc(direction)+'</span><span>Gerekli kaynak: '+esc(x.required_source||'Belirtilmemiş')+'</span></div>'+detail+'<p class="progress-foot">'+esc(x.independent_profit_verified?'Bağımsız sonuç doğrulanmış.':'Bağımsız kârlılık doğrulanmadı.')+'</p></article>';
     }).join(''):'<div class="empty">Bu aşama veya aramayla eşleşen strateji yok.</div>';
   }
   function showSources(){

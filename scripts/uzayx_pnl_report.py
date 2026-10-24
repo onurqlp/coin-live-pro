@@ -9,6 +9,10 @@ import datetime as dt
 import json
 import math
 import pathlib
+import sys
+
+sys.path.insert(0,str(pathlib.Path(__file__).resolve().parents[1]/'engine'))
+from turan_attribution import summarize as attribution_summary, classify as classify_attribution
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 OUT = ROOT / 'web/data/uzayx-pnl-report.json'
@@ -126,8 +130,7 @@ def build(ledger, paper, manifest, bank):
         coin['closed'] += int(status == 'CLOSED')
         coin['open'] += int(status == 'OPEN')
         sid = ticket.get('turan_strategy_id')
-        exact = (ticket.get('attribution_kind') == 'EXACT_TURAN_RULE_AT_BIRTH'
-                 and sid in strategies and ticket.get('strategy_id') == sid)
+        exact = sid in strategies and classify_attribution(ticket)['eligible_for_strategy_pnl']
         if exact:
             group = strategies[sid]
             for second in set(ticket.get('strategy_ids') or ()) - {sid}:
@@ -196,6 +199,7 @@ def build(ledger, paper, manifest, bank):
       'total_pnl_usdt': rounded(realized+floating), 'fees_estimated_usdt': rounded(fees),
       'open_count': open_count, 'closed_count': closed_count,
       'ledger_count': len(tickets), 'daily_realized_usdt': recent,
+      'attribution': attribution_summary(tickets),
       'daily_last_30': timeline, 'strategies': strategy_rows,
       'legacy_unassigned': legacy_rows, 'coins': coin_rows,
       'strategy_activation': {'paper_active': active, 'blocked_source': blocked,

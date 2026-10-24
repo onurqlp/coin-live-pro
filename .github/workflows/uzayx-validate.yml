@@ -32,6 +32,8 @@ jobs:
           node --check web/uzayx/support-proof.js
       - name: Adaptive learning invariants
         run: node --test tests/uzayx-learning.test.cjs tests/uzayx-chart-archive.test.cjs tests/uzayx-watchdesk.test.cjs tests/uzayx-support-proof.test.cjs
+      - name: TURAN evidence and separate experiment UI
+        run: node --test tests/turan-evidence.test.cjs tests/turan-learning-progress.test.cjs
       - name: Static integration contract
         run: |
           node - <<'NODE'
