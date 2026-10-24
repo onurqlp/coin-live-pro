@@ -16,6 +16,8 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 DATA = ROOT / "web" / "data"
 OUTPUT = DATA / "turan-core.json"
 JOURNAL = ROOT / "archive" / "turan-core-journal.jsonl"
+EXPECTED_TURAN_IDS = {f"T{i:03}" for i in range(1, 201)}
+CYCLE_STATUSES = {"SIGNAL", "NO_SIGNAL", "BLOCKED_SOURCE", "CONTROL_RESEARCH_ONLY"}
 
 
 def load(path, default=None):
@@ -124,6 +126,52 @@ def read_journal(path):
     return entries, ids
 
 
+def validate_cycle_evaluations(rows, summary):
+    """Fail closed unless this cycle contains one valid record for every T001-T200."""
+    if not isinstance(rows, list) or not isinstance(summary, dict):
+        raise ValueError("TURAN_CYCLE_COVERAGE_INVALID: missing rows or summary")
+    ids = [row.get("strategy_id") for row in rows if isinstance(row, dict)]
+    counts = defaultdict(int)
+    for sid in ids:
+        if isinstance(sid, str):
+            counts[sid] += 1
+    duplicates = sorted(sid for sid, count in counts.items() if count > 1)
+    observed = set(counts)
+    missing = sorted(EXPECTED_TURAN_IDS - observed)
+    unexpected = sorted(str(sid) for sid in observed - EXPECTED_TURAN_IDS)
+    status_counts = defaultdict(int)
+    invalid_rows = []
+    for row in rows:
+        if not isinstance(row, dict):
+            invalid_rows.append("NON_OBJECT_ROW")
+            continue
+        sid = row.get("strategy_id")
+        status = row.get("status")
+        if (not isinstance(sid, str) or not isinstance(status, str) or status not in CYCLE_STATUSES
+                or not row.get("evaluation_id") or not row.get("run_id")):
+            invalid_rows.append(str(sid or "UNKNOWN"))
+        if isinstance(status, str) and status in CYCLE_STATUSES:
+            status_counts[status] += 1
+    summary_ok = (
+        summary.get("expected_count") == 200 and
+        summary.get("checked_count") == 200 and
+        summary.get("record_count") == 200 and
+        summary.get("missing_count") == 0 and
+        summary.get("missing_ids") == [] and
+        summary.get("all_ids_present") is True and
+        summary.get("no_real_orders") is True and
+        summary.get("status_counts") == dict(status_counts)
+    )
+    if len(rows) != 200 or duplicates or missing or unexpected or invalid_rows or not summary_ok:
+        raise ValueError("TURAN_CYCLE_COVERAGE_INVALID: " + repr({
+            "records": len(rows), "duplicates": duplicates, "missing": missing,
+            "unexpected": unexpected, "invalid_rows": invalid_rows,
+            "summary_consistent": summary_ok,
+        }))
+    return {"verified": True, "expected_count": 200, "checked_count": 200,
+            "missing_count": 0, "status_counts": dict(status_counts)}
+
+
 def build(root=ROOT, now=None):
     now = now or dt.datetime.now(dt.timezone.utc)
     data = root / "web" / "data"
@@ -156,6 +204,7 @@ def build(root=ROOT, now=None):
     cycle_rows = bank.get("cycle_evaluations", [])
     if not isinstance(cycle_rows, list):
         cycle_rows = []
+    cycle_integrity = validate_cycle_evaluations(cycle_rows, cycle_summary)
     cycle_by_id = {x.get("strategy_id"): x for x in cycle_rows if isinstance(x, dict)}
     metrics = summarize_observations(source_events)
     paper = {s["id"]: s for s in pnl.get("strategies", []) if isinstance(s, dict) and isinstance(s.get("id"), str)}
@@ -226,6 +275,7 @@ def build(root=ROOT, now=None):
         "source_scan_id": scan_id,
         "source_alignment": aligned,
         "cycle_evaluation": {
+            **cycle_integrity,
             "run_id": cycle_summary.get("run_id"),
             "workflow_run_id": cycle_summary.get("workflow_run_id"),
             "checked_count": cycle_summary.get("checked_count"),
