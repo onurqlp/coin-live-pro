@@ -7,8 +7,8 @@
   <meta name="description" content="TURAN CORE: UzayX'in bağımsız veri, strateji, araştırma ve sürekli öğrenme merkezi.">
   <title>TURAN CORE | UzayX Araştırma Merkezi</title>
   <link rel="icon" type="image/svg+xml" href="../icon.svg">
-  <link rel="stylesheet" href="./turan.css?v=5">
-  <script defer src="./turan.js?v=9"></script>
+  <link rel="stylesheet" href="./turan.css?v=6">
+  <script defer src="./turan.js?v=10"></script>
 </head>
 <body>
 <a class="skip" href="#content">İçeriğe geç</a>
@@ -43,6 +43,7 @@
           <div class="hero-actions"><button type="button" data-open="arena" class="primary">Stratejileri incele <span>↗</span></button><button type="button" data-open="cases" class="soft">Olay hafızası →</button></div></div>
           <div class="hero-orbit" aria-hidden="true"><div class="orbit outer"></div><div class="orbit inner"></div><div class="orbit-center"><span>✧</span><strong>TURAN</strong><small>OBSERVE · LEARN</small></div><div class="orbit-point one"></div><div class="orbit-point two"></div></div>
         </div>
+        <article id="autonomy-panel" class="card autonomy" aria-live="polite"><div class="empty">Otomatik işletim durumu doğrulanıyor…</div></article>
         <div class="section-title"><div><small>01 / ARAŞTIRMA ÖZETİ</small><h2>Sistemin son durumu</h2></div><span id="last-update" class="time-hint">Rapor bekleniyor</span></div>
         <div class="kpis" id="kpis"><div class="empty full">Doğrulanmış kaynak okunuyor…</div></div>
         <div class="twocol">
@@ -73,12 +74,12 @@
         <div class="page-head"><div class="eyebrow">04 / MODEL LABORATUVARI</div><h1>Sonuçları biriktirir.<br><span>Hataları saklar.</span></h1><p>İleriye dönük tahminlerin sonraki gerçekleşen sonuçlarıyla karşılaştırıldığı araştırma alanı. Eski model otomatik olarak silinmez; üretim politikası değiştirilmez.</p></div>
         <div class="kpis" id="learn-kpis"></div>
         <div class="twocol"><article class="card"><div class="card-head"><div><div class="kicker">MODEL KARTI</div><h3>Öğrenme kanıtı</h3></div></div><div id="model-card"></div></article><article class="card"><div class="card-head"><div><div class="kicker">DOĞRULAMA</div><h3>Şampiyonluk şartları</h3></div></div><div id="validation-card"></div></article></div>
-        <article class="card broad"><div class="card-head"><div><div class="kicker">DEĞİŞMEZ KAYIT</div><h3>Öğrenme günlüğü</h3></div><span class="mini-chip">GITHUB / UTC</span></div><div id="journal-summary" class="journal"></div><p class="card-note">Günlük yeni piyasa verileri ve sanal deney sonuçları depolanır. GitHub zamanlayıcısı kesintisiz yayın garantisi değildir.</p></article>
+        <article class="card broad"><div class="card-head"><div><div class="kicker">DEĞİŞMEZ KAYIT</div><h3>Öğrenme günlüğü</h3></div><span class="mini-chip">GITHUB / UTC</span></div><div id="journal-summary" class="journal"></div><p class="card-note">Yeni piyasa verileri ve sanal deney sonuçları tarama tamamlandıkça depolanır; günlük manuel giriş beklenmez. GitHub zamanlayıcısı kesintisiz yayın garantisi değildir.</p></article>
       </section>
 
       <section class="view" id="view-progress">
         <div class="page-head"><div class="eyebrow">05 / ÖĞRENİM İLERLEMESİ</div><h1>Ne kadar yol aldık?<br><span>Kanıt neyi söylüyor?</span></h1><p>İlerleme; strateji kapsamı, veri hazırlığı, kapanan ileri tahminler ve bağımsız doğrulama şartlarıyla hesaplanır. Eksik kaynak, eksik örnek ve doğrulanmış sonuç birbirinden ayrılır.</p></div>
-        <article class="card journey" aria-labelledby="journey-title"><div class="card-head"><div><div class="kicker">TURAN · İLERLEME VE GEÇMİŞ</div><h3 id="journey-title">Bugün neredeyiz?</h3></div></div><div id="journey-panel" aria-live="polite"><div class="empty">Geçmiş kayıtlar okunuyor…</div></div></article>
+        <article class="card journey" aria-labelledby="journey-title"><div class="card-head"><div><div class="kicker">TURAN · İLERLEME VE GEÇMİŞ</div><h3 id="journey-title">Kayıtlı geçmişte neredeyiz?</h3></div></div><div id="journey-panel" aria-live="polite"><div class="empty">Geçmiş kayıtlar okunuyor…</div></div></article>
         <div class="kpis" id="learning-progress-kpis"><div class="empty full">Güncel öğrenim verisi okunuyor…</div></div>
         <article class="card research-panel" id="research-results" aria-live="polite"></article>
         <div class="twocol"><article class="card"><div class="card-head"><div><div class="kicker">GENEL YAKINLIK</div><h3>Bir sonraki doğrulama eşiği</h3></div><span class="mini-chip">VERİYE DAYALI</span></div><div class="learner" id="learning-progress-summary"></div></article><article class="card"><div class="card-head"><div><div class="kicker">ÖNCELİKLİ ADIMLAR</div><h3>İlerlemeyi açan işler</h3></div></div><div class="learner" id="learning-progress-next"></div></article></div>

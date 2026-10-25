@@ -10,7 +10,7 @@
   const stateLabel = x => ({IMPLEMENTED_FORWARD_PAPER:'İleri sanal deney',BLOCKED_REQUIRED_EVIDENCE:'Kaynak bekleniyor',IMPLEMENTED_CONTROL:'Kontrol / araştırma',RESEARCH_ONLY:'Önceki araştırma'}[x]||x||'Araştırma');
   const evaluationLabel = x => ({SIGNAL:'Araştırma sinyali eşleşti',NO_SIGNAL:'Sinyal yok',BLOCKED_SOURCE:'Kaynak/veri engeli',CONTROL_RESEARCH_ONLY:'Kontrol / bağımsız giriş değil',MISSING_REGISTRY_RECORD:'Katalog kaydı eksik'}[x]||'Bu döngüde kayıt yok');
   const displayView = {command:'Komuta merkezi',arena:'Strateji arenası',cases:'Olay hafızası',progress:'Öğrenim ilerlemesi',learning:'Öğrenme laboratuvarı',sources:'Veri ve sistem'};
-  let data=null,journeySources=null,limit=30;
+  let data=null,journeySources=null,health=null,limit=30;
   function go(view){
     if(!displayView[view])return;
     Object.keys(displayView).forEach(id=>{
@@ -51,7 +51,7 @@
     journeySources=null;
     {
       const root='https://raw.githubusercontent.com/onurqlp/coin-live-pro/'+(pinned||'main')+'/web/data/';
-      const results=await Promise.allSettled(['ops-report.json','turan-experiments.json','v4-spark-paper.json','turan-replay.json'].map(async name=>{
+      const results=await Promise.allSettled(['ops-report.json','turan-experiments.json','v4-spark-paper.json','turan-replay.json','health.json'].map(async name=>{
         const response=await fetch(root+name+(pinned?'':'?ts='+Date.now()),{cache:'no-store'});
         if(!response.ok)throw Error(name+' HTTP '+response.status);
         return response.json();
@@ -65,11 +65,32 @@
         }
       }
       if(results[3].status==='fulfilled')d.replay=preferVerifiedReplay(d,results[3].value);
+      const h=results[4].status==='fulfilled'?results[4].value:null;
+      health=h&&['OK','DEGRADED_SCHEDULE_GAP'].includes(h.status)?h:null;
     }
     return d;
   }
   function kpi(label,num,sub,suffix=''){
     return '<article class="kpi"><span class="k-label">'+esc(label)+'</span><div><span class="value">'+esc(num)+'</span><span class="suffix">'+esc(suffix)+'</span></div><small>'+esc(sub)+'</small></article>';
+  }
+  function autonomyState(core,market,now){
+    const fresh=stamp=>{const age=(now-Date.parse(stamp||''))/60000;return Number.isFinite(age)&&age>=-3&&age<=25;};
+    const trigger={schedule:'Zamanlayıcı',workflow_dispatch:'Harici tetikleme',push:'Kod yayını'}[market?.last_trigger]||'Tetikleyici bilinmiyor';
+    if(!core||!fresh(core.generated_at_utc))return {kind:'stale',title:'Araştırma verisi gecikti',trigger};
+    if(!market)return {kind:'unknown',title:'Piyasa işinin sağlığı doğrulanamadı',trigger};
+    if(!fresh(market.updated_at))return {kind:'stale',title:'Piyasa taraması gecikti',trigger};
+    if(market.status==='DEGRADED_SCHEDULE_GAP'||Number(market.missed_slots_latest)>0)
+      return {kind:'warn',title:'Tarama güncel; zamanlama boşluğu var',trigger};
+    return {kind:'ok',title:'Son tarama güncel',trigger};
+  }
+  function showAutonomy(){
+    const el=$('autonomy-panel'),state=autonomyState(data,health,Date.now());
+    const label=state.kind==='ok'?'GÜNCEL':state.kind==='warn'?'ZAMANLAMA UYARISI':state.kind==='stale'?'GECİKME':'DOĞRULANAMADI';
+    el.className='card autonomy '+state.kind;
+    el.innerHTML='<div class="card-head"><div><div class="kicker">30 GÜN / KENDİ KENDİNE TAKİP</div><h3>Günlük komut gerekmiyor</h3></div><span class="mini-chip">'+label+'</span></div>'+
+      '<p>Piyasa taraması ve kayıtlar arka planda yürür. Zamanlayıcı ile bağımsız sağlık gözcüsü tanımlıdır; GitHub zamanlaması kesintisiz çalışma garantisi vermez.</p>'+
+      '<div class="autonomy-facts"><div><small>SON ARAŞTIRMA</small><b>'+esc(clock(data.generated_at_utc))+'</b><span>'+esc(ago(data.generated_at_utc))+'</span></div><div><small>SON PİYASA TARAMASI</small><b>'+esc(clock(health?.updated_at))+'</b><span>'+esc(state.trigger)+'</span></div><div><small>DURUM</small><b>'+esc(state.title)+'</b><span>'+(health?.missed_slots_latest>0?esc(number(health.missed_slots_latest))+' kaçırılmış zaman dilimi':'Kaynak zamanı denetlenir')+'</span></div></div>'+
+      '<p class="autonomy-note">'+(state.kind==='stale'||state.kind==='unknown'?'Geciken veya doğrulanamayan veri güncel sinyal sayılmaz; son kayıt arşiv olarak okunur.':'Ekran açıkken kaynak iki dakikada bir yeniden okunur. Ürün sürümü ayrı bir yayındır; veri akışı için her gün GO gerekmez.')+'</p>';
   }
   function showCommand(){
     const t=data.totals||{};
@@ -216,7 +237,7 @@
   }
   function showJourney(){
     const j=journeySummary(data,journeySources),el=$('journey-panel');
-    if(!j.available){el.innerHTML='<div class="empty">Günlük kayıtlar ve toplamlar şu an aynı kaynakta doğrulanamadı. Sayılar yerine son güncelleme bekleniyor.</div>';return;}
+    if(!j.available){el.innerHTML='<div class="empty">Günlük kayıtlar ve toplamlar şu an aynı kaynakta doğrulanamadı. Kaynaklar yeniden eşleşene kadar sonuç gösterilmez.</div>';return;}
     const date=x=>{const t=Date.parse(x||'');return Number.isFinite(t)?new Date(t).toLocaleDateString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric',timeZone:'UTC'}):'—';};
     const dailyMax=Math.max(1,...j.days.map(x=>Math.abs(x.realized_net_usdt)));
     const rows=j.days.slice().reverse().map(x=>{
@@ -227,7 +248,7 @@
     const prior=j.sevenChange===null?'Önceki tam 7 gün bulunmuyor':'Önceki 7 güne göre '+signed(j.sevenChange,' USDT');
     const latest=j.days.at(-1),previous=j.days.at(-2);
     const dayComparison=latest&&previous?'Son gün '+number(latest.closed)+' kapanış; önceki gün '+number(previous.closed)+' kapanış.':'Günlük karşılaştırma için iki kayıt bekleniyor.';
-    const state=j.sevenNet===null?'Günlük kayıtlar birikiyor':j.sevenNet>=0?'Son 7 gün sanal net artıda':'Son 7 gün sanal net ekside';
+    const state=j.sevenNet===null?'Kayıtlı günler birikiyor':j.sevenNet>=0?'Son 7 kayıtlı gün sanal net artıda':'Son 7 kayıtlı gün sanal net ekside';
     el.innerHTML='<div class="journey-top"><div><span class="journey-eyebrow">ŞU AN</span><p class="journey-state">'+esc(state)+'</p><p>Günlük sonuçları ve geçmişteki değişimi birlikte izle. Bunlar sanal işlem ve yöntem deneyi kayıtlarıdır.</p></div><span class="journey-live">● Kaynaktan güncellenir</span></div>'+
       '<div class="journey-mini"><div><b>'+number(j.methods)+'</b><span>İncelenen yöntem</span></div><div><b>'+number(j.experiments)+'</b><span>Yöntem deneyi</span></div><div><b>'+number(j.closed)+'</b><span>Kapanan sanal işlem</span></div><div><b>'+number(j.dayCount)+'</b><span>Görünen günlük kayıt</span></div></div>'+
       '<div class="journey-overview"><div><small>BAŞTAN BUGÜNE · SANAL KASA</small><strong class="'+(j.modeledRealized>=0?'up':'down')+'">'+esc(signed(j.modeledRealized,' USDT'))+'</strong><span>'+number(j.positive)+' artı · '+number(j.negative)+' eksi · '+number(j.open)+' açık</span></div><div><small>SON 7 TAM KAYITLI GÜN</small><strong class="'+(j.sevenNet===null?'flat':j.sevenNet>=0?'up':'down')+'">'+(j.sevenNet===null?'Henüz yok':esc(signed(j.sevenNet,' USDT')))+'</strong><span>'+esc(prior)+'</span></div></div>'+
@@ -235,7 +256,7 @@
       '<div class="journey-table-head"><div><b>Gün gün geçmiş</b><span>En yeni gün üstte · '+esc(date(j.first))+' tarihinden beri sanal kasa</span></div></div>'+
       '<div class="journey-table-wrap"><table class="journey-table"><thead><tr><th>Gün (UTC)</th><th>Kapanış</th><th>Artı / eksi</th><th>Sanal net hareket</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
       '<div class="journey-foot-grid"><div><b>Nerede ilerliyoruz?</b><p>'+esc(dayComparison)+'</p><p>'+esc(j.hopeful)+' yöntem ilk incelemede olumlu görünüyor. Bu, sonraki günlerde de aynı sonucu vereceği anlamına gelmez.</p></div><div><b>Henüz neyi bilmiyoruz?</b><p>Uzun dönem tutarlılık, fonlama ve tasfiye maliyeti. Bu yüzden başarı puanı veya tarih tahmini göstermiyoruz.</p><p>Bağımsız doğrulanmış aday: '+number(j.reliable)+' · Gerçek işlem: yok.</p></div></div>'+
-      '<p class="journey-meta">Tekrar denenecek: asıl yöntemde en az 10 kapanış, 3 olay kümesi ve pozitif tahmini sonuç; sonraki dönemde doğrulanmış sonuç değil. Son güncelleme '+esc(clock(data.generated_at_utc))+' · Günlük tablo: son '+number(j.dayCount)+' kayıt; toplamlar '+esc(date(j.first))+' başlangıçlı ayrı sanal kasadan. Yöntem deneyleri '+esc(date(j.experimentFirst))+' tarihinden itibaren ayrı sayılır. Günlük net hareket açık işlemlerin kısmi kapanışını içerebilir; toplam sanal kasa sonucu yalnızca tamamen kapanan işlemlerdir. Tahmini ücretler dahil, fonlama ve tasfiye eksik. 30/90 günlük tam karşılaştırma için yeterli gün yok.</p>';
+      '<p class="journey-meta">Tekrar denenecek: asıl yöntemde en az 10 kapanış, 3 olay kümesi ve pozitif tahmini sonuç; sonraki dönemde doğrulanmış sonuç değil. Son araştırma '+esc(clock(data.generated_at_utc))+' · Günlük tablo: son '+number(j.dayCount)+' kayıt; toplamlar '+esc(date(j.first))+' başlangıçlı ayrı sanal kasadan. Yöntem deneyleri '+esc(date(j.experimentFirst))+' tarihinden itibaren ayrı sayılır. Günlük net hareket açık işlemlerin kısmi kapanışını içerebilir; toplam sanal kasa sonucu yalnızca tamamen kapanan işlemlerdir. Tahmini ücretler dahil, fonlama ve tasfiye eksik. '+(j.dayCount<30?'30 günlük karşılaştırma için '+number(30-j.dayCount)+' kayıtlı gün daha gerekir.':'30 günlük kayıt eşiği mevcut; uzun dönem tutarlılığı ayrıca doğrulanmalıdır.')+'</p>';
   }
   function showProgress(){
     showJourney();
@@ -268,8 +289,8 @@
       valueRow('Son yeni öğrenme',e?clock(e.last_learning_at_utc):'Yeni kanıt bekleniyor'),
       valueRow('Tam net P&L',e?'Bilinmiyor · fonlama / tasfiye '+e.funding+' / '+e.liquidation:'Bilinmiyor')
     ].join('');
-    const remaining=p.daysRemaining===null?'Gözlem süresini ve model hatasını güncel rapora yaz.':p.daysRemaining>0?'En az '+number(p.daysRemaining,2)+' gün daha ileri veri biriktir; ardından bağımsız doğrulamayı tekrar ölç.':'Gözlem günü eşiği tamam; kapanmış örnek koşulunu ve hata ölçüsünü denetle.';
-    const sourceStep=p.cyclePublished&&p.blocked!==null?number(p.blocked)+' strateji kaydında kaynak engeli var; gerekli veri arşivlerini tamamla.':'Son çevrim ve kaynak hazırlığı yayımlandığında engelli stratejiler otomatik görünür.';
+    const remaining=p.daysRemaining===null?'Gözlem süresi raporda doğrulanamadı; otomatik kayıt izlenir.':p.daysRemaining>0?'En az '+number(p.daysRemaining,2)+' gün daha ileri veri gerekir; kayıtlar taramalarla birikir.':'Gözlem günü eşiği tamam; kapanmış örnek ve hata koşulları ayrıca ölçülür.';
+    const sourceStep=p.cyclePublished&&p.blocked!==null?number(p.blocked)+' stratejide kaynak engeli var; tarama kaynakları yeniden dener ve eksikliği görünür tutar.':'Son çevrim yayımlandığında kaynak engelleri otomatik görünür.';
     $('learning-progress-next').innerHTML=[
       valueRow('1 · İleri örnek',remaining),
       valueRow('2 · Veri erişimi',sourceStep),
@@ -327,14 +348,14 @@
     const timestamp=Date.parse(data.generated_at_utc||'');
     const age=(Date.now()-timestamp)/60000;
     status(!Number.isFinite(age)?'fail':age>25?'stale':'ok',!Number.isFinite(age)?'Veri zamanı eksik':age>25?'Gecikmiş araştırma · '+ago(data.generated_at_utc):'Doğrulanmış rapor · '+ago(data.generated_at_utc));
-    showCommand();showArena();showCases();showLearning();showProgress();showResearchResults();showSources();
+    showAutonomy();showCommand();showArena();showCases();showLearning();showProgress();showResearchResults();showSources();
   }
   let busy=false;
   async function refresh(){
     if(busy)return;busy=true;
     $('refresh').disabled=true;status('','Kaynak kontrol ediliyor');
     try{data=await download();render();}
-    catch(e){data=null;journeySources=null;status('fail',e.message||'Kaynak okunamadı');['research-results','journey-panel','kpis','learn-kpis','learning-progress-kpis','learning-progress-summary','learning-progress-next','learning-progress-strategies','strategies','live-events','sources'].forEach(id=>{if($(id))$(id).innerHTML='<div class="empty">Veri doğrulanamadı. Daha sonra yeniden deneyin; eski rapor canlı gibi gösterilmez.</div>';});}
+    catch(e){data=null;health=null;journeySources=null;status('fail',e.message||'Kaynak okunamadı');['autonomy-panel','research-results','journey-panel','kpis','learn-kpis','learning-progress-kpis','learning-progress-summary','learning-progress-next','learning-progress-strategies','strategies','live-events','sources'].forEach(id=>{if($(id))$(id).innerHTML='<div class="empty">Veri doğrulanamadı. Daha sonra yeniden deneyin; eski rapor canlı gibi gösterilmez.</div>';});}
     finally{busy=false;$('refresh').disabled=false;}
   }
   $('refresh').addEventListener('click',refresh);
