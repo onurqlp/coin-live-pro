@@ -8,7 +8,7 @@ const extract=name=>{
  return match[0];
 };
 const context={};
-vm.runInNewContext(`${extract('learningProgressSummary')}\n${extract('paperEvidenceSummary')}\n${extract('learningStage')}\nthis.summarize=learningProgressSummary;this.cash=paperEvidenceSummary;this.stage=learningStage;`,context);
+vm.runInNewContext(`${extract('learningProgressSummary')}\n${extract('paperEvidenceSummary')}\n${extract('learningStage')}\n${extract('journeySummary')}\nthis.summarize=learningProgressSummary;this.cash=paperEvidenceSummary;this.stage=learningStage;this.journey=journeySummary;`,context);
 
 test('cash evidence is shown only when it matches the same verified read-only scan',()=>{
  const snapshot={source_scan_id:'scan-a',paper_evidence:{scan_id:'scan-a',source:'OKX_MODELLED_PAPER_LEDGER',reconciled:true,no_real_orders:true,starting_usdt:10000,equity_usdt:9613.95,total_pnl_usdt:-386.05,fees_estimated_usdt:92.82,closed_count:240,open_count:15,funding:'UNMODELED',liquidation:'UNVERIFIED'}};
@@ -44,5 +44,21 @@ test('desktop and six-item mobile navigation point to the published progress sec
  assert.match(page,/learning-progress-kpis/);assert.match(page,/learning-progress-strategies/);
  const mobile=page.match(/<nav class="mobile-nav"[\s\S]*?<\/nav>/)?.[0]||'';
  assert.equal((mobile.match(/data-view=/g)||[]).length,6);
- assert.match(page,/turan\.js\?v=4/);assert.match(page,/turan\.css\?v=2/);
+ assert.match(page,/turan\.js\?v=5/);assert.match(page,/turan\.css\?v=3/);
+ assert.match(page,/id="journey-panel"/);
+});
+
+test('journey accepts matching deduplicated snapshots and refuses mismatched scans',()=>{
+ const snapshot=require('../web/data/turan-core.json');
+ const ops=require('../web/data/ops-report.json');
+ const experiments=require('../web/data/turan-experiments.json');
+ const spark=require('../web/data/v4-spark-paper.json');
+ const summary=context.journey(snapshot,{ops,experiments,spark});
+ assert.equal(summary.available,true);
+ assert.equal(summary.closed,ops.cohorts['TÜMÜ'].closed);
+ assert.equal(summary.positive+summary.negative,summary.closed);
+ assert.equal(summary.reliable,snapshot.totals.verified_profitable);
+ assert.equal(summary.sevenChange,null);
+ assert.equal(context.journey(snapshot,{ops:{...ops,cohorts:{'TÜMÜ':{closed:999,positive:1,negative:1}}},experiments,spark}).available,false);
+ assert.equal(context.journey(snapshot,null).available,false);
 });

@@ -10,7 +10,7 @@
   const stateLabel = x => ({IMPLEMENTED_FORWARD_PAPER:'İleri sanal deney',BLOCKED_REQUIRED_EVIDENCE:'Kaynak bekleniyor',IMPLEMENTED_CONTROL:'Kontrol / araştırma',RESEARCH_ONLY:'Önceki araştırma'}[x]||x||'Araştırma');
   const evaluationLabel = x => ({SIGNAL:'Araştırma sinyali eşleşti',NO_SIGNAL:'Sinyal yok',BLOCKED_SOURCE:'Kaynak/veri engeli',CONTROL_RESEARCH_ONLY:'Kontrol / bağımsız giriş değil',MISSING_REGISTRY_RECORD:'Katalog kaydı eksik'}[x]||'Bu döngüde kayıt yok');
   const displayView = {command:'Komuta merkezi',arena:'Strateji arenası',cases:'Olay hafızası',progress:'Öğrenim ilerlemesi',learning:'Öğrenme laboratuvarı',sources:'Veri ve sistem'};
-  let data=null,limit=30;
+  let data=null,journeySources=null,limit=30;
   function go(view){
     if(!displayView[view])return;
     Object.keys(displayView).forEach(id=>{
@@ -30,14 +30,32 @@
   };
   async function download(){
     let url='https://raw.githubusercontent.com/onurqlp/coin-live-pro/main/web/data/turan-core.json?ts='+Date.now();
+    let pinned=null;
     try{
       const r=await fetch('https://api.github.com/repos/onurqlp/coin-live-pro/commits/main',{cache:'no-store'});
-      if(r.ok){const j=await r.json();if(/^[a-f0-9]{40}$/.test(j.sha||''))url='https://raw.githubusercontent.com/onurqlp/coin-live-pro/'+j.sha+'/web/data/turan-core.json';}
+      if(r.ok){const j=await r.json();if(/^[a-f0-9]{40}$/.test(j.sha||'')){pinned=j.sha;url='https://raw.githubusercontent.com/onurqlp/coin-live-pro/'+pinned+'/web/data/turan-core.json';}}
     }catch(e){ /* Fall back to uncached main source. */ }
     const r=await fetch(url,{cache:'no-store'});
     if(!r.ok)throw Error('TURAN raporu erişilemiyor (HTTP '+r.status+')');
     const d=await r.json();
     if(d.schema!=='turan.core.v1'||d.no_real_orders!==true||d.research_only!==true||!Array.isArray(d.strategies)||d.strategies.length!==230||!d.source_alignment||Object.values(d.source_alignment).some(x=>x!==true))throw Error('TURAN kaynak bütünlüğü doğrulanamadı');
+    journeySources=null;
+    if(pinned){
+      const root='https://raw.githubusercontent.com/onurqlp/coin-live-pro/'+pinned+'/web/data/';
+      const results=await Promise.allSettled(['ops-report.json','turan-experiments.json','v4-spark-paper.json'].map(async name=>{
+        const response=await fetch(root+name,{cache:'no-store'});
+        if(!response.ok)throw Error(name+' HTTP '+response.status);
+        return response.json();
+      }));
+      if(results.every(x=>x.status==='fulfilled')){
+        const [ops,experiments,spark]=results.map(x=>x.value);
+        if(ops.source_scan_id===d.source_scan_id&&experiments.scan_id===d.source_scan_id&&spark.scan_id===d.source_scan_id&&
+           ops.real_orders===false&&ops.experimental_spark?.is_real_money===false&&experiments.no_real_orders===true&&
+           experiments.separate_from_shared_cash===true&&spark.no_real_orders===true&&spark.daily?.per_event_deduplicated===true){
+          journeySources={ops,experiments,spark};
+        }
+      }
+    }
     return d;
   }
   function kpi(label,num,sub,suffix=''){
@@ -151,7 +169,70 @@
     const valid=e.scan_id===snapshot.source_scan_id&&e.no_real_orders===true&&e.separate_from_shared_cash===true;
     return {attribution:a,experiments:valid?e:null};
   }
+  function journeySummary(snapshot,sources){
+    const methods=snapshot.totals?.bank;
+    if(!sources)return {methods,available:false};
+    const {ops,experiments,spark}=sources, cohort=ops.cohorts?.['TÜMÜ']||{},days=ops.daily||[];
+    const closed=cohort.closed,positive=cohort.positive,negative=cohort.negative;
+    const countValid=Number.isInteger(closed)&&Number.isInteger(positive)&&Number.isInteger(negative)&&positive+negative<=closed;
+    const cash=paperEvidenceSummary(snapshot),matched=countValid&&cash&&cash.closed===closed&&
+      ops.experimental_spark?.closed_cohort_count===closed&&ops.experimental_spark?.positive_closed===positive&&
+      ops.experimental_spark?.negative_closed===negative&&ops.experimental_spark?.realized_reconciliation_verified===true;
+    const uniqueDays=[...new Map(days.filter(x=>/^\d{4}-\d{2}-\d{2}$/.test(x.date_utc||'')).map(x=>[x.date_utc,x])).values()]
+      .sort((a,b)=>a.date_utc.localeCompare(b.date_utc));
+    const dayCount=uniqueDays.length;
+    const dailyClosed=uniqueDays.reduce((n,x)=>n+x.closed,0);
+    const dailyPositive=uniqueDays.reduce((n,x)=>n+x.positive_closures,0);
+    const recent=uniqueDays.slice(-7),prior=uniqueDays.slice(-14,-7);
+    const sevenNet=recent.reduce((n,x)=>n+x.realized_net_usdt,0);
+    const priorNet=prior.reduce((n,x)=>n+x.realized_net_usdt,0);
+    const recentValid=recent.every(x=>Number.isFinite(x.realized_net_usdt));
+    const hopeful=(experiments.strategies||[]).filter(x=>x.arms?.ORIGINAL?.closed>=10&&x.episode_count>=3&&x.arms.ORIGINAL.modeled_net_usdt>0).length;
+    const reliable=(snapshot.totals?.verified_profitable||0);
+    const dataOk=Boolean(matched)&&dailyClosed===closed&&dailyPositive===positive&&Number.isInteger(methods)&&
+      experiments.experiment_count>=0&&experiments.complete_net_usdt===null;
+    return {available:dataOk,methods,hopeful,reliable,closed,positive,negative,open:cash?.open,
+      modeledRealized:ops.experimental_spark?.fully_closed_ticket_realized_net_usdt,
+      allRealized:cash?.totalPnl,sevenNet:recentValid?sevenNet:null,
+      sevenChange:recentValid&&prior.length===7?sevenNet-priorNet:null,
+      dayCount,first:uniqueDays[0]?.date_utc,last:uniqueDays.at(-1)?.date_utc,
+      experiments:experiments.experiment_count,sourceGaps:ops.source_publication_valid!==true,
+      completeNetKnown:Number.isFinite(experiments.complete_net_usdt)&&cash?.funding==='MODELED'&&cash?.liquidation==='VERIFIED'};
+  }
+  function showJourney(){
+    const j=journeySummary(data,journeySources),el=$('journey-panel');
+    if(!j.available){el.innerHTML='<div class="empty">Karşılaştırılabilir tarihsel kayıtlar aynı taramada doğrulanamadı. Başarı puanı ve sonuçlar hesaplanamıyor.</div>';return;}
+    const date=x=>x?x.split('-').reverse().join('.'):'—';
+    const evidenceDays=j.dayCount+' kayıtlı gün ('+date(j.first)+'–'+date(j.last)+')';
+    const enoughDays=j.dayCount>=7;
+    const status=j.reliable>0&&j.completeNetKnown?'Küçük ölçekte doğrulanıyor':'Denemelerde öğreniyor';
+    const percent=j.closed?number(j.positive/j.closed*100,1)+'%':'Henüz hesaplanamıyor';
+    const trend=j.sevenChange===null?'Önceki tam 7 gün henüz yok':signed(j.sevenChange,' USDT');
+    const net=Number.isFinite(j.modeledRealized)?signed(j.modeledRealized,' USDT'):'Hesaplanamıyor';
+    const stages=[
+      ['Öğrenmeyi başardı','Henüz doğrulanmadı',j.experiments+' ayrı yöntem deneyi; '+j.dayCount+' gün kayıt','Aynı yöntemin sonraki, görülmemiş dönemde bağımsız ve tutarlı sonucu','En az iki ayrık ileri dönem ve karşılaştırılabilir net ölçüm'],
+      ['Kazanç yöntemini buldu','Henüz doğrulanmadı',j.closed+' kapanmış sanal kasa işlemi; '+j.positive+' artı / '+j.negative+' eksi','Birden çok dönemde fonlama ve tasfiye dahil pozitif tam net sonuç','Masrafları tamamla, kötü günlerdeki gerilemeyi ölç'],
+      ['Gerçek başarıya ulaştı','Gerçek işlemlerle doğrulanmadı','Bu raporda gerçek emir: yok','Doğrulanmış gerçek işlem geçmişi ve önceden belirlenmiş risk koşulları','Gerçek kayıt oluşursa ayrı ve bağımsız doğrula']
+    ];
+    el.innerHTML='<p class="journey-state">'+esc(status)+'</p>'+
+      '<div class="journey-score"><span>Başarıya hazırlık</span><strong>Henüz hesaplanamıyor</strong></div><div class="journey-track" aria-label="Hazırlık puanı için yeterli kanıt yok"><span></span></div>'+
+      '<p class="journey-note">Bu puan kazanma ihtimali değildir. Görülmemiş veri, farklı dönemler ve tüm işlem maliyetleri doğrulanınca hesaplanabilir.</p>'+
+      '<div class="journey-mini"><div><b>'+number(j.methods)+'</b><span>İncelenen yöntem</span></div><div><b>'+number(j.hopeful)+'</b><span>Umut veren</span></div><div><b>'+number(j.reliable)+'</b><span>Güvenilir aday</span></div></div>'+
+      '<p class="journey-note">Umut veren: asıl yöntemde ≥10 kapanış, ≥3 olay kümesi ve pozitif tahmini sonuç; gelecek dönemde doğrulama değil. Güvenilir: bağımsız kâr doğrulaması; kesin kazanç anlamına gelmez.</p>'+
+      '<div class="journey-rows">'+[
+        ['Toplam deneme',number(j.experiments)+' yöntem deneyi · '+number(j.closed)+' kapanmış sanal işlem (ayrı kayıtlar)'],
+        ['Başarılı deneme',number(j.positive)+' / '+number(j.closed)+' · '+percent+'; '+number(j.negative)+' başarısız, '+number(j.open)+' açık'],
+        ['Son 7 günde değişim',trend+' · son kaydedilen 7 gün: '+(j.sevenNet===null?'—':signed(j.sevenNet,' USDT'))],
+        ['Gerçekleşen net sanal sonuç',net+' · kapanmış işlemler, tahmini ücretler dahil; fonlama ve tasfiye eksik'],
+        ['Başarıya ne kadar kaldı?','İleri dönem + tam maliyetli istikrar kanıtı eksik']
+      ].map(row=>valueRow(...row)).join('')+'</div>'+
+      '<div class="journey-comment"><b>TURAN bugün ne öğrendi?</b><p>'+esc(j.positive+' olumlu kapanışa karşı '+j.negative+' olumsuz kapanış var; isabet tek başına kârlılık kanıtı değil.')+'</p><p>'+esc('Son kayıtlı 7 günün sanal sonucu '+(j.sevenNet===null?'bilinmiyor':signed(j.sevenNet,' USDT'))+'; önceki tam hafta bulunmadığından haftalık iyileşme iddia edilemiyor.')+'</p><p>Sonraki hedef: umut veren yöntemleri yeni günlerde, tüm masraflarla tekrar sınamak.</p></div>'+
+      '<div class="journey-stages">'+stages.map((s,i)=>'<div><b>'+esc((i+1)+'. '+s[0])+'</b><strong>'+esc(s[1])+'</strong><small>Kanıt: '+esc(s[2])+'</small><small>Eksik: '+esc(s[3])+'</small><small>Sonraki adım: '+esc(s[4])+'</small></div>').join('')+'</div>'+
+      '<p class="journey-note"><b>Başarıya ne zaman ulaşacağız?</b> Şimdilik güvenilir tarih verilemiyor; eksik olan: birden fazla tam ileri dönem, tam maliyet ve gerçek işlem kanıtı.</p>'+
+      '<p class="journey-meta">'+esc(evidenceDays)+' · 30/90 günlük karşılaştırma: '+(enoughDays?'henüz tam dönem yok':'yetersiz kayıt')+' · Son güncelleme: '+esc(clock(data.generated_at_utc))+' · Kaynak: aynı tarama, yöntem deneyleri ve tekil sanal kasa kapanışları; farklı kasalar toplanmadı.</p>';
+  }
   function showProgress(){
+    showJourney();
     const p=learningProgressSummary(data),l=data.learning||{},c=data.contest||{},items=data.strategies||[],cash=paperEvidenceSummary(data);
     const proof=strategyEvidenceSummary(data),a=proof.attribution,e=proof.experiments;
     $('learning-progress-kpis').innerHTML=[
@@ -218,7 +299,7 @@
     if(busy)return;busy=true;
     $('refresh').disabled=true;status('','Kaynak kontrol ediliyor');
     try{data=await download();render();}
-    catch(e){data=null;status('fail',e.message||'Kaynak okunamadı');['kpis','learn-kpis','learning-progress-kpis','learning-progress-summary','learning-progress-next','learning-progress-strategies','strategies','live-events','sources'].forEach(id=>{if($(id))$(id).innerHTML='<div class="empty">Veri doğrulanamadı. Daha sonra yeniden deneyin; eski rapor canlı gibi gösterilmez.</div>';});}
+    catch(e){data=null;journeySources=null;status('fail',e.message||'Kaynak okunamadı');['journey-panel','kpis','learn-kpis','learning-progress-kpis','learning-progress-summary','learning-progress-next','learning-progress-strategies','strategies','live-events','sources'].forEach(id=>{if($(id))$(id).innerHTML='<div class="empty">Veri doğrulanamadı. Daha sonra yeniden deneyin; eski rapor canlı gibi gösterilmez.</div>';});}
     finally{busy=false;$('refresh').disabled=false;}
   }
   $('refresh').addEventListener('click',refresh);
