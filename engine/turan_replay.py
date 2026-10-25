@@ -148,6 +148,12 @@ def report(symbol_results):
         'cost_scenario':{'fee_per_side':FEE,'slippage_per_side':SLIP,'assumed_half_spread':HALF_SPREAD,'spread_observed':False,'notional_usdt':NOTIONAL,'max_hold_hours':24},
         'selection_warning':'Retrospective discovery, overlapping hypotheses and fixed spread scenario; no validated profitable winners.'}
 
+def pending_symbols(data,hashes,cached,implementation):
+    """Revisit changed archives first; deep continuous histories produce usable frames sooner."""
+    ordered=sorted(data,key=lambda symbol:(-len(data[symbol]),symbol))
+    return [symbol for symbol in ordered if cached.get(symbol,{}).get('signature')!=
+            digest([implementation,hashes[symbol],hashes.get('BTCUSDT')])]
+
 def main(root=ROOT,budget=16):
     directory=root/'research/binance-history';index=json.loads((directory/'index.json').read_text())
     files=defaultdict(list)
@@ -166,7 +172,7 @@ def main(root=ROOT,budget=16):
     # Changed canonical rule/implementation fingerprint invalidates cache without erasing old runs.
     implementation=digest({'rules':[r['strategy_config_hash'] for r in registry()],'replay_code':hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest(),'policy':POLICY})
     if cache.get('implementation')!=implementation:cache={'symbols':{},'offset':0,'implementation':implementation}
-    ordered=sorted(data,key=lambda k:(-len(data[k]),k));offset=cache['offset']%max(1,len(ordered));chosen=(ordered[offset:]+ordered[:offset])[:budget]
+    chosen=pending_symbols(data,hashes,cache['symbols'],implementation)[:budget]
     for symbol in chosen:
         signature=digest([implementation,hashes[symbol],hashes.get('BTCUSDT')])
         old=cache['symbols'].get(symbol)
@@ -174,7 +180,9 @@ def main(root=ROOT,budget=16):
         result=replay_symbol(data[symbol],symbol,'um',hashes[symbol],data.get('BTCUSDT'))
         name=symbol+'-'+signature[:20]+'.json.gz';(checkpoint/name).write_bytes(gzip.compress(json.dumps(result,separators=(',',':')).encode(),mtime=0))
         cache['symbols'][symbol]={'signature':signature,'path':name}
-    cache['offset']=(offset+len(chosen))%max(1,len(ordered))
+    # Keep the legacy checkpoint field readable, but selection is driven by
+    # stale source signatures rather than a rotating offset into all symbols.
+    cache['offset']=0
     results={symbol:json.loads(gzip.decompress((checkpoint/meta['path']).read_bytes())) for symbol,meta in cache['symbols'].items() if symbol in data and meta['signature']==digest([implementation,hashes[symbol],hashes.get('BTCUSDT')])}
     public=report(results);public['source_errors']=errors;public['available_archive_symbols']=len(data)
     target=root/'web/data/turan-replay.json';target.write_text(json.dumps(public,separators=(',',':'))+'\n')

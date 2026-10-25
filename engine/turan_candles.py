@@ -85,14 +85,24 @@ def collect(prior,pack,now,root,fetch=None,budget=24):
             first=min(recent or missing);step=STEPS[tf]
             pending.append((0 if recent else 1,-first,symbol,tf,first,min(first+100*step,now//step*step)))
     pending.sort();jobs=pending[:max(0,budget)];errors=[]
+    state_path=directory/'recovery-state.json'
+    state=json.loads(state_path.read_text()) if state_path.exists() else {'schema':'turan.candle.attempts.v1','sources':{}}
+    if state.get('schema')!='turan.candle.attempts.v1' or not isinstance(state.get('sources'),dict):
+        raise ValueError('INVALID_CANDLE_RECOVERY_STATE')
     def work(job):
         _,_,symbol,tf,start,end=job
         try:return symbol,tf,fetch(symbol,tf,start,end),None
         except (OSError,ValueError,KeyError,TypeError) as exc:return symbol,tf,[],type(exc).__name__
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
-        for symbol,tf,rows,error in pool.map(work,jobs):
+        for job,(symbol,tf,rows,error) in zip(jobs,pool.map(work,jobs)):
+            key=symbol+'|'+tf+'|'+str(job[4]);attempt=state['sources'].get(key,{})
+            attempt['attempts']=attempt.get('attempts',0)+1
+            attempt['last_attempt_ms']=now
+            if not error:merge(symbol,tf,rows)
+            if not error and job[4] not in loaded[(symbol,tf)]:error='SOURCE_BAR_MISSING'
+            attempt['last_error']=error
+            state['sources'][key]=attempt
             if error:errors.append({'symbol':symbol,'timeframe':tf,'error':error})
-            else:merge(symbol,tf,rows)
     for (symbol,tf),book in loaded.items():
         rows=[book[t] for t in sorted(book)]
         if rows:frames.setdefault(symbol,{})[tf]=rows
@@ -101,9 +111,18 @@ def collect(prior,pack,now,root,fetch=None,budget=24):
             path=directory/(symbol+'-'+tf+'.json.gz');temp=path.with_suffix('.tmp')
             temp.write_bytes(gzip.compress(json.dumps(doc,separators=(',',':')).encode(),mtime=0));temp.replace(path)
     unresolved=sum(t not in loaded[key] for key,ts in needs.items() for t in ts)
+    for key,attempt in list(state['sources'].items()):
+        symbol,tf,stamp=key.rsplit('|',2)
+        if int(stamp) in loaded.get((symbol,tf),{}):attempt['last_error']=None
+    temp=state_path.with_suffix('.tmp')
+    temp.write_text(json.dumps(state,separators=(',',':'))+'\n');temp.replace(state_path)
+    unresolved_attempts=[{'symbol':key.split('|')[0],'timeframe':key.split('|')[1],
+        'error':entry['last_error'],'attempts':entry['attempts'],'last_attempt_ms':entry['last_attempt_ms']}
+        for key,entry in state['sources'].items() if entry.get('last_error')]
     return out,{'schema':'turan.candle.recovery.v1','requests':len(jobs),'budget':budget,
         'unresolved_requested_bars':unresolved,'pending_coin_frames':len(pending),
-        'errors':errors,'cache_symbols':len(symbols),'recovered_candles_are_retrospective':True,
+        'errors':errors,'retrying_sources':len(unresolved_attempts),'last_errors':unresolved_attempts[-8:],
+        'cache_symbols':len(symbols),'recovered_candles_are_retrospective':True,
         'no_cash_inputs':True,'observed_at_ms':now,
         'quarantined_legacy_experiment_count':sum(quarantined_legacy.values()),
         'quarantined_legacy_symbols':sorted(quarantined_legacy)}

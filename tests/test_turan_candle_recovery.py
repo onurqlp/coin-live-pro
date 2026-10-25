@@ -50,3 +50,20 @@ class RecoveryTests(unittest.TestCase):
             pack['candles_by_symbol']['BTC-USDT-SWAP']={'5m':[]}
             with self.assertRaisesRegex(ValueError,'INVALID_CANDLE_SYMBOL'):
                 m.collect(prior,pack,now,Path(root),budget=0)
+
+    def test_failed_source_attempt_is_persisted_and_retried_without_fabricating_bar(self):
+        m=self.module();step=300000;now=3*step
+        prior={'experiments':[{'symbol':'BTCUSDT','exchange':'OKX','decision_ms':step,
+            'horizons':{},'arms':{'ORIGINAL':{'status':'SOURCE_GAP','last_bar_ms':step}}}]}
+        with tempfile.TemporaryDirectory() as root:
+            def fail(*args):raise OSError('source unavailable')
+            first,diag=m.collect(prior,{'candles_by_symbol':{}},now,Path(root),fetch=fail,budget=1)
+            self.assertEqual(diag['unresolved_requested_bars'],1)
+            self.assertEqual(diag['retrying_sources'],1)
+            self.assertEqual(diag['last_errors'][0]['error'],'OSError')
+            self.assertNotIn('BTCUSDT',first['candles_by_symbol'])
+            second,diag=m.collect(prior,{'candles_by_symbol':{}},now,Path(root),
+                fetch=lambda s,tf,start,end:[[2*step,100,101,99,100,10]],budget=1)
+            self.assertEqual(diag['unresolved_requested_bars'],0)
+            self.assertEqual(diag['retrying_sources'],0)
+            self.assertIn(2*step,[r[0] for r in second['candles_by_symbol']['BTCUSDT']['5m']])

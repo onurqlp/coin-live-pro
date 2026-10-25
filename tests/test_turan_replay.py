@@ -38,3 +38,16 @@ class ReplayTests(unittest.TestCase):
             p=Path(temp)/'month.json.gz';p.write_bytes(gzip.compress(json.dumps({'rows':[[0,100,101,99,100,1]]}).encode()))
             with self.assertRaisesRegex(ValueError,'CHECKSUM'):
                 m.read_archive(Path(temp),{'path':'month.json.gz','sha256':'0'*64})
+
+    def test_changed_deep_archive_replays_before_unchanged_shallow_cache(self):
+        m=self.module()
+        data={'BTCUSDT':[None]*1500,'ETHUSDT':[None]*1200,'AUSDT':[None]*300}
+        hashes={symbol:symbol for symbol in data}
+        implementation='v2'
+        signature=lambda symbol:m.digest([implementation,hashes[symbol],hashes.get('BTCUSDT')])
+        cache={'AUSDT':{'signature':signature('AUSDT')},
+               'BTCUSDT':{'signature':'old-month'},
+               'ETHUSDT':{'signature':signature('ETHUSDT')}}
+        self.assertEqual(m.pending_symbols(data,hashes,cache,implementation)[:2],['BTCUSDT'])
+        cache['ETHUSDT']['signature']='old-month'
+        self.assertEqual(m.pending_symbols(data,hashes,cache,implementation)[:2],['BTCUSDT','ETHUSDT'])
