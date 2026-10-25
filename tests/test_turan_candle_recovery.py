@@ -67,3 +67,10 @@ class RecoveryTests(unittest.TestCase):
             self.assertEqual(diag['unresolved_requested_bars'],0)
             self.assertEqual(diag['retrying_sources'],0)
             self.assertIn(2*step,[r[0] for r in second['candles_by_symbol']['BTCUSDT']['5m']])
+
+    def test_one_character_usdt_base_is_accepted_without_relaxing_invalid_instruments(self):
+        m=self.module();step=300000
+        with tempfile.TemporaryDirectory() as root:
+            pack={'candles_by_symbol':{'WUSDT':{'5m':[[0,100,101,99,100,10]]}}}
+            out,_=m.collect({},pack,step,Path(root),budget=0)
+            self.assertEqual(out['candles_by_symbol']['WUSDT']['5m'][0][0],0)
