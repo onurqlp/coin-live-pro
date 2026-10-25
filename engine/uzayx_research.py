@@ -93,7 +93,7 @@ def measure(event,now,frames):
         results[name]=result
     return results
 
-def observe(prior,mtf,pack,scan,now):
+def observe(prior,mtf,pack,scan,now,bank_feed=None):
     timestamp=v4_forward.parse(mtf.get('fetched_at'))
     if (not scan or mtf.get('provider')!='OKX' or not timestamp or not -120000<=now-timestamp<=480000
         or pack.get('source')!='OKX_CLOSED_CANDLES' or pack.get('source_mtf_at')!=mtf.get('fetched_at')):
@@ -105,7 +105,28 @@ def observe(prior,mtf,pack,scan,now):
     if len(ids)!=len(set(ids)):raise ValueError('DUPLICATE_RESEARCH_EVENT')
     seen=set(ids);frames=pack.get('candles_by_symbol')or{}
     btc=closed_rows(frames.get('BTCUSDT',{}).get('1H',[]),HOUR,now)
-    for c in mtf.get('candidates',[]):
+    candidates=mtf.get('candidates',[])
+    if bank_feed is not None:
+        if bank_feed.get('source_mtf_at')!=mtf['fetched_at'] or bank_feed.get('registry_count')!=200:
+            raise ValueError('RESEARCH_CANONICAL_FEED_MISMATCH')
+        rules={r['id']:r for r in bank_feed['registry']}
+        for signal in bank_feed.get('signals',[]):
+            for sid in signal['strategy_ids']:
+                rule=rules[sid];version=rule['strategy_version'];rule_hash=rule['strategy_config_hash']
+                identity=[version,rule_hash,sid,signal['symbol'],signal['side'],signal['source_closed_1h_at_utc']]
+                key=hashlib.sha256(json.dumps(identity).encode()).hexdigest()[:24]
+                if key in seen:continue
+                seen.add(key)
+                ledger['events'].append({'event_id':key,'parent_event_id':signal['event_id'],
+                    'strategy_id':sid,'strategy_version':version,'config_hash':rule_hash,
+                    'symbol':signal['symbol'],'side':signal['side'],'event_ms':now,'observed_at_utc':iso(now),
+                    'first_seen_price':signal['price_at_scan'],'source_scan_id':scan,'source_venue':'OKX',
+                    'birth':{'source_1h_candle':signal['source_closed_1h_at_utc'],
+                        'reference_price':signal['price_at_scan'],'condition':rule.get('conditions'),
+                        'source_observed_at':signal['source_observed_at_utc']},
+                    'is_executed_trade':False,'net_pnl_usdt':None,'horizons':{}})
+        candidates=[] # Legacy detector is retained only for explicit legacy callers.
+    for c in candidates:
         symbol=c.get('symbol');f=c.get('frames')or{}
         if c.get('quality')!='COMPLETE' or any(f.get(tf,{}).get('quality')!='CLOSED_CONFIRMED' for tf in ('4H','1D')):continue
         observed=v4_forward.parse(c.get('observed_at_utc'))
@@ -141,7 +162,8 @@ def account(ledger,public):
     for x in tickets:
         r=finite(x.get('realized_net_usdt'));realized+=r;fees+=finite(x.get('fees_estimated_usdt'))
         key=x.get('strategy_id')
-        if key not in NATIVE:unknown+=1;key='LEGACY_UNASSIGNED'
+        from turan_attribution import classify
+        if key not in NATIVE and not classify(x)['eligible_for_strategy_pnl']:unknown+=1;key='LEGACY_UNASSIGNED'
         g=groups.setdefault(key,{'id':key,'count':0,'closed':0,'open':0,'realized_usdt':0.,'closed_net_usdt':0.,'floating_usdt':0.})
         g['count']+=1;g['realized_usdt']+=r
         if x.get('status')=='CLOSED':closed+=r;g['closed']+=1;g['closed_net_usdt']+=r
@@ -198,7 +220,7 @@ def main():
     load=lambda path:json.loads(path.read_text(encoding='utf8'))
     manifest=load(DATA/'v4-manifest.json');now=int(dt.datetime.now(dt.timezone.utc).timestamp()*1000)
     prior=load(ARCH) if ARCH.exists() else {}
-    ledger=observe(prior,load(DATA/'mtf.json'),load(DATA/'chart-pack.json'),manifest['scan_id'],now)
+    ledger=observe(prior,load(DATA/'mtf.json'),load(DATA/'chart-pack.json'),manifest['scan_id'],now,bank_feed=load(DATA/'uzayx-strategy-bank.json'))
     cash=load(ROOT/'archive/v4-spark-paper-ledger.json');spark=load(DATA/'v4-spark-paper.json')
     if cash.get('last_scan_id')!=manifest['scan_id']:raise ValueError('PRIVATE_CASH_SCAN_MISMATCH')
     public=report(ledger,manifest,spark,cash,load(DATA/'v4-forward.json'),now)

@@ -64,7 +64,7 @@ def classify(ticket):
 
 
 def summarize(tickets):
-    counts=dict.fromkeys(LEVELS,0);by_strategy={};seen=set();rows=[]
+    counts=dict.fromkeys(LEVELS,0);by_strategy={};cohorts={};seen=set();rows=[]
     attributed=unattributed=0.;filled=attributed_filled=0
     for ticket in tickets:
         key=ticket.get('event_id')
@@ -77,6 +77,11 @@ def summarize(tickets):
         filled+=int(is_filled)
         if proof['eligible_for_strategy_pnl']:
             attributed+=pnl;attributed_filled+=int(is_filled)
+            fields=('strategy_id','strategy_version','strategy_config_hash','exchange','contract_type','risk_policy_version')
+            cohort_key=tuple(ticket.get(k,'UNKNOWN') for k in fields)
+            cohort=cohorts.setdefault(cohort_key,{**dict(zip(fields,cohort_key)),'realized_usdt':0.,'unrealized_usdt':0.,'closed':0,'open':0,'filled':0})
+            cohort['realized_usdt']+=r;cohort['unrealized_usdt']+=u
+            cohort['closed']+=int(ticket.get('status')=='CLOSED');cohort['open']+=int(ticket.get('status')=='OPEN');cohort['filled']+=int(is_filled)
             group=by_strategy.setdefault(proof['strategy_id'],dict(counts=dict.fromkeys(LEVELS,0),
                 modeled_pnl_usdt=0.,closed=0,open=0,filled=0))
             group['counts'][proof['level']]+=1
@@ -94,6 +99,6 @@ def summarize(tickets):
         attribution_rate_pct=round(attributed_filled/filled*100,2) if filled else None,
         attributed_modeled_pnl_usdt=round(attributed,6),unattributed_modeled_pnl_usdt=round(unattributed,6),
         complete_net_pnl_usdt=None,funding='UNKNOWN',liquidation='UNKNOWN',
-        by_strategy=by_strategy,recent_tickets=rows[:30],
+        by_strategy=by_strategy,cohorts=list(cohorts.values()),recent_tickets=rows[:30],
         reconstruction='FROZEN_BIRTH_RULE_RECORD_ONLY_NO_CURRENT_SIGNAL_MATCHING',
         shared_cash_counted_once=True,source='UZAYX_SHARED_SPARK_PAPER')

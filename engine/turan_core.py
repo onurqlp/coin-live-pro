@@ -88,7 +88,7 @@ def source_age(reference, now):
         return None
 
 
-def summarize_observations(events):
+def summarize_observations(events, registry=None):
     by_strategy = defaultdict(lambda: {"events": 0, "observed_1h": 0, "positive_1h": 0, "negative_1h": 0, "sum_direction_pct": 0.0})
     for event in events:
         if not isinstance(event, dict):
@@ -96,6 +96,12 @@ def summarize_observations(events):
         sid = event.get("strategy_id")
         if not isinstance(sid, str) or not sid.startswith("T"):
             continue
+        if registry is not None:
+            rule=registry.get(sid,{})
+            if (event.get('strategy_version')!=rule.get('strategy_version') or
+                event.get('config_hash')!=rule.get('strategy_config_hash') or
+                event.get('source_venue')!='OKX'):
+                continue
         record = by_strategy[sid]
         record["events"] += 1
         horizon = event.get("horizons", {}).get("1H", {})
@@ -182,6 +188,7 @@ def build(root=ROOT, now=None):
     adaptive = load(data / "uzayx-adaptive.json", {})
     pnl = load(data / "uzayx-pnl-report.json", {})
     coverage = load(data / "uzayx-binance-coverage.json", {})
+    replay = load(data / "turan-replay.json", {})
     experiments = load(data / "turan-experiments.json", {})
     registry = load(root / "web" / "uzayx" / "turan-registry.json", {})
     ledger = load(root / "archive" / "uzayx-research-ledger.json", {})
@@ -213,14 +220,21 @@ def build(root=ROOT, now=None):
         cycle_rows = []
     cycle_integrity = validate_cycle_evaluations(cycle_rows, cycle_summary)
     cycle_by_id = {x.get("strategy_id"): x for x in cycle_rows if isinstance(x, dict)}
-    metrics = summarize_observations(source_events)
+    active_rules={s['id']:s for s in bank.get('registry',[])}
+    metrics = summarize_observations(source_events, active_rules)
     paper = {s["id"]: s for s in pnl.get("strategies", []) if isinstance(s, dict) and isinstance(s.get("id"), str)}
     details = {s["id"]: s for s in bank.get("registry", []) if isinstance(s, dict) and isinstance(s.get("id"), str)}
     strategies = []
     for item in registry["entries"]:
         sid = item["id"]
         source = details.get(sid, {})
-        cash = paper.get(sid, {})
+        historical_cash = paper.get(sid, {})
+        cash_cohorts=[c for c in pnl.get('attribution',{}).get('cohorts',[]) if
+            c.get('strategy_id')==sid and c.get('strategy_version')==source.get('strategy_version') and
+            c.get('strategy_config_hash')==source.get('strategy_config_hash') and c.get('exchange')=='OKX']
+        cash={'closed':sum(c['closed'] for c in cash_cohorts),'open':sum(c['open'] for c in cash_cohorts),
+            'realized':sum(c['realized_usdt'] for c in cash_cohorts) if cash_cohorts else None,
+            'unrealized':sum(c['unrealized_usdt'] for c in cash_cohorts) if cash_cohorts else None}
         m = metrics.get(sid, {})
         strategies.append({
             "id": sid,
@@ -230,6 +244,8 @@ def build(root=ROOT, now=None):
             "state": source.get("state") or "RESEARCH_ONLY",
             "required_source": source.get("required_source") or cash.get("required_source"),
             "evaluated_candidates": source.get("evaluated_candidates", 0),
+            "historical_paper": historical_cash,
+            "cash_cohorts": cash_cohorts,
             "attribution": pnl.get('attribution',{}).get('by_strategy',{}).get(sid),
             "experiment": experiment_by_id.get(sid),
             "last_cycle_evaluation": ({
@@ -244,6 +260,9 @@ def build(root=ROOT, now=None):
                 "snapshot_id": cycle_by_id[sid].get("snapshot_id"),
                 "source_available_at": cycle_by_id[sid].get("source_available_at"),
             } if sid in cycle_by_id else None),
+            "strategy_version": source.get("strategy_version"),
+            "rules_hash": source.get("strategy_config_hash"),
+            "observation_scope": "CURRENT_RULE_VERSION_ONLY",
             "research_events": m.get("events", 0),
             "observed_1h": m.get("observed_1h", 0),
             "positive_1h": m.get("positive_1h", 0),
@@ -299,10 +318,14 @@ def build(root=ROOT, now=None):
             "status_counts": cycle_summary.get("status_counts", {}),
             "last_cycle_evaluation_present": len(cycle_rows) == 200,
         },
+        "rule_version": bank.get("model_version"),
+        "replay": replay if replay.get("schema")=="turan.replay.v1" and replay.get("no_real_orders") is True else None,
         "paper_evidence": paper_cash_evidence(pnl, scan_id),
         "attribution": pnl.get('attribution'),
         "experiments": {k:v for k,v in experiments.items() if k not in ('strategies','recent_experiments')},
         "research_only": True,
+        "observation_version_policy": "CURRENT_EXACT_VERSION_HASH_VENUE_ONLY",
+        "historical_observations_preserved": len(source_events),
         "no_real_orders": True,
         "no_cash_policy_change": True,
         "google_untouched": True,
@@ -325,6 +348,8 @@ def build(root=ROOT, now=None):
             "independent_episodes": adaptive.get("source_audit", {}).get("independent_coin_episodes"),
             "binance_verified_1h_bars": coverage.get("verified_1h_bars"),
         },
+        "learning_quality": adaptive.get("forecast_quality"),
+        "direction_evaluation": bank.get("direction_evaluation"),
         "learning": {
             "model_id": adaptive.get("current_model_id"),
             "trained_at_utc": adaptive.get("current_model", {}).get("trained_at_utc"),

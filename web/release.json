@@ -1,11 +1,12 @@
 {
-  "product_version": "4.09",
+  "product_version": "4.10",
   "version_change_owner": "AUTOMATIC_MINOR_WITHIN_4",
-  "release_id": "OPS-20261025-4_09",
-  "updated_at_utc": "2026-10-24T08:51:24.950696+00:00",
+  "release_id": "ARGE-20261025-4_10",
+  "updated_at_utc": "2026-10-25T10:49:58.025130+00:00",
   "timestamp_basis": "UTC",
   "market_data_timestamp_separate": true,
   "change_summary": [
+    "4.10: TURAN v2 ortak kurallar, düzeltilmiş dönüş yönü, çift yön araştırma, kalıcı deney mum takibi, sürüm ayrımlı eşleştirilmiş P&L, tahmin referans karşılaştırması ve Binance tarihsel replay. Eski kayıtlar korunur; tam net P&L bilinmiyor, gerçek emir yok.",
     "4.09: Her sinyalin evaluation/snapshot/zaman zinciri sanal bilete taşınır; geçmiş atıf EXACT/RECONSTRUCTED/CANDIDATE/UNATTRIBUTED olarak denetlenir. Ortak kasadan ayrı, asıl/ters/teyit-bekle/NO_TRADE ileri deneyleri, 8 gözlem ufku ve sıkıştırılmış değişmez 200-ID çevrim arşivi eklendi. Fonlama/tasfiye bilinmiyorsa tam net PnL bilinmiyor; otomatik kural terfisi veya gerçek emir yok.",
     "4.08: TURAN raporu T001–T200 için yalnızca satır adedini değil, benzersiz ve eksiksiz kimlik kümesini, değerlendirme kayıtlarını ve çevrim özeti mutabakatını doğrular; tutarsızlıkta rapor üretimi durur. Kasa, strateji kuralları, Google entegrasyonları ve gerçek emir politikası değişmedi.",
     "4.07: TURAN öğrenim ekranında aynı scan_id ile doğrulanmış sanal P&L, ücret tahmini, açık/kapalı kayıt, ileri tahmin MAE ve sonuçlanma oranı birlikte gösterilir. Fonlama/tasfiye belirsizliği korunur; gerçek P&L veya otomatik strateji değişikliği değildir.",
@@ -105,5 +106,7 @@
   ],
   "major_version_5_requires_user_approval": true,
   "product_name": "UZAYX",
-  "release_label": "25 Ekim 2026 güncellemesi"
+  "release_label": "25 Ekim 2026 güncellemesi",
+  "strategy_rule_version": "turan200-20261025-v2",
+  "replay_model": "turan.replay.v1"
 }

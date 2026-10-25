@@ -160,6 +160,38 @@ def update_arm(arm, experiment, bars, hours, now, kind):
         cursor+=B
 
 
+def report_results(experiments):
+    """Pair outcomes by experiment; never compare unlike closed populations."""
+    import statistics
+    grouped=defaultdict(list)
+    for item in experiments:
+        key=tuple(item.get(k) for k in ('strategy_id','strategy_version','rules_hash','exchange','contract_type','experiment_policy'))
+        grouped[key].append(item)
+    cohorts=[]
+    for key,items in sorted(grouped.items(),key=lambda kv:str(kv[0])):
+        record=dict(zip(('strategy_id','strategy_version','rules_hash','exchange','contract_type','experiment_policy'),key))
+        record.update(experiments=len(items),episode_clusters=len({i['episode_id'] for i in items}),
+            market_days=len({i['decision_ms']//86400000 for i in items}),complete_net_usdt=None)
+        for name,right in (('original_inverse','INVERSE'),('original_wait','WAIT')):
+            pairs=[i for i in items if i['arms']['ORIGINAL']['status']=='CLOSED' and
+                i['arms'][right]['status'] in ('CLOSED','NO_CONFIRMATION')]
+            left=sum(i['arms']['ORIGINAL']['modeled_net_usdt'] for i in pairs)
+            total=sum(i['arms'][right]['modeled_net_usdt'] for i in pairs)
+            clusters=defaultdict(list)
+            for i in pairs:clusters[i['episode_id']].append(i['arms'][right]['modeled_net_usdt']-i['arms']['ORIGINAL']['modeled_net_usdt'])
+            means=[statistics.mean(v) for v in clusters.values()]
+            lower=statistics.mean(means)-3.5*statistics.stdev(means)/len(means)**.5 if len(means)>1 else None
+            record[name]={'paired_count':len(pairs),'excluded_count':len(items)-len(pairs),
+                'original_modeled_usdt':round(left,6),right.lower()+'_modeled_usdt':round(total,6),
+                'alternative_minus_original_usdt':round(total-left,6),
+                'episode_clusters':len(clusters),'cluster_lower_delta_heuristic_usdt':round(lower,6) if lower is not None else None,
+                'no_trade_modeled_usdt':0.,'portfolio_return':False,'auto_promote':False}
+        cohorts.append(record)
+    return {'schema':'turan.paired.results.v1','cohorts':cohorts,'portfolio_return':False,
+        'pairing':'SAME_EXPERIMENT_ID_AND_IMMUTABLE_RULE_VERSION','funding':'UNKNOWN','liquidation':'UNKNOWN',
+        'complete_net_usdt':None,'selection_state':'RESEARCH_CANDIDATES_ONLY','auto_promote':False}
+
+
 def advance(prior, bank, manifest, pack, now):
     if (manifest.get('publication_valid') is not True or manifest.get('no_real_orders') is not True or
         bank.get('no_real_orders') is not True or not manifest.get('scan_id') or
@@ -175,7 +207,7 @@ def advance(prior, bank, manifest, pack, now):
     by_id={x['experiment_id']:x for x in ledger['experiments']}
     if len(by_id)!=len(ledger['experiments']):
         raise ValueError('TURAN_EXPERIMENT_DUPLICATE_ID')
-    changed=set();new_count=settled=0
+    changed=set();current_changed=set();new_count=settled=0
     for signal in bank.get('signals',[]):
         decision=epoch(signal.get('decision_at'))
         if decision is None or decision>now or now-decision>480000:
@@ -187,7 +219,7 @@ def advance(prior, bank, manifest, pack, now):
             if item['experiment_id'] not in by_id:
                 by_id[item['experiment_id']]=item
                 ledger['experiments'].append(item)
-                new_count+=1;changed.add(sid)
+                new_count+=1;changed.add(sid);current_changed.add(sid)
     frames=pack.get('candles_by_symbol',{})
     # Shared closed candles once per symbol/timeframe, not once per strategy.
     cache={}
@@ -218,22 +250,28 @@ def advance(prior, bank, manifest, pack, now):
                 item['horizons'][name]=dict(state='SOURCE_UNAVAILABLE')
         if before!=evidence_signature(item):
             changed.add(item['strategy_id'])
+            rule=registry[item['strategy_id']]
+            if item['strategy_version']==rule['strategy_version'] and item['rules_hash']==rule['strategy_config_hash']:
+                current_changed.add(item['strategy_id'])
     if changed:ledger['last_learning_at_utc']=iso(now)
     ledger.update(last_scan_id=manifest['scan_id'],no_real_orders=True,separate_from_shared_cash=True)
     strategies=[]
     by_strategy=defaultdict(list)
     for item in ledger['experiments']:by_strategy[item['strategy_id']].append(item)
     for sid in IDS:
-        items=by_strategy[sid]
+        all_items=by_strategy[sid];rule=registry[sid]
+        items=[x for x in all_items if x['strategy_version']==rule['strategy_version'] and
+            x['rules_hash']==rule['strategy_config_hash'] and x.get('exchange','OKX')=='OKX' and
+            x.get('experiment_policy')==POLICY]
         original=[x['arms']['ORIGINAL'] for x in items]
         original_closed=[x for x in original if x['status']=='CLOSED']
         arms={kind:dict(closed=sum(x['arms'][kind]['status']=='CLOSED' for x in items),
             modeled_net_usdt=round(sum(x['arms'][kind]['modeled_net_usdt'] or 0 for x in items if x['arms'][kind]['status']=='CLOSED'),6),
             complete_net_usdt=None) for kind in ARMS}
-        strategies.append(dict(strategy_id=sid, challenger_version=sid+'-vNext-CHALLENGER-1',
+        strategies.append(dict(strategy_id=sid, strategy_version=rule['strategy_version'],rules_hash=rule['strategy_config_hash'],historical_experiment_count=len(all_items)-len(items),challenger_version=sid+'-vNext-CHALLENGER-1',
             experiment_count=len(items), episode_count=len({x['episode_id'] for x in items}),
-            learning_state='NEW_EVIDENCE' if sid in changed else 'BLOCKED_SOURCE' if registry[sid]['role']=='SOURCE_DEPENDENT_HYPOTHESIS' else 'NO_NEW_EVIDENCE',
-            evidence_state='NEW_EVIDENCE' if sid in changed else 'NO_NEW_EVIDENCE',
+            learning_state='NEW_EVIDENCE' if sid in current_changed else 'BLOCKED_SOURCE' if registry[sid]['role']=='SOURCE_DEPENDENT_HYPOTHESIS' else 'NO_NEW_EVIDENCE',
+            evidence_state='NEW_EVIDENCE' if sid in current_changed else 'NO_NEW_EVIDENCE',
             arm_status_counts={kind:dict(Counter(x['arms'][kind]['status'] for x in items)) for kind in ARMS},
             risk_blocked_count=sum(x['status']=='BLOCKED_RISK' for x in original),
             source_gap_count=sum(x['status']=='SOURCE_GAP' for x in original),
@@ -246,7 +284,7 @@ def advance(prior, bank, manifest, pack, now):
         new_evidence_count=len(changed), no_new_evidence_count=200-len(changed),
         funding='UNKNOWN',liquidation='UNKNOWN',complete_net_usdt=None,
         episode_definition='COIN_DIRECTION_UTC_DAY_CLUSTER_NOT_PROVEN_INDEPENDENT',
-        strategies=strategies,recent_experiments=ledger['experiments'][-20:],
+        paired_results=report_results(ledger['experiments']),strategies=strategies,recent_experiments=ledger['experiments'][-20:],
         cost_model=dict(fee_per_side=FEE,slippage_per_side=SLIPPAGE,spread='BIRTH_HALF_SPREAD_PER_SIDE_ESTIMATE',
             notional_usdt=NOTIONAL,leverage=10,mark='LAST_CLOSED_5M_NOT_EXCHANGE_MARK',
             max_hold_hours=24,stop_atr=1,target_atr=2,ambiguity='STOP_FIRST',
@@ -260,9 +298,13 @@ def main():
     read=lambda p:json.loads((ROOT/p).read_text())
     archive=ROOT/'archive/turan-experiments-ledger.json'
     now=int(dt.datetime.now(dt.timezone.utc).timestamp()*1000)
-    ledger,report=advance(read('archive/turan-experiments-ledger.json') if archive.exists() else {},
+    prior=read('archive/turan-experiments-ledger.json') if archive.exists() else {}
+    from turan_candles import collect
+    pack,recovery=collect(prior,read('web/data/chart-pack.json'),now,ROOT)
+    ledger,report=advance(prior,
         read('web/data/uzayx-strategy-bank.json'),read('web/data/v4-manifest.json'),
-        read('web/data/chart-pack.json'),now)
+        pack,now)
+    report['source_recovery']=recovery
     save(archive,ledger);save(ROOT/'web/data/turan-experiments.json',report)
     print('TURAN_EXPERIMENTS',report['experiment_count'],'new',report['new_experiments'],
         'settled arms',report['settled_arms'],'NO_NEW_EVIDENCE',report['no_new_evidence_count'])
