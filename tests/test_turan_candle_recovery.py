@@ -34,3 +34,19 @@ class RecoveryTests(unittest.TestCase):
             p['candles_by_symbol']['BTCUSDT']['5m'][0][4]=100.5
             with self.assertRaisesRegex(ValueError,'CONFLICT'):
                 m.collect({},p,step,Path(root),budget=0)
+
+    def test_invalid_legacy_symbol_does_not_block_current_scans(self):
+        m=self.module();step=300000;now=12*step
+        old={'symbol':'BTC-USDT-SWAP','exchange':'OKX','decision_ms':step,
+             'horizons':{},'arms':{'ORIGINAL':{'status':'SOURCE_GAP'}}}
+        prior={'experiments':[old]};pack={'candles_by_symbol':{'BTCUSDT':{'5m':[[0,100,101,99,100,1]]}}}
+        with tempfile.TemporaryDirectory() as root:
+            out,diag=m.collect(prior,pack,now,Path(root),fetch=lambda *args:[],budget=0)
+            self.assertEqual(diag['quarantined_legacy_experiment_count'],1)
+            self.assertEqual(diag['quarantined_legacy_symbols'],['BTC-USDT-SWAP'])
+            self.assertEqual(prior['experiments'][0],old)
+            self.assertIn('BTCUSDT',out['candles_by_symbol'])
+            self.assertNotIn('BTC-USDT-SWAP',out['candles_by_symbol'])
+            pack['candles_by_symbol']['BTC-USDT-SWAP']={'5m':[]}
+            with self.assertRaisesRegex(ValueError,'INVALID_CANDLE_SYMBOL'):
+                m.collect(prior,pack,now,Path(root),budget=0)

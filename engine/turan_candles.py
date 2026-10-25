@@ -30,9 +30,16 @@ def collect(prior,pack,now,root,fetch=None,budget=24):
     out=copy.deepcopy(pack);frames=out.setdefault('candles_by_symbol',{})
     directory=pathlib.Path(root)/'research/turan-candles';directory.mkdir(parents=True,exist_ok=True)
     needs={};symbols=set(frames)
+    # Preserve legacy experiment identity; isolate invalid old instruments.
+    quarantined_legacy={}
     for item in prior.get('experiments',[]):
         if item.get('exchange','OKX')!='OKX':continue
-        symbol=item['symbol'];symbols.add(symbol);birth=item['decision_ms']
+        symbol=item.get('symbol')
+        if not isinstance(symbol,str) or not re.fullmatch(r'[A-Z0-9]{2,35}USDT',symbol):
+            key=str(symbol)
+            quarantined_legacy[key]=quarantined_legacy.get(key,0)+1
+            continue  # Never infer fills/PNL or rewrite an invalid legacy instrument.
+        symbols.add(symbol);birth=item['decision_ms']
         for kind,arm in item['arms'].items():
             if arm.get('status') in ('CLOSED','BENCHMARK','NO_CONFIRMATION','BLOCKED_RISK'):continue
             eligible=birth
@@ -97,4 +104,6 @@ def collect(prior,pack,now,root,fetch=None,budget=24):
     return out,{'schema':'turan.candle.recovery.v1','requests':len(jobs),'budget':budget,
         'unresolved_requested_bars':unresolved,'pending_coin_frames':len(pending),
         'errors':errors,'cache_symbols':len(symbols),'recovered_candles_are_retrospective':True,
-        'no_cash_inputs':True,'observed_at_ms':now}
+        'no_cash_inputs':True,'observed_at_ms':now,
+        'quarantined_legacy_experiment_count':sum(quarantined_legacy.values()),
+        'quarantined_legacy_symbols':sorted(quarantined_legacy)}
