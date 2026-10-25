@@ -35,7 +35,7 @@ def collect(prior,pack,now,root,fetch=None,budget=24):
     for item in prior.get('experiments',[]):
         if item.get('exchange','OKX')!='OKX':continue
         symbol=item.get('symbol')
-        if not isinstance(symbol,str) or not re.fullmatch(r'[A-Z0-9]{2,35}USDT',symbol):
+        if not isinstance(symbol,str) or not re.fullmatch(r'[A-Z0-9]{1,35}USDT',symbol):
             key=str(symbol)
             quarantined_legacy[key]=quarantined_legacy.get(key,0)+1
             continue  # Never infer fills/PNL or rewrite an invalid legacy instrument.
@@ -68,7 +68,7 @@ def collect(prior,pack,now,root,fetch=None,budget=24):
             if old is not None and old!=normalized:raise ValueError('TURAN_CANDLE_CONFLICT')
             if old is None:book[at]=normalized;dirty.add((symbol,tf))
     for symbol in sorted(symbols):
-        if not re.fullmatch(r'[A-Z0-9]{2,35}USDT',symbol):raise ValueError('INVALID_CANDLE_SYMBOL')
+        if not re.fullmatch(r'[A-Z0-9]{1,35}USDT',symbol):raise ValueError('INVALID_CANDLE_SYMBOL:'+repr(symbol))
         for tf in STEPS:
             path=directory/(symbol+'-'+tf+'.json.gz');loaded[(symbol,tf)]={}
             if path.exists():
