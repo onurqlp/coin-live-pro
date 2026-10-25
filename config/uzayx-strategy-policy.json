@@ -1,7 +1,7 @@
 {
   "schema": "uzayx.strategy.policy.v1",
   "mode": "TURAN200_ONLY",
-  "version": "turan200-20261020-v1",
+  "version": "turan200-20261025-v2",
   "close_request_id": "uzayx-20261020-turan200",
   "catalog": "web/uzayx/turan-families-v1.json",
   "minimum_margin_usdt": 30,

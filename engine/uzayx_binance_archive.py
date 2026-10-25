@@ -154,8 +154,12 @@ def run(fetch=get,max_artifacts=4,clock=None):
     priority=('um/BTCUSDT','um/ETHUSDT','um/SOLUSDT','um/XRPUSDT','cm/BTCUSD_PERP','cm/ETHUSD_PERP')
     candidates.sort(key=lambda x:(priority.index(x[0]) if x[0] in priority else len(priority),x[0]))
     offset=previous.get('next_instrument_offset',0)%max(1,len(candidates))
-    chosen=(candidates[offset:]+candidates[:offset])[:max_artifacts]
-    index['next_instrument_offset']=(offset+len(chosen))%max(1,len(candidates))
+    # Keep extending core USDT histories while rotating discovery fairly.
+    core=[x for x in candidates if x[0] in ('um/BTCUSDT','um/ETHUSDT','um/SOLUSDT','um/XRPUSDT')][:max(1,max_artifacts//2)]
+    rotating=[x for x in candidates if x not in core]
+    offset=offset%max(1,len(rotating))
+    chosen=core+(rotating[offset:]+rotating[:offset])[:max(0,max_artifacts-len(core))]
+    index['next_instrument_offset']=(offset+max(0,len(chosen)-len(core)))%max(1,len(rotating))
     for key,s,ym in chosen:
         if ym is None:
             try:ym=oldest_month(s['market'],s['symbol'],fetch)

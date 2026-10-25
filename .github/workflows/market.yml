@@ -280,7 +280,7 @@ jobs:
           git add archive/uzayx-adaptive-ledger.json web/data/uzayx-adaptive.json web/data/uzayx-strategy-bank.json
           git add web/data/uzayx-guncel.csv
           git add web/data/turan-core.json archive/turan-core-journal.jsonl
-          git add web/data/turan-experiments.json archive/turan-experiments-ledger.json archive/turan-cycles
+          git add web/data/turan-experiments.json archive/turan-experiments-ledger.json archive/turan-cycles research/turan-candles
           git add web/data/v4-watch-archive.json web/data/v4-context.json web/data/v4-early.json web/data/v4-spark-paper.json web/data/v4-spark-review.json
           git add web/data/swing-radar.json web/data/swing-history.json web/data/swing-outcomes.json
           git add archive/epochs

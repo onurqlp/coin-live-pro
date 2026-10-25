@@ -9,7 +9,7 @@ from uzayx_adaptive import H, samples
 DAY=24*H
 
 
-def contest(books, now):
+def contest(books, now, strategy_version=None):
     """Count first independent coin episodes, with outcomes known before cutoff.
 
     Secondary matched IDs share a ticket's outcome: they are supporting
@@ -25,6 +25,7 @@ def contest(books, now):
     for row in rows:
         ticket=tickets.get(row['key'],{})
         if ticket.get('attribution_kind')!='EXACT_TURAN_RULE_AT_BIRTH':continue
+        if strategy_version is not None and ticket.get('strategy_version')!=strategy_version:continue
         sid=row.get('strategy_id')
         if not isinstance(sid,str) or not sid.startswith('T'):continue
         primary[sid].append(row)

@@ -280,6 +280,35 @@
       return '<article class="progress-card" id="strategy-'+esc(x.id)+'"><header><div><a class="strategy-id" href="#strategy-'+esc(x.id)+'">'+esc(x.id)+'</a><h3>'+esc(x.name)+'</h3></div><span class="progress-stage">'+esc(stage)+'</span></header><p>'+esc(x.family)+' · '+esc(stateLabel(x.state))+'</p><div class="progress-evidence">'+esc(evidence)+'</div><div class="progress-stats"><span>'+esc(metric)+'</span><span>'+esc(direction)+'</span><span>Gerekli kaynak: '+esc(x.required_source||'Belirtilmemiş')+'</span></div>'+detail+'<p class="progress-foot">'+esc(x.independent_profit_verified?'Bağımsız sonuç doğrulanmış.':'Bağımsız kârlılık doğrulanmadı.')+'</p></article>';
     }).join(''):'<div class="empty">Bu aşama veya aramayla eşleşen strateji yok.</div>';
   }
+  function researchComparison(report,version){
+    return (report?.cohorts||[]).filter(x=>!version||x.strategy_version===version).map(x=>{
+      const pair=x.original_inverse||{},wait=x.original_wait||{};
+      return {id:x.strategy_id,version:x.strategy_version,pairs:pair.paired_count||0,excluded:pair.excluded_count||0,
+        original:pair.original_modeled_usdt??null,inverse:pair.inverse_modeled_usdt??null,
+        wait:wait.wait_modeled_usdt??null,waitOriginal:wait.original_modeled_usdt??null,waitPairs:wait.paired_count||0,
+        clusters:pair.episode_clusters??x.episode_clusters??null};
+    });
+  }
+  function researchTable(rows){
+    if(!rows.length)return '<div class="empty">Bu kural sürümünde sonuçlanan eşleştirilmiş deney bekleniyor.</div>';
+    const sorted=rows.filter(r=>r.pairs||r.waitPairs).sort((a,b)=>Math.max(b.original??-Infinity,b.inverse??-Infinity)-Math.max(a.original??-Infinity,a.inverse??-Infinity));
+    if(!sorted.length)return '<div class="empty">Henüz kapanmış ortak karşılaştırma yok.</div>';
+    return '<div class="research-scroll"><table class="research-results"><thead><tr><th>Yöntem / sürüm</th><th>Asıl</th><th>Ters</th><th>Ortak deney</th><th>Eksik</th><th>Teyit bekle / eş asıl</th></tr></thead><tbody>'+sorted.slice(0,40).map(r=>'<tr><td><b>'+esc(r.id)+'</b><small>'+esc(r.version)+'</small></td><td class="'+(r.original>=0?'up':'down')+'">'+esc(signed(r.original))+'</td><td class="'+(r.inverse>=0?'up':'down')+'">'+esc(signed(r.inverse))+'</td><td>'+number(r.pairs)+'<small>'+number(r.clusters)+' olay kümesi</small></td><td>'+number(r.excluded)+'</td><td>'+esc(signed(r.wait))+' / '+esc(signed(r.waitOriginal))+'<small>'+number(r.waitPairs)+' ayrı ortak deney</small></td></tr>').join('')+'</tbody></table></div>';
+  }
+  function forecastQualityLabel(quality){
+    if(!quality||!quality.paired_count)return 'Karşılaştırılabilir kapanmış tahmin bekleniyor';
+    return quality.beats_zero_baseline?'Bu kesitte daha düşük hata':'Bu kesitte referansı geçemedi';
+  }
+  function showResearchResults(){
+    const host=$('research-results');if(!host)return;
+    const quality=data.learning_quality,experiments=data.experiments||{},replay=data.replay;
+    const current=data.rule_version||null,paired=researchComparison(experiments.paired_results,current);
+    const older=researchComparison(experiments.paired_results,null).filter(r=>r.version!==current);
+    const baseline=quality?valueRow('Ölçüm kapsamı','Tüm kayıtlı model ve kural sürümlerinin geçmiş tahminleri')+valueRow('Tahmin / sıfır referans hatası',number(quality.model_mae_pct,3)+'% / '+number(quality.zero_baseline_mae_pct,3)+'%')+valueRow('Aynı sonuçlar üzerinde katkı',number(quality.mae_skill_pct,2)+'% · '+forecastQualityLabel(quality))+valueRow('Karşılaştırılabilen tahmin',number(quality.paired_count)+' · dışarıda / bekleyen '+number(quality.excluded_count)):'<div class="empty">Aynı örneklerde referans karşılaştırması bekleniyor.</div>';
+    const recovery=experiments.source_recovery;
+    const historical=replay&&replay.no_real_orders===true?'<h4>Geçmişte ayrılan son dönem</h4><p>'+number(replay.symbols_replayed)+' / '+number(replay.available_archive_symbols)+' arşiv sembolü · '+number(replay.bars_loaded)+' gerçek saatlik mum · '+number(replay.experiments)+' geçmiş deney · '+esc(clock(replay.generated_at_utc))+'</p>'+researchTable(researchComparison(replay.split_results?.HOLDOUT,current))+'<p class="research-note">Binance 1H maliyet senaryosu; ileri deneyin 5m modeliyle farklıdır. Geçmişte ayrılmış dönem, yeni ileri doğrulama değildir. Saatlik stop/hedef çakışmasında stop önce kabul edilir; spread varsayımdır. Deney toplamı portföy getirisi değildir.</p>':'<div class="empty">Doğrulanmış geçmiş test raporu bekleniyor.</div>';
+    host.innerHTML='<div class="card-head"><div><div class="kicker">STRATEJİDEN SONUCA</div><h3>Asıl, ters ve bekle karşılaştırması</h3></div><span class="mini-chip">'+esc(current||'Sürüm bekleniyor')+'</span></div><div class="learner">'+baseline+'</div><p>Değerler USDT cinsinden maliyet modelli deney sonuçlarıdır. İşlem yapma referansı 0 USDT. Asıl–ters aynı deneylerde karşılaştırılır; bekleme kolunun eş aslı kendi sütununda gösterilir. Tam net sonuç fonlama/tasfiye nedeniyle bilinmiyor.</p><h4>Yeni kuralın ileri deneyleri</h4>'+researchTable(paired)+(recovery?'<p class="research-note">Kalıcı veri takibi: '+number(recovery.cache_symbols)+' coin · bu çevrim '+number(recovery.requests)+' geçmiş veri isteği · '+number(recovery.unresolved_requested_bars)+' eksik mum bekleniyor.</p>':'')+(older.length?'<details><summary>Önceki kural sürümlerinin ayrı sonuçları</summary>'+researchTable(older)+'</details>':'')+historical;
+  }
   function showSources(){
     $('sources').innerHTML=(data.sources||[]).map(s=>'<div class="source-card"><span class="id">'+esc(s.id)+'</span><b>'+esc(s.name)+'</b><span class="'+sourceColor(s)+'">'+esc(sourceStatus(s))+'</span><p>Son kaydedilen zaman: '+esc(clock(s.observed_at))+' · '+esc(ago(s.observed_at))+'</p></div>').join('');
   }
@@ -288,14 +317,14 @@
     const timestamp=Date.parse(data.generated_at_utc||'');
     const age=(Date.now()-timestamp)/60000;
     status(!Number.isFinite(age)?'fail':age>25?'stale':'ok',!Number.isFinite(age)?'Veri zamanı eksik':age>25?'Gecikmiş araştırma · '+ago(data.generated_at_utc):'Doğrulanmış rapor · '+ago(data.generated_at_utc));
-    showCommand();showArena();showCases();showLearning();showProgress();showSources();
+    showCommand();showArena();showCases();showLearning();showProgress();showResearchResults();showSources();
   }
   let busy=false;
   async function refresh(){
     if(busy)return;busy=true;
     $('refresh').disabled=true;status('','Kaynak kontrol ediliyor');
     try{data=await download();render();}
-    catch(e){data=null;journeySources=null;status('fail',e.message||'Kaynak okunamadı');['journey-panel','kpis','learn-kpis','learning-progress-kpis','learning-progress-summary','learning-progress-next','learning-progress-strategies','strategies','live-events','sources'].forEach(id=>{if($(id))$(id).innerHTML='<div class="empty">Veri doğrulanamadı. Daha sonra yeniden deneyin; eski rapor canlı gibi gösterilmez.</div>';});}
+    catch(e){data=null;journeySources=null;status('fail',e.message||'Kaynak okunamadı');['research-results','journey-panel','kpis','learn-kpis','learning-progress-kpis','learning-progress-summary','learning-progress-next','learning-progress-strategies','strategies','live-events','sources'].forEach(id=>{if($(id))$(id).innerHTML='<div class="empty">Veri doğrulanamadı. Daha sonra yeniden deneyin; eski rapor canlı gibi gösterilmez.</div>';});}
     finally{busy=false;$('refresh').disabled=false;}
   }
   $('refresh').addEventListener('click',refresh);

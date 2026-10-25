@@ -44,7 +44,7 @@ test('desktop and six-item mobile navigation point to the published progress sec
  assert.match(page,/learning-progress-kpis/);assert.match(page,/learning-progress-strategies/);
  const mobile=page.match(/<nav class="mobile-nav"[\s\S]*?<\/nav>/)?.[0]||'';
  assert.equal((mobile.match(/data-view=/g)||[]).length,6);
- assert.match(page,/turan\.js\?v=6/);assert.match(page,/turan\.css\?v=4/);
+ assert.match(page,/turan\.js\?v=\d+/);assert.match(page,/turan\.css\?v=\d+/);
  assert.match(page,/id="journey-panel"/);
 });
 

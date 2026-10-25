@@ -21,6 +21,7 @@ import v4_paper
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 H=3600000
 VERSION='uzayx.adaptive.v1'
+PREDICTOR_REVISION='cohort-restricted-analogues-20261025-v2'
 CONFIG={'neighbors':40,'minimum_neighbors':12,'embargo_hours':1,
         'extra_roundtrip_cost_pct':.1,'minimum_days':7,'minimum_selected':30,
         'minimum_market_hours':12,'shrinkage_zero_observations':8,
@@ -53,7 +54,9 @@ def context(t):
     vector += [min(2,math.log1p(feats['1H']['atr_pct'])/math.log(11)),stage/3,
                int(t.get('entry_class')=='GELDI')]
     return {'vector':vector,'symbol':t.get('symbol'),'side':t['side'],'decision_ms':int(decision),
-            'features':copy.deepcopy(feats),'policy':t.get('risk_policy_version') or 'LEGACY_UNKNOWN'}
+            'features':copy.deepcopy(feats),'policy':t.get('risk_policy_version') or 'LEGACY_UNKNOWN',
+            'strategy_version':t.get('strategy_version','LEGACY_UNKNOWN'),'exchange':t.get('exchange','UNKNOWN'),
+            'contract_type':t.get('contract_type','UNKNOWN')}
 
 
 def label(t,cutoff):
@@ -102,6 +105,7 @@ def predict(rows,target,at):
     pool=[]
     for r in rows:
         if r['closed_ms']>=at-H or r['symbol']==target['symbol'] or r['side']!=target['side']:continue
+        if any(r.get(k)!=target.get(k) for k in ('strategy_version','exchange','contract_type','policy')):continue
         distance=sum((a-b)**2 for a,b in zip(r['vector'],target['vector']))/len(target['vector'])
         if distance>.5:continue
         pool.append((distance,r['key'],r))
@@ -182,11 +186,11 @@ def run(prior,books,scan,now):
     current=books[0]
     if current.get('last_scan_id')!=scan:raise ValueError('LEARNING_SCAN_MISMATCH')
     rows,audit=samples(books,now-H)
-    if prior.get('last_scan_id')==scan:return copy.deepcopy(prior),public(prior,audit,scan,now)
+    if prior.get('last_scan_id')==scan and prior.get('predictor_revision')==PREDICTOR_REVISION:return copy.deepcopy(prior),public(prior,audit,scan,now)
     ledger=copy.deepcopy(prior) if prior else {'model_version':VERSION,'started_at':stamp(now),'models':{},'forecasts':[]}
-    model_id=digest({'version':VERSION,'config':CONFIG,'samples':[{k:r[k] for k in ('key','strategy_id','decision_ms','closed_ms','return_pct','vector','policy')} for r in rows]})
+    model_id=digest({'version':VERSION,'predictor_revision':PREDICTOR_REVISION,'config':CONFIG,'samples':[{k:r[k] for k in ('key','strategy_id','decision_ms','closed_ms','return_pct','vector','policy','strategy_version','exchange','contract_type')} for r in rows]})
     if model_id not in ledger['models']:
-        ledger['models'][model_id]={'trained_at_utc':stamp(now),'config':CONFIG,'sample_keys':[r['key'] for r in rows],
+        ledger['models'][model_id]={'predictor_revision':PREDICTOR_REVISION,'trained_at_utc':stamp(now),'config':CONFIG,'sample_keys':[r['key'] for r in rows],
             'latest_label_at_utc':stamp(max(r['closed_ms'] for r in rows)) if rows else None,
             'validation':validate(rows,now),'audit':audit}
     model=ledger['models'][model_id];epoch_id=current.get('epoch_id') or 'current'
@@ -210,11 +214,33 @@ def run(prior,books,scan,now):
         if (c['decision_ms']//300000+1)*300000<=now:continue
         pred=predict(rows,c,now);champ=model['validation']['shadow_champion']
         ledger['forecasts'].append({'key':key,'event_id':t['event_id'],'strategy_id':t.get('strategy_id'),
+            'strategy_version':t.get('strategy_version','LEGACY_UNKNOWN'),
+            'rules_hash':t.get('strategy_config_hash'),'exchange':t.get('exchange','UNKNOWN'),
+            'execution_policy':t.get('risk_policy_version','LEGACY_UNKNOWN'),
             'predicted_at_utc':stamp(now),'model_id':model_id,'input_hash':digest(c),
             'prediction':pred,'shadow_policy':champ,'take_in_shadow':take(champ,c,pred) if champ else False,
             'outcome':None,'no_backfilled_prediction':True})
-    ledger.update(last_scan_id=scan,updated_at=stamp(now),current_model_id=model_id)
+    ledger.update(last_scan_id=scan,updated_at=stamp(now),current_model_id=model_id,predictor_revision=PREDICTOR_REVISION)
     return ledger,public(ledger,audit,scan,now)
+
+
+def forecast_quality(forecasts):
+    """Same paired outcomes for model and zero-return reference; no cash claim."""
+    def measure(rows):
+        paired=[f for f in rows if num((f.get('prediction') or {}).get('expected_paper_return_pct')) and
+            num((f.get('outcome') or {}).get('baseline_return_pct'))]
+        model=stats.mean(abs(f['prediction']['expected_paper_return_pct']-f['outcome']['baseline_return_pct']) for f in paired) if paired else None
+        zero=stats.mean(abs(f['outcome']['baseline_return_pct']) for f in paired) if paired else None
+        skill=(1-model/zero)*100 if zero else None
+        return {'forecast_count':len(rows),'paired_count':len(paired),'excluded_count':len(rows)-len(paired),
+            'model_mae_pct':model,'zero_baseline_mae_pct':zero,'mae_skill_pct':skill,
+            'beats_zero_baseline':bool(model is not None and zero is not None and model<zero),
+            'not_statistical_significance':True}
+    groups=defaultdict(list)
+    for f in forecasts:groups[(f.get('strategy_version','LEGACY_UNKNOWN'),f.get('exchange','UNKNOWN'),f.get('execution_policy','LEGACY_UNKNOWN'))].append(f)
+    return {'schema':'turan.forecast.quality.v1',**measure(forecasts),
+        'cohorts':[{'strategy_version':k[0],'exchange':k[1],'execution_policy':k[2],**measure(v)} for k,v in sorted(groups.items())],
+        'reference':'ZERO_RETURN_FORECAST_ON_IDENTICAL_SETTLED_OUTCOMES','auto_promote':False}
 
 
 def public(ledger,audit,scan,now):
@@ -222,7 +248,7 @@ def public(ledger,audit,scan,now):
     errors=[abs(f['prediction']['expected_paper_return_pct']-f['outcome']['baseline_return_pct']) for f in settled if f['prediction']['expected_paper_return_pct'] is not None]
     return {'model_version':VERSION,'scan_id':scan,'updated_at':stamp(now),'source_audit':audit,
             'current_model_id':ledger['current_model_id'],'current_model':ledger['models'][ledger['current_model_id']],
-            'prospective_predictions':len(fs),'settled_predictions':len(settled),
+            'forecast_quality':forecast_quality(fs),'prospective_predictions':len(fs),'settled_predictions':len(settled),
             'prospective_mean_absolute_error_pct':stats.mean(errors) if errors else None,
             'recent_forecasts':fs[-40:],'original_cash_untouched':True,'no_real_orders':True,
             'win_probability':None,'funding':'UNMODELED','liquidation':'UNVERIFIED',

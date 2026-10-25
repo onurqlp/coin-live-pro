@@ -227,7 +227,7 @@ def advance(prior,early,mtf_doc,now_ms,candles):
         # Idempotent replay; no second fill, fee, or duplicate event.
         pass
     index={x['event_id']:x for x in old.get('tickets',[])}
-    frames={(x.get('symbol'),x.get('side')):x for x in mtf_doc.get('candidates',[])}
+    frames={(x.get('symbol'),side):{**x,'side':side} for x in mtf_doc.get('candidates',[]) for side in ('LONG','SHORT')}
     # This engine observes only *new* discoveries after its initial deployment,
     # not earlier research events retroactively reclassified as paper fills.
     since=max(int(old.get('last_run_ms',now_ms))-90000,
