@@ -44,7 +44,7 @@ test('desktop and six-item mobile navigation point to the published progress sec
  assert.match(page,/learning-progress-kpis/);assert.match(page,/learning-progress-strategies/);
  const mobile=page.match(/<nav class="mobile-nav"[\s\S]*?<\/nav>/)?.[0]||'';
  assert.equal((mobile.match(/data-view=/g)||[]).length,6);
- assert.match(page,/turan\.js\?v=5/);assert.match(page,/turan\.css\?v=3/);
+ assert.match(page,/turan\.js\?v=6/);assert.match(page,/turan\.css\?v=4/);
  assert.match(page,/id="journey-panel"/);
 });
 
@@ -61,4 +61,21 @@ test('journey accepts matching deduplicated snapshots and refuses mismatched sca
  assert.equal(summary.sevenChange,null);
  assert.equal(context.journey(snapshot,{ops:{...ops,cohorts:{'TÜMÜ':{closed:999,positive:1,negative:1}}},experiments,spark}).available,false);
  assert.equal(context.journey(snapshot,null).available,false);
+});
+
+test('journey keeps all-time totals when only a rolling daily window remains',()=>{
+ const snapshot=require('../web/data/turan-core.json');
+ const ops=require('../web/data/ops-report.json');
+ const experiments=require('../web/data/turan-experiments.json');
+ const spark=require('../web/data/v4-spark-paper.json');
+ const recent={...ops,daily:ops.daily.slice(0,4)};
+ const summary=context.journey(snapshot,{ops:recent,experiments,spark});
+ assert.equal(summary.available,true);
+ assert.equal(summary.closed,ops.cohorts['TÜMÜ'].closed);
+ assert.equal(summary.dayCount,4);
+ assert.equal(summary.sevenNet,null);
+ const future={...snapshot,paper_evidence:{...snapshot.paper_evidence,closed_count:ops.cohorts['TÜMÜ'].closed+10}};
+ const futureOps={...ops,cohorts:{...ops.cohorts,'TÜMÜ':{...ops.cohorts['TÜMÜ'],closed:ops.cohorts['TÜMÜ'].closed+10,positive:ops.cohorts['TÜMÜ'].positive+4,negative:ops.cohorts['TÜMÜ'].negative+6}},experimental_spark:{...ops.experimental_spark,closed_cohort_count:ops.cohorts['TÜMÜ'].closed+10,positive_closed:ops.cohorts['TÜMÜ'].positive+4,negative_closed:ops.cohorts['TÜMÜ'].negative+6}};
+ assert.equal(context.journey(future,{ops:futureOps,experiments,spark}).available,true);
+ assert.equal(context.journey(snapshot,{ops:{...ops,daily:[...ops.daily,ops.daily[0]]},experiments,spark}).available,false);
 });

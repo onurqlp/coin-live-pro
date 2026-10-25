@@ -40,10 +40,10 @@
     const d=await r.json();
     if(d.schema!=='turan.core.v1'||d.no_real_orders!==true||d.research_only!==true||!Array.isArray(d.strategies)||d.strategies.length!==230||!d.source_alignment||Object.values(d.source_alignment).some(x=>x!==true))throw Error('TURAN kaynak bütünlüğü doğrulanamadı');
     journeySources=null;
-    if(pinned){
-      const root='https://raw.githubusercontent.com/onurqlp/coin-live-pro/'+pinned+'/web/data/';
+    {
+      const root='https://raw.githubusercontent.com/onurqlp/coin-live-pro/'+(pinned||'main')+'/web/data/';
       const results=await Promise.allSettled(['ops-report.json','turan-experiments.json','v4-spark-paper.json'].map(async name=>{
-        const response=await fetch(root+name,{cache:'no-store'});
+        const response=await fetch(root+name+(pinned?'':'?ts='+Date.now()),{cache:'no-store'});
         if(!response.ok)throw Error(name+' HTTP '+response.status);
         return response.json();
       }));
@@ -178,58 +178,54 @@
     const cash=paperEvidenceSummary(snapshot),matched=countValid&&cash&&cash.closed===closed&&
       ops.experimental_spark?.closed_cohort_count===closed&&ops.experimental_spark?.positive_closed===positive&&
       ops.experimental_spark?.negative_closed===negative&&ops.experimental_spark?.realized_reconciliation_verified===true;
-    const uniqueDays=[...new Map(days.filter(x=>/^\d{4}-\d{2}-\d{2}$/.test(x.date_utc||'')).map(x=>[x.date_utc,x])).values()]
-      .sort((a,b)=>a.date_utc.localeCompare(b.date_utc));
+    const dailyValid=Array.isArray(days)&&days.length>0&&days.every(x=>/^\d{4}-\d{2}-\d{2}$/.test(x.date_utc||'')&&
+      Number.isInteger(x.closed)&&x.closed>=0&&Number.isInteger(x.positive_closures)&&x.positive_closures>=0&&
+      Number.isInteger(x.negative_closures)&&x.negative_closures>=0&&
+      x.positive_closures+x.negative_closures<=x.closed&&Number.isFinite(x.realized_net_usdt));
+    const uniqueDays=dailyValid?[...days].sort((a,b)=>a.date_utc.localeCompare(b.date_utc)):[];
     const dayCount=uniqueDays.length;
     const dailyClosed=uniqueDays.reduce((n,x)=>n+x.closed,0);
     const dailyPositive=uniqueDays.reduce((n,x)=>n+x.positive_closures,0);
+    const consecutive=rows=>rows.length===7&&rows.every((x,i)=>i===0||
+      Date.parse(x.date_utc+'T00:00:00Z')-Date.parse(rows[i-1].date_utc+'T00:00:00Z')===86400000);
     const recent=uniqueDays.slice(-7),prior=uniqueDays.slice(-14,-7);
-    const sevenNet=recent.reduce((n,x)=>n+x.realized_net_usdt,0);
-    const priorNet=prior.reduce((n,x)=>n+x.realized_net_usdt,0);
-    const recentValid=recent.every(x=>Number.isFinite(x.realized_net_usdt));
+    const sevenNet=consecutive(recent)?recent.reduce((n,x)=>n+x.realized_net_usdt,0):null;
+    const priorNet=consecutive(prior)?prior.reduce((n,x)=>n+x.realized_net_usdt,0):null;
     const hopeful=(experiments.strategies||[]).filter(x=>x.arms?.ORIGINAL?.closed>=10&&x.episode_count>=3&&x.arms.ORIGINAL.modeled_net_usdt>0).length;
     const reliable=(snapshot.totals?.verified_profitable||0);
-    const dataOk=Boolean(matched)&&dailyClosed===closed&&dailyPositive===positive&&Number.isInteger(methods)&&
-      experiments.experiment_count>=0&&experiments.complete_net_usdt===null;
+    const dataOk=Boolean(matched)&&dailyValid&&new Set(uniqueDays.map(x=>x.date_utc)).size===dayCount&&
+      dailyClosed<=closed&&dailyPositive<=positive&&Number.isInteger(methods)&&experiments.experiment_count>=0;
     return {available:dataOk,methods,hopeful,reliable,closed,positive,negative,open:cash?.open,
       modeledRealized:ops.experimental_spark?.fully_closed_ticket_realized_net_usdt,
-      allRealized:cash?.totalPnl,sevenNet:recentValid?sevenNet:null,
-      sevenChange:recentValid&&prior.length===7?sevenNet-priorNet:null,
-      dayCount,first:uniqueDays[0]?.date_utc,last:uniqueDays.at(-1)?.date_utc,
-      experiments:experiments.experiment_count,sourceGaps:ops.source_publication_valid!==true,
+      allRealized:cash?.totalPnl,sevenNet,
+      sevenChange:sevenNet!==null&&priorNet!==null?sevenNet-priorNet:null,
+      dayCount,first:spark.started_at||null,last:uniqueDays.at(-1)?.date_utc,
+      days:uniqueDays.slice(-7),experiments:experiments.experiment_count,
+      experimentFirst:experiments.started_at_utc,sourceGaps:ops.source_publication_valid!==true,
       completeNetKnown:Number.isFinite(experiments.complete_net_usdt)&&cash?.funding==='MODELED'&&cash?.liquidation==='VERIFIED'};
   }
   function showJourney(){
     const j=journeySummary(data,journeySources),el=$('journey-panel');
-    if(!j.available){el.innerHTML='<div class="empty">Karşılaştırılabilir tarihsel kayıtlar aynı taramada doğrulanamadı. Başarı puanı ve sonuçlar hesaplanamıyor.</div>';return;}
-    const date=x=>x?x.split('-').reverse().join('.'):'—';
-    const evidenceDays=j.dayCount+' kayıtlı gün ('+date(j.first)+'–'+date(j.last)+')';
-    const enoughDays=j.dayCount>=7;
-    const status=j.reliable>0&&j.completeNetKnown?'Küçük ölçekte doğrulanıyor':'Denemelerde öğreniyor';
-    const percent=j.closed?number(j.positive/j.closed*100,1)+'%':'Henüz hesaplanamıyor';
-    const trend=j.sevenChange===null?'Önceki tam 7 gün henüz yok':signed(j.sevenChange,' USDT');
-    const net=Number.isFinite(j.modeledRealized)?signed(j.modeledRealized,' USDT'):'Hesaplanamıyor';
-    const stages=[
-      ['Öğrenmeyi başardı','Henüz doğrulanmadı',j.experiments+' ayrı yöntem deneyi; '+j.dayCount+' gün kayıt','Aynı yöntemin sonraki, görülmemiş dönemde bağımsız ve tutarlı sonucu','En az iki ayrık ileri dönem ve karşılaştırılabilir net ölçüm'],
-      ['Kazanç yöntemini buldu','Henüz doğrulanmadı',j.closed+' kapanmış sanal kasa işlemi; '+j.positive+' artı / '+j.negative+' eksi','Birden çok dönemde fonlama ve tasfiye dahil pozitif tam net sonuç','Masrafları tamamla, kötü günlerdeki gerilemeyi ölç'],
-      ['Gerçek başarıya ulaştı','Gerçek işlemlerle doğrulanmadı','Bu raporda gerçek emir: yok','Doğrulanmış gerçek işlem geçmişi ve önceden belirlenmiş risk koşulları','Gerçek kayıt oluşursa ayrı ve bağımsız doğrula']
-    ];
-    el.innerHTML='<p class="journey-state">'+esc(status)+'</p>'+
-      '<div class="journey-score"><span>Başarıya hazırlık</span><strong>Henüz hesaplanamıyor</strong></div><div class="journey-track" aria-label="Hazırlık puanı için yeterli kanıt yok"><span></span></div>'+
-      '<p class="journey-note">Bu puan kazanma ihtimali değildir. Görülmemiş veri, farklı dönemler ve tüm işlem maliyetleri doğrulanınca hesaplanabilir.</p>'+
-      '<div class="journey-mini"><div><b>'+number(j.methods)+'</b><span>İncelenen yöntem</span></div><div><b>'+number(j.hopeful)+'</b><span>Umut veren</span></div><div><b>'+number(j.reliable)+'</b><span>Güvenilir aday</span></div></div>'+
-      '<p class="journey-note">Umut veren: asıl yöntemde ≥10 kapanış, ≥3 olay kümesi ve pozitif tahmini sonuç; gelecek dönemde doğrulama değil. Güvenilir: bağımsız kâr doğrulaması; kesin kazanç anlamına gelmez.</p>'+
-      '<div class="journey-rows">'+[
-        ['Toplam deneme',number(j.experiments)+' yöntem deneyi · '+number(j.closed)+' kapanmış sanal işlem (ayrı kayıtlar)'],
-        ['Başarılı deneme',number(j.positive)+' / '+number(j.closed)+' · '+percent+'; '+number(j.negative)+' başarısız, '+number(j.open)+' açık'],
-        ['Son 7 günde değişim',trend+' · son kaydedilen 7 gün: '+(j.sevenNet===null?'—':signed(j.sevenNet,' USDT'))],
-        ['Gerçekleşen net sanal sonuç',net+' · kapanmış işlemler, tahmini ücretler dahil; fonlama ve tasfiye eksik'],
-        ['Başarıya ne kadar kaldı?','İleri dönem + tam maliyetli istikrar kanıtı eksik']
-      ].map(row=>valueRow(...row)).join('')+'</div>'+
-      '<div class="journey-comment"><b>TURAN bugün ne öğrendi?</b><p>'+esc(j.positive+' olumlu kapanışa karşı '+j.negative+' olumsuz kapanış var; isabet tek başına kârlılık kanıtı değil.')+'</p><p>'+esc('Son kayıtlı 7 günün sanal sonucu '+(j.sevenNet===null?'bilinmiyor':signed(j.sevenNet,' USDT'))+'; önceki tam hafta bulunmadığından haftalık iyileşme iddia edilemiyor.')+'</p><p>Sonraki hedef: umut veren yöntemleri yeni günlerde, tüm masraflarla tekrar sınamak.</p></div>'+
-      '<div class="journey-stages">'+stages.map((s,i)=>'<div><b>'+esc((i+1)+'. '+s[0])+'</b><strong>'+esc(s[1])+'</strong><small>Kanıt: '+esc(s[2])+'</small><small>Eksik: '+esc(s[3])+'</small><small>Sonraki adım: '+esc(s[4])+'</small></div>').join('')+'</div>'+
-      '<p class="journey-note"><b>Başarıya ne zaman ulaşacağız?</b> Şimdilik güvenilir tarih verilemiyor; eksik olan: birden fazla tam ileri dönem, tam maliyet ve gerçek işlem kanıtı.</p>'+
-      '<p class="journey-meta">'+esc(evidenceDays)+' · 30/90 günlük karşılaştırma: '+(enoughDays?'henüz tam dönem yok':'yetersiz kayıt')+' · Son güncelleme: '+esc(clock(data.generated_at_utc))+' · Kaynak: aynı tarama, yöntem deneyleri ve tekil sanal kasa kapanışları; farklı kasalar toplanmadı.</p>';
+    if(!j.available){el.innerHTML='<div class="empty">Günlük kayıtlar ve toplamlar şu an aynı kaynakta doğrulanamadı. Sayılar yerine son güncelleme bekleniyor.</div>';return;}
+    const date=x=>{const t=Date.parse(x||'');return Number.isFinite(t)?new Date(t).toLocaleDateString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric',timeZone:'UTC'}):'—';};
+    const dailyMax=Math.max(1,...j.days.map(x=>Math.abs(x.realized_net_usdt)));
+    const rows=j.days.slice().reverse().map(x=>{
+      const net=x.realized_net_usdt,kind=net>0?'up':net<0?'down':'flat';
+      const width=Math.round(Math.abs(net)/dailyMax*100);
+      return '<tr><td>'+esc(date(x.date_utc))+'</td><td>'+number(x.closed)+'</td><td>'+number(x.positive_closures)+' / '+number(x.negative_closures)+'</td><td><div class="journey-result '+kind+'"><span class="journey-spark" aria-hidden="true"><i style="width:'+width+'%"></i></span><b>'+esc(signed(net,' USDT'))+'</b></div></td></tr>';
+    }).join('');
+    const prior=j.sevenChange===null?'Önceki tam 7 gün bulunmuyor':'Önceki 7 güne göre '+signed(j.sevenChange,' USDT');
+    const latest=j.days.at(-1),previous=j.days.at(-2);
+    const dayComparison=latest&&previous?'Son gün '+number(latest.closed)+' kapanış; önceki gün '+number(previous.closed)+' kapanış.':'Günlük karşılaştırma için iki kayıt bekleniyor.';
+    const state=j.sevenNet===null?'Günlük kayıtlar birikiyor':j.sevenNet>=0?'Son 7 gün sanal net artıda':'Son 7 gün sanal net ekside';
+    el.innerHTML='<div class="journey-top"><div><span class="journey-eyebrow">ŞU AN</span><p class="journey-state">'+esc(state)+'</p><p>Günlük sonuçları ve geçmişteki değişimi birlikte izle. Bunlar sanal işlem ve yöntem deneyi kayıtlarıdır.</p></div><span class="journey-live">● Kaynaktan güncellenir</span></div>'+
+      '<div class="journey-mini"><div><b>'+number(j.methods)+'</b><span>İncelenen yöntem</span></div><div><b>'+number(j.experiments)+'</b><span>Yöntem deneyi</span></div><div><b>'+number(j.closed)+'</b><span>Kapanan sanal işlem</span></div><div><b>'+number(j.dayCount)+'</b><span>Görünen günlük kayıt</span></div></div>'+
+      '<div class="journey-overview"><div><small>BAŞTAN BUGÜNE · SANAL KASA</small><strong class="'+(j.modeledRealized>=0?'up':'down')+'">'+esc(signed(j.modeledRealized,' USDT'))+'</strong><span>'+number(j.positive)+' artı · '+number(j.negative)+' eksi · '+number(j.open)+' açık</span></div><div><small>SON 7 TAM KAYITLI GÜN</small><strong class="'+(j.sevenNet===null?'flat':j.sevenNet>=0?'up':'down')+'">'+(j.sevenNet===null?'Henüz yok':esc(signed(j.sevenNet,' USDT')))+'</strong><span>'+esc(prior)+'</span></div></div>'+
+      '<div class="journey-methods"><div><b>'+number(j.methods)+'</b><span>İnceleniyor</span></div><div><b>'+number(j.hopeful)+'</b><span>Tekrar denenecek</span></div><div><b>'+number(j.reliable)+'</b><span>Bağımsız doğrulandı</span></div></div>'+
+      '<div class="journey-table-head"><div><b>Gün gün geçmiş</b><span>En yeni gün üstte · '+esc(date(j.first))+' tarihinden beri sanal kasa</span></div></div>'+
+      '<div class="journey-table-wrap"><table class="journey-table"><thead><tr><th>Gün (UTC)</th><th>Kapanış</th><th>Artı / eksi</th><th>Sanal net hareket</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+      '<div class="journey-foot-grid"><div><b>Nerede ilerliyoruz?</b><p>'+esc(dayComparison)+'</p><p>'+esc(j.hopeful)+' yöntem ilk incelemede olumlu görünüyor. Bu, sonraki günlerde de aynı sonucu vereceği anlamına gelmez.</p></div><div><b>Henüz neyi bilmiyoruz?</b><p>Uzun dönem tutarlılık, fonlama ve tasfiye maliyeti. Bu yüzden başarı puanı veya tarih tahmini göstermiyoruz.</p><p>Bağımsız doğrulanmış aday: '+number(j.reliable)+' · Gerçek işlem: yok.</p></div></div>'+
+      '<p class="journey-meta">Tekrar denenecek: asıl yöntemde en az 10 kapanış, 3 olay kümesi ve pozitif tahmini sonuç; sonraki dönemde doğrulanmış sonuç değil. Son güncelleme '+esc(clock(data.generated_at_utc))+' · Günlük tablo: son '+number(j.dayCount)+' kayıt; toplamlar '+esc(date(j.first))+' başlangıçlı ayrı sanal kasadan. Yöntem deneyleri '+esc(date(j.experimentFirst))+' tarihinden itibaren ayrı sayılır. Günlük net hareket açık işlemlerin kısmi kapanışını içerebilir; toplam sanal kasa sonucu yalnızca tamamen kapanan işlemlerdir. Tahmini ücretler dahil, fonlama ve tasfiye eksik. 30/90 günlük tam karşılaştırma için yeterli gün yok.</p>';
   }
   function showProgress(){
     showJourney();
