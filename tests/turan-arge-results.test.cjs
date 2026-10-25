@@ -14,3 +14,15 @@ test('zero paired forecasts means comparison unavailable',()=>{
  assert.equal(ctx.label({paired_count:0,beats_zero_baseline:false}),'Karşılaştırılabilir kapanmış tahmin bekleniyor');
  assert.equal(ctx.label({paired_count:2,beats_zero_baseline:false}),'Bu kesitte referansı geçemedi');
 });
+test('newer same-version verified archive replaces stale embedded replay only',()=>{
+ const match=source.match(/  function preferVerifiedReplay\([\s\S]*?\n  \}/);
+ assert.ok(match,'independent historical report selection missing');
+ const ctx={};vm.runInNewContext(match[0]+';this.pick=preferVerifiedReplay;',ctx);
+ const current={rule_version:'v2',replay:{generated_at_utc:'2026-10-25T10:00:00Z',symbols_replayed:4}};
+ const newer={schema:'turan.replay.v1',no_real_orders:true,strategy_version:'v2',source:'BINANCE_VERIFIED_MONTHLY_1H',complete_net_usdt:null,
+   generated_at_utc:'2026-10-25T11:00:00Z',symbols_replayed:16};
+ assert.equal(ctx.pick(current,newer).symbols_replayed,16);
+ assert.equal(ctx.pick(current,{...newer,strategy_version:'v1'}).symbols_replayed,4);
+ assert.equal(ctx.pick(current,{...newer,no_real_orders:false}).symbols_replayed,4);
+ assert.equal(ctx.pick(current,{...newer,generated_at_utc:'2026-10-25T09:00:00Z'}).symbols_replayed,4);
+});

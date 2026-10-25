@@ -28,6 +28,15 @@
     const el=$('live-state');el.className='status-pill '+kind;
     el.innerHTML='<span class="status-dot"></span> '+esc(text);
   };
+  function preferVerifiedReplay(core,candidate){
+    const prior=core.replay||null;
+    if(!candidate||candidate.schema!=='turan.replay.v1'||candidate.no_real_orders!==true||
+       candidate.complete_net_usdt!==null||candidate.strategy_version!==core.rule_version||
+       candidate.source!=='BINANCE_VERIFIED_MONTHLY_1H')return prior;
+    const newer=Date.parse(candidate.generated_at_utc||'');
+    const older=Date.parse(prior?.generated_at_utc||'');
+    return Number.isFinite(newer)&&(!Number.isFinite(older)||newer>=older)?candidate:prior;
+  }
   async function download(){
     let url='https://raw.githubusercontent.com/onurqlp/coin-live-pro/main/web/data/turan-core.json?ts='+Date.now();
     let pinned=null;
@@ -42,19 +51,20 @@
     journeySources=null;
     {
       const root='https://raw.githubusercontent.com/onurqlp/coin-live-pro/'+(pinned||'main')+'/web/data/';
-      const results=await Promise.allSettled(['ops-report.json','turan-experiments.json','v4-spark-paper.json'].map(async name=>{
+      const results=await Promise.allSettled(['ops-report.json','turan-experiments.json','v4-spark-paper.json','turan-replay.json'].map(async name=>{
         const response=await fetch(root+name+(pinned?'':'?ts='+Date.now()),{cache:'no-store'});
         if(!response.ok)throw Error(name+' HTTP '+response.status);
         return response.json();
       }));
-      if(results.every(x=>x.status==='fulfilled')){
-        const [ops,experiments,spark]=results.map(x=>x.value);
+      if(results.slice(0,3).every(x=>x.status==='fulfilled')){
+        const [ops,experiments,spark]=results.slice(0,3).map(x=>x.value);
         if(ops.source_scan_id===d.source_scan_id&&experiments.scan_id===d.source_scan_id&&spark.scan_id===d.source_scan_id&&
            ops.real_orders===false&&ops.experimental_spark?.is_real_money===false&&experiments.no_real_orders===true&&
            experiments.separate_from_shared_cash===true&&spark.no_real_orders===true&&spark.daily?.per_event_deduplicated===true){
           journeySources={ops,experiments,spark};
         }
       }
+      if(results[3].status==='fulfilled')d.replay=preferVerifiedReplay(d,results[3].value);
     }
     return d;
   }
