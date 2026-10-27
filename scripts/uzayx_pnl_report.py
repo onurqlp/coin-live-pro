@@ -85,6 +85,9 @@ def build(ledger, paper, manifest, bank):
     legacy = {}
     coins = {}
     daily = collections.defaultdict(float)
+    rolling_48h = {'from_utc': (now - dt.timedelta(hours=48)).isoformat(),
+                   'to_utc': now.isoformat(), 'realized_net_usdt': 0.,
+                   'exit_count': 0, 'positive_exits': 0, 'negative_exits': 0}
     seen = set()
     realized = floating = fees = 0.
     closed_count = open_count = 0
@@ -118,6 +121,11 @@ def build(ledger, paper, manifest, bank):
             if not closed_at or closed_at > now + dt.timedelta(minutes=2) or not number(value):
                 raise ValueError('PNL_INVALID_EXIT_TIMESTAMP_OR_VALUE')
             daily[closed_at.date().isoformat()] += value
+            if now - dt.timedelta(hours=48) < closed_at <= now:
+                rolling_48h['realized_net_usdt'] += value
+                rolling_48h['exit_count'] += 1
+                rolling_48h['positive_exits'] += int(value > 0)
+                rolling_48h['negative_exits'] += int(value < 0)
             exit_sum += value
         if abs(exit_sum-r) > .025:
             raise ValueError('PNL_EXIT_LEDGER_MISMATCH')
@@ -185,6 +193,7 @@ def build(ledger, paper, manifest, bank):
     recent = {span: rounded(sum(v for day, v in daily.items()
                   if (now.date()-dt.timedelta(days=span-1)).isoformat() <= day <= now.date().isoformat()))
               for span in (1, 7, 30)}
+    rolling_48h['realized_net_usdt'] = rounded(rolling_48h['realized_net_usdt'])
     active = sum(r['state'] == 'PAPER_ACTIVE' for r in strategy_rows)
     blocked = sum(r['state'] == 'RESEARCH_SOURCE_BLOCKED' for r in strategy_rows)
     controls = sum(r['state'] == 'CONTROL_ACTIVE' for r in strategy_rows)
@@ -199,6 +208,7 @@ def build(ledger, paper, manifest, bank):
       'total_pnl_usdt': rounded(realized+floating), 'fees_estimated_usdt': rounded(fees),
       'open_count': open_count, 'closed_count': closed_count,
       'ledger_count': len(tickets), 'daily_realized_usdt': recent,
+      'rolling_48h': rolling_48h,
       'attribution': attribution_summary(tickets),
       'daily_last_30': timeline, 'strategies': strategy_rows,
       'legacy_unassigned': legacy_rows, 'coins': coin_rows,

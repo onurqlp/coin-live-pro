@@ -15,6 +15,11 @@ body{background:radial-gradient(ellipse 90% 50% at 50% -15%,#23425355,transparen
 .compact-hero h1{font-size:clamp(25px,3vw,36px);letter-spacing:-.045em;margin:0 0 6px}
 .compact-hero .eyebrow{font-size:9px;margin-bottom:6px;color:#92d9c5}
 .compact-hero .lede{font-size:12px;margin:0;color:#b3c6d3;max-width:560px}
+.release-meta{display:flex;flex-wrap:wrap;align-items:center;gap:7px 18px;margin:-5px 0 13px;padding:8px 11px;border:1px solid #263b4a;border-radius:9px;background:#0c1925;color:#95adbb;font-size:10px;line-height:1.4}
+.release-meta b{color:#d7ecef;font-weight:750;font-variant-numeric:tabular-nums}
+.release-meta span:last-child{margin-left:auto;color:#8197a6}
+.release-meta .negative{color:#ff9aa5}
+.release-meta .positive{color:#81e1bc}
 .hero-time{min-width:140px;display:flex;flex-direction:column;align-items:flex-end;font-size:10px;color:#b3cbd4}
 .hero-time b{font-size:17px;line-height:1.5;color:#dff9f1;font-variant-numeric:tabular-nums}
 .hero-time small{font-size:10px;color:#80a79f}
@@ -114,6 +119,8 @@ body{background:radial-gradient(ellipse 90% 50% at 50% -15%,#23425355,transparen
 #chart-message{max-width:470px;font-size:11px}
 footer{margin-top:25px;padding-top:20px}
 @media(max-width:800px){
+.release-meta{gap:5px 12px;font-size:9px}
+.release-meta span:last-child{margin-left:0}
  .overview-flow{grid-template-columns:1fr}
  .overview-decision{min-height:0}
  #top-candidates{grid-template-columns:repeat(2,minmax(0,1fr))}

@@ -43,6 +43,10 @@ class PNLReportTest(unittest.TestCase):
         self.assertEqual(x['legacy_unassigned'][0]['realized'],2)
         self.assertEqual(x['daily_realized_usdt'][1],2)
         self.assertEqual(x['daily_realized_usdt'][7],12)
+        self.assertEqual(x['rolling_48h']['realized_net_usdt'],12)
+        self.assertEqual(x['rolling_48h']['exit_count'],2)
+        self.assertEqual(x['rolling_48h']['positive_exits'],2)
+        self.assertEqual(x['rolling_48h']['negative_exits'],0)
     def test_cash_drift_fails_closed(self):
         a,b,c,d=fixture();b['summary']['virtual_equity_usdt']+=10
         with self.assertRaisesRegex(ValueError,'PNL_CASH_RECONCILIATION_FAILED'):

@@ -20,7 +20,7 @@
     manifest: 'v4-manifest.json', health: 'health.json', radar: 'v4-radar.json',
     paper: 'v4-paper.json', spark: 'v4-spark-paper.json', early: 'v4-early.json',
     review: 'v4-spark-review.json', ops: 'ops-report.json', diary: 'uzayx-lessons-history.json',
-    research: 'uzayx-research.json', strategyBank: 'uzayx-strategy-bank.json'
+    research: 'uzayx-research.json', strategyBank: 'uzayx-strategy-bank.json', pnl: 'uzayx-pnl-report.json'
   };
   const MAKINE = 'https://raw.githubusercontent.com/onurqlp/makine-core/main/site/data/support.json';
   let db = {}, faults = [], mode = 'ALL', stage = 'ALL', search = '';
@@ -32,6 +32,7 @@
   const clear = node => {node.replaceChildren();return node;};
   const set = (id,v) => {const n=$(id);if(n)n.textContent=v;};
   const time = s => {const d=new Date(s||'');return Number.isFinite(+d)?d.toLocaleString('tr-TR',{timeZone:'Europe/Istanbul',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'—';};
+  const dateTime = s => {const d=new Date(s||'');return Number.isFinite(+d)?d.toLocaleString('tr-TR',{timeZone:'Europe/Istanbul',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'—';};
   const age = s => {const t=Date.parse(s||'');return Number.isFinite(t)?Math.round((Date.now()-t)/60000):null;};
   const ageLabel=s=>{const n=age(s);return n===null?'Bilinmiyor':n<0?'Saat farkı':n<2?'Şimdi':n<60?n+' dk':Math.floor(n/60)+' sa';};
   function go(tab) {
@@ -233,6 +234,21 @@
     set('connection',failed?'Bağlantı kontrol edilemedi':healthy?'Veri güncel':stamp===null?'Kaynak eksik':stamp>25?'Veri gecikmiş':'Kontrol gerekli');
     $('connection').className='status '+(healthy&&!failed?'ok':'bad');
   }
+  function renderReleaseMeta(){
+    const release=db.release||{},pnl=db.pnl||{},window48=pnl.rolling_48h;
+    set('product-release',release.product_version&&Date.parse(release.updated_at_utc)
+      ?release.product_version+' · '+dateTime(release.updated_at_utc)+' TSİ':'Doğrulanamadı');
+    const aligned=pnl.scan_id&&pnl.scan_id===db.manifest?.scan_id&&pnl.no_real_orders===true;
+    if(!aligned||!window48||!Number.isFinite(Number(window48.realized_net_usdt))){
+      set('paper-48h','Henüz ölçülmedi');
+      set('paper-48h-count','Son tarama ile uyumlu 48 saatlik kapanış verisi yok');
+      return;
+    }
+    const value=Number(window48.realized_net_usdt);
+    set('paper-48h',(value>0?'+':'')+num(value,2)+' USDT · tahmini');
+    set('paper-48h-count',num(window48.exit_count,0)+' kapanış adımı · '+dateTime(window48.from_utc)+'–'+dateTime(window48.to_utc)+' TSİ · gerçek emir yok');
+    $('paper-48h').className=value<0?'negative':value>0?'positive':'';
+  }
   function redrawMarket(){
     renderConnection();renderTop();renderRadar();renderSystem();
     const valid=currentGroups().valid;
@@ -245,7 +261,8 @@
     $('reload').disabled=true;set('connection','Yükleniyor…');$('connection').className='status';faults=[];
     try{
     try{sourceCommit=await currentHead();sourceError=null;}catch(e){sourceCommit=null;sourceError=String(e.message||e);faults.push('commit pin');}
-    const entries=[...Object.entries(FILES).map(([key,fn])=>[key,dataUrl(fn)]),['support',MAKINE+'?ts='+Date.now()]];
+    const releaseRoot=sourceCommit?'https://raw.githubusercontent.com/'+OWNER_REPO+'/'+sourceCommit+'/web/':'https://raw.githubusercontent.com/'+OWNER_REPO+'/main/web/';
+    const entries=[...Object.entries(FILES).map(([key,fn])=>[key,dataUrl(fn)]),['release',releaseRoot+'release.json'],['support',MAKINE+'?ts='+Date.now()]];
     const results=await Promise.allSettled(entries.map(([,url])=>getJson(url)));
     const updated={};
     results.forEach((r,i)=>{const key=entries[i][0];if(r.status==='fulfilled')updated[key]=r.value;else{faults.push(key);updated[key]=null;}});
@@ -256,6 +273,7 @@
     const feeds=[db.radar,db.paper,db.spark,db.review,db.early];
     if(!db.strategyBank||db.strategyBank.policy!=='TURAN200_ONLY'||db.strategyBank.registry_count!==200||db.strategyBank.no_real_orders!==true||db.strategyBank.source_mtf_at!==db.spark?.source_mtf_at)faults.push('STRATEGY_200_SOURCE_MISMATCH');
     if(!id || feeds.some(f=>!f || f.scan_id!==id)){faults.push('SCAN_ID_MISMATCH');db.radar=null;}
+    renderReleaseMeta();
     renderConnection();
     lastCheckedAt=new Date().toISOString();
     renderTop();renderRadar();renderLearn();renderFunds();renderResearch();renderSystem();renderLeverage();
