@@ -40,6 +40,12 @@ on:
     paths:
       - 'engine/**'
       - '.github/workflows/market.yml'
+      - 'scripts/uzayx_pnl_report.py'
+      - 'web/uzayx/app.js'
+      - 'web/uzayx/site.html'
+      - 'web/uzayx/finish.css'
+      - 'web/release.json'
+      - 'web/uzayx/release.json'
 permissions:
   contents: write
   pages: write

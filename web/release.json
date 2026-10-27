@@ -1,11 +1,12 @@
 {
-  "product_version": "4.11",
+  "product_version": "4.12",
   "version_change_owner": "AUTOMATIC_MINOR_WITHIN_4",
-  "release_id": "ARGE-20261027-4_11",
-  "updated_at_utc": "2026-10-27T17:14:12+00:00",
+  "release_id": "ARGE-20261027-4_12",
+  "updated_at_utc": "2026-10-27T18:05:21Z",
   "timestamp_basis": "UTC",
   "market_data_timestamp_separate": true,
   "change_summary": [
+    "4.12: Son 48 saat model kâğıt kapanışlarını coin, yön, çıkış türü ve yalnızca doğrulanmış TURAN atfına göre betimleyici gruplara ayırır. Bu gruplar nedensel kök neden veya kârlılık kanıtı değildir; funding/tasfiye belirsizliği, aynı scan_id doğrulaması ve gerçek emir kapalı ilkeleri korunur.",
     "4.11: Ana ekranda ürün sürümü, piyasa verisi ve tarama saatleri ayrılır; tarama ile aynı scan_id üzerinden tam çıkış zamanlarıyla kayan 48 saatlik model kâğıt PnL özeti eklenir. Ölçülmeyen ters yön/kök neden iddiası üretilmez; funding/tasfiye belirsizliği ve 200 strateji/ayrı kasa korunur.",
     "4.10: TURAN v2 ortak kurallar, düzeltilmiş dönüş yönü, çift yön araştırma, kalıcı deney mum takibi, sürüm ayrımlı eşleştirilmiş P&L, tahmin referans karşılaştırması ve Binance tarihsel replay. Eski kayıtlar korunur; tam net P&L bilinmiyor, gerçek emir yok.",
     "4.09: Her sinyalin evaluation/snapshot/zaman zinciri sanal bilete taşınır; geçmiş atıf EXACT/RECONSTRUCTED/CANDIDATE/UNATTRIBUTED olarak denetlenir. Ortak kasadan ayrı, asıl/ters/teyit-bekle/NO_TRADE ileri deneyleri, 8 gözlem ufku ve sıkıştırılmış değişmez 200-ID çevrim arşivi eklendi. Fonlama/tasfiye bilinmiyorsa tam net PnL bilinmiyor; otomatik kural terfisi veya gerçek emir yok.",
@@ -19,6 +20,11 @@
   "no_real_orders": true,
   "not_a_trading_signal": true,
   "change_log": [
+    {
+      "release_id": "ARGE-20261027-4_12",
+      "updated_at_utc": "2026-10-27T18:05:21Z",
+      "summary": "4.12: Son 48 saat model kâğıt kapanışlarını coin, yön, çıkış türü ve yalnızca doğrulanmış TURAN atfına göre betimleyici gruplara ayırır. Bu gruplar nedensel kök neden veya kârlılık kanıtı değildir; funding/tasfiye belirsizliği, aynı scan_id doğrulaması ve gerçek emir kapalı ilkeleri korunur."
+    },
     {
       "release_id": "OPS-20261025-4_09",
       "updated_at_utc": "2026-10-24T08:51:24.950696+00:00",

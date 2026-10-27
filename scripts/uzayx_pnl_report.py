@@ -45,6 +45,15 @@ def rounded(value):
     return round(value, 6)
 
 
+def add_exit_group(groups, key, value):
+    row = groups.setdefault(key, {'key': key, 'realized_net_usdt': 0., 'exit_count': 0,
+                                  'positive_exits': 0, 'negative_exits': 0})
+    row['realized_net_usdt'] += value
+    row['exit_count'] += 1
+    row['positive_exits'] += int(value > 0)
+    row['negative_exits'] += int(value < 0)
+
+
 def build(ledger, paper, manifest, bank):
     scan = manifest.get('scan_id')
     if (not scan or manifest.get('publication_valid') is not True or
@@ -87,7 +96,10 @@ def build(ledger, paper, manifest, bank):
     daily = collections.defaultdict(float)
     rolling_48h = {'from_utc': (now - dt.timedelta(hours=48)).isoformat(),
                    'to_utc': now.isoformat(), 'realized_net_usdt': 0.,
-                   'exit_count': 0, 'positive_exits': 0, 'negative_exits': 0}
+                   'exit_count': 0, 'positive_exits': 0, 'negative_exits': 0,
+                   'causal_conclusion': False, 'attribution_basis': 'DESCRIPTIVE_ONLY'}
+    rolling_groups = {name: {} for name in
+                      ('by_symbol', 'by_side', 'by_exit_kind', 'by_strategy')}
     seen = set()
     realized = floating = fees = 0.
     closed_count = open_count = 0
@@ -126,6 +138,15 @@ def build(ledger, paper, manifest, bank):
                 rolling_48h['exit_count'] += 1
                 rolling_48h['positive_exits'] += int(value > 0)
                 rolling_48h['negative_exits'] += int(value < 0)
+                proof = classify_attribution(ticket)
+                dimensions = {
+                    'by_symbol': ticket.get('symbol') or 'UNKNOWN',
+                    'by_side': ticket.get('side') if ticket.get('side') in ('LONG', 'SHORT') else 'UNKNOWN',
+                    'by_exit_kind': exit_row.get('kind') if isinstance(exit_row.get('kind'), str) and exit_row.get('kind') else 'UNKNOWN',
+                    'by_strategy': proof['strategy_id'] if proof['eligible_for_strategy_pnl'] else 'UNATTRIBUTED',
+                }
+                for name, group_key in dimensions.items():
+                    add_exit_group(rolling_groups[name], group_key, value)
             exit_sum += value
         if abs(exit_sum-r) > .025:
             raise ValueError('PNL_EXIT_LEDGER_MISMATCH')
@@ -194,6 +215,14 @@ def build(ledger, paper, manifest, bank):
                   if (now.date()-dt.timedelta(days=span-1)).isoformat() <= day <= now.date().isoformat()))
               for span in (1, 7, 30)}
     rolling_48h['realized_net_usdt'] = rounded(rolling_48h['realized_net_usdt'])
+    for name, rows in rolling_groups.items():
+        groups = list(rows.values())
+        for group in groups:
+            group['realized_net_usdt'] = rounded(group['realized_net_usdt'])
+        if sum(group['exit_count'] for group in groups) != rolling_48h['exit_count'] or abs(
+            sum(group['realized_net_usdt'] for group in groups) - rolling_48h['realized_net_usdt']) > .00001:
+            raise ValueError('PNL_48H_ATTRIBUTION_RECONCILIATION_FAILED')
+        rolling_48h[name] = sorted(groups, key=lambda group: (group['realized_net_usdt'], group['key']))
     active = sum(r['state'] == 'PAPER_ACTIVE' for r in strategy_rows)
     blocked = sum(r['state'] == 'RESEARCH_SOURCE_BLOCKED' for r in strategy_rows)
     controls = sum(r['state'] == 'CONTROL_ACTIVE' for r in strategy_rows)

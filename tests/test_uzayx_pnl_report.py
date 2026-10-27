@@ -47,6 +47,25 @@ class PNLReportTest(unittest.TestCase):
         self.assertEqual(x['rolling_48h']['exit_count'],2)
         self.assertEqual(x['rolling_48h']['positive_exits'],2)
         self.assertEqual(x['rolling_48h']['negative_exits'],0)
+    def test_rolling_48h_has_descriptive_groups_and_excludes_boundary(self):
+        a,b,c,d=fixture()
+        ticket=a['tickets'][1]
+        ticket['realized_net_usdt']=-2.
+        ticket['exits'][0].update(net_usdt=-2.,kind='STOP',closed_at_utc='2026-10-21T09:00:00Z')
+        a['tickets'][0]['exits'].append({'closed_at_utc':'2026-10-19T09:00:00Z','net_usdt':0.,'kind':'TP2'})
+        b['summary']['realized_net_usdt']=8.
+        b['summary']['virtual_equity_usdt']=1005.
+        report=pnl.build(a,b,c,d)['rolling_48h']
+        self.assertEqual(report['exit_count'],2)
+        self.assertEqual(report['realized_net_usdt'],8.)
+        self.assertIn('causal_conclusion', report)
+        self.assertFalse(report['causal_conclusion'])
+        self.assertEqual({x['key']:x['realized_net_usdt'] for x in report['by_side']},
+                         {'LONG':10.,'SHORT':-2.})
+        self.assertEqual(report['by_symbol'][0]['key'],'ETHUSDT')
+        self.assertEqual(report['by_exit_kind'][0]['key'],'STOP')
+        self.assertEqual(report['by_strategy'][0]['key'],'UNATTRIBUTED')
+
     def test_cash_drift_fails_closed(self):
         a,b,c,d=fixture();b['summary']['virtual_equity_usdt']+=10
         with self.assertRaisesRegex(ValueError,'PNL_CASH_RECONCILIATION_FAILED'):
