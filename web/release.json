@@ -110,6 +110,6 @@
   "release_label": "25 Ekim 2026 güncellemesi",
   "strategy_rule_version": "turan200-20261025-v2",
   "replay_model": "turan.replay.v1",
-  "production_deployed_at_utc": "2026-10-27T17:20:17Z",
+  "production_deployed_at_utc": "2026-10-27T17:15:39Z",
   "production_snapshot_scan_id": "1d3627493b22cac8332ee8ab"
 }
