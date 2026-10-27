@@ -236,8 +236,9 @@
   }
   function renderReleaseMeta(){
     const release=db.release||{},pnl=db.pnl||{},window48=pnl.rolling_48h;
-    set('product-release',release.product_version&&Date.parse(release.updated_at_utc)
-      ?release.product_version+' · '+dateTime(release.updated_at_utc)+' TSİ':'Doğrulanamadı');
+    const releaseAt=release.production_deployed_at_utc||release.updated_at_utc;
+    set('product-release',release.product_version&&Date.parse(releaseAt)
+      ?release.product_version+' · '+dateTime(releaseAt)+' TSİ':'Doğrulanamadı');
     const aligned=pnl.scan_id&&pnl.scan_id===db.manifest?.scan_id&&pnl.no_real_orders===true;
     if(!aligned||!window48||!Number.isFinite(Number(window48.realized_net_usdt))){
       set('paper-48h','Henüz ölçülmedi');
