@@ -3,7 +3,7 @@
   "version_change_owner": "AUTOMATIC_MINOR_WITHIN_4",
   "release_id": "ARGE-20261027-4_11",
   "updated_at_utc": "2026-10-27T17:14:12+00:00",
-  "timestamp_basis": "UTC_SOURCE_RELEASE; production publication independently verified from GitHub Pages deployment status",
+  "timestamp_basis": "UTC",
   "market_data_timestamp_separate": true,
   "change_summary": [
     "4.11: Ana ekranda ürün sürümü, piyasa verisi ve tarama saatleri ayrılır; tarama ile aynı scan_id üzerinden tam çıkış zamanlarıyla kayan 48 saatlik model kâğıt PnL özeti eklenir. Ölçülmeyen ters yön/kök neden iddiası üretilmez; funding/tasfiye belirsizliği ve 200 strateji/ayrı kasa korunur.",
