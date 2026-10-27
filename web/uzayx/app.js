@@ -243,12 +243,24 @@
     if(!aligned||!window48||!Number.isFinite(Number(window48.realized_net_usdt))){
       set('paper-48h','Henüz ölçülmedi');
       set('paper-48h-count','Son tarama ile uyumlu 48 saatlik kapanış verisi yok');
+      set('paper-48h-insight','Betimleyici gruplar; nedensel kök neden analizi değildir.');
       return;
     }
     const value=Number(window48.realized_net_usdt);
     set('paper-48h',(value>0?'+':'')+num(value,2)+' USDT · tahmini');
     set('paper-48h-count',num(window48.exit_count,0)+' kapanış adımı · '+dateTime(window48.from_utc)+'–'+dateTime(window48.to_utc)+' TSİ · gerçek emir yok');
     $('paper-48h').className=value<0?'negative':value>0?'positive':'';
+    const worst=(rows)=>Array.isArray(rows)?rows.find(x=>Number(x.realized_net_usdt)<0):null;
+    const format=(row)=>row?row.key+' ('+num(row.realized_net_usdt,2)+' USDT)':'negatif grup yok';
+    const outside=(Array.isArray(window48.by_strategy)?window48.by_strategy:[]).find(x=>x.key==='UNATTRIBUTED');
+    const strategyRows=Array.isArray(window48.by_strategy)?window48.by_strategy.filter(x=>x.key!=='UNATTRIBUTED'):[];
+    const ready=window48.attribution_basis==='DESCRIPTIVE_ONLY'&&window48.causal_conclusion===false;
+    const note=ready?('Betimleyici gruplar; nedensel kök neden analizi değildir. Çıkış: '+format(worst(window48.by_exit_kind))+
+      ' · Coin: '+format(worst(window48.by_symbol))+' · Yön: '+format(worst(window48.by_side))+
+      ' · Atfedilmiş strateji grubu: '+format(worst(strategyRows))+
+      ' · Strateji atfı dışı: '+num(outside?.exit_count,0)+' kapanış.'):
+      'Yeni ayrıştırılmış tarama bekleniyor; neden analizi yapılmadı.';
+    set('paper-48h-insight',note);
   }
   function redrawMarket(){
     renderConnection();renderTop();renderRadar();renderSystem();
