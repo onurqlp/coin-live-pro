@@ -239,22 +239,40 @@
     const releaseAt=release.production_deployed_at_utc||release.updated_at_utc;
     set('product-release',release.product_version&&Date.parse(releaseAt)
       ?release.product_version+' · '+dateTime(releaseAt)+' TSİ':'Doğrulanamadı');
-    const aligned=pnl.scan_id&&pnl.scan_id===db.manifest?.scan_id&&pnl.no_real_orders===true;
-    if(!aligned||!window48||!Number.isFinite(Number(window48.realized_net_usdt))){
+    // Fail closed: mixed scans, unpinned HEAD, stale timestamps and unreconciled
+    // paper balances cannot be presented as the latest 48-hour result.
+    const manifest=db.manifest||{};
+    const finished=Date.parse(manifest.finished_at_utc||'');
+    const fresh=Number.isFinite(finished)&&Date.now()>=finished-120000&&Date.now()-finished<=25*60000;
+    const pinned=/^[a-f0-9]{40}$/.test(sourceCommit||'');
+    const aligned=Boolean(pinned&&fresh&&manifest.publication_valid===true&&
+      manifest.no_real_orders===true&&pnl.scan_id===manifest.scan_id&&
+      pnl.no_real_orders===true&&pnl.reconciled===true&&
+      pnl.not_realized_exchange_pnl===true&&pnl.source_at_utc&&
+      Math.abs(Date.parse(pnl.source_at_utc)-finished)<=120000);
+    const validWindow=Boolean(window48&&typeof window48.realized_net_usdt==='number'&&
+      Number.isFinite(window48.realized_net_usdt)&&Number.isInteger(window48.exit_count)&&
+      window48.exit_count>=0&&Number.isInteger(window48.positive_exits)&&
+      Number.isInteger(window48.negative_exits)&&window48.positive_exits>=0&&
+      window48.negative_exits>=0&&window48.positive_exits+window48.negative_exits<=window48.exit_count&&
+      window48.attribution_basis==='DESCRIPTIVE_ONLY'&&window48.causal_conclusion===false&&
+      Number.isFinite(Date.parse(window48.to_utc||''))&&
+      Math.abs(Date.parse(window48.to_utc)-finished)<=120000);
+    if(!aligned||!validWindow){
       set('paper-48h','Henüz ölçülmedi');
-      set('paper-48h-count','Son tarama ile uyumlu 48 saatlik kapanış verisi yok');
+      set('paper-48h-count','Güncel, aynı taramadan ve mutabakatlı 48 saatlik sanal kapanış doğrulanamadı');
       set('paper-48h-insight','Betimleyici gruplar; nedensel kök neden analizi değildir.');
       return;
     }
     const value=Number(window48.realized_net_usdt);
     set('paper-48h',(value>0?'+':'')+num(value,2)+' USDT · tahmini');
-    set('paper-48h-count',num(window48.exit_count,0)+' kapanış adımı · '+dateTime(window48.from_utc)+'–'+dateTime(window48.to_utc)+' TSİ · gerçek emir yok');
+    set('paper-48h-count',num(window48.exit_count,0)+' kapanış · '+num(window48.positive_exits,0)+' artı / '+num(window48.negative_exits,0)+' eksi · '+dateTime(window48.from_utc)+'–'+dateTime(window48.to_utc)+' TSİ · gerçek emir yok');
     $('paper-48h').className=value<0?'negative':value>0?'positive':'';
     const worst=(rows)=>Array.isArray(rows)?rows.find(x=>Number(x.realized_net_usdt)<0):null;
     const format=(row)=>row?row.key+' ('+num(row.realized_net_usdt,2)+' USDT)':'negatif grup yok';
     const outside=(Array.isArray(window48.by_strategy)?window48.by_strategy:[]).find(x=>x.key==='UNATTRIBUTED');
     const strategyRows=Array.isArray(window48.by_strategy)?window48.by_strategy.filter(x=>x.key!=='UNATTRIBUTED'):[];
-    const ready=window48.attribution_basis==='DESCRIPTIVE_ONLY'&&window48.causal_conclusion===false;
+    const ready=true; // validated by validWindow above; group breakdown is descriptive only.
     const note=ready?('Betimleyici gruplar; nedensel kök neden analizi değildir. Çıkış: '+format(worst(window48.by_exit_kind))+
       ' · Coin: '+format(worst(window48.by_symbol))+' · Yön: '+format(worst(window48.by_side))+
       ' · Atfedilmiş strateji grubu: '+format(worst(strategyRows))+
