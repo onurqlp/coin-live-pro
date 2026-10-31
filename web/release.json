@@ -1,11 +1,12 @@
 {
-  "product_version": "4.12",
+  "product_version": "4.13",
   "version_change_owner": "AUTOMATIC_MINOR_WITHIN_4",
-  "release_id": "ARGE-20261027-4_12",
-  "updated_at_utc": "2026-10-27T18:05:21Z",
+  "release_id": "OPS-20261101-4_13",
+  "updated_at_utc": "2026-10-31T23:48:37.835Z",
   "timestamp_basis": "UTC",
   "market_data_timestamp_separate": true,
   "change_summary": [
+    "4.13: Ana ekranda son 48 saat model PnL yalnız SHA-pinned, 25 dakika içinde, aynı scan_id, uzlaştırılmış ve paper-only kaynakla gösterilir. Gerçek işlem kârı gibi sunulmaz; kapanışların artı/eksi adedi net sonucun yanında gösterilir.",
     "4.12: Son 48 saat model kâğıt kapanışlarını coin, yön, çıkış türü ve yalnızca doğrulanmış TURAN atfına göre betimleyici gruplara ayırır. Bu gruplar nedensel kök neden veya kârlılık kanıtı değildir; funding/tasfiye belirsizliği, aynı scan_id doğrulaması ve gerçek emir kapalı ilkeleri korunur.",
     "4.11: Ana ekranda ürün sürümü, piyasa verisi ve tarama saatleri ayrılır; tarama ile aynı scan_id üzerinden tam çıkış zamanlarıyla kayan 48 saatlik model kâğıt PnL özeti eklenir. Ölçülmeyen ters yön/kök neden iddiası üretilmez; funding/tasfiye belirsizliği ve 200 strateji/ayrı kasa korunur.",
     "4.10: TURAN v2 ortak kurallar, düzeltilmiş dönüş yönü, çift yön araştırma, kalıcı deney mum takibi, sürüm ayrımlı eşleştirilmiş P&L, tahmin referans karşılaştırması ve Binance tarihsel replay. Eski kayıtlar korunur; tam net P&L bilinmiyor, gerçek emir yok.",
@@ -20,6 +21,11 @@
   "no_real_orders": true,
   "not_a_trading_signal": true,
   "change_log": [
+    {
+      "release_id": "OPS-20261101-4_13",
+      "updated_at_utc": "2026-10-31T23:48:37.835Z",
+      "summary": "4.13: 48 saat model PnL için kaynak bütünlüğü ve tazelik doğrulaması; kapanış dağılımı, kesintide fail-closed gösterim. Strateji, kasalar ve emir politikası değişmedi."
+    },
     {
       "release_id": "ARGE-20261027-4_12",
       "updated_at_utc": "2026-10-27T18:05:21Z",
