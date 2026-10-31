@@ -1,5 +1,5 @@
 {
-  "release_id": "ARGE-20261027-4_12",
+  "release_id": "OPS-20261101-4_13",
   "legacy_cash_model": "4.03",
   "research_model": "uzayx.research.v1",
   "new_intents_max_leverage": 10,
@@ -8,11 +8,12 @@
   "exact_liquidation_model": "UNVERIFIED",
   "no_real_orders": true,
   "product_name": "UZAYX",
-  "product_version": "4.12",
-  "updated_at_utc": "2026-10-27T18:05:21Z",
+  "product_version": "4.13",
+  "updated_at_utc": "2026-10-31T23:48:37.835Z",
   "experiment_model": "turan.experiments.v1",
   "strategy_rule_version": "turan200-20261025-v2",
   "replay_model": "turan.replay.v1",
-  "production_deployed_at_utc": "2026-10-27T18:10:22Z",
-  "production_snapshot_scan_id": "9514d205365bfc14eec1bad4"
+  "production_deployed_at_utc": null,
+  "production_snapshot_scan_id": null,
+  "change_note": "48 saatlik sanal net sonuç için sabit kaynak SHA, 25 dakika tazelik, tarama kimliği, mutabakat ve sonuç sınıflandırma kontrolleri; artı/eksi kapanış sayıları. Strateji, hesap ve emir kuralları değişmedi."
 }
