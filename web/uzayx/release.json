@@ -1,5 +1,5 @@
 {
-  "release_id": "OPS-20261101-4_13",
+  "release_id": "OPS-20261101-4_14",
   "legacy_cash_model": "4.03",
   "research_model": "uzayx.research.v1",
   "new_intents_max_leverage": 10,
@@ -8,12 +8,12 @@
   "exact_liquidation_model": "UNVERIFIED",
   "no_real_orders": true,
   "product_name": "UZAYX",
-  "product_version": "4.13",
-  "updated_at_utc": "2026-10-31T23:48:37.835Z",
+  "product_version": "4.14",
+  "updated_at_utc": "2026-11-01T01:00:25.654Z",
   "experiment_model": "turan.experiments.v1",
   "strategy_rule_version": "turan200-20261025-v2",
   "replay_model": "turan.replay.v1",
   "production_deployed_at_utc": null,
   "production_snapshot_scan_id": null,
-  "change_note": "48 saatlik sanal net sonuç için sabit kaynak SHA, 25 dakika tazelik, tarama kimliği, mutabakat ve sonuç sınıflandırma kontrolleri; artı/eksi kapanış sayıları. Strateji, hesap ve emir kuralları değişmedi."
+  "change_note": "Six fixed reversal research cohorts in independent forward shadow ledger; matched closed bars only, no real orders or shared cash edits."
 }
