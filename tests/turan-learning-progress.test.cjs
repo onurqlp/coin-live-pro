@@ -58,7 +58,13 @@ test('journey accepts matching deduplicated snapshots and refuses mismatched sca
  assert.equal(summary.closed,ops.cohorts['TÜMÜ'].closed);
  assert.equal(summary.positive+summary.negative,summary.closed);
  assert.equal(summary.reliable,snapshot.totals.verified_profitable);
- assert.equal(summary.sevenChange,null);
+ const dated=[...ops.daily].sort((a,b)=>a.date_utc.localeCompare(b.date_utc));
+ const consecutive=rows=>rows.length===7&&rows.every((row,i)=>i===0||
+   Date.parse(row.date_utc+'T00:00:00Z')-Date.parse(rows[i-1].date_utc+'T00:00:00Z')===86400000);
+ const week=dated.slice(-7),previous=dated.slice(-14,-7);
+ const expected=consecutive(week)&&consecutive(previous)?
+   week.reduce((sum,x)=>sum+x.realized_net_usdt,0)-previous.reduce((sum,x)=>sum+x.realized_net_usdt,0):null;
+ assert.equal(summary.sevenChange,expected);
  assert.equal(context.journey(snapshot,{ops:{...ops,cohorts:{'TÜMÜ':{closed:999,positive:1,negative:1}}},experiments,spark}).available,false);
  assert.equal(context.journey(snapshot,null).available,false);
 });
