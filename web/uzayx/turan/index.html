@@ -8,7 +8,7 @@
   <title>TURAN CORE | UzayX Araştırma Merkezi</title>
   <link rel="icon" type="image/svg+xml" href="../icon.svg">
   <link rel="stylesheet" href="./turan.css?v=6">
-  <script defer src="./turan.js?v=10"></script>
+  <script defer src="./turan.js?v=11"></script><link rel="stylesheet" href="../inverse-watch.css?v=1"><script defer src="../inverse-watch.js?v=1"></script>
 </head>
 <body>
 <a class="skip" href="#content">İçeriğe geç</a>
@@ -22,6 +22,7 @@
     <nav id="nav">
       <button class="nav-link selected" data-view="command"><span class="nav-icon">◫</span> Komuta merkezi</button>
       <button class="nav-link" data-view="arena"><span class="nav-icon">◈</span> Strateji arenası</button>
+      <button class="nav-link" data-view="inverse"><span class="nav-icon">⇄</span> Ters yön deneyleri</button>
       <button class="nav-link" data-view="cases"><span class="nav-icon">⌁</span> Olay hafızası</button>
       <button class="nav-link" data-view="progress"><span class="nav-icon">◉</span> Öğrenim ilerlemesi</button>
       <button class="nav-link" data-view="learning"><span class="nav-icon">◎</span> Öğrenme laboratuvarı</button>
@@ -40,7 +41,7 @@
       <section class="view active" id="view-command">
         <div class="hero">
           <div class="hero-copy"><div class="eyebrow">TURAN CORE / OPERASYON PANELİ <span class="hero-slash">//</span> PAPER-ONLY</div><h1>Veriden öğrenen.<br><span>Kanıtla gelişen.</span></h1><p>Piyasadaki her yeni olay, geçmiş örnekler ve strateji kurallarıyla karşılaştırılır. Araştırma hafızası büyür; sonuçlar kanıtlanmadan stratejiler kârlı ilan edilmez.</p>
-          <div class="hero-actions"><button type="button" data-open="arena" class="primary">Stratejileri incele <span>↗</span></button><button type="button" data-open="cases" class="soft">Olay hafızası →</button></div></div>
+          <div class="hero-actions"><button type="button" data-open="arena" class="primary">Stratejileri incele <span>↗</span></button><button type="button" data-open="inverse" class="soft">↔ Ters yön deneyleri</button><button type="button" data-open="cases" class="soft">Olay hafızası →</button></div></div>
           <div class="hero-orbit" aria-hidden="true"><div class="orbit outer"></div><div class="orbit inner"></div><div class="orbit-center"><span>✧</span><strong>TURAN</strong><small>OBSERVE · LEARN</small></div><div class="orbit-point one"></div><div class="orbit-point two"></div></div>
         </div>
         <article id="autonomy-panel" class="card autonomy" aria-live="polite"><div class="empty">Otomatik işletim durumu doğrulanıyor…</div></article>
@@ -56,6 +57,7 @@
         </div>
       </section>
 
+      <section class="view" id="view-inverse" aria-label="Ters yön sanal araştırma laboratuvarı"><div class="page-head"><div class="eyebrow">TURAN / İLERİYE DÖNÜK ARAŞTIRMA</div><h1>Orijinal mi,<br><span>ters yön mü?</span></h1><p>Seçim öncesindeki model sonuçları ve seçimden sonraki bağımsız zaman döneminin kapalı, eşleşmiş sanal deneyleri ayrı tutulur. Gerçek emir yok.</p></div><div id="inverse-watch-board" class="card" role="region" aria-live="polite"><div class="empty">Altı seçili ters yön deneyi doğrulanıyor…</div></div></section>
       <section class="view" id="view-arena">
         <div class="page-head"><div class="eyebrow">02 / STRATEJİ ARENASI</div><h1>Tüm stratejiler.<br><span>Tek kanıt standardı.</span></h1><p>200 araştırma bankası ve önceki 30 tasarım. Sıralama doğrulanmış kârlılık iddiası değildir; sanal kayıt, gözlem ve veri yeterliliği ayrı sunulur.</p></div>
         <div class="section-title"><div><small>STRATEJİ KAYIT DEFTERİ</small><h2>230 araştırma kimliği</h2></div><span id="arena-count" class="time-hint"></span></div>
