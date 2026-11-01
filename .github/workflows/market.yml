@@ -267,6 +267,10 @@ jobs:
         run: |
           python3 engine/turan_experiments.py
           python3 engine/turan_core.py
+      - name: Track six frozen inverse SHADOW cohorts from post-selection closed experiments
+        run: |
+          python3 -m unittest discover -s tests -p 'test_turan_inverse_watch.py'
+          python3 scripts/uzayx_inverse_watch.py
       - name: Refresh UzayX Google summary from this verified scan
         if: ${{ github.event_name != 'push' || !startsWith(github.event.head_commit.message || '', '[skip-google]') }}
         run: python3 scripts/uzayx_google_export.py
@@ -286,7 +290,7 @@ jobs:
           git add archive/uzayx-adaptive-ledger.json web/data/uzayx-adaptive.json web/data/uzayx-strategy-bank.json
           git add web/data/uzayx-guncel.csv
           git add web/data/turan-core.json archive/turan-core-journal.jsonl
-          git add web/data/turan-experiments.json archive/turan-experiments-ledger.json archive/turan-cycles research/turan-candles
+          git add web/data/turan-experiments.json web/data/turan-inverse-watch.json archive/turan-experiments-ledger.json archive/turan-cycles research/turan-candles
           git add web/data/v4-watch-archive.json web/data/v4-context.json web/data/v4-early.json web/data/v4-spark-paper.json web/data/v4-spark-review.json
           git add web/data/swing-radar.json web/data/swing-history.json web/data/swing-outcomes.json
           git add archive/epochs
