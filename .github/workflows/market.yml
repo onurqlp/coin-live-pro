@@ -68,6 +68,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - name: Rehydrate verified TURAN research shards (never reset history)
+        run: |
+          python3 -m unittest discover -s tests -p 'test_turan_ledger_shards.py'
+          python3 scripts/turan_ledger_shards.py hydrate
       - name: Timestamp 5-minute best-effort scan
         run: echo "TRIGGER=${{ github.event_name }} UTC=$(date -u +%FT%TZ)"
       - name: Verify TURAN timing, attribution and immutable experiment contracts
@@ -274,6 +278,8 @@ jobs:
       - name: Refresh UzayX Google summary from this verified scan
         if: ${{ github.event_name != 'push' || !startsWith(github.event.head_commit.message || '', '[skip-google]') }}
         run: python3 scripts/uzayx_google_export.py
+      - name: Persist lossless TURAN experiment shards before GitHub publication
+        run: python3 scripts/turan_ledger_shards.py pack
       - name: Publish only validated data
         run: |
           set -euo pipefail
@@ -290,7 +296,11 @@ jobs:
           git add archive/uzayx-adaptive-ledger.json web/data/uzayx-adaptive.json web/data/uzayx-strategy-bank.json
           git add web/data/uzayx-guncel.csv
           git add web/data/turan-core.json archive/turan-core-journal.jsonl
-          git add web/data/turan-experiments.json web/data/turan-inverse-watch.json archive/turan-experiments-ledger.json archive/turan-cycles research/turan-candles
+          # The old ~100 MB ledger is reconstructed locally and intentionally NOT pushed.
+          # Replace the tracked legacy blob with lossless verified gzip members.
+          git rm --cached --ignore-unmatch archive/turan-experiments-ledger.json
+          git add archive/turan-ledger-shards
+          git add web/data/turan-experiments.json web/data/turan-inverse-watch.json archive/turan-cycles research/turan-candles
           git add web/data/v4-watch-archive.json web/data/v4-context.json web/data/v4-early.json web/data/v4-spark-paper.json web/data/v4-spark-review.json
           git add web/data/swing-radar.json web/data/swing-history.json web/data/swing-outcomes.json
           git add archive/epochs
