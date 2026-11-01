@@ -41,6 +41,8 @@ on:
       - 'engine/**'
       - '.github/workflows/market.yml'
       - 'scripts/uzayx_pnl_report.py'
+      - 'scripts/turan_ledger_shards.py'
+      - 'tests/test_turan_ledger_shards.py'
       - 'web/uzayx/app.js'
       - 'web/uzayx/site.html'
       - 'web/uzayx/finish.css'
