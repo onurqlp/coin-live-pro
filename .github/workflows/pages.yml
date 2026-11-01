@@ -11,7 +11,7 @@ permissions:
   pages: write
   id-token: write
 concurrency:
-  group: coin-live-pro-pages-20261101
+  group: coin-live-pro-pages
   cancel-in-progress: false
 jobs:
   deploy:
