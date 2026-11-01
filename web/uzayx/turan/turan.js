@@ -9,7 +9,7 @@
   const valueRow = (label,value) => '<div class="learnline"><span>'+esc(label)+'</span><strong>'+esc(value)+'</strong></div>';
   const stateLabel = x => ({IMPLEMENTED_FORWARD_PAPER:'İleri sanal deney',BLOCKED_REQUIRED_EVIDENCE:'Kaynak bekleniyor',IMPLEMENTED_CONTROL:'Kontrol / araştırma',RESEARCH_ONLY:'Önceki araştırma'}[x]||x||'Araştırma');
   const evaluationLabel = x => ({SIGNAL:'Araştırma sinyali eşleşti',NO_SIGNAL:'Sinyal yok',BLOCKED_SOURCE:'Kaynak/veri engeli',CONTROL_RESEARCH_ONLY:'Kontrol / bağımsız giriş değil',MISSING_REGISTRY_RECORD:'Katalog kaydı eksik'}[x]||'Bu döngüde kayıt yok');
-  const displayView = {command:'Komuta merkezi',arena:'Strateji arenası',cases:'Olay hafızası',progress:'Öğrenim ilerlemesi',learning:'Öğrenme laboratuvarı',sources:'Veri ve sistem'};
+  const displayView = {command:'Komuta merkezi',arena:'Strateji arenası',inverse:'Ters yön deneyleri',cases:'Olay hafızası',progress:'Öğrenim ilerlemesi',learning:'Öğrenme laboratuvarı',sources:'Veri ve sistem'};
   let data=null,journeySources=null,health=null,limit=30;
   function go(view){
     if(!displayView[view])return;
