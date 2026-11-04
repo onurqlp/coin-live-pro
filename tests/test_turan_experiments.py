@@ -38,6 +38,24 @@ def run(prior=None, now=NOW, bars=None):
 
 
 class ExperimentTests(unittest.TestCase):
+    def test_equivalent_rules_are_one_independent_experiment_not_two(self):
+        bank,manifest,pack=fixture()
+        for sid in ('T001','T002'):
+            rule=next(x for x in bank['registry'] if x['id']==sid)
+            rule['equivalence_group']='SAME_RULE'
+        ledger,report=exp.advance({},bank,manifest,pack,NOW)
+        self.assertEqual(len(ledger['experiments']),2)  # preserve per-ID audit records
+        self.assertEqual(report['raw_experiment_record_count'],2)
+        self.assertEqual(report['independent_experiment_count'],1)
+        self.assertEqual(report['duplicate_equivalent_experiment_count'],1)
+        paired=report['paired_results']
+        self.assertEqual(len(paired['cohorts']),2)  # traceability remains
+        self.assertEqual(len(paired['independent_cohorts']),1)
+        cohort=paired['independent_cohorts'][0]
+        self.assertEqual(cohort['experiments'],1)
+        self.assertEqual(cohort['strategy_ids'],['T001','T002'])
+        self.assertEqual(cohort['duplicate_equivalent_records'],1)
+
     def test_extreme_real_atr_is_recorded_as_risk_block_without_stopping_cycle(self):
         bank,manifest,pack=fixture()
         bank['signals'][0]['atr_pct_at_decision']=53.013
