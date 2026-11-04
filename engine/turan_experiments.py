@@ -168,8 +168,8 @@ def _independent_experiment_identity(item, registry):
     current=(group and item.get('strategy_version')==rule.get('strategy_version') and
         item.get('rules_hash')==rule.get('strategy_config_hash'))
     hypothesis='EQUIVALENCE:'+group if current else 'STRATEGY:'+str(sid)
-    cohort=(hypothesis,item.get('strategy_version'),item.get('exchange'),
-        item.get('contract_type'),item.get('experiment_policy'))
+    cohort=(hypothesis,item.get('strategy_version'),None if current else item.get('rules_hash'),
+        item.get('exchange'),item.get('contract_type'),item.get('experiment_policy'))
     event=item.get('event_id')
     event_identity=(event,item.get('symbol'),item.get('direction'),item.get('decision_ms'),
         item.get('reference_price'),item.get('atr_pct'),item.get('spread_bps'))
@@ -222,14 +222,14 @@ def report_results(experiments, registry=None):
         cohorts.append(_paired_record(items,metadata))
     independent_cohorts=[]
     for key,events in sorted(independent.items(),key=lambda kv:str(kv[0])):
-        hypothesis,version,exchange,contract,policy=key
+        hypothesis,version,rules_hash,exchange,contract,policy=key
         items=list(events.values())
         ids=sorted(independent_groups[key])
         equivalence=hypothesis.removeprefix('EQUIVALENCE:') if hypothesis.startswith('EQUIVALENCE:') else None
         duplicate_count=raw_group_counts[key]-len(items)
         metadata=dict(hypothesis_id=hypothesis,equivalence_group=equivalence,
             strategy_ids=ids,raw_experiment_records=raw_group_counts[key],
-            duplicate_equivalent_records=duplicate_count,strategy_version=version,
+            duplicate_equivalent_records=duplicate_count,strategy_version=version,rules_hash=rules_hash,
             exchange=exchange,contract_type=contract,experiment_policy=policy)
         independent_cohorts.append(_paired_record(items,metadata))
     independent_count=sum(len(events) for events in independent.values())
