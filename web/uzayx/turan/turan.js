@@ -231,7 +231,8 @@
       allRealized:cash?.totalPnl,sevenNet,
       sevenChange:sevenNet!==null&&priorNet!==null?sevenNet-priorNet:null,
       dayCount,first:spark.started_at||null,last:uniqueDays.at(-1)?.date_utc,
-      days:uniqueDays.slice(-7),experiments:experiments.experiment_count,
+      days:uniqueDays.slice(-7),experiments:experiments.independent_experiment_count??experiments.experiment_count,
+      rawExperiments:experiments.raw_experiment_record_count??experiments.experiment_count,
       experimentFirst:experiments.started_at_utc,sourceGaps:ops.source_publication_valid!==true,
       completeNetKnown:Number.isFinite(experiments.complete_net_usdt)&&cash?.funding==='MODELED'&&cash?.liquidation==='VERIFIED'};
   }
@@ -249,8 +250,8 @@
     const latest=j.days.at(-1),previous=j.days.at(-2);
     const dayComparison=latest&&previous?'Son gün '+number(latest.closed)+' kapanış; önceki gün '+number(previous.closed)+' kapanış.':'Günlük karşılaştırma için iki kayıt bekleniyor.';
     const state=j.sevenNet===null?'Kayıtlı günler birikiyor':j.sevenNet>=0?'Son 7 kayıtlı gün sanal net artıda':'Son 7 kayıtlı gün sanal net ekside';
-    el.innerHTML='<div class="journey-top"><div><span class="journey-eyebrow">ŞU AN</span><p class="journey-state">'+esc(state)+'</p><p>Günlük sonuçları ve geçmişteki değişimi birlikte izle. Bunlar sanal işlem ve yöntem deneyi kayıtlarıdır.</p></div><span class="journey-live">● Kaynaktan güncellenir</span></div>'+
-      '<div class="journey-mini"><div><b>'+number(j.methods)+'</b><span>İncelenen yöntem</span></div><div><b>'+number(j.experiments)+'</b><span>Yöntem deneyi</span></div><div><b>'+number(j.closed)+'</b><span>Kapanan sanal işlem</span></div><div><b>'+number(j.dayCount)+'</b><span>Görünen günlük kayıt</span></div></div>'+
+    el.innerHTML='<div class="journey-top"><div><span class="journey-eyebrow">ŞU AN</span><p class="journey-state">'+esc(state)+'</p><p>Günlük sonuçları ve geçmişteki değişimi birlikte izle. Bunlar sanal araştırma kayıtlarıdır; eşdeğer kurallar bağımsız deney sayısında bir kez sayılır.</p></div><span class="journey-live">● Kaynaktan güncellenir</span></div>'+
+      '<div class="journey-mini"><div><b>'+number(j.methods)+'</b><span>İncelenen yöntem</span></div><div><b>'+number(j.experiments)+'</b><span>Bağımsız deney · '+number(j.rawExperiments)+' ham kayıt</span></div><div><b>'+number(j.closed)+'</b><span>Kapanan sanal işlem</span></div><div><b>'+number(j.dayCount)+'</b><span>Görünen günlük kayıt</span></div></div>'+
       '<div class="journey-overview"><div><small>BAŞTAN BUGÜNE · SANAL KASA</small><strong class="'+(j.modeledRealized>=0?'up':'down')+'">'+esc(signed(j.modeledRealized,' USDT'))+'</strong><span>'+number(j.positive)+' artı · '+number(j.negative)+' eksi · '+number(j.open)+' açık</span></div><div><small>SON 7 TAM KAYITLI GÜN</small><strong class="'+(j.sevenNet===null?'flat':j.sevenNet>=0?'up':'down')+'">'+(j.sevenNet===null?'Henüz yok':esc(signed(j.sevenNet,' USDT')))+'</strong><span>'+esc(prior)+'</span></div></div>'+
       '<div class="journey-methods"><div><b>'+number(j.methods)+'</b><span>İnceleniyor</span></div><div><b>'+number(j.hopeful)+'</b><span>Tekrar denenecek</span></div><div><b>'+number(j.reliable)+'</b><span>Bağımsız doğrulandı</span></div></div>'+
       '<div class="journey-table-head"><div><b>Gün gün geçmiş</b><span>En yeni gün üstte · '+esc(date(j.first))+' tarihinden beri sanal kasa</span></div></div>'+
