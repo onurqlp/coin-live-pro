@@ -160,36 +160,87 @@ def update_arm(arm, experiment, bars, hours, now, kind):
         cursor+=B
 
 
-def report_results(experiments):
-    """Pair outcomes by experiment; never compare unlike closed populations."""
+def _independent_experiment_identity(item, registry):
+    """Return a conservative cohort/event key and the recognized equivalence group."""
+    sid=item.get('strategy_id')
+    rule=registry.get(sid,{})
+    group=rule.get('equivalence_group')
+    current=(group and item.get('strategy_version')==rule.get('strategy_version') and
+        item.get('rules_hash')==rule.get('strategy_config_hash'))
+    hypothesis='EQUIVALENCE:'+group if current else 'STRATEGY:'+str(sid)
+    cohort=(hypothesis,item.get('strategy_version'),item.get('exchange'),
+        item.get('contract_type'),item.get('experiment_policy'))
+    event=item.get('event_id')
+    event_identity=(event,item.get('symbol'),item.get('direction'),item.get('decision_ms'),
+        item.get('reference_price'),item.get('atr_pct'),item.get('spread_bps'))
+    # If an event ID is absent, the record cannot safely be deduplicated.
+    if not event:
+        event_identity=('EXPERIMENT',item.get('experiment_id'))
+    return cohort, event_identity, group if current else None
+
+
+def _paired_record(items, metadata):
+    """Summarize only same-experiment paired closures in one evidence cohort."""
     import statistics
-    grouped=defaultdict(list)
+    record=dict(metadata)
+    record.update(experiments=len(items),episode_clusters=len({i['episode_id'] for i in items}),
+        market_days=len({i['decision_ms']//86400000 for i in items}),complete_net_usdt=None)
+    for name,right in (('original_inverse','INVERSE'),('original_wait','WAIT')):
+        pairs=[i for i in items if i['arms']['ORIGINAL']['status']=='CLOSED' and
+            i['arms'][right]['status'] in ('CLOSED','NO_CONFIRMATION')]
+        left=sum(i['arms']['ORIGINAL']['modeled_net_usdt'] for i in pairs)
+        total=sum(i['arms'][right]['modeled_net_usdt'] for i in pairs)
+        clusters=defaultdict(list)
+        for i in pairs:clusters[i['episode_id']].append(i['arms'][right]['modeled_net_usdt']-i['arms']['ORIGINAL']['modeled_net_usdt'])
+        means=[statistics.mean(v) for v in clusters.values()]
+        lower=statistics.mean(means)-3.5*statistics.stdev(means)/len(means)**.5 if len(means)>1 else None
+        record[name]={'paired_count':len(pairs),'excluded_count':len(items)-len(pairs),
+            'original_modeled_usdt':round(left,6),right.lower()+'_modeled_usdt':round(total,6),
+            'alternative_minus_original_usdt':round(total-left,6),
+            'episode_clusters':len(clusters),'cluster_lower_delta_heuristic_usdt':round(lower,6) if lower is not None else None,
+            'no_trade_modeled_usdt':0.,'portfolio_return':False,'auto_promote':False}
+    return record
+
+
+def report_results(experiments, registry=None):
+    """Keep traceable per-ID cohorts and add de-duplicated independent evidence cohorts."""
+    registry=registry or {}
+    by_strategy=defaultdict(list)
+    independent=defaultdict(dict)
+    independent_groups=defaultdict(set)
+    raw_group_counts=Counter()
     for item in experiments:
         key=tuple(item.get(k) for k in ('strategy_id','strategy_version','rules_hash','exchange','contract_type','experiment_policy'))
-        grouped[key].append(item)
+        by_strategy[key].append(item)
+        cohort,event,group=_independent_experiment_identity(item,registry)
+        independent[cohort].setdefault(event,item)
+        independent_groups[cohort].add(item.get('strategy_id'))
+        raw_group_counts[cohort]+=1
     cohorts=[]
-    for key,items in sorted(grouped.items(),key=lambda kv:str(kv[0])):
-        record=dict(zip(('strategy_id','strategy_version','rules_hash','exchange','contract_type','experiment_policy'),key))
-        record.update(experiments=len(items),episode_clusters=len({i['episode_id'] for i in items}),
-            market_days=len({i['decision_ms']//86400000 for i in items}),complete_net_usdt=None)
-        for name,right in (('original_inverse','INVERSE'),('original_wait','WAIT')):
-            pairs=[i for i in items if i['arms']['ORIGINAL']['status']=='CLOSED' and
-                i['arms'][right]['status'] in ('CLOSED','NO_CONFIRMATION')]
-            left=sum(i['arms']['ORIGINAL']['modeled_net_usdt'] for i in pairs)
-            total=sum(i['arms'][right]['modeled_net_usdt'] for i in pairs)
-            clusters=defaultdict(list)
-            for i in pairs:clusters[i['episode_id']].append(i['arms'][right]['modeled_net_usdt']-i['arms']['ORIGINAL']['modeled_net_usdt'])
-            means=[statistics.mean(v) for v in clusters.values()]
-            lower=statistics.mean(means)-3.5*statistics.stdev(means)/len(means)**.5 if len(means)>1 else None
-            record[name]={'paired_count':len(pairs),'excluded_count':len(items)-len(pairs),
-                'original_modeled_usdt':round(left,6),right.lower()+'_modeled_usdt':round(total,6),
-                'alternative_minus_original_usdt':round(total-left,6),
-                'episode_clusters':len(clusters),'cluster_lower_delta_heuristic_usdt':round(lower,6) if lower is not None else None,
-                'no_trade_modeled_usdt':0.,'portfolio_return':False,'auto_promote':False}
-        cohorts.append(record)
-    return {'schema':'turan.paired.results.v1','cohorts':cohorts,'portfolio_return':False,
-        'pairing':'SAME_EXPERIMENT_ID_AND_IMMUTABLE_RULE_VERSION','funding':'UNKNOWN','liquidation':'UNKNOWN',
-        'complete_net_usdt':None,'selection_state':'RESEARCH_CANDIDATES_ONLY','auto_promote':False}
+    for key,items in sorted(by_strategy.items(),key=lambda kv:str(kv[0])):
+        metadata=dict(zip(('strategy_id','strategy_version','rules_hash','exchange','contract_type','experiment_policy'),key))
+        cohorts.append(_paired_record(items,metadata))
+    independent_cohorts=[]
+    for key,events in sorted(independent.items(),key=lambda kv:str(kv[0])):
+        hypothesis,version,exchange,contract,policy=key
+        items=list(events.values())
+        ids=sorted(independent_groups[key])
+        equivalence=hypothesis.removeprefix('EQUIVALENCE:') if hypothesis.startswith('EQUIVALENCE:') else None
+        duplicate_count=raw_group_counts[key]-len(items)
+        metadata=dict(hypothesis_id=hypothesis,equivalence_group=equivalence,
+            strategy_ids=ids,raw_experiment_records=raw_group_counts[key],
+            duplicate_equivalent_records=duplicate_count,strategy_version=version,
+            exchange=exchange,contract_type=contract,experiment_policy=policy)
+        independent_cohorts.append(_paired_record(items,metadata))
+    independent_count=sum(len(events) for events in independent.values())
+    return {'schema':'turan.paired.results.v1','cohorts':cohorts,
+        'independent_cohorts':independent_cohorts,
+        'raw_experiment_records':len(experiments),
+        'independent_experiment_count':independent_count,
+        'duplicate_equivalent_records':len(experiments)-independent_count,
+        'portfolio_return':False,'pairing':'SAME_EVENT_AND_IMMUTABLE_RULE_VERSION',
+        'funding':'UNKNOWN','liquidation':'UNKNOWN','complete_net_usdt':None,
+        'selection_state':'RESEARCH_CANDIDATES_ONLY','auto_promote':False}
 
 
 def advance(prior, bank, manifest, pack, now):
@@ -284,7 +335,11 @@ def advance(prior, bank, manifest, pack, now):
         new_evidence_count=len(changed), no_new_evidence_count=200-len(changed),
         funding='UNKNOWN',liquidation='UNKNOWN',complete_net_usdt=None,
         episode_definition='COIN_DIRECTION_UTC_DAY_CLUSTER_NOT_PROVEN_INDEPENDENT',
-        paired_results=report_results(ledger['experiments']),strategies=strategies,recent_experiments=ledger['experiments'][-20:],
+        paired_results=report_results(ledger['experiments'],registry),
+        raw_experiment_record_count=len(by_id),
+        independent_experiment_count=report_results(ledger['experiments'],registry)['independent_experiment_count'],
+        duplicate_equivalent_experiment_count=len(by_id)-report_results(ledger['experiments'],registry)['independent_experiment_count'],
+        strategies=strategies,recent_experiments=ledger['experiments'][-20:],
         cost_model=dict(fee_per_side=FEE,slippage_per_side=SLIPPAGE,spread='BIRTH_HALF_SPREAD_PER_SIDE_ESTIMATE',
             notional_usdt=NOTIONAL,leverage=10,mark='LAST_CLOSED_5M_NOT_EXCHANGE_MARK',
             max_hold_hours=24,stop_atr=1,target_atr=2,ambiguity='STOP_FIRST',
