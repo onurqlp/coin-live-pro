@@ -328,6 +328,7 @@ def advance(prior, bank, manifest, pack, now):
             source_gap_count=sum(x['status']=='SOURCE_GAP' for x in original),
             arms=arms, original_outcomes=dict(Counter(x['outcome'] for x in original_closed)),
             horizon_counts={h:sum(x['horizons'].get(h,{}).get('state')=='OBSERVED' for x in items) for h in HORIZONS}))
+    paired=report_results(ledger['experiments'],registry)
     report=dict(schema=SCHEMA,scan_id=manifest['scan_id'],generated_at_utc=iso(now),
         no_real_orders=True,separate_from_shared_cash=True,experiment_policy=POLICY,
         started_at_utc=ledger['started_at_utc'], last_learning_at_utc=ledger.get('last_learning_at_utc'),
@@ -335,10 +336,10 @@ def advance(prior, bank, manifest, pack, now):
         new_evidence_count=len(changed), no_new_evidence_count=200-len(changed),
         funding='UNKNOWN',liquidation='UNKNOWN',complete_net_usdt=None,
         episode_definition='COIN_DIRECTION_UTC_DAY_CLUSTER_NOT_PROVEN_INDEPENDENT',
-        paired_results=report_results(ledger['experiments'],registry),
+        paired_results=paired,
         raw_experiment_record_count=len(by_id),
-        independent_experiment_count=report_results(ledger['experiments'],registry)['independent_experiment_count'],
-        duplicate_equivalent_experiment_count=len(by_id)-report_results(ledger['experiments'],registry)['independent_experiment_count'],
+        independent_experiment_count=paired['independent_experiment_count'],
+        duplicate_equivalent_experiment_count=paired['duplicate_equivalent_records'],
         strategies=strategies,recent_experiments=ledger['experiments'][-20:],
         cost_model=dict(fee_per_side=FEE,slippage_per_side=SLIPPAGE,spread='BIRTH_HALF_SPREAD_PER_SIDE_ESTIMATE',
             notional_usdt=NOTIONAL,leverage=10,mark='LAST_CLOSED_5M_NOT_EXCHANGE_MARK',
