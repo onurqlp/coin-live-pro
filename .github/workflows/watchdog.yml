@@ -12,6 +12,9 @@ permissions:
   contents: read
   actions: write
   issues: write
+concurrency:
+  group: coin-live-pro-watchdog
+  cancel-in-progress: false
 jobs:
   watchdog:
     runs-on: ubuntu-latest
