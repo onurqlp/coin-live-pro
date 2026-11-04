@@ -34,6 +34,28 @@ class WatchdogTest(unittest.TestCase):
         self.assertEqual(recovery_decision(degraded, [recent], self.now)["reason"],
                          "RECENT_RUN_COOLDOWN")
 
+    def test_fresh_manual_scan_does_not_hide_missing_schedule(self):
+        health = {"updated_at": "2026-10-17T16:29:00Z", "status": "DEGRADED_SCHEDULE_GAP"}
+        manual = [{"status": "completed", "conclusion": "success",
+                   "event": "workflow_dispatch", "created_at": "2026-10-17T16:29:00Z"}]
+        scheduled = [{"status": "completed", "conclusion": "success",
+                      "event": "schedule", "created_at": "2026-10-17T15:30:00Z"}]
+        result = diagnose(health, manual, self.now, scheduled_runs=scheduled)
+        self.assertTrue(result["unhealthy"])
+        self.assertFalse(result["data_unhealthy"])
+        self.assertTrue(result["schedule_gap"])
+        self.assertEqual(result["schedule_age_minutes"], 60)
+        self.assertEqual(recovery_decision(result, manual, self.now)["reason"],
+                         "SCHEDULE_GAP_ONLY")
+
+    def test_fresh_schedule_clears_schedule_gap(self):
+        health = {"updated_at": "2026-10-17T16:29:00Z", "status": "OK"}
+        scheduled = [{"status": "completed", "conclusion": "success",
+                      "event": "schedule", "created_at": "2026-10-17T16:20:00Z"}]
+        result = diagnose(health, [], self.now, scheduled_runs=scheduled)
+        self.assertFalse(result["unhealthy"])
+        self.assertFalse(result["schedule_gap"])
+
     def test_recovery_never_dispatches_when_fresh_and_healthy(self):
         good = {"unhealthy": False, "age_minutes": 2, "consecutive_failed_runs": 0}
         self.assertFalse(recovery_decision(good, [], self.now)["dispatch"])
