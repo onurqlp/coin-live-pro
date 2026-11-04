@@ -19,7 +19,8 @@ def parse_utc(value):
         return None
 
 
-def diagnose(health, runs, now=None, max_age_minutes=25):
+def diagnose(health, runs, now=None, max_age_minutes=25,
+             scheduled_runs=None, max_schedule_age_minutes=20):
     now = now or dt.datetime.now(UTC)
     stamp = parse_utc(health.get("updated_at"))
     age = round((now-stamp).total_seconds()/60, 1) if stamp else None
@@ -31,13 +32,30 @@ def diagnose(health, runs, now=None, max_age_minutes=25):
         else:
             break
     reasons = []
+    data_reasons = []
     if age is None or age > max_age_minutes or age < -3:
-        reasons.append("Market health data stale/invalid (%s min)" % age)
+        data_reasons.append("Market health data stale/invalid (%s min)" % age)
     if recent_failures >= 3:
-        reasons.append("Last %s completed market jobs failed" % recent_failures)
+        data_reasons.append("Last %s completed market jobs failed" % recent_failures)
     if health.get("status") not in ("OK", "DEGRADED_SCHEDULE_GAP"):
-        reasons.append("Health status %s" % health.get("status"))
-    return {"unhealthy": bool(reasons), "reasons": reasons, "age_minutes": age,
+        data_reasons.append("Health status %s" % health.get("status"))
+    reasons.extend(data_reasons)
+
+    last_schedule = None
+    schedule_age = None
+    schedule_gap = False
+    if scheduled_runs is not None:
+        schedule_stamps = [parse_utc(r.get("created_at")) for r in scheduled_runs]
+        schedule_stamps = [x for x in schedule_stamps if x is not None]
+        last_schedule = max(schedule_stamps) if schedule_stamps else None
+        schedule_age = round((now-last_schedule).total_seconds()/60, 1) if last_schedule else None
+        schedule_gap = (schedule_age is None or schedule_age > max_schedule_age_minutes or schedule_age < -3)
+        if schedule_gap:
+            reasons.append("No recent scheduled market scan (%s min)" % schedule_age)
+    return {"unhealthy": bool(reasons), "data_unhealthy": bool(data_reasons),
+            "schedule_gap": schedule_gap, "schedule_age_minutes": schedule_age,
+            "last_scheduled_run": last_schedule.isoformat() if last_schedule else None,
+            "reasons": reasons, "age_minutes": age,
             "consecutive_failed_runs": recent_failures,
             "last_good_scan": health.get("updated_at"),
             "latest_run_url": completed[0].get("html_url") if completed else None}
@@ -49,6 +67,8 @@ def recovery_decision(diagnosis, runs, now=None, cooldown_minutes=20):
     now = now or dt.datetime.now(UTC)
     if not diagnosis.get("unhealthy"):
         return {"dispatch": False, "reason": "HEALTHY"}
+    if diagnosis.get("data_unhealthy") is False:
+        return {"dispatch": False, "reason": "SCHEDULE_GAP_ONLY"}
     for run in runs:
         if run.get("status") in ("queued", "in_progress", "waiting", "pending", "requested"):
             return {"dispatch": False, "reason": "SCAN_ALREADY_RUNNING_OR_QUEUED"}
@@ -99,7 +119,8 @@ def main():
     raw = api(base + "/contents/web/data/health.json?ref=main", token)
     health = json.loads(base64.b64decode(raw["content"]).decode("utf-8"))
     runs = api(base + "/actions/workflows/market.yml/runs?per_page=12", token).get("workflow_runs", [])
-    status = diagnose(health, runs)
+    scheduled_runs = api(base + "/actions/workflows/market.yml/runs?event=schedule&per_page=1", token).get("workflow_runs", [])
+    status = diagnose(health, runs, scheduled_runs=scheduled_runs)
     recovery = recovery_decision(status, runs)
     print("autonomous_recovery:", json.dumps(recovery))
     if recovery["dispatch"]:
@@ -115,7 +136,8 @@ def main():
     if status["unhealthy"]:
         body = ("Automatic read-only health check (UTC). Not a trading signal.\n\n" +
                 "\n".join("- " + r for r in status["reasons"]) +
-                "\n\nLast published scan: " + str(status["last_good_scan"]) +
+                "\n\nLast scheduled market scan: " + str(status["last_scheduled_run"]) +
+                "\nLast published scan: " + str(status["last_good_scan"]) +
                 "\nLatest completed job: " + str(status["latest_run_url"]) +
                 "\n\nNo keys or secrets were included. Issue closes automatically after recovery.")
         if not existing:
