@@ -238,7 +238,8 @@ def report_results(experiments, registry=None):
         'raw_experiment_records':len(experiments),
         'independent_experiment_count':independent_count,
         'duplicate_equivalent_records':len(experiments)-independent_count,
-        'portfolio_return':False,'pairing':'SAME_EVENT_AND_IMMUTABLE_RULE_VERSION',
+        'portfolio_return':False,'pairing':'SAME_EXPERIMENT_ID_AND_IMMUTABLE_RULE_VERSION',
+        'independent_pairing':'SAME_EVENT_AND_IMMUTABLE_RULE_VERSION',
         'funding':'UNKNOWN','liquidation':'UNKNOWN','complete_net_usdt':None,
         'selection_state':'RESEARCH_CANDIDATES_ONLY','auto_promote':False}
 
