@@ -28,7 +28,7 @@ jobs:
           tar -xOzf artifacts/coin-live-${{ github.run_id }}.tar.gz web/data/v4-spark-paper.json | python3 -c 'import json,sys; d=json.load(sys.stdin); assert d["archive_is_persistent"] and d["no_real_orders"] and d["all_events_count"]>=0'
           sha256sum artifacts/*.tar.gz > artifacts/ARCHIVE_CHECKSUMS.sha256
           wc -l artifacts/SOURCE_CHECKSUMS.sha256
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: coin-live-snapshot-${{ github.run_id }}
           path: artifacts/
