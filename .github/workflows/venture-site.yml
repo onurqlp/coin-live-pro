@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Validate retained partner page (normal Pages workflow publishes web/)
         run: |
           test -s web/fikir-laboratuvari/index.html
