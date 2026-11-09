@@ -166,7 +166,7 @@ jobs:
             label=${pair#*:}
             "$CHROME" --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --window-size="$dimensions" --virtual-time-budget=15000 --screenshot="/tmp/v4-$label.png" "http://127.0.0.1:8765/#portfoy" >/dev/null 2>/dev/null
           done
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: v4-isolated-read-only-preview

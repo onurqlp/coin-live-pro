@@ -22,7 +22,7 @@ jobs:
           python-version: '3.11'
       - name: Daily / weekly 7-14-30-90 day forward-only evidence
         run: python3 scripts/quant_report.py
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: quant-evidence-${{ github.run_id }}
           path: web/data/ops-report.json
