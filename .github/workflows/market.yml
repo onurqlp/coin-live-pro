@@ -70,6 +70,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - name: Rehydrate compacted JSON archives (verify hashes, preserve raw books)
+        run: python3 scripts/compact_large_ledgers.py hydrate
       - name: Rehydrate verified TURAN research shards (never reset history)
         run: |
           python3 -m unittest discover -s tests -p 'test_turan_ledger_shards.py'
@@ -282,6 +284,8 @@ jobs:
         run: python3 scripts/uzayx_google_export.py
       - name: Persist lossless TURAN experiment shards before GitHub publication
         run: python3 scripts/turan_ledger_shards.py pack
+      - name: Compact and hash-check large JSON ledgers before publication
+        run: python3 scripts/compact_large_ledgers.py pack
       - name: Publish only validated data
         run: |
           set -euo pipefail
@@ -293,7 +297,7 @@ jobs:
           git add web/data/v4-oi.json web/data/v4-radar.json web/data/v4-paper.json
           git add web/data/v4-history-index.json web/data/v4-shadow.json
           git add web/data/v4-lab.json web/data/v4-forward.json web/data/v4-manifest.json
-          git add web/data/uzayx-research.json archive/uzayx-research-ledger.json web/data/uzayx-pnl-report.json
+          git add web/data/uzayx-research.json web/data/uzayx-pnl-report.json
           git add archive/closings web/data/uzayx-cash-close.json
           git add archive/uzayx-adaptive-ledger.json web/data/uzayx-adaptive.json web/data/uzayx-strategy-bank.json
           git add web/data/uzayx-guncel.csv
@@ -307,7 +311,10 @@ jobs:
           git add web/data/swing-radar.json web/data/swing-history.json web/data/swing-outcomes.json
           git add archive/epochs
           git add archive/pilot-ledger.json archive/scan-health.json archive/swing-sparks-ledger.json archive/swing-active-ledger.json archive/swing-outcomes-ledger.json
-          git add archive/v3-paper-legacy-snapshot.json archive/v4-lifecycle-ledger.json archive/v4-paper-ledger.json archive/v4-shadow-ledger.json archive/v4-forward-ledger.json archive/v4-oi-timeseries.json archive/v4-anomaly-study.json archive/v4-watch-ledger.json archive/v4-context-ledger.json archive/v4-early-ledger.json archive/v4-spark-paper-ledger.json
+          # These large JSON books are compacted losslessly above; stage only their verified gzip payloads.
+          git rm --cached --ignore-unmatch archive/uzayx-research-ledger.json archive/v4-lifecycle-ledger.json archive/v4-forward-ledger.json archive/v4-watch-ledger.json archive/v4-spark-paper-ledger.json
+          git add archive/compact-json-archives.json archive/uzayx-research-ledger.json.gz archive/v4-lifecycle-ledger.json.gz archive/v4-forward-ledger.json.gz archive/v4-watch-ledger.json.gz archive/v4-spark-paper-ledger.json.gz
+          git add archive/v3-paper-legacy-snapshot.json archive/v4-paper-ledger.json archive/v4-shadow-ledger.json archive/v4-oi-timeseries.json archive/v4-anomaly-study.json archive/v4-context-ledger.json archive/v4-early-ledger.json
           if git diff --cached --quiet; then exit 0; fi
           git commit -m 'data: 7-timeframe radar, paper pilot, 90-day event and cron provenance [skip ci]'
           for try in 1 2 3; do
