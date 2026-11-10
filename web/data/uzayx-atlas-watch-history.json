@@ -10099,6 +10099,52 @@
       "real_order": false,
       "simulated_fill": false,
       "note": "Historical token name overlap only, not recurring pattern proof or actionable signal."
+    },
+    {
+      "observed_at_utc": "2026-11-10T01:35:38Z",
+      "scan_id": "e61cafe135ea164a0659670d",
+      "market_asof_utc": "2026-11-09T18:00:18.627000+00:00",
+      "market_age_minutes": 455.3,
+      "market_state": "STALE_NO_MATCHING",
+      "fresh_early_candidate_count": 0,
+      "historical_symbol_matches": [],
+      "module_context": {
+        "state": "UNAVAILABLE",
+        "asof_utc": null,
+        "modules": [
+          {
+            "id": "A1",
+            "state": "UNAVAILABLE"
+          },
+          {
+            "id": "A2",
+            "state": "UNAVAILABLE"
+          },
+          {
+            "id": "A3",
+            "state": "UNAVAILABLE"
+          },
+          {
+            "id": "B1",
+            "state": "UNAVAILABLE"
+          },
+          {
+            "id": "B2",
+            "state": "UNAVAILABLE"
+          },
+          {
+            "id": "T0",
+            "state": "UNAVAILABLE"
+          }
+        ]
+      },
+      "atlas_source_sha256": "c5538743a2550bede523fa5ffd04aed833eff45865b55fa7947e46870d77d821",
+      "ohlcv_backtest": false,
+      "predictions_verified": false,
+      "futures_tradability_verified": false,
+      "real_order": false,
+      "simulated_fill": false,
+      "note": "Historical token name overlap only, not recurring pattern proof or actionable signal."
     }
   ]
 }
